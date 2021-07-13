@@ -78,6 +78,16 @@ class GetProfile(views.APIView):
         response = Response(serializer.data)
         return add_cache_control(response)
 
+class GetSubmitterProfile(views.APIView):
+    renderer_classes = [JSONRenderer,]
+    def get(self, request, format=None):
+        #import ipdb; ipdb.set_trace()
+        submitter_id = request.GET.get('submitter_id')
+        submitter = EmailUser.objects.get(id=submitter_id)
+        serializer  = UserSerializer(submitter, context={'request':request})
+        response = Response(serializer.data)
+        return add_cache_control(response)
+
 from rest_framework import filters
 class UserListFilterView(generics.ListAPIView):
     """ https://cop-internal.dbca.wa.gov.au/api/filtered_users?search=russell
@@ -145,9 +155,11 @@ class UserViewSet(viewsets.ModelViewSet):
                 user = instance
             )
             instance.residential_address = residential_address
+            #import ipdb; ipdb.set_trace()
             # postal address
             postal_address_data = request.data.get('postal_address')
-            if postal_address_data and postal_address_data.get('same_as_residential'):
+            if request.data.get('postal_same_as_residential'):
+                instance.postal_same_as_residential = True
                 instance.postal_address = residential_address
             elif postal_address_data:
                 postal_serializer = UserAddressSerializer(data=postal_address_data)

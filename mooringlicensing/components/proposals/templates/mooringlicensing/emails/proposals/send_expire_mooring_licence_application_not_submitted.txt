@@ -1,0 +1,8 @@
+{%  extends 'mooringlicensing/emails/base_email.txt' %}
+
+{%  block content %}
+    {{ proposal.submitter }},
+    Your mooring licence application: {{ proposal.lodgement_number }}  has been expired.
+
+    Regards,
+{%  endblock %}

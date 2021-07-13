@@ -26,8 +26,17 @@
                     </table>
                     <br/>
                     <!-- label>Please note that it may take up to 21 business days to process your application.<br/><br/>If there is any missing information, the Department may assign this application back to you to complete. In that case you will be notified by email.</label -->
-                    <label>If there is any missing information, Department of Biodiversity, Conservation and Attractions may assign this application back to you to complete. In that case you will be notified by email.</label>
-                  </div>
+                    <span>If there is any missing information, Rottnest Island Authority (RIA) may assign this application back to you to complete. In that case you will be notified by email.</span>
+                    {% if request.user == submitter or request.user.is_staff %}
+                        {% if request.user.is_authenticated %}
+                        <div class="row" style="margin-top:2em;">
+                            <div class="col-sm-6">
+                                <div><strong>Invoice</strong>: <a href="{% url 'invoice-pdf' fee_invoice.invoice_reference %}" target="_blank"><i style='color:red;' class='fa fa-file-pdf-o'></i> #{{ fee_invoice.invoice_reference }}</a></div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
             {% else %}
                 <div class="col-sm-offset-3 col-sm-6 borderDecoration">
                     <strong>Sorry it looks like there isn't any proposal currently in your session.</strong>
@@ -37,14 +46,21 @@
 
         <div class="row"><div class="col-sm-12" style="margin-top: 1em">
             {% if request.user == submitter or request.user.is_staff %}
-
                 {% if request.user.is_authenticated %}
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <a href="{% url 'external' %}" class="pull-right btn btn-info btn-lg">Return to Dashboard</a>
+                        </div>
+                    </div>
+            <!--
                     <span>
+                        <div>Invoice: <a href="{% url 'invoice-pdf' fee_invoice.invoice_reference %}" target="_blank"><i style='color:red;' class='fa fa-file-pdf-o'></i> #{{ fee_invoice.invoice_reference }}</a></div>
                         <a href="{% url 'invoice-pdf' fee_invoice.invoice_reference %}" class="btn btn-info btn-lg"  target="_blank">Invoice</a>
                     </span>
                     <span style="float:right;">
                         <a href="{% url 'external' %}" class="btn btn-info btn-lg">Return to Dashboard</a>
                     </span>
+            -->
                 {% else %}
                     <a href="{% url 'home' %}" class="btn btn-info btn-lg">Log in</a><p>You must be logged in to see your invoice online.</p>
                 {% endif %}

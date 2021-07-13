@@ -1,7 +1,6 @@
 from mooringlicensing.settings import HTTP_HOST_FOR_TEST
 from mooringlicensing.tests.test_setup import APITestSetup
 from mooringlicensing.components.proposals.models import MooringBay, Proposal
-from mooringlicensing.components.proposals.utils import proposal_submit
 from datetime import datetime
 import pytz
 from ledger.settings_base import TIME_ZONE

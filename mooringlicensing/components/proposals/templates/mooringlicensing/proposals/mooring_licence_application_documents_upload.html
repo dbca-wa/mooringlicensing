@@ -1,0 +1,9 @@
+{% extends 'mooringlicensing/base.html' %}
+{% load static %}
+{% block content %}
+<div class="container-fluid" id="dashboard-table-container">
+    {% block vue-component %}
+    <div id="app"></div>
+    {% endblock %}
+</div>
+{% endblock %}

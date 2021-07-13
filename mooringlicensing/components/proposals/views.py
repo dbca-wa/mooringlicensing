@@ -1,13 +1,16 @@
 from django.http import HttpResponse,JsonResponse
 from django.urls import reverse
+from django.core.exceptions import ValidationError
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import View, TemplateView
 from django.db.models import Q
 # from mooringlicensing.components.proposals.utils import create_data_from_form
-from mooringlicensing.components.proposals.models import (Proposal, #Referral, 
-        #ProposalType, 
-        HelpPage
-        )
+from mooringlicensing import settings
+from mooringlicensing.components.proposals.models import (Proposal,  # Referral,
+    # ProposalType,
+                                                          HelpPage, AuthorisedUserApplication, Mooring,
+                                                          MooringLicenceApplication
+                                                          )
 from mooringlicensing.components.approvals.models import Approval
 from mooringlicensing.components.compliances.models import Compliance
 import json,traceback
@@ -107,3 +110,55 @@ class TestEmailView(View):
         return HttpResponse('Test Email Script Completed')
 
 
+class MooringLicenceApplicationDocumentsUploadView(TemplateView):
+    template_name = 'mooringlicensing/proposals/mooring_licence_application_documents_upload.html'
+
+    def get_object(self):
+        return get_object_or_404(MooringLicenceApplication, uuid=self.kwargs['uuid_str'])
+
+    def get(self, request, *args, **kwargs):
+        proposal = self.get_object()
+
+        if not proposal.processing_status == Proposal.PROCESSING_STATUS_AWAITING_DOCUMENTS:
+            raise ValidationError('You cannot upload documents for the application when it is not in awaiting-documents status')
+
+        context = {
+            'proposal': proposal,
+        }
+
+        context['dev'] = settings.DEV_STATIC
+        context['dev_url'] = settings.DEV_STATIC_URL
+        if hasattr(settings, 'DEV_APP_BUILD_URL') and settings.DEV_APP_BUILD_URL:
+            context['app_build_url'] = settings.DEV_APP_BUILD_URL
+
+        return render(request, self.template_name, context)
+
+
+class AuthorisedUserApplicationEndorseView(TemplateView):
+
+    def get_object(self):
+        return get_object_or_404(AuthorisedUserApplication, uuid=self.kwargs['uuid_str'])
+
+    def get(self, request, *args, **kwargs):
+        proposal = self.get_object()
+
+        if not proposal.processing_status == Proposal.PROCESSING_STATUS_AWAITING_ENDORSEMENT:
+            raise ValidationError('You cannot endorse/decline the application not in awaiting-endorsement status')
+
+        action = self.kwargs['action']
+        if action == 'endorse':
+            self.template_name = 'mooringlicensing/proposals/authorised_user_application_endorsed.html'
+            proposal.endorse_approved(request)
+            # TODO: Upon endorsement, the applicant and site licensee receive an email
+        elif action == 'decline':
+            self.template_name = 'mooringlicensing/proposals/authorised_user_application_declined.html'
+            proposal.endorse_declined(request)
+            # TODO: Upon endorsement, the applicant and site licensee receive an email
+        proposal.save()
+
+        context = {
+            'proposal': proposal,
+            'mooring': proposal.mooring,
+        }
+
+        return render(request, self.template_name, context)

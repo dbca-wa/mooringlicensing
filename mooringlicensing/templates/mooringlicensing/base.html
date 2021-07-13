@@ -68,7 +68,6 @@
                                 <ul class="nav navbar-nav">
                                     {% block left_menu_items %}
                                         {% if is_internal_login %}
-                                            <li><a href="/internal/proposals">Applications</a></li>
                                             <li><a href="/internal/approvals">Approvals</a></li>
                                             <li><a href="/internal/compliances">Compliance</a></li>
                                             <li><a href="/internal/waiting_list">Waiting List</a></li>
@@ -128,7 +127,9 @@
                                                     <li><a href="{% url 'test-emails' %}">Test Emails</a></li>
                                                 {% endif %}
                                                 <li><a href="{% url 'manage-account' %}">Manage Account</a></li>
-                                                <li><a href="/external/vessels">Manage Vessels</a></li>
+                                                {% if not is_internal_login %}
+                                                    <li><a href="/external/vessels">Manage Vessels</a></li>
+                                                {% endif %}
                                                 <!-- <li><a href="{% url 'manage-profiles' %}">Manage Profiles</a></li> -->
                                                 {% for org in request.user.mooringlicensing_organisations.all %}
                                                     {% for org_contact in org.contacts.all%}

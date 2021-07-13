@@ -241,22 +241,25 @@ from '@/utils/hooks'
           //Assessment
         },
         computed:{
-        contactsURL: function(){
-            return this.proposal!= null ? helpers.add_endpoint_json(api_endpoints.organisations,this.proposal.org_applicant.id+'/contacts') : '';
-        },
-        applicantType: function(){
-            return this.proposal.applicant_type;
-        },
-        // hasAssessorMode:function(){
-        //     return this.proposal && this.proposal.assessor_mode.has_assessor_mode ? true : false;
-        // },
+            contactsURL: function(){
+                // We don't need anything relating to organisations
+                //return this.proposal != null ? helpers.add_endpoint_json(api_endpoints.organisations, this.proposal.org_applicant.id+'/contacts') : '';
+                return ''
+            },
+            applicantType: function(){
+                return this.proposal.applicant_type;
+            },
+            // hasAssessorMode:function(){
+            //     return this.proposal && this.proposal.assessor_mode.has_assessor_mode ? true : false;
+            // },
         },
         methods:{
             initialiseOrgContactTable: function(){
                 let vm = this;
                 //console.log("i am here")
                 if (vm.proposal && !vm.contacts_table_initialised){
-                    vm.contacts_options.ajax.url = helpers.add_endpoint_json(api_endpoints.organisations,vm.proposal.org_applicant.id+'/contacts');
+                    // We don't need anything relating to organisations
+                    //vm.contacts_options.ajax.url = helpers.add_endpoint_json(api_endpoints.organisations, vm.proposal.org_applicant.id + '/contacts');
                     vm.contacts_table = $('#'+vm.contacts_table_id).DataTable(vm.contacts_options);
                     vm.contacts_table_initialised = true;
                 }

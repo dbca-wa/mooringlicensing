@@ -1,0 +1,10 @@
+{%  extends 'mooringlicensing/emails/base_email.html' %}
+
+{%  block content %}
+    <p>
+        The submission of the moorling licence application {{ proposal.lodgement_number }} deadline is approaching. Please do not forget to submit it.
+        <a href="{{ proposal_url }}">Access the mooring licence application</a>
+    </p>
+
+    Regards,
+{%  endblock %}

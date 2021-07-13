@@ -1,12 +1,14 @@
+import datetime
 import logging
 
 from django.contrib.auth.models import Group
 
 from mooringlicensing import settings
 from mooringlicensing.components.approvals.models import AgeGroup, AdmissionType
-from mooringlicensing.components.main.models import ApplicationType, GlobalSettings
+from mooringlicensing.components.main.models import ApplicationType, GlobalSettings, NumberOfDaysType, \
+    NumberOfDaysSetting
 from mooringlicensing.components.proposals.models import ProposalType, Proposal, ProposalAssessorGroup, \
-    ProposalApproverGroup
+    ProposalApproverGroup, StickerPrintingContact
 
 logger = logging.getLogger(__name__)
 
@@ -86,6 +88,16 @@ class DefaultDataManager(object):
             except Exception as e:
                 logger.error('{}, Key: {}'.format(e, item[0]))
 
+        # Printing company email
+        try:
+            tos = StickerPrintingContact.objects.filter(type=StickerPrintingContact.TYPE_EMIAL_TO, enabled=True)
+            if not tos:
+                contact, created = StickerPrintingContact.objects.create(type=StickerPrintingContact.TYPE_EMIAL_TO, email='printing_company@mail.com')
+                if created:
+                    logger.info("Created {}".format(contact))
+        except Exception as e:
+            logger.error('{}'.format(e))
+
         # AgeGroup for the DcvAdmission fees
         for item in AgeGroup.NAME_CHOICES:
             try:
@@ -112,3 +124,30 @@ class DefaultDataManager(object):
                     logger.info("Created group: {}".format(group_name))
             except Exception as e:
                 logger.error('{}, Group name: {}'.format(e, group_name))
+
+        # Types of configurable number of days
+        for item in settings.TYPES_OF_CONFIGURABLE_NUMBER_OF_DAYS:
+            try:
+                types_to_be_deleted = NumberOfDaysType.objects.filter(code__isnull=True)
+                types_to_be_deleted.delete()  # Delete left overs
+
+                type, created = NumberOfDaysType.objects.get_or_create(code=item['code'])
+                if created:
+                    # Save description
+                    type.description = item['description']
+                    type.name = item['name']
+                    type.save()
+                    logger.info("Created number of days type: {}".format(type.name))
+
+                setting = NumberOfDaysSetting.objects.filter(number_of_days_type=type)
+                if not setting:
+                    # No setting for this type. Create one
+                    enforcement_date = datetime.date(year=2021, month=1, day=1)
+                    NumberOfDaysSetting.objects.create(
+                        number_of_days=item['default'],
+                        date_of_enforcement=enforcement_date,
+                        number_of_days_type=type
+                    )
+
+            except Exception as e:
+                logger.error('{}, Number of days type: {}'.format(e, type.name))

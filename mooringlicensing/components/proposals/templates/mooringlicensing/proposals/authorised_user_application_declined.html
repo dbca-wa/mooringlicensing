@@ -1,0 +1,13 @@
+{% extends 'mooringlicensing/base.html' %}
+{% load static %}
+{% block content %}
+    <div class="container">
+        <div class="well">
+            <div class="row"><div class="col-sm-6">
+                <p>
+                    <strong>You have declined the application of {{ proposal.submitter.first_name }} {{ proposal.submitter.last_name }} for authorised use of the mooring: {{ mooring.name }} of which you are the site licensee.</strong>
+                </p>
+            </div></div>
+        </div>
+    </div>
+{% endblock %}

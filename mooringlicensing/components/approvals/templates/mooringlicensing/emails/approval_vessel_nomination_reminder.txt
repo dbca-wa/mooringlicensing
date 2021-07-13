@@ -1,0 +1,11 @@
+{%  extends 'mooringlicensing/emails/base_email.txt' %}
+
+{%  block content %}
+
+    You do not have a vessel registered on your permit, please register your vessel.
+
+    Permit : {{ approval.lodgement_number }}
+
+    Due date : {{ due_date }}
+
+{%  endblock %}

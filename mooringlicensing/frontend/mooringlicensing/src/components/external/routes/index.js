@@ -1,12 +1,14 @@
-import ExternalDashboard from '../dashboard.vue'
-import Proposal from '../proposal.vue'
-import ProposalApply from '../proposal_apply.vue'
-import ProposalSubmit from '../proposal_submit.vue'
-import Organisation from '../organisations/manage.vue'
-import DcvPermit from '../dcv_permit.vue'
-import DcvAdmission from '../dcv_admission.vue'
-import VesselsDashboard from '../vessels_dashboard.vue'
-import ManageVessel from '../manage_vessel.vue'
+import ExternalDashboard from '@/components/external/dashboard.vue'
+import Proposal from '@/components/external/proposal.vue'
+import ProposalApply from '@/components/external/proposal_apply.vue'
+import ProposalSubmit from '@/components/external/proposal_submit.vue'
+import Organisation from '@/components/external/organisations/manage.vue'
+import DcvPermit from '@/components/external/dcv/dcv_permit.vue'
+import DcvAdmission from '@/components/external/dcv/dcv_admission.vue'
+import VesselsDashboard from '@/components/external/vessels_dashboard.vue'
+import ManageVessel from '@/components/external/manage_vessel.vue'
+import Compliance from '../compliances/access.vue'
+import ComplianceSubmit from '../compliances/submit.vue'
 /*
 import Compliance from '../compliances/access.vue'
 import ComplianceSubmit from '../compliances/submit.vue'
@@ -32,7 +34,6 @@ export default
             path: 'organisations/manage/:org_id',
             component: Organisation
         },
-        /*
         {
             path: 'compliance/:compliance_id',
             component: Compliance
@@ -42,6 +43,7 @@ export default
             component: ComplianceSubmit,
             name:"submit_compliance"
         },
+        /*
         {
             path: 'approval/:approval_id',
             component: Approval,
@@ -105,7 +107,7 @@ export default
                     name:"new-vessel"
                 },
                 {
-                    path: ':id',
+                    path: ':vessel_id',
                     component: ManageVessel,
                     name:"manage-vessel"
                 },

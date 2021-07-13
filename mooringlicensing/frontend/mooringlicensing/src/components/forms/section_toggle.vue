@@ -1,15 +1,15 @@
 <template lang="html">
     <div class="panel panel-default" >
-      <div v-if="!hideHeader" class="panel-heading">
-        <h3 class="panel-title">{{label}} 
-            <a :href="'#'+section_id" class="panelClicker" :id="custom_id" data-toggle="collapse" expanded="true" :aria-controls="section_id">
-                <span v-if="!noChevron" :class="panel_chevron_class"></span>
-            </a>
-        </h3>
-      </div>
-      <div :class="panel_collapse_class" :id="section_id">
-          <slot></slot>
-      </div>
+        <div v-if="!hideHeader" class="panel-heading">
+            <h3 class="panel-title">{{label}} <span class="subtitle">{{ subtitle }}</span>
+                <a :href="'#'+section_id" class="panelClicker" :id="custom_id" data-toggle="collapse" expanded="true" :aria-controls="section_id">
+                    <span v-if="!noChevron" :class="panel_chevron_class"></span>
+                </a>
+            </h3>
+        </div>
+        <div :class="panel_collapse_class" :id="section_id">
+            <slot></slot>
+        </div>
     </div>
 </template>
 
@@ -20,6 +20,10 @@ export default {
     name:"FormSection",
     props: {
         label: {}, 
+        subtitle: {
+            type: String,
+            default: '',
+        },
         Index: {}, 
         formCollapse: {}, 
         hideHeader: {},
@@ -78,5 +82,8 @@ export default {
         display: flex;
         flex-direction: column;
         min-height: 325px;
+    }
+    .subtitle {
+        font-size: 0.6em;
     }
 </style>

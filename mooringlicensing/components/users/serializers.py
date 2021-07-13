@@ -131,6 +131,7 @@ class UserSerializer(serializers.ModelSerializer):
             'is_staff',
             'system_settings',
             'is_mooringlicensing_admin',
+            'postal_same_as_residential',
         )
 
     def get_personal_details(self,obj):

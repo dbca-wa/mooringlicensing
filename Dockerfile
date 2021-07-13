@@ -7,6 +7,7 @@ ENV PRODUCTION_EMAIL=False
 ENV EMAIL_INSTANCE="DEV"
 ENV NON_PROD_EMAIL="brendan.blackford@dbca.wa.gov.au,walter.genuit@dbca.wa.gov.au,aaron.farr@dbca.wa.gov.au,katsufumi.shibata@dbca.wa.gov.au"
 ENV SECRET_KEY="ThisisNotRealKey"
+ENV CRON_NOTIFICATION_EMAIL="brendan.blackford@dbca.wa.gov.au,katsufumi.shibata@dbca.wa.gov.au"
 
 RUN apt-get clean
 RUN apt-get update
@@ -14,8 +15,9 @@ RUN apt-get upgrade -y
 RUN apt-get install --no-install-recommends -y wget git libmagic-dev gcc binutils libproj-dev gdal-bin python3 python3-setuptools python3-dev python3-pip tzdata cron rsyslog gunicorn libreoffice
 RUN apt-get install --no-install-recommends -y libpq-dev patch
 RUN apt-get install --no-install-recommends -y postgresql-client mtr htop vim ssh
-RUN ln -s /usr/bin/python3 /usr/bin/python && \
-    ln -s /usr/bin/pip3 /usr/bin/pip
+RUN ln -s /usr/bin/python3 /usr/bin/python 
+#&& \
+ #   ln -s /usr/bin/pip3 /usr/bin/pip
 RUN pip install --upgrade pip
 # Install Python libs from requirements.txt.
 FROM builder_base_mooringlicensing as python_libs_mooringlicensing
@@ -44,25 +46,28 @@ COPY timezone /etc/timezone
 ENV TZ=Australia/Perth
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN touch /app/.env
-COPY .git ./.git
+#COPY .git ./.git
 COPY mooringlicensing ./mooringlicensing
 RUN python manage_ml.py collectstatic --noinput
 
 RUN mkdir /app/tmp/
 RUN chmod 777 /app/tmp/
 
-#COPY cron /etc/cron.d/dockercron
+COPY cron /etc/cron.d/dockercron
 COPY startup.sh /
 ## Cron start
-#RUN service rsyslog start
-#RUN chmod 0644 /etc/cron.d/dockercron
-#RUN crontab /etc/cron.d/dockercron
-#RUN touch /var/log/cron.log
-#RUN service cron start
+RUN service rsyslog start
+RUN chmod 0644 /etc/cron.d/dockercron
+RUN crontab /etc/cron.d/dockercron
+RUN touch /var/log/cron.log
+RUN service cron start
 RUN chmod 755 /startup.sh
 # cron end
 
 # IPYTHONDIR - Will allow shell_plus (in Docker) to remember history between sessions
+# 1. will create dir, if it does not already exist
+# 2. will create profile, if it does not already exist
+RUN mkdir /app/logs/.ipython
 RUN export IPYTHONDIR=/app/logs/.ipython/
 
 EXPOSE 8080

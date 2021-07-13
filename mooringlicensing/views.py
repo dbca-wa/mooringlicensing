@@ -175,12 +175,24 @@ class HelpView(LoginRequiredMixin, TemplateView):
 class ManagementCommandsView(LoginRequiredMixin, TemplateView):
     template_name = 'mooringlicensing/mgt-commands.html'
 
+    def get(self, request, *args, **kwargs):
+        debug = request.GET.get('debug', 'f')
+        if debug.lower() in ['true', 't', 'yes', 'y']:
+            debug = True
+        else:
+            debug = False
+
+        context = self.get_context_data(**kwargs)
+        context.update({'debug': debug})
+        return self.render_to_response(context)
+
     def post(self, request):
         data = {}
         command_script = request.POST.get('script', None)
+
         if command_script:
-            print ('running {}'.format(command_script))
-            call_command(command_script)
+            print('running {}'.format(command_script))
+            call_command(command_script, params=request.POST)
             data.update({command_script: 'true'})
 
         return render(request, self.template_name, data)

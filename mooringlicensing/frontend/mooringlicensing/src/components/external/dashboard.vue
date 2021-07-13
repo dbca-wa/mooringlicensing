@@ -1,27 +1,58 @@
 <template>
     <div class="container" id="externalDash">
-        <FormSection :formCollapse="false" label="Applications" Index="applications">
+        <FormSection 
+            :formCollapse="false" 
+            label="Applications" 
+            subtitle="- View existing applications and lodge new ones" 
+            Index="applications"
+        >
             <ApplicationsTable
                 level="external"
             />
         </FormSection>
-        <FormSection :formCollapse="false" label="Waiting List" Index="waiting_list">
-            <WaitingListTable 
+
+        <FormSection 
+            :formCollapse="false" 
+            label="Waiting List" 
+            subtitle="- View and amend your waiting list allocation" 
+            Index="waiting_list"
+        >
+            <WaitingListTable
+                level="external"
+                :approvalTypeFilter="wlaApprovalTypeFilter"
+            />
+        </FormSection>
+
+        <FormSection 
+            :formCollapse="false" 
+            label="Licences and Permits" 
+            subtitle="- View existing licences / permits and renew them" 
+            Index="licences_and_permits"
+        >
+            <LicencesAndPermitsTable
+                level="external"
+                :approvalTypeFilter="allApprovalTypeFilter"
+            />
+        </FormSection>
+
+        <FormSection 
+            :formCollapse="false" 
+            label="Compliances" 
+            subtitle="- View submitted Compliances and submit new ones" 
+            Index="compliances"
+        >
+            <CompliancesTable
                 level="external"
             />
         </FormSection>
-        <FormSection :formCollapse="false" label="Licences and Permits" Index="licences_and_permits">
-            <LicencesAndPermitsTable 
-                level="external"
-            />
-        </FormSection>
-        <FormSection :formCollapse="false" label="Compliances" Index="compliances">
-            <CompliancesTable 
-                level="external"
-            />
-        </FormSection>
-        <FormSection :formCollapse="false" label="Authorised User Applications for my Endorsement" Index="authorised_user_applications_for_my_endorsement">
-            <AuthorisedUserApplicationsTable 
+
+        <FormSection 
+            :formCollapse="false" 
+            label="Authorised User Applications for my Endorsement" 
+            subtitle="" 
+            Index="authorised_user_applications_for_my_endorsement"
+        >
+            <AuthorisedUserApplicationsTable
                 level="external"
             />
         </FormSection>
@@ -31,11 +62,13 @@
 <script>
 import datatable from '@/utils/vue/datatable.vue'
 import FormSection from "@/components/forms/section_toggle.vue"
-import ApplicationsTable from "@/components/common/table_applications"
-import WaitingListTable from "@/components/common/table_waiting_list"
-import LicencesAndPermitsTable from "@/components/common/table_licences_and_permits"
+import ApplicationsTable from "@/components/common/table_proposals"
+//import WaitingListTable from "@/components/common/table_approval_waiting_list"
+import WaitingListTable from "@/components/common/table_approvals"
+//import LicencesAndPermitsTable from "@/components/common/table_approval_licences_and_permits"
+import LicencesAndPermitsTable from "@/components/common/table_approvals"
 import CompliancesTable from "@/components/common/table_compliances"
-import AuthorisedUserApplicationsTable from "@/components/common/table_to_be_endorsed"
+import AuthorisedUserApplicationsTable from "@/components/common/table_approval_to_be_endorsed"
 import { api_endpoints, helpers } from '@/utils/hooks'
 
 export default {
@@ -53,6 +86,8 @@ export default {
             compliances_url: api_endpoints.compliances_paginated_external,
 
             system_name: api_endpoints.system_name,
+            allApprovalTypeFilter: ['ml', 'aap', 'aup'],
+            wlaApprovalTypeFilter: ['wla',],
         }
     },
     components:{

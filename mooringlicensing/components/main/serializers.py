@@ -63,6 +63,10 @@ class QuestionSerializer(serializers.ModelSerializer):
         fields = ('id', 'question_text', 'answer_one', 'answer_two', 'answer_three', 'answer_four','correct_answer', 'correct_answer_value')
 
 
+class BookingSettlementReportSerializer(serializers.Serializer):
+    date = serializers.DateTimeField(input_formats=['%d/%m/%Y'])
+
+
 class OracleSerializer(serializers.Serializer):
     date = serializers.DateField(input_formats=['%d/%m/%Y','%Y-%m-%d'])
     override = serializers.BooleanField(default=False)

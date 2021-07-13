@@ -41,6 +41,7 @@
             ref="waiting_list_application"
             :showElectoralRoll="showElectoralRoll"
             :readonly="readonly"
+            :submitterId="submitterId"
             />
 
             <AnnualAdmissionApplication
@@ -50,6 +51,7 @@
             ref="annual_admission_application"
             :showElectoralRoll="showElectoralRoll"
             :readonly="readonly"
+            :submitterId="submitterId"
             />
             <AuthorisedUserApplication
             v-if="proposal && proposal.application_type_code==='aua'"
@@ -57,6 +59,7 @@
             :is_external="true" 
             ref="authorised_user_application"
             :readonly="readonly"
+            :submitterId="submitterId"
             />
             <MooringLicenceApplication
             v-if="proposal && proposal.application_type_code==='mla'"
@@ -65,6 +68,7 @@
             ref="mooring_licence_application"
             :showElectoralRoll="showElectoralRoll"
             :readonly="readonly"
+            :submitterId="submitterId"
             />
 
             <div>
@@ -157,6 +161,13 @@ export default {
       */
   },
   computed: {
+      submitterId: function() {
+          let submitter = null;
+          if (this.proposal && this.proposal.submitter && this.proposal.submitter.id) {
+              submitter = this.proposal.submitter.id;
+          }
+          return submitter;
+      },
       readonly: function() {
           let returnVal = true;
           if (this.proposal.processing_status === 'Draft') {
@@ -301,6 +312,7 @@ export default {
         if (this.$refs.waiting_list_application) {
             if (this.$refs.waiting_list_application.$refs.vessels) {
                 payload.vessel = Object.assign({}, this.$refs.waiting_list_application.$refs.vessels.vessel);
+                payload.proposal.dot_name = this.$refs.waiting_list_application.$refs.vessels.dotName;
             }
             if (typeof(this.$refs.waiting_list_application.$refs.profile.silentElector) === 'boolean') {
                 payload.proposal.silent_elector = this.$refs.waiting_list_application.$refs.profile.silentElector;
@@ -312,6 +324,7 @@ export default {
         } else if (this.$refs.annual_admission_application) {
             if (this.$refs.annual_admission_application.$refs.vessels) {
                 payload.vessel = Object.assign({}, this.$refs.annual_admission_application.$refs.vessels.vessel);
+                payload.proposal.dot_name = this.$refs.annual_admission_application.$refs.vessels.dotName;
             }
             if (this.$refs.annual_admission_application.$refs.insurance.selectedOption) {
                 // modify if additional proposal attributes required
@@ -321,6 +334,7 @@ export default {
         } else if (this.$refs.authorised_user_application) {
             if (this.$refs.authorised_user_application.$refs.vessels) {
                 payload.vessel = Object.assign({}, this.$refs.authorised_user_application.$refs.vessels.vessel);
+                payload.proposal.dot_name = this.$refs.authorised_user_application.$refs.vessels.dotName;
             }
             if (this.$refs.authorised_user_application.$refs.insurance.selectedOption) {
                 // modify if additional proposal attributes required
@@ -336,13 +350,14 @@ export default {
                         this.$refs.authorised_user_application.$refs.mooring_authorisation.mooringBays.map((item) => item.id);
                 } else if (payload.proposal.mooring_authorisation_preference === 'site_licensee') { 
                     payload.proposal.site_licensee_email = this.$refs.authorised_user_application.$refs.mooring_authorisation.siteLicenseeEmail;
-                    payload.proposal.mooring_site_id = this.$refs.authorised_user_application.$refs.mooring_authorisation.mooringSiteId;
+                    payload.proposal.mooring_id = this.$refs.authorised_user_application.$refs.mooring_authorisation.mooringSiteId;
                 }
             }
         // MLA
         } else if (this.$refs.mooring_licence_application) {
             if (this.$refs.mooring_licence_application.$refs.vessels) {
                 payload.vessel = Object.assign({}, this.$refs.mooring_licence_application.$refs.vessels.vessel);
+                payload.proposal.dot_name = this.$refs.mooring_licence_application.$refs.vessels.dotName;
             }
             if (typeof(this.$refs.mooring_licence_application.$refs.profile.silentElector) === 'boolean') {
             //if (this.$refs.mooring_licence_application.$refs.profile.silentElector !== null) {
@@ -400,6 +415,7 @@ export default {
     },
     submit_and_pay: async function() {
         //let formData = this.set_formData()
+        console.log('in submit_and_pay')
         try {
             const res = await this.save(false, this.proposal_submit_url);
             if (this.proposal.application_type_code === 'wla' || this.proposal.application_type_code === 'aaa'){
@@ -603,6 +619,7 @@ export default {
 
     },
     submit: async function(){
+        console.log('in submit()')
         let vm = this;
         //let formData = vm.set_formData()
         /*
@@ -638,11 +655,18 @@ export default {
       
         if (!vm.proposal.fee_paid) {
             await vm.submit_and_pay();
-
         } else {
             /* just save and submit - no payment required (probably application was pushed back by assessor for amendment */
+            console.log('application was pushed back by assessor for amendment')
+            const res = await this.save(false, this.proposal_submit_url);
+            if (res.ok) {
+                vm.$router.push({
+                  name: 'external-dashboard'
+                });
+            }
+            /*
             vm.save_wo_confirm()
-            vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposals,vm.proposal.id+'/submit'),formData).then(res=>{
+            vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposal,vm.proposal.id + '/submit'), formData).then(res=>{
                 vm.proposal = res.body;
                 vm.$router.push({
                     name: 'submit_proposal',
@@ -655,6 +679,7 @@ export default {
                     'error'
                 )
             });
+                */
         }
     },
 
@@ -678,7 +703,7 @@ export default {
     },
     fetchProposalParks: function(proposal_id){
       let vm=this;
-      vm.$http.get(helpers.add_endpoint_json(api_endpoints.proposals,proposal_id+'/parks_and_trails')).then(response => {
+      vm.$http.get(helpers.add_endpoint_json(api_endpoints.proposal,proposal_id+'/parks_and_trails')).then(response => {
                 vm.proposal_parks = helpers.copyObject(response.body);
                 console.log(vm.proposal_parks)
             },

@@ -1,0 +1,5 @@
+{%  extends 'mooringlicensing/emails/base_email.txt' %}
+
+{%  block content %}
+        The submission of the moorling licence application {{ proposal.lodgement_number }} deadline is approaching. Please do not forget to submit it.
+{%  endblock %}

@@ -110,8 +110,8 @@
                             <div class="col-sm-3">
                             </div>
                             <div class="col-sm-6">
-                              <input :readonly="readonly" type="checkbox" id="same_as_residential" v-model="profile.postal_address.same_as_residential"/>
-                              <label for="same_as_residential" class="control-label">Same as residential address</label>
+                              <input :readonly="readonly" type="checkbox" id="postal_same_as_residential" v-model="profile.postal_same_as_residential"/>
+                              <label for="postal_same_as_residential" class="control-label">Same as residential address</label>
                             </div>
                           </div>
                           <div class="form-group">
@@ -257,6 +257,9 @@ export default {
         proposalId: {
             type: Number,
         },
+        submitterId: {
+            type: Number,
+        },
         isApplication:{
                 type: Boolean,
                 default: false
@@ -354,7 +357,7 @@ export default {
     },
     computed: {
         postalAddressReadonly: function() {
-            if (this.readonly || this.profile.postal_address.same_as_residential) {
+            if (this.readonly || this.profile.postal_same_as_residential) {
                 return true;
             }
         },
@@ -588,8 +591,9 @@ export default {
             vm.updatingAddress = true;
             let payload = {}
             payload.residential_address = Object.assign({}, vm.profile.residential_address);
-            if (!vm.profile.postal_address.same_as_residential) {
-                payload.postal_address = Object.assign({}, vm.profile.postal_address);
+            payload.postal_address = Object.assign({}, vm.profile.postal_address);
+            if (vm.profile.postal_same_as_residential) {
+                payload.postal_same_as_residential = true;
             }
             try {
                 const response = await vm.$http.post(helpers.add_endpoint_json(api_endpoints.users,(vm.profile.id+'/update_address')), payload);
@@ -859,13 +863,19 @@ export default {
             }); 
         },
         fetchProfile: async function(){
-          const response = await Vue.http.get(api_endpoints.profile)
-          this.profile = response.body
-          if (this.profile.residential_address == null){ this.profile.residential_address = {}; }
-          if (this.profile.postal_address == null){ this.profile.postal_address = {}; }
-          //if (this.profile.mooringlicensing_organisations && this.profile.mooringlicensing_organisations.length > 0 ) { this.managesOrg = 'Yes' }
-          this.phoneNumberReadonly = this.profile.phone_number === '' || this.profile.phone_number === null || this.profile.phone_number === 0 ?  false : true;
-          this.mobileNumberReadonly = this.profile.mobile_number === '' || this.profile.mobile_number === null || this.profile.mobile_number === 0 ?  false : true;
+            let response = null;
+            //let submitter_id = 666;
+            if (this.submitterId) {
+                response = await Vue.http.get(`${api_endpoints.submitter_profile}?submitter_id=${this.submitterId}`);
+            } else {
+                response = await Vue.http.get(api_endpoints.profile);
+            }
+            this.profile = response.body
+            if (this.profile.residential_address == null){ this.profile.residential_address = {}; }
+            if (this.profile.postal_address == null){ this.profile.postal_address = {}; }
+            //if (this.profile.mooringlicensing_organisations && this.profile.mooringlicensing_organisations.length > 0 ) { this.managesOrg = 'Yes' }
+            this.phoneNumberReadonly = this.profile.phone_number === '' || this.profile.phone_number === null || this.profile.phone_number === 0 ?  false : true;
+            this.mobileNumberReadonly = this.profile.mobile_number === '' || this.profile.mobile_number === null || this.profile.mobile_number === 0 ?  false : true;
 
         },
     },

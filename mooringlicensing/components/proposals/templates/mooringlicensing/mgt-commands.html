@@ -1,18 +1,156 @@
 {% extends 'mooringlicensing/base.html' %}
 
 {% block content %}
-    <div>
+    <style>
+        .debug-box {
+            margin: 0 0 0 3em;
+            background: lightgray;
+            padding: 0.5em;
+        }
+        .row {
+            margin: 0 0 1em 0;
+        }
+    </style>
+    <div class="container">
         <H4>Hover over button to see help text.</H4>
         <form action="" method="POST">
             {% csrf_token %}
-            <button type="submit" name="script" value="approval_renewal_notices" {% if approval_renewal_notices == 'true' %}style="color:green" {% endif %} title="Send Approval renewal notice when approval is due to expire in 30 days">Run Script 'approval_renewal_notices'</button><br><br>
-            <button type="submit" name="script" value="expire_approvals" {% if expire_approvals == 'true' %}style="color:green" {% endif %} title="Change the status of Approvals to Expired when past expiry date">Run Script 'expire_approvals'</button><br><br>
-            <button type="submit" name="script" value="eclass_renewal_notices" {% if eclass_renewal_notices == 'true' %}style="color:green" {% endif %} title="Run the EClass Renewal Notices script">Run Script 'eclass_renewal_notices'</button><br><br>
-            <button type="submit" name="script" value="eclass_expiry_notices" {% if eclass_expiry_notices == 'true' %}style="color:green" {% endif %} title="Run the EClass Expiry Notices script">Run Script 'eclass_expiry_notices'</button><br><br>
-            <button type="submit" name="script" value="send_compliance_reminder" {% if send_compliance_reminder == 'true' %}style="color:green" {% endif %} title="Send notification emails for compliances which has past due dates, and also reminder notification emails for those that are within the daterange prior to due_date (eg. within 14 days of due date)">Run Script 'send_compliance_reminder'</button><br><br>
-            <button type="submit" name="script" value="update_approval_status" {% if update_approval_status == 'true' %}style="color:green" {% endif %} title="Change the status of Approvals to Surrender/Cancelled/Suspended">Run Script 'update_approval_status'</button><br><br>
-            <button type="submit" name="script" value="update_compliance_status" {% if update_compliance_status == 'true' %}style="color:green" {% endif %} title="Change the status of Compliances from future to due when they are close to due date (eg. within 14 days)">Run Script 'update_compliance_status'</button><br><br>
-            <button type="submit" name="script" value="monthly_invoices" {% if monthly_invoices == 'true' %}style="color:green" {% endif %} title="Run the monthly_invoices script">Run Script 'monthly_invoices'</button><br><br>
+            {% if debug %}
+                <input type="hidden" name="debug" value="true" />
+            {% endif %}
+
+            <div class="row">
+                <button type="submit" name="script" value="import_mooring_bookings_data" {% if import_mooring_bookings_data == 'true' %}style="color:green" {% endif %} title="Import Mooring Bookings data">Run Script 'import_mooring_bookings_data'</button>
+            </div>
+
+            <div class="row">
+                <button type="submit" name="script" value="export_and_email_sticker_data" {% if export_and_email_sticker_data == 'true' %}style="color:green" {% endif %} title="Export and Send Sticker data">Run Script 'export_and_email_sticker_data'</button>
+                {% if debug %}
+                    <div class="debug-box">
+                        <span>Issue AAP/AUP/ML and click the button above</span>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="row">
+                <button type="submit" name="script" value="reset_waiting_list_allocations" {% if reset_waiting_list_allocations == 'true' %}style="color:green" {% endif %} title="Reset Waiting List Allocations">Run Script 'reset_waiting_list_allocations'</button>
+            </div>
+
+            <div class="row">
+                <button type="submit" name="script" value="expire_approvals" {% if expire_approvals == 'true' %}style="color:green" {% endif %} title="Expire Approvals">Run Script 'expire_approvals'</button>
+                {% if debug %}
+                    <div class="debug-box">
+                        <div><span>Enter the approval lodgement number and click the button above</span></div>
+                            <div>
+                                Approval lodgement number to expire: <input type="text" name="expire_approvals_lodgement_number" />
+                            </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="row">
+                <button type="submit" name="script" value="update_approval_status" {% if update_approval_status == 'true' %}style="color:green" {% endif %} title="Update Approval Status">Run Script 'update_approval_status'</button>
+<!--                {% if debug %}-->
+<!--                    <div class="debug-box">-->
+<!--                        <div><span>Enter the approval ID and click the button above</span></div>-->
+<!--                        <div>-->
+<!--                            Approval ID to update: <input type="text" name="update_approval_status_id" />-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                {% endif %}-->
+            </div>
+
+            <div class="row">
+                <button type="submit" name="script" value="update_compliance_status" {% if update_compliance_status == 'true' %}style="color:green" {% endif %} title="Update Compliance Status">Run Script 'update_compliance_status'</button>
+            </div>
+
+            <div class="row">
+                <button type="submit" name="script" value="send_compliance_reminder" {% if send_compliance_reminder == 'true' %}style="color:green" {% endif %} title="Send Compliance Reminder">Run Script 'send_compliance_reminder'</button>
+            </div>
+
+            <div class="row">
+                <button type="submit" name="script" value="send_endorser_reminder" {% if send_endorser_reminder == 'true' %}style="color:green" {% endif %} title="Send Endorsement Reminder">Run Script 'send_endorser_reminder'</button>
+                {% if debug %}
+                    <div class="debug-box">
+                        <div><span>Enter the proposal ID and click the button above</span></div>
+                        <div>
+                            Proposal ID to send reminder: <input type="text" name="send_endorser_reminder_id" />
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="row">
+                <button type="submit" name="script" value="send_vessel_nominate_reminder" {% if send_vessel_nominate_reminder == 'true' %}style="color:green" {% endif %} title="Send Endorsement Reminder">Run Script 'send_vessel_nominate_reminder'</button>
+                {% if debug %}
+                <div class="debug-box">
+                    <div><span>Enter the lodgement number and click the button above</span></div>
+                    <div>
+                        Approval lodgement number to send reminder: <input type="text" name="send_vessel_nominate_reminder_lodgement_number" />
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="row">
+                <button type="submit" name="script" value="cancel_approvals_due_to_no_vessels_nominated" {% if cancel_approvals_due_to_no_vessels_nominated == 'true' %}style="color:green" {% endif %} title="Expire Approvals and Send Notifications">Run Script 'cancel_approvals_due_to_no_vessels_nominated'</button>
+                {% if debug %}
+                <div class="debug-box">
+                    <div><span>Enter the lodgement number and click the button above</span></div>
+                    <div>
+                        Approval lodgement number to cancel: <input type="text" name="cancel_approvals_due_to_no_vessels_nominated_lodgement_number" />
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="row">
+                <button type="submit" name="script" value="expire_mooring_licence_application_due_to_no_documents" {% if expire_mooring_licence_application_due_to_no_documents == 'true' %}style="color:green" {% endif %} title="Expire Mooring Licence Application if documents not submitted">Run Script 'expire_mooring_licence_application_due_to_no_documents'</button>
+                {% if debug %}
+                <div class="debug-box">
+                    <div><span>Enter the lodgement number and click the button above</span></div>
+                    <div>
+                        MLApplication lodgement number to expire: <input type="text" name="expire_mooring_licence_application_due_to_no_documents_lodgement_number" />
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="row">
+                <button type="submit" name="script" value="expire_mooring_licence_application_due_to_no_submit" {% if expire_mooring_licence_application_due_to_no_submit == 'true' %}style="color:green" {% endif %} title="Expire Mooring Licence Application if documents not submitted">Run Script 'expire_mooring_licence_application_due_to_no_submit'</button>
+                {% if debug %}
+                <div class="debug-box">
+                    <div><span>Enter the lodgement number and click the button above</span></div>
+                    <div>
+                        MLApplication lodgement number to expire: <input type="text" name="expire_mooring_licence_application_due_to_no_submit_lodgement_number" />
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="row">
+                <button type="submit" name="script" value="approval_renewal_notices" {% if approval_renewal_notices == 'true' %}style="color:green" {% endif %} title="Send Approval Renewal Notices">Run Script 'approval_renewal_notices'</button>
+                {% if debug %}
+                <div class="debug-box">
+                    <div><span>Enter the lodgement number and click the button above</span></div>
+                    <div>
+                        Approval lodgement number to send notice: <input type="text" name="approval_renewal_notices_lodgement_number" />
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="row">
+                <button type="submit" name="script" value="send_mooring_licence_application_submit_due_reminder" {% if send_mooring_licence_application_submit_due_reminder == 'true' %}style="color:green" {% endif %} title="Send Mooring Licence Application Submit Due Reminder">Run Script 'send_mooring_licence_application_submit_due_reminder'</button>
+                {% if debug %}
+                <div class="debug-box">
+                    <div><span>Enter the lodgement number and click the button above</span></div>
+                    <div>
+                        ML lodgement number to send notice: <input type="text" name="send_mooring_licence_application_submit_due_reminder_lodgement_number" />
+                    </div>
+                </div>
+                {% endif %}
+            </div>
         </form>
         <br>
     </div>

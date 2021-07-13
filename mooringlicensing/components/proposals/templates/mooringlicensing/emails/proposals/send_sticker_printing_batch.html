@@ -1,0 +1,20 @@
+{%  extends 'mooringlicensing/emails/base_email.html' %}
+
+{%  block content %}
+    {{ proposal.submitter }},
+    <p>
+        Your mooring licence application: {{ proposal.lodgement_number }} has been submitted successfully.  You will now need to submit<br />
+        - a current mooring inspection report (in your name) from your chosen mooring contractor<br />
+        - written proof of the finalisation of negotiations concerning the ownership of the mooring apparatus between you and the previous licensee
+    </p>
+
+    <p>
+        These documents need to be submitted before <28 days of offer>.
+    </p>
+
+    <p>
+        Please click <a href="{{ documents_upload_url }}">here</a> to submit these documents and complete your application.
+    </p>
+
+    Regards,
+{%  endblock %}

@@ -1,7 +1,8 @@
 from django import forms
 from django.contrib import admin
 
-from mooringlicensing.components.main.models import VesselSizeCategory, VesselSizeCategoryGroup, ApplicationType
+from mooringlicensing.components.main.models import VesselSizeCategory, VesselSizeCategoryGroup, ApplicationType, \
+    NumberOfDaysSetting, NumberOfDaysType
 
 
 class VesselSizeCategoryForm(forms.ModelForm):
@@ -87,3 +88,34 @@ class ApplicationTypeAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request):
         return False
+
+
+class NumberOfDaysSettingInline(admin.TabularInline):
+    model = NumberOfDaysSetting
+    extra = 0
+    can_delete = True
+    # form = VesselSizeCategoryForm
+
+
+@admin.register(NumberOfDaysType)
+class NumberOfDaysTypeAdmin(admin.ModelAdmin):
+    list_display = ['name', 'description', 'number_by_date',]
+    list_display_links = ['name',]
+    # readonly_fields = ['name',]
+    fields = ['name', 'description',]
+    inlines = [NumberOfDaysSettingInline,]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+# @admin.register(NumberOfDaysSetting)
+# class NumberOfDaysSettingAdmin(admin.ModelAdmin):
+#     list_display = [
+#         'number_of_days',
+#         'date_of_enforcement',
+#         'number_of_days_type',
+#     ]

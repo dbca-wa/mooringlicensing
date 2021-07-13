@@ -25,6 +25,18 @@ class FirstTimeNagScreenMiddleware(object):
                     #response = add_cache_control(redirect(reverse('first_time')+"?next="+urlquote_plus(request.get_full_path())))
                     return add_cache_control(redirect(reverse('first_time')+"?next="+urlquote_plus(request.get_full_path())))
 
+class CacheControlMiddleware(object):
+    def process_response(self, request, response):
+        return add_cache_control(response)
+
+    #def __init__(self, get_response):
+    #    self.get_response = get_response
+
+    #def __call__(self, request):
+    #    response = self.get_response(request)
+    #    #print(response.__dict__)
+
+    #    return response
 
 #class BookingTimerMiddleware(object):
 #    def process_request(self, request):

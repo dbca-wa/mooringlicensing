@@ -72,6 +72,7 @@ REST_FRAMEWORK = {
 MIDDLEWARE_CLASSES += [
     'mooringlicensing.middleware.FirstTimeNagScreenMiddleware',
     'mooringlicensing.middleware.RevisionOverrideMiddleware',
+    'mooringlicensing.middleware.CacheControlMiddleware',
 ]
 
 TEMPLATES[0]['DIRS'].append(os.path.join(BASE_DIR, 'mooringlicensing', 'templates'))
@@ -127,6 +128,7 @@ DEP_FAX = env('DEP_FAX','(08) 9423 8242')
 DEP_POSTAL = env('DEP_POSTAL','Locked Bag 104, Bentley Delivery Centre, Western Australia 6983')
 DEP_NAME = env('DEP_NAME','Department of Biodiversity, Conservation and Attractions')
 DEP_NAME_SHORT = env('DEP_NAME_SHORT','DBCA')
+RIA_NAME = env('RIA_NAME', 'Rottnest Island Authority (RIA)')
 SITE_URL = env('SITE_URL', 'https://' + SITE_PREFIX + '.' + SITE_DOMAIN)
 PUBLIC_URL=env('PUBLIC_URL', SITE_URL)
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', 'no-reply@' + SITE_DOMAIN).lower()
@@ -134,6 +136,7 @@ MEDIA_APP_DIR = env('MEDIA_APP_DIR', 'mooringlicensing')
 ADMIN_GROUP = env('ADMIN_GROUP', 'MooringLicensing Admin')
 CRON_RUN_AT_TIMES = env('CRON_RUN_AT_TIMES', '04:05')
 CRON_EMAIL = env('CRON_EMAIL', 'cron@' + SITE_DOMAIN).lower()
+CRON_NOTIFICATION_EMAIL = env('CRON_NOTIFICATION_EMAIL', NOTIFICATION_EMAIL).lower()
 EMAIL_FROM = DEFAULT_FROM_EMAIL
 
 BASE_URL=env('BASE_URL')
@@ -149,10 +152,14 @@ CKEDITOR_CONFIGS = {
     },
 }
 
-if env('CONSOLE_EMAIL_BACKEND', False):
-   EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+CONSOLE_EMAIL_BACKEND = env('CONSOLE_EMAIL_BACKEND', False)
+if CONSOLE_EMAIL_BACKEND:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 PAYMENT_SYSTEM_ID = env('PAYMENT_SYSTEM_ID', 'S517')
+OSCAR_BASKET_COOKIE_OPEN = 'mooringlicensing_basket'
+PS_PAYMENT_SYSTEM_ID = PAYMENT_SYSTEM_ID
+PAYMENT_SYSTEM_PREFIX = env('PAYMENT_SYSTEM_PREFIX', PAYMENT_SYSTEM_ID.replace('S', '0'))
 
 MOORING_BOOKINGS_API_KEY=env('MOORING_BOOKINGS_API_KEY')
 MOORING_BOOKINGS_API_URL=env('MOORING_BOOKINGS_API_URL')
@@ -172,12 +179,12 @@ HTTP_HOST_FOR_TEST = 'localhost:8071'
 APPLICATION_TYPE_DCV_PERMIT = {
     'code': 'dcvp',
     'description': 'DCV Permit',
-    'oracle_code': '0517',
+    'oracle_code': 'T1 EXEMPT',
 }
 APPLICATION_TYPE_DCV_ADMISSION = {
     'code': 'dcv',
     'description': 'DCV Admission',
-    'oracle_code': '0517',
+    'oracle_code': 'T1 EXEMPT',
 }
 LOGGING['loggers']['mooringlicensing'] = {
     'handlers': ['file'],
@@ -203,3 +210,41 @@ CUSTOM_GROUPS = [
     GROUP_DCV_APPROVER_MOORING_LICENCE,
     GROUP_DCV_PERMIT_ADMIN,
 ]
+
+CODE_DAYS_BEFORE_DUE_COMPLIANCE = 'ComplianceDueDate'
+CODE_DAYS_BEFORE_END_OF_SIX_MONTH_PERIOD_ML = 'MLVesselNominateNotification'
+CODE_DAYS_BEFORE_END_OF_SIX_MONTH_PERIOD_WLA ='WLAVesselNominateNotification'
+CODE_DAYS_BEFORE_PERIOD_WLA = 'WLAApplicationSubmitNotification'
+CODE_DAYS_IN_PERIOD_WLA = 'WLAApplicationSubmitPeriod'
+CODE_DAYS_FOR_SUBMIT_DOCUMENTS_MLA = 'MLADocumentsSubmitPeriod'
+CODE_DAYS_FOR_ENDORSER_AUA = 'AUAEndorseDeclinePeriod'
+CODE_DAYS_FOR_RENEWAL = 'AAPAUPMLRenewalNotification'
+
+NUM_OF_DAYS_BEFORE_DUE_COMPLIANCE = 'Compliance due date'
+NUM_OF_DAYS_BEFORE_END_OF_SIX_MONTH_PERIOD_ML = 'Vessel nominate notification for ML'
+NUM_OF_DAYS_BEFORE_END_OF_SIX_MONTH_PERIOD_WLA = 'Vessel nominate notification for WLA'
+NUM_OF_DAYS_BEFORE_PERIOD_WLA = 'WLA application submit notification'
+NUM_OF_DAYS_IN_PERIOD_WLA = 'WLA application submit period'
+NUM_OF_DAYS_FOR_SUBMIT_DOCUMENTS_MLA = 'MLA documents submit period'
+NUM_OF_DAYS_FOR_ENDORSER_AUA = 'AUA endorse/decline period'
+NUM_OF_DAYS_FOR_RENEWAL = 'AAP, AUP and ML Renewal notification'
+
+NUM_OF_DAYS_BEFORE_DUE_COMPLIANCE_DESC = 'Number of days before due date of compliance'
+NUM_OF_DAYS_BEFORE_END_OF_SIX_MONTH_PERIOD_ML_DESC = 'Number of days before end of six month period in which a new vessel is to be nominated for ML'
+NUM_OF_DAYS_BEFORE_END_OF_SIX_MONTH_PERIOD_WLA_DESC = 'Number of days before end of six month period in which a new vessel is to be nominated for WLA'
+NUM_OF_DAYS_BEFORE_PERIOD_WLA_DESC = 'Number of days before end of period in which the mooring licence application needs to be submitted'
+NUM_OF_DAYS_IN_PERIOD_WLA_DESC = 'Number of days in the period in which the mooring licence application needs to be submitted'
+NUM_OF_DAYS_FOR_SUBMIT_DOCUMENTS_MLA_DESC = 'Number of days in the period in which the mooring licence application needs to be submitted'
+NUM_OF_DAYS_FOR_ENDORSER_AUA_DESC = 'Number of days after initial submit for the endorser to endorse/decline'
+NUM_OF_DAYS_FOR_RENEWAL_DESC = 'Number of days before expiry date of the approvals to email'
+TYPES_OF_CONFIGURABLE_NUMBER_OF_DAYS = [
+    {'code': CODE_DAYS_BEFORE_DUE_COMPLIANCE, 'name': NUM_OF_DAYS_BEFORE_DUE_COMPLIANCE, 'description': NUM_OF_DAYS_BEFORE_DUE_COMPLIANCE_DESC, 'default': 28},
+    {'code': CODE_DAYS_BEFORE_END_OF_SIX_MONTH_PERIOD_ML, 'name': NUM_OF_DAYS_BEFORE_END_OF_SIX_MONTH_PERIOD_ML, 'description': NUM_OF_DAYS_BEFORE_END_OF_SIX_MONTH_PERIOD_ML_DESC, 'default': 28},
+    {'code': CODE_DAYS_BEFORE_END_OF_SIX_MONTH_PERIOD_WLA, 'name': NUM_OF_DAYS_BEFORE_END_OF_SIX_MONTH_PERIOD_WLA, 'description': NUM_OF_DAYS_BEFORE_END_OF_SIX_MONTH_PERIOD_WLA_DESC, 'default': 28},
+    {'code': CODE_DAYS_BEFORE_PERIOD_WLA, 'name': NUM_OF_DAYS_BEFORE_PERIOD_WLA, 'description': NUM_OF_DAYS_BEFORE_PERIOD_WLA_DESC, 'default': 14},
+    {'code': CODE_DAYS_IN_PERIOD_WLA, 'name': NUM_OF_DAYS_IN_PERIOD_WLA, 'description': NUM_OF_DAYS_IN_PERIOD_WLA_DESC, 'default': 28},
+    {'code': CODE_DAYS_FOR_SUBMIT_DOCUMENTS_MLA, 'name': NUM_OF_DAYS_FOR_SUBMIT_DOCUMENTS_MLA, 'description': NUM_OF_DAYS_FOR_SUBMIT_DOCUMENTS_MLA_DESC, 'default': 28},
+    {'code': CODE_DAYS_FOR_ENDORSER_AUA, 'name': NUM_OF_DAYS_FOR_ENDORSER_AUA, 'description': NUM_OF_DAYS_FOR_ENDORSER_AUA_DESC, 'default': 28},
+    {'code': CODE_DAYS_FOR_RENEWAL, 'name': NUM_OF_DAYS_FOR_RENEWAL, 'description': NUM_OF_DAYS_FOR_RENEWAL_DESC, 'default': 28},
+]
+

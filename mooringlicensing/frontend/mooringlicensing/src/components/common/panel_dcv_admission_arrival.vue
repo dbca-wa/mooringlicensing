@@ -47,6 +47,7 @@
                         <div class="col-sm-2 text-center"><label>Extended stay</label></div>
                         <div class="col-sm-2 text-center"><label>Not landing</label></div>
                         <div class="col-sm-2 text-center"><label>Approved events</label></div>
+                        <div class="col-sm-2 text-center"><label>Fee (AU$)</label></div>
                     </div>
                     <div class="row form-group">
                         <div class="col-sm-2"><label>Number of Adults</label><br />(12 and over)</div>
@@ -62,6 +63,11 @@
                         <div class="col-sm-2">
                             <input :disabled="!column_approved_events_enabled" type="number" min="0" max="100" step="1" class="form-control text-center" name="adults-approved-events" placeholder="" v-model="arrival.adults.approved_events">
                         </div>
+                        <div class="col-sm-2">
+                            <div class="total_fee text-right">
+                                {{ total_fee_adults }}
+                            </div>
+                        </div>
                     </div>
                     <div class="row form-group">
                         <div class="col-sm-2"><label>Number of Children</label><br />(4 - 12)</div>
@@ -76,6 +82,11 @@
                         </div>
                         <div class="col-sm-2">
                             <input :disabled="!column_approved_events_enabled" type="number" min="0" max="100" step="1" class="form-control text-center" name="children-approved-events" placeholder="" v-model="arrival.children.approved_events">
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="total_fee text-right">
+                                {{ total_fee_children }}
+                            </div>
                         </div>
                     </div>
                 </template>
@@ -106,6 +117,7 @@ export default {
         uuid: null,
         arrival: null,
         dcv_vessel: null,
+        fee_configurations: null,
         column_landing_enabled: {
             type: Boolean,
             default: true,
@@ -159,16 +171,10 @@ export default {
         has_dcv_permit: function() {
             if (this.arrival && this.arrival.arrival_date){
                 let arrival_date = moment(this.arrival.arrival_date, 'DD/MM/YYYY')
-                console.log('arrival_date')
-                console.log(arrival_date)
                 if (this.dcv_vessel && this.dcv_vessel.dcv_permits){
                     for (let dcv_permit of this.dcv_vessel.dcv_permits){
                         let start_date = moment(dcv_permit.start_date, 'YYYY-MM-DD')
-                        console.log('start_date')
-                        console.log(start_date)
                         let end_date = moment(dcv_permit.end_date, 'YYYY-MM-DD')
-                        console.log('end_date')
-                        console.log(end_date)
                         if (start_date <= arrival_date && arrival_date <= end_date){
                             return true
                         }
@@ -188,6 +194,64 @@ export default {
             // TODO: calc
 
             return false
+        },
+        total_fee_adults: function() {
+            let total_fee = 0
+            let target_fee_configuration = null
+            if (this.arrival.arrival_date && !this.arrival.private_visit){
+                let arrival_date = moment(this.arrival.arrival_date, 'DD/MM/YYYY')
+                for (let fee_configuration of this.fee_configurations){
+                    let start_date = moment(fee_configuration.start_date, 'YYYY-MM-DD')
+                    let end_date = moment(fee_configuration.end_date, 'YYYY-MM-DD')
+                    if (start_date <= arrival_date && arrival_date <= end_date){
+                        target_fee_configuration = fee_configuration
+                        break
+                    }
+                }
+                if (!target_fee_configuration){
+                    return '---'
+                } else {
+                    for(let key in this.arrival.adults) {
+                        if(this.arrival.adults.hasOwnProperty(key) ) {
+                            console.log(key + ': ' + this.arrival.adults[key] );
+                            console.log(target_fee_configuration.fee_items.adult[key])
+                            total_fee += this.arrival.adults[key] * target_fee_configuration.fee_items.adult[key]
+                        }
+                    }
+                    return (Math.round(total_fee * 100) / 100).toFixed(2);
+                }
+            } else {
+                return '---'
+            }
+        },
+        total_fee_children: function() {
+            let total_fee = 0
+            let target_fee_configuration = null
+            if (this.arrival.arrival_date && !this.arrival.private_visit){
+                let arrival_date = moment(this.arrival.arrival_date, 'DD/MM/YYYY')
+                for (let fee_configuration of this.fee_configurations){
+                    let start_date = moment(fee_configuration.start_date, 'YYYY-MM-DD')
+                    let end_date = moment(fee_configuration.end_date, 'YYYY-MM-DD')
+                    if (start_date <= arrival_date && arrival_date <= end_date){
+                        target_fee_configuration = fee_configuration
+                        break
+                    }
+                }
+                if (!target_fee_configuration){
+                    return '---'
+                } else {
+                    for(let key in this.arrival.children) {
+                        if(this.arrival.children.hasOwnProperty(key) ) {
+                            console.log(key + ': ' + this.arrival.children[key] );
+                            console.log(target_fee_configuration.fee_items.child[key])
+                            total_fee += this.arrival.children[key] * target_fee_configuration.fee_items.child[key]
+                        }
+                    }
+                    return (Math.round(total_fee * 100) / 100).toFixed(2);
+                }
+            } else {
+                return '---'
+            }
         },
     },
     methods: {
@@ -223,6 +287,7 @@ export default {
         this.shown = true  // Show the panel once
     },
     created: function() {
+
         this.$nextTick(() => {
             this.addEventListeners();
         });
@@ -254,5 +319,8 @@ export default {
 }
 .v-enter-to, .v-leave {
     opacity: 1;
+}
+.total_fee {
+    padding-right: 1em;
 }
 </style>

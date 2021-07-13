@@ -1,5 +1,8 @@
 from django.contrib import admin
+from django.contrib.admin.utils import flatten_fieldsets
+
 from ledger.accounts.models import EmailUser
+
 from mooringlicensing.components.proposals import models
 #from mooringlicensing.components.bookings.models import ApplicationFeeInvoice
 from mooringlicensing.components.proposals import forms
@@ -26,6 +29,9 @@ from django.http import HttpResponse, HttpResponseRedirect
 #    ordering = ('name', '-version')
 #    list_filter = ('name',)
     #exclude=("site",)
+from mooringlicensing.components.proposals.models import StickerPrintingBatch, StickerPrintingResponse, \
+    StickerPrintingContact
+
 
 class ProposalDocumentInline(admin.TabularInline):
     model = models.ProposalDocument
@@ -35,8 +41,11 @@ class ProposalDocumentInline(admin.TabularInline):
 class AmendmentReasonAdmin(admin.ModelAdmin):
     list_display = ['reason']
 
+
 @admin.register(models.Proposal)
 class ProposalAdmin(VersionAdmin):
+    list_display = ['id', 'lodgement_number', 'lodgement_date', 'processing_status', 'submitter', 'approval',]
+    list_display_links = ['id', 'lodgement_number', ]
     inlines =[ProposalDocumentInline,]
 
 
@@ -198,17 +207,26 @@ class SystemMaintenanceAdmin(admin.ModelAdmin):
 
 @admin.register(GlobalSettings)
 class GlobalSettingsAdmin(admin.ModelAdmin):
+    list_display = ['key', 'value', '_file',]
+    ordering = ('key',)
+
     def get_fields(self, request, obj=None):
-        if obj.key in (GlobalSettings.KEY_DCV_PERMIT_TEMPLATE_FILE, GlobalSettings.KEY_DCV_ADMISSION_TEMPLATE_FILE):
+        if obj and obj.key in GlobalSettings.keys_for_file:
             return ['key', '_file',]
         else:
-            return ['key', 'value',]
+            return ['key', 'value', 'stickerprintingcontact_set',]
+
+    def has_add_permission(self, request):
+        return False
 
     def get_readonly_fields(self, request, obj=None):
         return ['key',]
 
-    list_display = ['key', 'value', '_file',]
-    ordering = ('key',)
+    def has_delete_permission(self, request, obj=None):
+        if obj:
+            if obj.key in [item[0] for item in GlobalSettings.keys]:
+                return False
+        return True
 
 
 @admin.register(Question)
@@ -218,3 +236,83 @@ class QuestionAdmin(admin.ModelAdmin):
             ]
     ordering = ('question_text',)
 
+
+@admin.register(StickerPrintingContact)
+class StickersPrintingContactAdmin(admin.ModelAdmin):
+    list_display = ['email', 'type', 'enabled',]
+    ordering = ('type', 'email',)
+
+
+@admin.register(StickerPrintingBatch)
+class StickersPrintingBatchAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name', '_file', 'uploaded_date', 'emailed_datetime',]
+    list_display_links = ['id', 'name', '_file',]
+
+    def get_actions(self, request):
+        actions = super(StickersPrintingBatchAdmin, self).get_actions(request)
+        del actions["delete_selected"]
+        return actions
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    # def has_change_permission(self, request, obj=None):
+    #     return False
+
+    def get_readonly_fields(self, request, obj=None):
+        return [
+            'id',
+            'name',
+            'emailed_datetime',
+            'uploaded_date',
+            '_file',
+        ]
+
+    def save_model(self, request, obj, form, change):
+        pass
+
+    def delete_model(self, request, obj):
+        pass
+
+    def save_related(self, request, form, formsets, change):
+        pass
+
+
+@admin.register(StickerPrintingResponse)
+class StickersPrintingResponseAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name', '_file', 'uploaded_date', 'received_datetime',]
+
+    def get_actions(self, request):
+        actions = super(StickersPrintingResponseAdmin, self).get_actions(request)
+        del actions["delete_selected"]
+        return actions
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    # def has_change_permission(self, request, obj=None):
+    #     return False
+
+    def get_readonly_fields(self, request, obj=None):
+        return [
+            'id',
+            'name',
+            'received_datetime',
+            'uploaded_date',
+            '_file',
+        ]
+
+    def save_model(self, request, obj, form, change):
+        pass
+
+    def delete_model(self, request, obj):
+        pass
+
+    def save_related(self, request, form, formsets, change):
+        pass

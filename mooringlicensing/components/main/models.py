@@ -1,13 +1,12 @@
 from __future__ import unicode_literals
+import pytz
 import os
 
+from ledger.settings_base import TIME_ZONE
 from django.db import models
-from django.dispatch import receiver
-from django.db.models.signals import pre_delete
 from django.utils.encoding import python_2_unicode_compatible
 from django.core.exceptions import ValidationError
 from ledger.accounts.models import EmailUser, RevisionedMixin
-from django.contrib.postgres.fields.jsonb import JSONField
 from datetime import datetime
 
 
@@ -180,13 +179,28 @@ class Question(models.Model):
 class GlobalSettings(models.Model):
     KEY_DCV_PERMIT_TEMPLATE_FILE = 'dcv_permit_template_file'
     KEY_DCV_ADMISSION_TEMPLATE_FILE = 'dcv_admission_template_file'
+    KEY_APPROVAL_TEMPLATE_FILE = 'approval_template_file'
+    KEY_RESET_WAITING_LIST_ALLOCATION_DAYS = 'reset_waiting_list_allocation_days'
+    KEY_STICKER_PRINTING_CONTACT = 'sticker_printing_contact'
+
+    keys_for_file = (
+        KEY_DCV_PERMIT_TEMPLATE_FILE,
+        KEY_DCV_ADMISSION_TEMPLATE_FILE,
+        KEY_APPROVAL_TEMPLATE_FILE,
+    )
     keys = (
         (KEY_DCV_PERMIT_TEMPLATE_FILE, 'DcvPermit template file'),
         (KEY_DCV_ADMISSION_TEMPLATE_FILE, 'DcvAdmission template file'),
+        (KEY_APPROVAL_TEMPLATE_FILE, 'Approval template file'),
+        (KEY_RESET_WAITING_LIST_ALLOCATION_DAYS, 'Reset unclaimed Waiting List Allocations after X days'),
+        (KEY_STICKER_PRINTING_CONTACT, 'Contact email addresses for printing the sticker'),
     )
     default_values = (
         (KEY_DCV_PERMIT_TEMPLATE_FILE, ''),
         (KEY_DCV_ADMISSION_TEMPLATE_FILE, ''),
+        (KEY_APPROVAL_TEMPLATE_FILE, ''),
+        (KEY_RESET_WAITING_LIST_ALLOCATION_DAYS, 0),
+        (KEY_STICKER_PRINTING_CONTACT, ''),
     )
 
     key = models.CharField(max_length=255, choices=keys, blank=False, null=False,)
@@ -314,6 +328,58 @@ class VesselSizeCategory(RevisionedMixin):
         if self.vessel_size_category_group:
             return self.vessel_size_category_group.is_editable
         return True
+
+
+class NumberOfDaysType(RevisionedMixin):
+    code = models.CharField(max_length=100, blank=True, null=True)
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True, verbose_name='description', help_text='')
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        app_label = 'mooringlicensing'
+        verbose_name = 'Number of days Settings'
+        verbose_name_plural = 'Number of days Settings'
+
+    def get_setting_by_date(self, target_date=datetime.now(pytz.timezone(TIME_ZONE)).date()):
+        return NumberOfDaysSetting.get_setting_by_date(self, target_date)
+
+    def get_number_of_days_currently_applied(self):
+        setting = self.get_setting_by_date(target_date=datetime.now(pytz.timezone(TIME_ZONE)).date())
+        if setting:
+            return setting.number_of_days
+        else:
+            return '---'
+
+    get_number_of_days_currently_applied.short_description = 'Number currently applied'  # Displayed at the admin page
+    number_by_date = property(get_number_of_days_currently_applied)
+
+
+class NumberOfDaysSetting(RevisionedMixin):
+    number_of_days = models.PositiveSmallIntegerField(blank=True, null=True)
+    date_of_enforcement = models.DateField(blank=True, null=True)
+    number_of_days_type = models.ForeignKey(NumberOfDaysType, blank=True, null=True, related_name='settings')
+
+    def __str__(self):
+        return '{} ({})'.format(self.number_of_days, self.number_of_days_type.name)
+
+    class Meta:
+        app_label = 'mooringlicensing'
+        ordering = ['-date_of_enforcement',]
+
+    @staticmethod
+    def get_setting_by_date(number_of_days_type, target_date=datetime.now(pytz.timezone(TIME_ZONE)).date()):
+        """
+        Return an setting object which is enabled at the target_date
+        """
+        setting = NumberOfDaysSetting.objects.filter(
+            number_of_days_type=number_of_days_type,
+            date_of_enforcement__lte=target_date,
+        ).order_by('date_of_enforcement').last()
+        return setting
+
 
 
 

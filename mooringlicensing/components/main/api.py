@@ -1,5 +1,6 @@
 import traceback
 from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
+from ledger.payments.utils import oracle_parser
 from django.conf import settings
 from django.db import transaction
 from wsgiref.util import FileWrapper
@@ -16,16 +17,19 @@ from mooringlicensing.components.main.models import (#Region, District, Tenure,
         Question, 
         GlobalSettings
         )
-from mooringlicensing.components.main.serializers import (#RegionSerializer, DistrictSerializer, TenureSerializer, 
-        #ApplicationTypeSerializer, #ActivityMatrixSerializer,  AccessTypeSerializer, ParkSerializer, ParkFilterSerializer, TrailSerializer, ActivitySerializer, ActivityCategorySerializer, 
-        #RequiredDocumentSerializer, 
-        QuestionSerializer, 
-        GlobalSettingsSerializer, 
-        OracleSerializer, #BookingSettlementReportSerializer, LandActivityTabSerializer, MarineActivityTabSerializer, EventsParkSerializer, TrailTabSerializer, FilmingParkSerializer
-        )
+from mooringlicensing.components.main.serializers import (  # RegionSerializer, DistrictSerializer, TenureSerializer,
+    # ApplicationTypeSerializer, #ActivityMatrixSerializer,  AccessTypeSerializer, ParkSerializer, ParkFilterSerializer, TrailSerializer, ActivitySerializer, ActivityCategorySerializer,
+    # RequiredDocumentSerializer,
+    QuestionSerializer,
+    GlobalSettingsSerializer,
+    OracleSerializer,
+    BookingSettlementReportSerializer,  # BookingSettlementReportSerializer, LandActivityTabSerializer, MarineActivityTabSerializer, EventsParkSerializer, TrailTabSerializer, FilmingParkSerializer
+)
 from mooringlicensing.components.main.utils import add_cache_control
 from django.core.exceptions import ValidationError
 from django.db.models import Q
+
+from mooringlicensing.components.payments_ml import reports
 from mooringlicensing.components.proposals.models import Proposal
 from mooringlicensing.components.proposals.serializers import ProposalSerializer
 #from mooringlicensing.components.bookings.utils import oracle_integration
@@ -36,6 +40,9 @@ import json
 from decimal import Decimal
 
 import logging
+
+from mooringlicensing.settings import PAYMENT_SYSTEM_PREFIX, SYSTEM_NAME
+
 logger = logging.getLogger('payment_checkout')
 
 
@@ -78,32 +85,38 @@ class PaymentViewSet(viewsets.ModelViewSet):
         return add_cache_control(HttpResponseRedirect(redirect_to=fallback_url + '/success/'))
 
 
-#class BookingSettlementReportView(views.APIView):
-#    renderer_classes = (JSONRenderer,)
-#
-#    def get(self,request,format=None):
-#        try:
-#            http_status = status.HTTP_200_OK
-#            #parse and validate data
-#            report = None
-#            data = {
-#                "date":request.GET.get('date'),
-#            }
-#            serializer = BookingSettlementReportSerializer(data=data)
-#            serializer.is_valid(raise_exception=True)
-#            filename = 'Booking Settlement Report-{}'.format(str(serializer.validated_data['date']))
-#            # Generate Report
-#            report = reports.booking_bpoint_settlement_report(serializer.validated_data['date'])
-#            if report:
-#                response = HttpResponse(FileWrapper(report), content_type='text/csv')
-#                response['Content-Disposition'] = 'attachment; filename="{}.csv"'.format(filename)
-#                return response
-#            else:
-#                raise serializers.ValidationError('No report was generated.')
-#        except serializers.ValidationError:
-#            raise
-#        except Exception as e:
-#            traceback.print_exc()
+class BookingSettlementReportView(views.APIView):
+   renderer_classes = (JSONRenderer,)
+
+   def get(self,request,format=None):
+       try:
+           http_status = status.HTTP_200_OK
+           #parse and validate data
+           report = None
+           data = {
+               "date":request.GET.get('date'),
+           }
+           serializer = BookingSettlementReportSerializer(data=data)
+           serializer.is_valid(raise_exception=True)
+           filename = 'Booking Settlement Report-{}'.format(str(serializer.validated_data['date']))
+           # Generate Report
+           report = reports.booking_bpoint_settlement_report(serializer.validated_data['date'])
+           if report:
+               response = HttpResponse(FileWrapper(report), content_type='text/csv')
+               response['Content-Disposition'] = 'attachment; filename="{}.csv"'.format(filename)
+               return response
+           else:
+               raise serializers.ValidationError('No report was generated.')
+       except serializers.ValidationError:
+           raise
+       except Exception as e:
+           traceback.print_exc()
+
+def oracle_integration(date, override):
+    system = PAYMENT_SYSTEM_PREFIX
+    #oracle_codes = oracle_parser(date, system, 'Commercial Operator Licensing', override=override)
+    # oracle_codes = oracle_parser(date, system, 'WildlifeCompliance', override=override)
+    oracle_codes = oracle_parser(date, system, SYSTEM_NAME, override=override)
 
 
 class OracleJob(views.APIView):

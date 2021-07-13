@@ -1,0 +1,16 @@
+{%  extends 'mooringlicensing/emails/base_email.html' %}
+
+{%  block content %}
+    <p>
+        {{ proposal.submitter }} has submitted an application: {{ proposal.lodgement_number }} for the authorised user of the mooring: {{ mooring.name }} of which you are the site licensee.
+    </p>
+
+    <p>
+        Please click <a href="{{ endorse_url }}">here</a> to endorse this application, or please click <a href="{{ dashboard_url }}">here to endorse/decline this application.</a>
+    </p>
+
+    <p>
+        If you do not know {{ proposal.submitter }} or do not want to endorse the application there is nothing you need to do and you can ignore this email.
+    </p>
+    Regards,
+{%  endblock %}

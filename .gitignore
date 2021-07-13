@@ -85,6 +85,9 @@ target/
 # media
 media/
 
+# export
+export/
+
 # Database/fixture dumps
 *.pgdump
 *.dump

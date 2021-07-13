@@ -1,0 +1,4 @@
+#* * * * * root eval $(grep -v '^#' /etc/.cronenv | xargs -d "\n" -I {} echo export \"{}\" ) && cd /app && python manage_ml.py system_maintenance_check > /dev/null 2>&1
+#0 2 * * * root eval $(grep -v '^#' /etc/.cronenv | xargs -d "\n" -I {} echo export \"{}\" ) && cd /app && python manage_ml.py cron_tasks > logs/run_cron_tasks.log 2>&1
+0 2 6 * * root eval $(grep -v '^#' /etc/.cronenv | xargs -d "\n" -I {} echo export \"{}\" ) && cd /app && python manage_ml.py cron_tasks > logs/run_cron_tasks.log 2>&1
+#10 4 * * * root eval $(grep -v '^#' /etc/.cronenv | xargs -d "\n" -I {} echo export \"{}\" ) && cd /app && python manage_ml.py runcrons > logs/runcrons.log 2>&1

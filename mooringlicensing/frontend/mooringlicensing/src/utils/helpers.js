@@ -99,14 +99,18 @@ module.exports = {
         } );
     } );
   },
-  add_endpoint_json: function ( string, addition ) {
-    var res = string.split( ".json" )
-    return res[ 0 ] + '/' + addition + '.json';
-  },
-  add_endpoint_join: function ( api_string, addition ) {
-    // assumes api_string has trailing forward slash "/" character required for POST
-    return api_string + addition;
-  },
+    add_endpoint_json: function ( string, addition ) {
+        let res = string.split( ".json" )
+        let endpoint = res[ 0 ] + '/' + addition + '.json';
+        endpoint = endpoint.replace("//", "/")  // Remove duplicated '/' just in case
+        return endpoint
+    },
+    add_endpoint_join: function ( api_string, addition ) {
+        // assumes api_string has trailing forward slash "/" character required for POST
+        let endpoint = api_string + addition;
+        endpoint = endpoint.replace("//", "/")  // Remove duplicated '/' just in case
+        return endpoint
+    },
     dtPopover: function(value,truncate_length=30,trigger='hover'){
         var ellipsis = '...',
         truncated = _.truncate(value, {

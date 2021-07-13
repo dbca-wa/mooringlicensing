@@ -1,0 +1,7 @@
+{%  extends 'mooringlicensing/emails/base_email.html' %}
+
+{%  block content %}
+    <p>You do not have a vessel registered on your permit, please register new vessel.</p>
+    <p><strong>Permit : {{ approval.lodgement_number }}</strong></p>
+    <p><strong>Due date : {{ due_date }}</strong></p>
+{%  endblock %}

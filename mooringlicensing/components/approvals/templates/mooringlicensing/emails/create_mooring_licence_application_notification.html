@@ -1,0 +1,10 @@
+{%  extends 'mooringlicensing/emails/base_email.html' %}
+
+{%  block content %}
+    <p>Mooring Licence Application
+    <strong> {{ mla_proposal.lodgement_number}} has been created</strong>.</p>
+    
+    <p>To continue your application, please click <a href="{{url}}">here</a>.</p>
+    <p><label>Message details:</label>{{ message_details }}</p>
+    
+{%  endblock %}

@@ -7,22 +7,22 @@
         </FormSection>
         <!--
         <FormSection :formCollapse="false" label="Waiting List" Index="waiting_list">
-            <WaitingListTable 
+            <WaitingListTable
                 level="external"
             />
         </FormSection>
         <FormSection :formCollapse="false" label="Licences and Permits" Index="licences_and_permits">
-            <LicencesAndPermitsTable 
+            <LicencesAndPermitsTable
                 level="external"
             />
         </FormSection>
         <FormSection :formCollapse="false" label="Compliances" Index="compliances">
-            <CompliancesTable 
+            <CompliancesTable
                 level="external"
             />
         </FormSection>
         <FormSection :formCollapse="false" label="Authorised User Applications for my Endorsement" Index="authorised_user_applications_for_my_endorsement">
-            <AuthorisedUserApplicationsTable 
+            <AuthorisedUserApplicationsTable
                 level="external"
             />
         </FormSection>
@@ -33,15 +33,15 @@
 <script>
 import datatable from '@/utils/vue/datatable.vue'
 import FormSection from "@/components/forms/section_toggle.vue"
-import ApplicationsTable from "@/components/common/table_applications"
-import WaitingListTable from "@/components/common/table_waiting_list"
-import LicencesAndPermitsTable from "@/components/common/table_licences_and_permits"
-import CompliancesTable from "@/components/common/table_compliances"
-import AuthorisedUserApplicationsTable from "@/components/common/table_to_be_endorsed"
+import ApplicationsTable from "@/components/common/table_proposals"
+//import WaitingListTable from "@/components/common/table_approval_waiting_list"
+//import LicencesAndPermitsTable from "@/components/common/table_approval_licences_and_permits"
+//import CompliancesTable from "@/components/common/table_compliances"
+//import AuthorisedUserApplicationsTable from "@/components/common/table_approval_to_be_endorsed"
 import { api_endpoints, helpers } from '@/utils/hooks'
 
 export default {
-    name: 'ExternalDashboard',
+    name: 'InternalDashboard',
     data() {
         let vm = this;
         return {
@@ -60,10 +60,10 @@ export default {
     components:{
         FormSection,
         ApplicationsTable,
-        WaitingListTable,
-        LicencesAndPermitsTable,
-        CompliancesTable,
-        AuthorisedUserApplicationsTable,
+        //WaitingListTable,
+        //LicencesAndPermitsTable,
+        //CompliancesTable,
+        //AuthorisedUserApplicationsTable,
     },
     watch: {
 
