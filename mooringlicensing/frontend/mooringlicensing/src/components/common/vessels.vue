@@ -4,7 +4,7 @@
             <div class="row form-group">
                 <label for="vessel_search" class="col-sm-3 control-label">Vessel registration number</label>
                 <div class="col-sm-9">
-                    <select :disabled="readonly || editingVessel" id="vessel_search"  ref="vessel_rego_nos" class="form-control" style="width: 40%">
+                    <select :disabled="readonly" id="vessel_search"  ref="vessel_rego_nos" class="form-control" style="width: 40%">
                         <option></option>
                     </select>
                 </div>

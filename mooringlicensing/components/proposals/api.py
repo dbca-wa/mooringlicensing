@@ -238,11 +238,13 @@ class GetMooringPerBay(views.APIView):
                         vessel_details_id = wla.current_proposal.vessel_details.id
                         ## restrict search results to suitable vessels
                         vessel_details = VesselDetails.objects.get(id=vessel_details_id)
-                        data = Mooring.available_moorings.filter(
-                                name__icontains=search_term).filter(
-                                mooring_bay__id=mooring_bay_id).filter(
-                                vessel_size_limit__gte=vessel_details.vessel_applicable_length).filter(
-                                vessel_draft_limit__gte=vessel_details.vessel_draft).values('id', 'name')[:10]
+                        mooring_filter = Q(
+                                Q(name__icontains=search_term) & 
+                                Q(mooring_bay__id=mooring_bay_id) & 
+                                Q(vessel_size_limit__gte=vessel_details.vessel_applicable_length) & 
+                                Q(vessel_draft_limit__gte=vessel_details.vessel_draft)
+                                )
+                        data = Mooring.available_moorings.filter(mooring_filter).values('id', 'name')[:10]
                     else:
                         data = Mooring.available_moorings.filter(name__icontains=search_term, mooring_bay__id=mooring_bay_id).values('id', 'name')[:10]
                 else:
@@ -256,12 +258,14 @@ class GetMooringPerBay(views.APIView):
                     if vessel_details_id:
                         ## restrict search results to suitable vessels
                         vessel_details = VesselDetails.objects.get(id=vessel_details_id)
-                        data = Mooring.authorised_user_moorings.filter(
-                                name__icontains=search_term).filter(
-                                mooring_bay__id=mooring_bay_id).filter(
-                                vessel_size_limit__gte=vessel_details.vessel_applicable_length).filter(
-                                vessel_draft_limit__gte=vessel_details.vessel_draft).exclude(
-                                id__in=aup_mooring_ids).values('id', 'name')[:10]
+                        mooring_filter = Q(
+                                Q(name__icontains=search_term) & 
+                                Q(mooring_bay__id=mooring_bay_id) &
+                                Q(vessel_size_limit__gte=vessel_details.vessel_applicable_length) & 
+                                Q(vessel_draft_limit__gte=vessel_details.vessel_draft) &
+                                ~Q(id__in=aup_mooring_ids)
+                                )
+                        data = Mooring.authorised_user_moorings.filter(mooring_filter).values('id', 'name')[:10]
                     else:
                         data = []
                 else:
