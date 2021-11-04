@@ -3,6 +3,8 @@ from ledger.accounts.models import EmailUser
 from django.conf import settings
 
 import logging
+
+from rest_framework import serializers
 logger = logging.getLogger(__name__)
 
 def belongs_to(user, group_name):
@@ -48,3 +50,14 @@ def is_customer(request):
 def is_internal(request):
     return is_departmentUser(request)
 
+def is_authorised_to_modify(request, instance):
+    authorised = True
+
+    if is_customer(request):
+        # the status of the application must be DRAFT for customer to modify
+        authorised &= instance.processing_status == 'draft'
+        # the applicant and submitter must be the same
+        authorised &= request.user.email == instance.applicant_email
+
+    if not authorised:
+        raise serializers.ValidationError('You are not authorised to modify this application.')
