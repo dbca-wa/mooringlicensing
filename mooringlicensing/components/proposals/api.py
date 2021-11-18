@@ -665,6 +665,9 @@ class ProposalByUuidViewSet(viewsets.ModelViewSet):
     def submit(self, request, *args, **kwargs):
         instance = self.get_object()
 
+        # Make sure the submitter is the same as the applicant.
+        is_authorised_to_modify(request, instance)
+
         if not instance.mooring_report_documents.count() \
                 or not instance.written_proof_documents.count()\
                 or not instance.signed_licence_agreement_documents.count() \
@@ -1045,6 +1048,10 @@ class ProposalViewSet(viewsets.ModelViewSet):
     def submit(self, request, *args, **kwargs):
         with transaction.atomic():
             instance = self.get_object()
+
+            # Ensure status is draft and submitter is same as applicant.
+            is_authorised_to_modify(request, instance)
+            
             save_proponent_data(instance,request,self)
             return Response()
 
