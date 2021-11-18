@@ -83,8 +83,25 @@ class ComplianceViewSet(viewsets.ModelViewSet):
             with transaction.atomic():
                 instance = self.get_object()
 
-                # Make sure the submitter is the same as the applicant.
-                is_authorised_to_modify(request, instance)
+                # Can only modify if Due or Future.
+                if instance.processing_status not in ['due', 'future']:
+                    raise serializers.ValidationError('The status of this application means it cannot be modified: {}'
+                                                      .format(instance.processing_status))
+
+            applicantType = instance.applicant_type
+            # Applicant is individual
+            if applicantType == 'SUB':
+                authorised &= instance.submitter != request.user.email
+            # the application org and submitter org must be the same
+            else:
+                authorised &= is_in_organisation_contacts(request, instance.org_applicant)
+
+                # # If the submitter is not the holder of the application
+                # submitter_organisations = self.request.user.organisation
+                # # ensure submitter is in the Organisation that made the original application.
+                # if (request.user.email != instance.submitter) or (instance.proposal.org_applicant.id not in submitter_organisations):
+                #     raise serializers.ValidationError('You are not authorised to modify this application.')
+
 
                 data = {
                     'text': request.data.get('detail'),
