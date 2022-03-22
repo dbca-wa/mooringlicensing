@@ -1170,12 +1170,18 @@ class AuthorisedUserPermit(Approval):
                 if moa.sticker not in stickers_to_be_replaced:
                     stickers_to_be_replaced.append(moa.sticker)
                     stickers_to_be_replaced_for_renewal.append(moa.sticker)
+            moas_to_be_removed = self.mooringonapproval_set. \
+                filter(Q(end_date__isnull=False) | ~Q(mooring__mooring_licence__status=MooringLicence.APPROVAL_STATUS_CURRENT)). \
+                filter(sticker__status__in=[Sticker.STICKER_STATUS_CURRENT, Sticker.STICKER_STATUS_AWAITING_PRINTING])
         elif proposal.proposal_type.code == PROPOSAL_TYPE_AMENDMENT and proposal.vessel_ownership != proposal.previous_application.vessel_ownership:
             # When amendment and vessel changed, all the current/awaiting_printing stickers to be replaced
             moas_current = self._get_current_moas()
             for moa in moas_current:
                 if moa.sticker not in stickers_to_be_replaced:
                     stickers_to_be_replaced.append(moa.sticker)
+            moas_to_be_removed = self.mooringonapproval_set. \
+                filter(Q(end_date__isnull=False) | ~Q(mooring__mooring_licence__status=MooringLicence.APPROVAL_STATUS_CURRENT)). \
+                filter(sticker__status__in=[Sticker.STICKER_STATUS_CURRENT, Sticker.STICKER_STATUS_AWAITING_PRINTING])
         else:
             # MooringOnApprovals which has end_date OR related ML is not current status, but sticker is still in current/awaiting_printing status
             moas_to_be_removed = self.mooringonapproval_set.\
@@ -1215,7 +1221,7 @@ class AuthorisedUserPermit(Approval):
                             moas_to_be_reallocated.append(moa)
                 elif stickers.count() > 1:
                     # Should not reach here
-                    raise ValueError('AUP: {} has more than one new moorings without sticker'.format(self.lodgement_number))
+                    raise ValueError('AUP: {} has more than one stickers without 4 moorings'.format(self.lodgement_number))
 
         # Finally assign mooring(s) to new sticker(s)
         self._assign_to_new_stickers(moas_to_be_reallocated, proposal, stickers_to_be_replaced_for_renewal)
