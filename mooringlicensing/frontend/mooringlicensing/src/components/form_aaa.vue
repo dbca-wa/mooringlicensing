@@ -230,7 +230,7 @@
                             this.showPaymentTab = true;
                             this.$emit("updateSubmitText", "Pay / Submit");
                         } else {
-                            this.showPaymentTab = true;
+                            this.showPaymentTab = false;
                             this.$emit("updateSubmitText", "Submit");
                         }
 
