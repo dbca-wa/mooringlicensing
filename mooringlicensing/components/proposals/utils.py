@@ -568,7 +568,7 @@ def submit_vessel_data(instance, request, vessel_data):
         if instance.vessel_details.vessel_applicable_length < min_vessel_size:
             logger.error("Proposal {}: Vessel must be at least {}m in length".format(instance, min_vessel_size_str))
             raise serializers.ValidationError("Vessel must be at least {}m in length".format(min_vessel_size_str))
-        # proposal
+        # check new site licensee mooring
         proposal_data = request.data.get('proposal') if request.data.get('proposal') else {}
         mooring_id = proposal_data.get('mooring_id')
         if mooring_id and proposal_data.get('site_licensee_email'):
@@ -577,6 +577,16 @@ def submit_vessel_data(instance, request, vessel_data):
             instance.vessel_details.vessel_draft > mooring.vessel_draft_limit):
                 logger.error("Proposal {}: Vessel unsuitable for mooring".format(instance))
                 raise serializers.ValidationError("Vessel unsuitable for mooring")
+        # amend / renewal
+        if instance.approval:
+            # check existing moorings against current vessel dimensions
+            for moa in instance.approval.mooringonapproval_set.filter(end_date__isnull=True):
+                mooring = Mooring.objects.get(id=moa.mooring_id)
+                if (instance.vessel_details.vessel_applicable_length > mooring.vessel_size_limit or
+                instance.vessel_details.vessel_draft > mooring.vessel_draft_limit):
+                    logger.error("Proposal {}: Vessel unsuitable for one or more moorings".format(instance))
+                    raise serializers.ValidationError("Vessel unsuitable for one or more moorings")
+
     elif type(instance.child_obj) == WaitingListApplication:
         if instance.vessel_details.vessel_applicable_length < min_mooring_vessel_size:
             logger.error("Proposal {}: Vessel must be at least {}m in length".format(instance, min_mooring_vessel_size_str))
