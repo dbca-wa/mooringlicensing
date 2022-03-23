@@ -1405,7 +1405,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                     for r in req:
                         old_r = deepcopy(r)
                         r.proposal = proposal
-                        r.copied_from=None
+                        r.copied_from=old_r
                         r.copied_for_renewal=True
                         if r.due_date:
                             r.due_date=None
@@ -2313,6 +2313,12 @@ class AuthorisedUserApplication(Proposal):
                     elif moa1.get("id") == moa2.id and moa1.get("checked") and moa2.end_date:
                         moa2.end_date = None
                         moa2.save()
+        # set auto_renew ProposalRequirement due dates to those from previous application + 12 months
+        if auto_renew:
+            for req in self.requirements.filter(is_deleted=False):
+                if req.copied_from and req.copied_from.due_date:
+                    req.due_date = req.copied_from.due_date + relativedelta(months=+12)
+                    req.save()
         # do not process compliances for system reissue
         if request:
             # Generate compliances
@@ -2391,9 +2397,9 @@ class AuthorisedUserApplication(Proposal):
             self.log_user_action(ProposalUserAction.ACTION_APPROVE_APPLICATION.format(self.id))
 
         # Write approval history
-        if self.proposal_type == ProposalType.objects.filter(code=PROPOSAL_TYPE_RENEWAL):
+        if self.proposal_type == ProposalType.objects.get(code=PROPOSAL_TYPE_RENEWAL):
             approval.write_approval_history('renewal application {}'.format(self.lodgement_number))
-        elif self.proposal_type == ProposalType.objects.filter(code=PROPOSAL_TYPE_AMENDMENT):
+        elif self.proposal_type == ProposalType.objects.get(code=PROPOSAL_TYPE_AMENDMENT):
             approval.write_approval_history('amendment application {}'.format(self.lodgement_number))
         elif self.approval and self.approval.reissued:
             approval.write_approval_history('reissue via application {}'.format(self.lodgement_number))
@@ -2694,6 +2700,12 @@ class MooringLicenceApplication(Proposal):
                         elif vo1.get("id") == vo2.vessel_ownership.id and vo1.get("checked") and vo2.end_date:
                             vo2.end_date = None
                             vo2.save()
+            # set auto_renew ProposalRequirement due dates to those from previous application + 12 months
+            if auto_renew:
+                for req in self.requirements.filter(is_deleted=False):
+                    if req.copied_from and req.copied_from.due_date:
+                        req.due_date = req.copied_from.due_date + relativedelta(months=+12)
+                        req.save()
             # do not process compliances for system reissue
             if request:
                 # Generate compliances
@@ -2762,9 +2774,9 @@ class MooringLicenceApplication(Proposal):
                 self.log_user_action(ProposalUserAction.ACTION_APPROVE_APPLICATION.format(self.id))
 
             # write approval history
-            if self.proposal_type == ProposalType.objects.filter(code=PROPOSAL_TYPE_RENEWAL):
+            if self.proposal_type == ProposalType.objects.get(code=PROPOSAL_TYPE_RENEWAL):
                 approval.write_approval_history('renewal application {}'.format(self.lodgement_number))
-            elif self.proposal_type == ProposalType.objects.filter(code=PROPOSAL_TYPE_AMENDMENT):
+            elif self.proposal_type == ProposalType.objects.get(code=PROPOSAL_TYPE_AMENDMENT):
                 approval.write_approval_history('amendment application {}'.format(self.lodgement_number))
             elif self.approval and self.approval.reissued:
                 approval.write_approval_history('reissue via application {}'.format(self.lodgement_number))
@@ -2921,9 +2933,11 @@ class Mooring(RevisionedMixin):
                     status = 'Licence Application'
         return status if status else 'Unlicensed'
 
-    def suitable_vessel(self, vessel_details):
+    def suitable_vessel(self, vessel_details=None):
         suitable = True
-        if vessel_details.vessel_applicable_length > self.vessel_size_limit or vessel_details.vessel_draft > self.vessel_draft_limit:
+        if not vessel_details:
+            suitable = ''
+        elif vessel_details.vessel_applicable_length > self.vessel_size_limit or vessel_details.vessel_draft > self.vessel_draft_limit:
             suitable = False
         return suitable
 
