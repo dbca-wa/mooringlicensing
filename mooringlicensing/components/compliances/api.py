@@ -6,7 +6,6 @@ import base64
 import geojson
 from rest_framework_datatables.filters import DatatablesFilterBackend
 from rest_framework_datatables.renderers import DatatablesRenderer
-from six.moves.urllib.parse import urlparse
 from wsgiref.util import FileWrapper
 from django.db.models import Q, Min
 from django.db import transaction
@@ -15,8 +14,6 @@ from django.core.files.base import ContentFile
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.contrib import messages
-from django.views.decorators.http import require_http_methods
-from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from rest_framework import viewsets, serializers, status, generics, views
 from rest_framework.decorators import detail_route, list_route, renderer_classes
@@ -30,8 +27,6 @@ from django.core.cache import cache
 from ledger.accounts.models import EmailUser, Address
 from ledger.address.models import Country
 from datetime import datetime, timedelta, date
-from django.urls import reverse
-from django.shortcuts import render, redirect, get_object_or_404
 from mooringlicensing.components.compliances.models import (
    Compliance,
    ComplianceAmendmentRequest,
@@ -46,7 +41,7 @@ from mooringlicensing.components.compliances.serializers import (
     ComplianceAmendmentRequestSerializer,
     CompAmendmentRequestDisplaySerializer, ListComplianceSerializer
 )
-from mooringlicensing.helpers import is_customer, is_internal
+from mooringlicensing.helpers import is_customer, is_internal, is_in_organisation_contacts
 from rest_framework_datatables.pagination import DatatablesPageNumberPagination
 
 
@@ -87,6 +82,15 @@ class ComplianceViewSet(viewsets.ModelViewSet):
         try:
             with transaction.atomic():
                 instance = self.get_object()
+
+                # Can only modify if Due or Future.
+                if instance.processing_status not in ['due', 'future']:
+                    raise serializers.ValidationError('The status of this application means it cannot be modified: {}'
+                                                      .format(instance.processing_status))
+
+                if instance.proposal.applicant_email != request.user.email:
+                    raise serializers.ValidationError('You are not authorised to modify this application.')
+
                 data = {
                     'text': request.data.get('detail'),
                     'num_participants': request.data.get('num_participants')
