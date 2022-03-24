@@ -118,7 +118,7 @@ from '@/utils/hooks'
                 if (this.proposal && this.proposal.approval_vessel_rego_no) {
                     return `Your ${this.proposal.approval_type_text} ${this.proposal.approval_lodgement_number} 
                     lists a vessel with registration number ${this.proposal.approval_vessel_rego_no}. 
-                        Do you want to add another vessel on your ${this.proposal.approval_type_text}?`;
+                        Do you want to list another vessel on your ${this.proposal.approval_type_text}?`;
                 }
                 //return '';
             },
