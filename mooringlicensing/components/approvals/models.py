@@ -359,7 +359,7 @@ class Approval(RevisionedMixin):
                 proposal=self.current_proposal,
                 start_date=self.issue_date,
                 approval_letter=self.licence_document,
-                reason='new',
+                reason='New application {}'.format(str(self.current_proposal)),
             )
         elif reason:
             new_approval_history_entry = ApprovalHistory.objects.create(
@@ -1680,19 +1680,15 @@ class MooringLicence(Approval):
                 attribute_list.append(vooa.vessel_ownership.vessel.latest_vessel_details)
             elif attribute == 'vessel':
                 attribute_list.append(vooa.vessel_ownership.vessel)
-            elif attribute == 'current_vessels':
-                if not (vooa.vessel_ownership.vessel.rego_no == self.current_proposal.rego_no):
-                    attribute_list.append({
-                        "rego_no": vooa.vessel_ownership.vessel.rego_no,
-                        "latest_vessel_details": vooa.vessel_ownership.vessel.latest_vessel_details
-                        })
-            elif attribute == 'current_vessels_for_licence_doc':
-                attribute_list.append({
-                    "rego_no": vooa.vessel_ownership.vessel.rego_no,
-                    "latest_vessel_details": vooa.vessel_ownership.vessel.latest_vessel_details
-                })
+            #elif attribute == 'current_vessels':
+            #    if not (vooa.vessel_ownership.vessel.rego_no == self.current_proposal.rego_no):
+            #        attribute_list.append({
+            #            "rego_no": vooa.vessel_ownership.vessel.rego_no,
+            #            "latest_vessel_details": vooa.vessel_ownership.vessel.latest_vessel_details
+            #            })
             elif attribute == 'current_vessels_rego':
-                if not (vooa.vessel_ownership.vessel.rego_no == self.current_proposal.rego_no):
+                #if not (vooa.vessel_ownership.vessel.rego_no == self.current_proposal.rego_no):
+                if vooa.vessel_ownership.vessel.rego_no != self.current_proposal.rego_no or self.current_proposal.keep_existing_vessel:
                     attribute_list.append(vooa.vessel_ownership.vessel.rego_no)
         return attribute_list
 
@@ -1743,9 +1739,9 @@ class MooringLicence(Approval):
     def vessel_ownership_list(self):
         return self.current_vessel_attributes()
 
-    @property
-    def current_vessels(self):
-        return self.current_vessel_attributes('current_vessels')
+    #@property
+    #def current_vessels(self):
+    #    return self.current_vessel_attributes('current_vessels')
 
     def get_current_vessels_for_licence_doc(self):
         return self.current_vessel_attributes('current_vessels_for_licence_doc')
