@@ -1194,9 +1194,9 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                 self.approval.documents.all().update(can_delete=False)
 
                 # write approval history
-                if self.proposal_type == ProposalType.objects.filter(code=PROPOSAL_TYPE_RENEWAL):
+                if self.proposal_type == ProposalType.objects.get(code=PROPOSAL_TYPE_RENEWAL):
                     approval.write_approval_history('renewal application {}'.format(self.lodgement_number))
-                elif self.proposal_type == ProposalType.objects.filter(code=PROPOSAL_TYPE_AMENDMENT):
+                elif self.proposal_type == ProposalType.objects.get(code=PROPOSAL_TYPE_AMENDMENT):
                     approval.write_approval_history('amendment application {}'.format(self.lodgement_number))
                 elif self.approval and self.approval.reissued:
                     approval.write_approval_history('reissue via application {}'.format(self.lodgement_number))
