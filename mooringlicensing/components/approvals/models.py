@@ -359,7 +359,7 @@ class Approval(RevisionedMixin):
                 proposal=self.current_proposal,
                 start_date=self.issue_date,
                 approval_letter=self.licence_document,
-                reason='new',
+                reason='New application {}'.format(str(self.current_proposal)),
             )
         elif reason:
             new_approval_history_entry = ApprovalHistory.objects.create(
