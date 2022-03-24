@@ -1686,6 +1686,11 @@ class MooringLicence(Approval):
             #            "rego_no": vooa.vessel_ownership.vessel.rego_no,
             #            "latest_vessel_details": vooa.vessel_ownership.vessel.latest_vessel_details
             #            })
+            elif attribute == 'current_vessels_for_licence_doc':
+                attribute_list.append({
+                    "rego_no": vooa.vessel_ownership.vessel.rego_no,
+                    "latest_vessel_details": vooa.vessel_ownership.vessel.latest_vessel_details
+                })
             elif attribute == 'current_vessels_rego':
                 #if not (vooa.vessel_ownership.vessel.rego_no == self.current_proposal.rego_no):
                 if vooa.vessel_ownership.vessel.rego_no != self.current_proposal.rego_no or self.current_proposal.keep_existing_vessel:
