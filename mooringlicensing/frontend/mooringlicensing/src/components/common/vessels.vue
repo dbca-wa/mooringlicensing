@@ -4,7 +4,7 @@
             <div class="row form-group">
                 <label for="vessel_search" class="col-sm-3 control-label">Vessel registration number</label>
                 <div class="col-sm-9">
-                    <select :disabled="readonly" id="vessel_search"  ref="vessel_rego_nos" class="form-control" style="width: 40%">
+                    <select :disabled="regoReadonly" id="vessel_search"  ref="vessel_rego_nos" class="form-control" style="width: 40%">
                         <option></option>
                     </select>
                 </div>
@@ -255,6 +255,13 @@ from '@/utils/hooks'
             },
         },
         computed: {
+            regoReadonly: function() {
+                let readonly = false;
+                if ((this.proposal && this.keep_current_vessel && ['amendment', 'renewal']. includes(this.proposal.proposal_type.code)) || this.readonly) {
+                    readonly = true;
+                }
+                return readonly;
+            },
             vesselLength: function() {
                 let length = 0;
                 if (this.vessel && this.vessel.vessel_details && this.vessel.vessel_details.vessel_length) {
