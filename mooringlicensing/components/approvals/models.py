@@ -1435,7 +1435,8 @@ class MooringLicence(Approval):
             additional_vessels = []
 
             max_vessel_length = 0
-            for vessel in self.current_vessels:
+            # for vessel in self.current_vessels:
+            for vessel in self.get_current_vessels_for_licence_doc():
                 v = {}
                 v['vessel_rego_no'] = vessel['rego_no']
                 v['vessel_name'] = vessel['latest_vessel_details'].vessel_name
@@ -1523,57 +1524,56 @@ class MooringLicence(Approval):
         return current_stickers
 
     def manage_stickers(self, proposal):
-        # Retrieve all the stickers regardless of the status
-        stickers_present = list(self.stickers.all())
+#        # Retrieve all the stickers regardless of the status
+#        stickers_present = list(self.stickers.all())
+#
+#        stickers_required = []  # Store all the stickers we want to keep
+#
+#        # Loop through all the current vessels
+#        for vessel_ownership in self.vessel_ownership_list:
+#            # Look for the sticker for the vessel
+#            sticker = self.stickers.filter(
+#                status__in=(
+#                    Sticker.STICKER_STATUS_CURRENT,
+#                    Sticker.STICKER_STATUS_AWAITING_PRINTING,
+#                    Sticker.STICKER_STATUS_TO_BE_RETURNED,),
+#                vessel_ownership=vessel_ownership,
+#            )
+#            if sticker:
+#                sticker = sticker.first()
+#            else:
+#                # Sticker not found --> Create it
+#                sticker = Sticker.objects.create(
+#                    approval=self,
+#                    vessel_ownership=proposal.vessel_ownership,
+#                    fee_constructor=proposal.fee_constructor,
+#                    proposal_initiated=proposal,
+#                    fee_season=self.latest_applied_season,
+#                )
+#            stickers_required.append(sticker)
+#
+#        if proposal.proposal_type.code == PROPOSAL_TYPE_RENEWAL:
+#            for sticker_to_be_replaced in stickers_required:
+#                new_sticker = Sticker.objects.create(
+#                    approval=self,
+#                    vessel_ownership=sticker_to_be_replaced.vessel_ownership,
+#                    fee_constructor=proposal.fee_constructor if proposal.fee_constructor else sticker_to_be_replaced.fee_constructor if sticker_to_be_replaced else None,
+#                    proposal_initiated=proposal,
+#                    fee_season=self.latest_applied_season,
+#                )
+#                new_sticker.sticker_to_replace = sticker_to_be_replaced
+#                new_sticker.save()
+#            return [], []  # Is this correct?
+#
+#        else:
+#            # Calculate the stickers which are no longer needed.  Some stickers could be in the 'awaiting_printing'/'to_be_returned' status.
+#            stickers_to_be_returned = [sticker for sticker in stickers_present if sticker not in stickers_required]
+#
+#            # Update sticker status
+#            self._handle_stickers_to_be_removed(stickers_to_be_returned)
+#
+#            return [], stickers_to_be_returned
 
-        stickers_required = []  # Store all the stickers we want to keep
-
-        # Loop through all the current vessels
-        for vessel_ownership in self.vessel_ownership_list:
-            # Look for the sticker for the vessel
-            sticker = self.stickers.filter(
-                status__in=(
-                    Sticker.STICKER_STATUS_CURRENT,
-                    Sticker.STICKER_STATUS_AWAITING_PRINTING,
-                    Sticker.STICKER_STATUS_TO_BE_RETURNED,),
-                vessel_ownership=vessel_ownership,
-            )
-            if sticker:
-                sticker = sticker.first()
-            else:
-                # Sticker not found --> Create it
-                sticker = Sticker.objects.create(
-                    approval=self,
-                    vessel_ownership=proposal.vessel_ownership,
-                    fee_constructor=proposal.fee_constructor,
-                    proposal_initiated=proposal,
-                    fee_season=self.latest_applied_season,
-                )
-            stickers_required.append(sticker)
-
-        if proposal.proposal_type.code == PROPOSAL_TYPE_RENEWAL:
-            for sticker_to_be_replaced in stickers_required:
-                new_sticker = Sticker.objects.create(
-                    approval=self,
-                    vessel_ownership=sticker_to_be_replaced.vessel_ownership,
-                    fee_constructor=proposal.fee_constructor if proposal.fee_constructor else sticker_to_be_replaced.fee_constructor if sticker_to_be_replaced else None,
-                    proposal_initiated=proposal,
-                    fee_season=self.latest_applied_season,
-                )
-                new_sticker.sticker_to_replace = sticker_to_be_replaced
-                new_sticker.save()
-            return [], []  # Is this correct?
-
-        else:
-            # Calculate the stickers which are no longer needed.  Some stickers could be in the 'awaiting_printing'/'to_be_returned' status.
-            stickers_to_be_returned = [sticker for sticker in stickers_present if sticker not in stickers_required]
-
-            # Update sticker status
-            self._handle_stickers_to_be_removed(stickers_to_be_returned)
-
-            return [], stickers_to_be_returned
-
-        #### New
         if proposal.proposal_type.code == PROPOSAL_TYPE_NEW:
             # New sticker created with status Ready
             new_sticker = self._create_new_sticker_by_proposal(proposal)
@@ -1584,8 +1584,12 @@ class MooringLicence(Approval):
             proposal.save()
 
             return [], []
+
         elif proposal.proposal_type.code == PROPOSAL_TYPE_AMENDMENT:
+            current_stickers = self._get_current_stickers()
             stickers_required = []  # Store all the stickers we want to keep
+            new_sticker_created = False
+
             for vessel_ownership in self.vessel_ownership_list:
                 # Look for the sticker for the vessel
                 stickers = self.stickers.filter(
@@ -1606,20 +1610,62 @@ class MooringLicence(Approval):
                         proposal_initiated=proposal,
                         fee_season=self.latest_applied_season,
                     )
+                    new_sticker_created = True
                 stickers_required.append(sticker)
 
-            # Calculate the stickers which are no longer needed.  Some stickers could be in the 'awaiting_printing'/'to_be_returned' status.
-            stickers_to_be_returned = [sticker for sticker in stickers_present if sticker not in stickers_required]
+            # Calculate the stickers which are no longer needed.  There should be none always...?
+            stickers_to_be_returned = [sticker for sticker in current_stickers if sticker not in stickers_required]
 
             # Update sticker status
             self._handle_stickers_to_be_removed(stickers_to_be_returned)
 
+            if new_sticker_created:
+                proposal.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
+                proposal.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
+            else:
+                proposal.processing_status = Proposal.PROCESSING_STATUS_APPROVED
+                proposal.customer_status = Proposal.CUSTOMER_STATUS_APPROVED
+            proposal.save()
+
             return [], stickers_to_be_returned
+
         elif proposal.proposal_type.code == PROPOSAL_TYPE_RENEWAL:
+            stickers_required = []
+            stickers_to_be_replaced = []
 
-            # TODO: implement
+            for vessel_ownership in self.vessel_ownership_list:
+                # Look for the sticker for the vessel
+                existing_sticker = self.stickers.filter(
+                    status__in=(
+                        Sticker.STICKER_STATUS_CURRENT,
+                        Sticker.STICKER_STATUS_AWAITING_PRINTING,
+                        Sticker.STICKER_STATUS_TO_BE_RETURNED,),
+                    vessel_ownership=vessel_ownership,
+                )
+                if existing_sticker:
+                    existing_sticker = existing_sticker.first()
+                    stickers_to_be_replaced.append(existing_sticker)
 
-            return [], []
+                # Sticker not found --> Create it
+                new_sticker = Sticker.objects.create(
+                    approval=self,
+                    vessel_ownership=proposal.vessel_ownership,
+                    fee_constructor=proposal.fee_constructor,
+                    proposal_initiated=proposal,
+                    fee_season=self.latest_applied_season,
+                )
+                stickers_required.append(new_sticker)
+
+                if existing_sticker:
+                    new_sticker.sticker_to_replace = existing_sticker
+                    new_sticker.save()
+
+            if len(stickers_required):
+                proposal.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
+                proposal.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
+                proposal.save()
+
+            return [], []  # Is this correct?
 
     def current_vessel_attributes(self, attribute=None):
         attribute_list = []
@@ -1640,6 +1686,11 @@ class MooringLicence(Approval):
                         "rego_no": vooa.vessel_ownership.vessel.rego_no,
                         "latest_vessel_details": vooa.vessel_ownership.vessel.latest_vessel_details
                         })
+            elif attribute == 'current_vessels_for_licence_doc':
+                attribute_list.append({
+                    "rego_no": vooa.vessel_ownership.vessel.rego_no,
+                    "latest_vessel_details": vooa.vessel_ownership.vessel.latest_vessel_details
+                })
             elif attribute == 'current_vessels_rego':
                 if not (vooa.vessel_ownership.vessel.rego_no == self.current_proposal.rego_no):
                     attribute_list.append(vooa.vessel_ownership.vessel.rego_no)
@@ -1695,6 +1746,9 @@ class MooringLicence(Approval):
     @property
     def current_vessels(self):
         return self.current_vessel_attributes('current_vessels')
+
+    def get_current_vessels_for_licence_doc(self):
+        return self.current_vessel_attributes('current_vessels_for_licence_doc')
 
     @property
     def current_vessels_rego(self):

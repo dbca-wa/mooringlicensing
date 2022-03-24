@@ -2740,23 +2740,23 @@ class MooringLicenceApplication(Proposal):
             moas_to_be_reallocated, stickers_to_be_returned = approval.manage_stickers(self)
 
             ## set proposal status after manage _stickers
-            from mooringlicensing.components.approvals.models import Sticker
-            awaiting_printing = False
-
-            if self.approval:
-                stickers = self.approval.stickers.filter(status__in=(Sticker.STICKER_STATUS_READY, Sticker.STICKER_STATUS_AWAITING_PRINTING))
-                if stickers.count() >0:
-                    awaiting_printing = True
-
-            if awaiting_printing or auto_renew:
-                self.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
-                self.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
-                # Log proposal action
-                self.log_user_action(ProposalUserAction.ACTION_PRINTING_STICKER.format(self.id), request)
-            else:
-                self.processing_status = Proposal.PROCESSING_STATUS_APPROVED
-                self.customer_status = Proposal.CUSTOMER_STATUS_APPROVED
-            self.save()
+#            from mooringlicensing.components.approvals.models import Sticker
+#            awaiting_printing = False
+#
+#            if self.approval:
+#                stickers = self.approval.stickers.filter(status__in=(Sticker.STICKER_STATUS_READY, Sticker.STICKER_STATUS_AWAITING_PRINTING))
+#                if stickers.count() >0:
+#                    awaiting_printing = True
+#
+#            if awaiting_printing or auto_renew:
+#                self.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
+#                self.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
+#                # Log proposal action
+#                self.log_user_action(ProposalUserAction.ACTION_PRINTING_STICKER.format(self.id), request)
+#            else:
+#                self.processing_status = Proposal.PROCESSING_STATUS_APPROVED
+#                self.customer_status = Proposal.CUSTOMER_STATUS_APPROVED
+#            self.save()
 
             # Creating documents should be performed at the end
             approval.generate_doc()
