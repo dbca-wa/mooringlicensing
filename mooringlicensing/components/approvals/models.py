@@ -1215,7 +1215,8 @@ class AuthorisedUserPermit(Approval):
             for moa in self.mooringonapproval_set.all():
                 # do not show mooring from latest application in "Current Moorings"
                 #if not moa.mooring.id == self.current_proposal.proposed_issuance_approval.get("mooring_id"):
-                if moa.mooring.id != self.current_proposal.proposed_issuance_approval.get("mooring_id") or self.current_proposal.keep_existing_mooring:
+                if ((self.current_proposal.proposed_issuance_approval and moa.mooring.id != self.current_proposal.proposed_issuance_approval.get("mooring_id")) 
+                        or self.current_proposal.keep_existing_mooring):
                     moorings_str += moa.mooring.name + ','
             # truncate trailing comma
             moorings_str = moorings_str[0:-1]
