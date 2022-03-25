@@ -416,14 +416,18 @@ class ApprovalViewSet(viewsets.ModelViewSet):
         # external
         approval = self.get_object()
         details = request.data['details']
-        sticker_ids = [sticker['id'] for sticker in request.data['stickers']]
+        # sticker_ids = [sticker['id'] for sticker in request.data['stickers']]
+        sticker_ids = []
+        for sticker in request.data['stickers']:
+            if sticker['checked'] == True:
+                sticker_ids.append(sticker['id'])
 
         # TODO: Validation
 
         sticker_action_details = []
         stickers = Sticker.objects.filter(approval=approval, id__in=sticker_ids, status__in=(Sticker.STICKER_STATUS_CURRENT, Sticker.STICKER_STATUS_AWAITING_PRINTING,))
         data = {}
-        today = datetime.datetime.now(pytz.timezone(settings.TIME_ZONE)).date()
+        today = datetime.now(pytz.timezone(settings.TIME_ZONE)).date()
         for sticker in stickers:
             data['action'] = 'Request new sticker'
             data['user'] = request.user.id
