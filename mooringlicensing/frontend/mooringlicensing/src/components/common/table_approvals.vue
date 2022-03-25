@@ -99,7 +99,7 @@
         <ApprovalSuspension ref="approval_suspension"  @refreshFromResponse="refreshFromResponseApprovalModify"></ApprovalSuspension>
         <ApprovalSurrender ref="approval_surrender"  @refreshFromResponse="refreshFromResponseApprovalModify"></ApprovalSurrender>
         <div v-if="approvalHistoryId">
-            <ApprovalHistory 
+            <ApprovalHistory
                 ref="approval_history"
                 :key="approvalHistoryId"
                 :approvalId="approvalHistoryId"
@@ -436,7 +436,7 @@ export default {
                                 if(full.can_action || vm.debug){
                                     if(full.amend_or_renew === 'amend' || vm.debug){
                                        links +=  `<a href='#${full.id}' data-amend-approval='${full.current_proposal_id}'>Amend</a><br/>`;
-                                    } 
+                                    }
                                     if(full.amend_or_renew === 'renew' || vm.debug){
                                         links +=  `<a href='#${full.id}' data-renew-approval='${full.current_proposal_id}'>Renew</a><br/>`;
                                     }
@@ -611,7 +611,7 @@ export default {
                         'render': function(row, type, full){
                             let approval_letter_name = ''
                             if (full.approval_type_dict.code === 'aup'){
-                                approval_letter_name = 'Authrised User Permit'
+                                approval_letter_name = 'Authorised User Permit'
                             } else if (full.approval_type_dict.code === 'aap'){
                                 approval_letter_name = 'Annual Admission Permit'
                             } else if (full.approval_type_dict.code === 'ml'){
@@ -801,6 +801,7 @@ export default {
     },
     methods: {
         sendData: function(params){
+            console.log(params)
             let vm = this
             vm.$http.post(helpers.add_endpoint_json(api_endpoints.approvals, params.approval_id + '/request_new_stickers'), params).then(
                 res => {
