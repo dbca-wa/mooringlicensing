@@ -366,7 +366,7 @@ def save_proponent_data_aaa(instance, request, viewset):
             data=proposal_data, 
             context={
                 "action": viewset.action,
-                "ignore_insurance_check": request.data.get("ignore_insurance_check")
+                #"ignore_insurance_check": request.data.get("ignore_insurance_check")
                 }
     )
     serializer.is_valid(raise_exception=True)
@@ -427,7 +427,7 @@ def save_proponent_data_mla(instance, request, viewset):
             data=proposal_data, 
             context={
                 "action": viewset.action,
-                "ignore_insurance_check":request.data.get("ignore_insurance_check")
+                #"ignore_insurance_check":request.data.get("ignore_insurance_check")
                 }
     )
     serializer.is_valid(raise_exception=True)
@@ -454,7 +454,7 @@ def save_proponent_data_aua(instance, request, viewset):
             data=proposal_data, 
             context={
                 "action": viewset.action,
-                "ignore_insurance_check":request.data.get("ignore_insurance_check")
+                #"ignore_insurance_check":request.data.get("ignore_insurance_check")
                 }
     )
     serializer.is_valid(raise_exception=True)
