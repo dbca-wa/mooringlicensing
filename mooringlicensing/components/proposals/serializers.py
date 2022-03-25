@@ -526,12 +526,14 @@ class SaveAnnualAdmissionApplicationSerializer(serializers.ModelSerializer):
                 'id',
                 'insurance_choice',
                 'temporary_document_collection_id',
+                'keep_existing_vessel',
                 )
         read_only_fields=('id',)
 
     def validate(self, data):
         custom_errors = {}
-        ignore_insurance_check=self.context.get("ignore_insurance_check")
+        #ignore_insurance_check=self.context.get("ignore_insurance_check")
+        ignore_insurance_check = data.get("keep_existing_vessel")
         if self.context.get("action") == 'submit':
             if ignore_insurance_check:
                 pass 
@@ -559,7 +561,8 @@ class SaveMooringLicenceApplicationSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         custom_errors = {}
-        ignore_insurance_check=self.context.get("ignore_insurance_check")
+        #ignore_insurance_check=self.context.get("ignore_insurance_check")
+        ignore_insurance_check = data.get("keep_existing_vessel")
         if self.context.get("action") == 'submit':
             if ignore_insurance_check:
                 pass
@@ -595,6 +598,7 @@ class SaveAuthorisedUserApplicationSerializer(serializers.ModelSerializer):
                 'processing_status',
                 'temporary_document_collection_id',
                 'keep_existing_mooring',
+                'keep_existing_vessel',
                 )
         read_only_fields=('id',)
 
@@ -602,7 +606,8 @@ class SaveAuthorisedUserApplicationSerializer(serializers.ModelSerializer):
         print("validate data")
         print(data)
         custom_errors = {}
-        ignore_insurance_check=self.context.get("ignore_insurance_check")
+        #ignore_insurance_check=self.context.get("ignore_insurance_check")
+        ignore_insurance_check = data.get("keep_existing_vessel")
         if self.context.get("action") == 'submit':
             if ignore_insurance_check:
                 pass
