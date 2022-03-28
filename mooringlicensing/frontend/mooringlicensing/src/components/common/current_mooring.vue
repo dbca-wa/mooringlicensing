@@ -89,7 +89,8 @@ from '@/utils/hooks'
                 let displayText = '';
                 if (this.proposal && this.proposal.authorised_user_moorings_str) {
                     displayText += `Your ${this.proposal.approval_type_text} ${this.proposal.approval_lodgement_number} 
-                    lists moorings ${this.proposal.authorised_user_moorings_str}. Do you want to apply for another mooring to be listed on the Authorised User Permit?`;
+                    lists moorings ${this.proposal.authorised_user_moorings_str}. 
+                        Do you want to apply to add another mooring to your Authorised User Permit?`;
                 }
                 /*
                 if (this.proposal && this.proposal.mooring_licence_vessels && this.proposal.mooring_licence_vessels.length) {

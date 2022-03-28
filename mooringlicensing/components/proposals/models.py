@@ -298,8 +298,10 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
     invitee_reminder_sent = models.BooleanField(default=False)
     temporary_document_collection_id = models.IntegerField(blank=True, null=True)
     # AUA amendment
+    listed_moorings = models.ManyToManyField('Mooring', related_name='listed_on_proposals')
     keep_existing_mooring = models.BooleanField(default=True)
     # MLA amendment
+    listed_vessels = models.ManyToManyField('VesselOwnership', 'listed_on_proposals')
     keep_existing_vessel = models.BooleanField(default=True)
 
     fee_season = models.ForeignKey('FeeSeason', null=True, blank=True)  # In some case, proposal doesn't have any fee related objects.  Which results in the impossibility to retrieve season, start_date, end_date, etc.
@@ -1389,6 +1391,21 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
             except:
                 raise
 
+    def add_vessels_and_moorings_from_licence(self):
+        if self.approval and type(self) is MooringLicenceApplication:
+            for vooa in self.approval.vesselownershiponapproval_set.filter(
+                    Q(end_date__isnull=True) &
+                    Q(vessel_ownership__end_date__isnull=True)
+                    ):
+                self.listed_vessels.add(vooa.vessel_ownership)
+            self.save()
+        elif self.approval and type(self) is AuthorisedUserApplication:
+            for moa in self.approval.mooringonapproval_set.filter(
+                    Q(end_date__isnull=True)
+                    ):
+                self.listed_moorings.add(moa.mooring)
+            self.save()
+
     def renew_approval(self,request):
         with transaction.atomic():
             previous_proposal = self
@@ -1422,6 +1439,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                 from mooringlicensing.components.approvals.models import ApprovalUserAction
                 self.approval.log_user_action(ApprovalUserAction.ACTION_RENEW_APPROVAL.format(self.approval.id),request)
                 proposal.save(version_comment='New Amendment/Renewal Application created, from origin {}'.format(proposal.previous_application_id))
+                proposal.add_vessels_and_moorings_from_licence()
                 return proposal
             except Exception as e:
                 raise e
@@ -1453,6 +1471,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                 from mooringlicensing.components.approvals.models import ApprovalUserAction
                 self.approval.log_user_action(ApprovalUserAction.ACTION_AMEND_APPROVAL.format(self.approval.id),request)
                 proposal.save(version_comment='New Amendment/Renewal Application created, from origin {}'.format(proposal.previous_application_id))
+                proposal.add_vessels_and_moorings_from_licence()
                 return proposal
             except Exception as e:
                 raise e
