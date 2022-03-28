@@ -821,7 +821,7 @@ class InternalProposalSerializer(BaseProposalSerializer):
     def get_current_vessels_rego_list(self, obj):
         vessels = []
         if obj.approval and type(obj.approval.child_obj) is MooringLicence:
-            vessels = obj.approval.child_obj.current_vessels_rego
+            vessels = obj.approval.child_obj.current_vessels_rego(obj)
         return vessels
 
     def get_reissued(self, obj):
@@ -829,13 +829,7 @@ class InternalProposalSerializer(BaseProposalSerializer):
 
     def get_authorised_user_moorings_str(self, obj):
         if type(obj.child_obj) == AuthorisedUserApplication and obj.approval:
-            return obj.approval.child_obj.previous_moorings()
-    #def get_authorised_user_moorings_str(self, obj):
-    #    moorings_str = ''
-    #    if type(obj.child_obj) == AuthorisedUserApplication and obj.approval:
-    #        for moa in obj.approval.mooringonapproval_set.all():
-    #            moorings_str += moa.mooring.name + ','
-    #        return moorings_str[0:-1] if moorings_str else ''
+            return obj.approval.child_obj.previous_moorings(obj)
 
     def get_authorised_user_moorings(self, obj):
         moorings = []
