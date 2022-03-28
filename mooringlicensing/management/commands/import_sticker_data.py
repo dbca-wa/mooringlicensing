@@ -235,12 +235,12 @@ def process_sticker_printing_response():
                     sticker.mailing_date = mailing_date_value
                     sticker.sticker_printing_response = response
                     if sticker.status in (Sticker.STICKER_STATUS_AWAITING_PRINTING, Sticker.STICKER_STATUS_READY):
-                        # sticker shoudl not be in READY status though.
+                        # sticker should not be in READY status though.
                         sticker.status = Sticker.STICKER_STATUS_CURRENT
-                        if sticker.sticker_to_replace:  # new sticker has the old sticker here if it's created for renewal
-                            # When this sticker is created for renewal, set 'expiry' status to the old sticker.
-                            sticker.sticker_to_replace.status = Sticker.STICKER_STATUS_EXPIRED
-                            sticker.sticker_to_replace.save()
+                        #if sticker.sticker_to_replace:  # new sticker has the old sticker here if it's created for renewal
+                        #    # When this sticker is created for renewal, set 'expiry' status to the old sticker.
+                        #    sticker.sticker_to_replace.status = Sticker.STICKER_STATUS_EXPIRED
+                        #    sticker.sticker_to_replace.save()
                     sticker.save()
 
                     updates.append(sticker.number)
