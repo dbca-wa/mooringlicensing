@@ -2245,6 +2245,16 @@ class Sticker(models.Model):
         STICKER_STATUS_LOST,
         STICKER_STATUS_EXPIRED,
     )
+    STATUSES_FOR_FILTER = (
+        STICKER_STATUS_AWAITING_PRINTING,
+        STICKER_STATUS_CURRENT,
+        STICKER_STATUS_TO_BE_RETURNED,
+        STICKER_STATUS_RETURNED,
+        STICKER_STATUS_LOST,
+        STICKER_STATUS_EXPIRED,
+        STICKER_STATUS_CANCELLED,
+    )
+
     colour_default = 'green'
     colour_matrix = [
         {'length': 10, 'colour': 'green'},
