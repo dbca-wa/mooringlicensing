@@ -350,20 +350,24 @@ export default {
             if (this.$refs.annual_admission_application.$refs.vessels) {
                 payload.vessel = Object.assign({}, this.$refs.annual_admission_application.$refs.vessels.vessel);
                 payload.proposal.temporary_document_collection_id = this.$refs.annual_admission_application.$refs.vessels.temporary_document_collection_id;
+                payload.proposal.keep_existing_vessel = this.$refs.annual_admission_application.keepCurrentVessel;
                 //payload.vessel.vessel_ownership.dot_name = this.$refs.annual_admission_application.$refs.vessels.vessel.vessel_ownership.dotName;
             }
             if (this.$refs.annual_admission_application.$refs.insurance.selectedOption) {
                 // modify if additional proposal attributes required
                 payload.proposal.insurance_choice = this.$refs.annual_admission_application.$refs.insurance.selectedOption;
             }
+            /*
             if(this.amendmentOrRenewal && this.$refs.annual_admission_application.keepCurrentVessel){
                 payload.ignore_insurance_check=true;
             }
+            */
         // AUA
         } else if (this.$refs.authorised_user_application) {
             if (this.$refs.authorised_user_application.$refs.vessels) {
                 payload.vessel = Object.assign({}, this.$refs.authorised_user_application.$refs.vessels.vessel);
                 payload.proposal.temporary_document_collection_id = this.$refs.authorised_user_application.$refs.vessels.temporary_document_collection_id;
+                payload.proposal.keep_existing_vessel = this.$refs.authorised_user_application.keepCurrentVessel;
                 //payload.vessel.vessel_ownership.dot_name = this.$refs.authorised_user_application.$refs.vessels.vessel.vessel_ownership.dotName;
             }
             if (this.$refs.authorised_user_application.$refs.insurance.selectedOption) {
@@ -385,9 +389,11 @@ export default {
                     payload.proposal.mooring_id = this.$refs.authorised_user_application.$refs.mooring_authorisation.mooringSiteId;
                 }
             }
+            /*
             if(this.amendmentOrRenewal && this.$refs.authorised_user_application.keepCurrentVessel){
                 payload.ignore_insurance_check=true;
             }
+            */
         // MLA
         } else if (this.$refs.mooring_licence_application) {
             //this.vesselChanged = await this.$refs.mooring_licence_application.$refs.vessels.vesselChanged();
@@ -396,6 +402,7 @@ export default {
                 payload.vessel = Object.assign({}, this.$refs.mooring_licence_application.$refs.vessels.vessel);
                 payload.vessel.readonly = this.$refs.mooring_licence_application.$refs.vessels.readonly;
                 payload.proposal.temporary_document_collection_id = this.$refs.mooring_licence_application.$refs.vessels.temporary_document_collection_id;
+                payload.proposal.keep_existing_vessel = this.$refs.mooring_licence_application.keepCurrentVessel;
                 //payload.vessel.vessel_ownership.dot_name = this.$refs.mooring_licence_application.$refs.vessels.vessel.vessel_ownership.dotName;
             }
             if (typeof(this.$refs.mooring_licence_application.$refs.profile.silentElector) === 'boolean') {
@@ -407,11 +414,13 @@ export default {
                 // modify if additional proposal attributes required
                 payload.proposal.insurance_choice = this.$refs.mooring_licence_application.$refs.insurance.selectedOption;
             }
+            /*
             if(this.amendmentOrRenewal && this.$refs.mooring_licence_application.keepCurrentVessel){
               payload.ignore_insurance_check=true;
             } else if(this.amendmentOrRenewal && !this.$refs.mooring_licence_application.keepCurrentVessel){
               payload.proposal.keep_existing_vessel=false;
             }
+            */
         }
 
         //vm.$http.post(vm.proposal_form_url,payload).then(res=>{
