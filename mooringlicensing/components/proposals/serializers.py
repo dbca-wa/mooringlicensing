@@ -247,7 +247,9 @@ class BaseProposalSerializer(serializers.ModelSerializer):
     #        return moorings_str[0:-1] if moorings_str else ''
     def get_authorised_user_moorings_str(self, obj):
         if type(obj.child_obj) == AuthorisedUserApplication and obj.approval:
-            return obj.approval.child_obj.previous_moorings()
+            moorings_str = ''
+            moorings_str += ', '.join([mooring.name for mooring in obj.listed_moorings.all()])
+            return moorings_str
 
     def get_waiting_list_application_id(self, obj):
         wla_id = None
@@ -270,10 +272,10 @@ class BaseProposalSerializer(serializers.ModelSerializer):
         return lodgement_number
 
     def get_current_vessels_rego_list(self, obj):
-        vessels = []
         if obj.approval and type(obj.approval.child_obj) is MooringLicence:
-            vessels = obj.approval.child_obj.current_vessels_rego
-        return vessels
+            vessels_str = ''
+            vessels_str += ', '.join([vo.vessel.rego_no for vo in obj.listed_vessels.all()])
+            return vessels_str
 
     def get_previous_application_preferred_bay_id(self, obj):
         preferred_bay_id = None
@@ -819,23 +821,36 @@ class InternalProposalSerializer(BaseProposalSerializer):
         return obj.application_type_code
 
     def get_current_vessels_rego_list(self, obj):
-        vessels = []
         if obj.approval and type(obj.approval.child_obj) is MooringLicence:
-            vessels = obj.approval.child_obj.current_vessels_rego
-        return vessels
+            vessels_str = ''
+            vessels_str += ', '.join([vo.vessel.rego_no for vo in obj.listed_vessels.all()])
+            return vessels_str
+
+   # def get_current_vessels_rego_list(self, obj):
+   #     vessels = []
+   #     if obj.approval and type(obj.approval.child_obj) is MooringLicence:
+   #         vessels = obj.approval.child_obj.current_vessels_rego(obj)
+   #     return vessels
 
     def get_reissued(self, obj):
         return obj.approval.reissued if obj.approval else False
 
+    #def get_authorised_user_moorings_str(self, obj):
+    #    if type(obj.child_obj) == AuthorisedUserApplication and obj.approval:
+    #        return obj.approval.child_obj.previous_moorings(obj)
+   # def get_authorised_user_moorings_str(self, obj):
+   #     if type(obj.child_obj) == AuthorisedUserApplication and obj.approval:
+   #         #return obj.approval.child_obj.previous_moorings(obj)
+   #         moorings_str = [mooring.name + ',' for mooring in obj.listed_moorings.all()]
+   #         if moorings_str:
+   #             moorings_str = moorings_str[0:-1]
+   #         return moorings_str
+
     def get_authorised_user_moorings_str(self, obj):
         if type(obj.child_obj) == AuthorisedUserApplication and obj.approval:
-            return obj.approval.child_obj.previous_moorings()
-    #def get_authorised_user_moorings_str(self, obj):
-    #    moorings_str = ''
-    #    if type(obj.child_obj) == AuthorisedUserApplication and obj.approval:
-    #        for moa in obj.approval.mooringonapproval_set.all():
-    #            moorings_str += moa.mooring.name + ','
-    #        return moorings_str[0:-1] if moorings_str else ''
+            moorings_str = ''
+            moorings_str += ', '.join([mooring.name for mooring in obj.listed_moorings.all()])
+            return moorings_str
 
     def get_authorised_user_moorings(self, obj):
         moorings = []

@@ -1361,6 +1361,20 @@ class VesselOwnershipViewSet(viewsets.ModelViewSet):
             instance = self.get_object()
             sale_date = request.data.get('sale_date')
             if sale_date:
+                if not instance.end_date:
+                    # proposals with instance copied to listed_vessels
+                    for proposal in instance.listed_on_proposals.all():
+                        if proposal.processing_status not in ['discarded', 'approved', 'declined']:
+                            raise serializers.ValidationError(
+                                    "You cannot record the sale of this vessel at this time as application {} that lists this vessel is still in progress.".format(proposal.lodgement_number)
+                                    )
+                    # submitted proposals with instance == proposal.vessel_ownership
+                    for proposal in instance.proposal_set.all():
+                        if proposal.processing_status not in ['discarded', 'approved', 'declined']:
+                            raise serializers.ValidationError(
+                                    "You cannot record the sale of this vessel at this time as application {} that lists this vessel is still in progress.".format(proposal.lodgement_number)
+                                    )
+
                 ## setting the end_date "removes" the vessel from current Approval records
                 serializer = SaveVesselOwnershipSaleDateSerializer(instance, {"end_date": sale_date})
                 serializer.is_valid(raise_exception=True)

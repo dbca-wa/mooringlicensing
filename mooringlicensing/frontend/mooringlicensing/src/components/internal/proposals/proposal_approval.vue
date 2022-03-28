@@ -122,8 +122,8 @@
                                 <template v-if="!proposal.proposed_decline_status">
                                     <template v-if="isFinalised">
                                         <p><strong>Decision: Issue</strong></p>
-                                        <p><strong>Start date: {{proposal.proposed_issuance_approval.start_date}}</strong></p>
-                                        <p><strong>Expiry date: {{proposal.proposed_issuance_approval.expiry_date}}</strong></p>
+                                        <!--p><strong>Start date: {{proposal.proposed_issuance_approval.start_date}}</strong></p>
+                                        <p><strong>Expiry date: {{proposal.proposed_issuance_approval.expiry_date}}</strong></p-->
                                         <p><strong>CC emails: {{proposal.proposed_issuance_approval.cc_email}}</strong></p>
                                     </template>
                                     <template v-else>
