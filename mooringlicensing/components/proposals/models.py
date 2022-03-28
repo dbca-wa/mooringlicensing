@@ -298,10 +298,10 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
     invitee_reminder_sent = models.BooleanField(default=False)
     temporary_document_collection_id = models.IntegerField(blank=True, null=True)
     # AUA amendment
-    listed_moorings = models.ManyToManyField('Mooring', related_name='proposal_moorings_list')
+    listed_moorings = models.ManyToManyField('Mooring', related_name='listed_on_proposals')
     keep_existing_mooring = models.BooleanField(default=True)
     # MLA amendment
-    listed_vessels = models.ManyToManyField('VesselOwnership', 'proposal_vessels_list')
+    listed_vessels = models.ManyToManyField('VesselOwnership', 'listed_on_proposals')
     keep_existing_vessel = models.BooleanField(default=True)
 
     fee_season = models.ForeignKey('FeeSeason', null=True, blank=True)  # In some case, proposal doesn't have any fee related objects.  Which results in the impossibility to retrieve season, start_date, end_date, etc.
