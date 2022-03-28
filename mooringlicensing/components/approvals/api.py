@@ -68,6 +68,18 @@ class GetDailyAdmissionUrl(views.APIView):
         return Response(data)
 
 
+class GetStickerStatusDict(views.APIView):
+    renderer_classes = [JSONRenderer, ]
+
+    def get(self, request, format=None):
+        from mooringlicensing.components.main.models import ApplicationType
+        data = []
+        for status in Sticker.STATUS_CHOICES:
+            if status[0] in Sticker.STATUSES_FOR_FILTER:
+                data.append({'id': status[0], 'display': status[1]})
+        return Response(data)
+
+
 class GetFeeSeasonsDict(views.APIView):
     renderer_classes = [JSONRenderer, ]
 
@@ -1052,6 +1064,11 @@ class StickerFilterBackend(DatatablesFilterBackend):
         if filter_fee_season_id and not filter_fee_season_id.lower() == 'all':
             fee_season = FeeSeason.objects.get(id=filter_fee_season_id)
             queryset = queryset.filter(fee_constructor__fee_season=fee_season)
+
+        # Filter sticker status
+        filter_sticker_status_id = request.GET.get('filter_sticker_status')
+        if filter_sticker_status_id and not filter_sticker_status_id.lower() == 'all':
+            queryset = queryset.filter(status=filter_sticker_status_id)
 
         getter = request.query_params.get
         fields = self.get_fields(getter)
