@@ -1438,7 +1438,8 @@ class MooringLicence(Approval):
 
             max_vessel_length = 0
             # for vessel in self.current_vessels:
-            for vessel in self.get_current_vessels_for_licence_doc():
+            current_vessels = self.get_current_vessels_for_licence_doc()
+            for vessel in current_vessels:
                 v = {}
                 v['vessel_rego_no'] = vessel['rego_no']
                 v['vessel_name'] = vessel['latest_vessel_details'].vessel_name
@@ -1452,6 +1453,8 @@ class MooringLicence(Approval):
                         # Found a larger vessel than the one stored as a licenced.  Replace it by the larger one.
                         additional_vessels.append(licenced_vessel)
                         licenced_vessel = v
+                    else:
+                        additional_vessels.append(v)
 
             context = {
                 'approval': self,
