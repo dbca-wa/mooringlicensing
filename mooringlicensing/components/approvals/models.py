@@ -1208,28 +1208,28 @@ class AuthorisedUserPermit(Approval):
             moorings.append(moa.mooring)
         return moorings
 
-    def previous_moorings(self, proposal=None):
-        moorings_str = ''
-        #if vooa.vessel_ownership.vessel.rego_no != self.current_proposal.rego_no or self.current_proposal.keep_existing_vessel:
-         #   attribute_list.append(vooa.vessel_ownership.vessel.rego_no)
-        for moa in self.mooringonapproval_set.all():
-            # do not show mooring from latest application in "Current Moorings"
-            #if not moa.mooring.id == self.current_proposal.proposed_issuance_approval.get("mooring_id"):
-            if ((self.current_proposal.proposed_issuance_approval and moa.mooring.id != self.current_proposal.proposed_issuance_approval.get("mooring_id")) 
-                    or self.current_proposal.keep_existing_mooring 
-                    or (proposal and proposal.processing_status in [
-                        'draft', 
-                        'with_assessor', 
-                        'with_assessor_requirements', 
-                        'with_approver', 
-                        'awaiting_endorsement', 
-                        'awaiting_documents', 
-                        'awaiting_payment'])
-                    ):
-                moorings_str += moa.mooring.name + ','
-        # truncate trailing comma
-        moorings_str = moorings_str[0:-1]
-        return moorings_str
+    #def previous_moorings(self, proposal=None):
+    #    moorings_str = ''
+    #    #if vooa.vessel_ownership.vessel.rego_no != self.current_proposal.rego_no or self.current_proposal.keep_existing_vessel:
+    #     #   attribute_list.append(vooa.vessel_ownership.vessel.rego_no)
+    #    for moa in self.mooringonapproval_set.all():
+    #        # do not show mooring from latest application in "Current Moorings"
+    #        #if not moa.mooring.id == self.current_proposal.proposed_issuance_approval.get("mooring_id"):
+    #        if ((self.current_proposal.proposed_issuance_approval and moa.mooring.id != self.current_proposal.proposed_issuance_approval.get("mooring_id")) 
+    #                or self.current_proposal.keep_existing_mooring 
+    #                or (proposal and proposal.processing_status in [
+    #                    'draft', 
+    #                    'with_assessor', 
+    #                    'with_assessor_requirements', 
+    #                    'with_approver', 
+    #                    'awaiting_endorsement', 
+    #                    'awaiting_documents', 
+    #                    'awaiting_payment'])
+    #                ):
+    #            moorings_str += moa.mooring.name + ','
+    #    # truncate trailing comma
+    #    moorings_str = moorings_str[0:-1]
+    #    return moorings_str
 
     #def previous_moorings(self):
     #    moorings_str = ''
@@ -1716,20 +1716,20 @@ class MooringLicence(Approval):
                     "rego_no": vooa.vessel_ownership.vessel.rego_no,
                     "latest_vessel_details": vooa.vessel_ownership.vessel.latest_vessel_details
                 })
-            elif attribute == 'current_vessels_rego':
-                #if not (vooa.vessel_ownership.vessel.rego_no == self.current_proposal.rego_no):
-                if (vooa.vessel_ownership.vessel.rego_no != self.current_proposal.rego_no 
-                or self.current_proposal.keep_existing_vessel
-                or (proposal and proposal.processing_status in [
-                    'draft', 
-                    'with_assessor', 
-                    'with_assessor_requirements', 
-                    'with_approver', 
-                    'awaiting_endorsement', 
-                    'awaiting_documents', 
-                    'awaiting_payment'])
-                ):
-                    attribute_list.append(vooa.vessel_ownership.vessel.rego_no)
+            #elif attribute == 'current_vessels_rego':
+            #    #if not (vooa.vessel_ownership.vessel.rego_no == self.current_proposal.rego_no):
+            #    if (vooa.vessel_ownership.vessel.rego_no != self.current_proposal.rego_no 
+            #    or self.current_proposal.keep_existing_vessel
+            #    or (proposal and proposal.processing_status in [
+            #        'draft', 
+            #        'with_assessor', 
+            #        'with_assessor_requirements', 
+            #        'with_approver', 
+            #        'awaiting_endorsement', 
+            #        'awaiting_documents', 
+            #        'awaiting_payment'])
+            #    ):
+            #        attribute_list.append(vooa.vessel_ownership.vessel.rego_no)
         return attribute_list
 
     @property
@@ -1786,9 +1786,9 @@ class MooringLicence(Approval):
     def get_current_vessels_for_licence_doc(self):
         return self.current_vessel_attributes('current_vessels_for_licence_doc')
 
-    #@property
-    def current_vessels_rego(self, proposal=None):
-        return self.current_vessel_attributes('current_vessels_rego', proposal)
+    ##@property
+    #def current_vessels_rego(self, proposal=None):
+    #    return self.current_vessel_attributes('current_vessels_rego', proposal)
 
 
 class PreviewTempApproval(Approval):
