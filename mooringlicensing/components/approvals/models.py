@@ -1001,7 +1001,7 @@ class AnnualAdmissionPermit(Approval):
 
             return [], []
         elif proposal.proposal_type.code == PROPOSAL_TYPE_AMENDMENT:
-            if proposal.vessel_details == proposal.previous_application.vessel_details:
+            if proposal.vessel_ownership == proposal.previous_application.vessel_ownership:
                 return [], []
             else:
                 # New sticker created with status Ready
@@ -2245,6 +2245,16 @@ class Sticker(models.Model):
         STICKER_STATUS_LOST,
         STICKER_STATUS_EXPIRED,
     )
+    STATUSES_FOR_FILTER = (
+        STICKER_STATUS_AWAITING_PRINTING,
+        STICKER_STATUS_CURRENT,
+        STICKER_STATUS_TO_BE_RETURNED,
+        STICKER_STATUS_RETURNED,
+        STICKER_STATUS_LOST,
+        STICKER_STATUS_EXPIRED,
+        STICKER_STATUS_CANCELLED,
+    )
+
     colour_default = 'green'
     colour_matrix = [
         {'length': 10, 'colour': 'green'},
