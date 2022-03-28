@@ -1001,7 +1001,7 @@ class AnnualAdmissionPermit(Approval):
 
             return [], []
         elif proposal.proposal_type.code == PROPOSAL_TYPE_AMENDMENT:
-            if proposal.vessel_details == proposal.previous_application.vessel_details:
+            if proposal.vessel_ownership == proposal.previous_application.vessel_ownership:
                 return [], []
             else:
                 # New sticker created with status Ready
