@@ -526,12 +526,14 @@ class SaveAnnualAdmissionApplicationSerializer(serializers.ModelSerializer):
                 'id',
                 'insurance_choice',
                 'temporary_document_collection_id',
+                'keep_existing_vessel',
                 )
         read_only_fields=('id',)
 
     def validate(self, data):
         custom_errors = {}
-        ignore_insurance_check=self.context.get("ignore_insurance_check")
+        #ignore_insurance_check=self.context.get("ignore_insurance_check")
+        ignore_insurance_check = data.get("keep_existing_vessel")
         if self.context.get("action") == 'submit':
             if ignore_insurance_check:
                 pass 
@@ -559,7 +561,8 @@ class SaveMooringLicenceApplicationSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         custom_errors = {}
-        ignore_insurance_check=self.context.get("ignore_insurance_check")
+        #ignore_insurance_check=self.context.get("ignore_insurance_check")
+        ignore_insurance_check = data.get("keep_existing_vessel")
         if self.context.get("action") == 'submit':
             if ignore_insurance_check:
                 pass
@@ -595,6 +598,7 @@ class SaveAuthorisedUserApplicationSerializer(serializers.ModelSerializer):
                 'processing_status',
                 'temporary_document_collection_id',
                 'keep_existing_mooring',
+                'keep_existing_vessel',
                 )
         read_only_fields=('id',)
 
@@ -602,7 +606,8 @@ class SaveAuthorisedUserApplicationSerializer(serializers.ModelSerializer):
         print("validate data")
         print(data)
         custom_errors = {}
-        ignore_insurance_check=self.context.get("ignore_insurance_check")
+        #ignore_insurance_check=self.context.get("ignore_insurance_check")
+        ignore_insurance_check = data.get("keep_existing_vessel")
         if self.context.get("action") == 'submit':
             if ignore_insurance_check:
                 pass
@@ -686,6 +691,7 @@ class InternalProposalSerializer(BaseProposalSerializer):
     waiting_list_application_id = serializers.SerializerMethodField()
     approval_type_text = serializers.SerializerMethodField()
     approval_lodgement_number = serializers.SerializerMethodField()
+    approval_vessel_rego_no = serializers.SerializerMethodField()
 
     class Meta:
         model = Proposal
@@ -779,11 +785,20 @@ class InternalProposalSerializer(BaseProposalSerializer):
                 'pending_amendment_request',
                 'approval_type_text',
                 'approval_lodgement_number',
+                'approval_vessel_rego_no',
                 )
         read_only_fields = (
             'documents',
             'requirements',
         )
+
+    def get_approval_vessel_rego_no(self, obj):
+        rego_no = None
+        if obj.approval and type(obj.approval) is not MooringLicence:
+            rego_no = (obj.approval.current_proposal.vessel_details.vessel.rego_no if
+                    obj.approval and obj.approval.current_proposal and obj.approval.current_proposal.vessel_details
+                    else None)
+        return rego_no
 
     def get_approval_type_text(self, obj):
         return obj.approval.child_obj.description if obj.approval else None
