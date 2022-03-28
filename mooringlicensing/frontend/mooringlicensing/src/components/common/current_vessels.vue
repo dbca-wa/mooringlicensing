@@ -110,7 +110,7 @@ from '@/utils/hooks'
                 if (this.proposal && this.proposal.current_vessels_rego_list && this.proposal.current_vessels_rego_list.length > 0) {
                     return `Your mooring licence ${this.proposal.approval_lodgement_number} 
                     currently lists the following vessels ${this.proposal.current_vessels_rego_list.toString()}. 
-                       Do you want to list another vessel on your Mooring Licence?`;
+                        Do you want to apply to add another vessel to your Mooring Licence?`;
                 }
                 //return '';
             },
@@ -118,7 +118,7 @@ from '@/utils/hooks'
                 if (this.proposal && this.proposal.approval_vessel_rego_no) {
                     return `Your ${this.proposal.approval_type_text} ${this.proposal.approval_lodgement_number} 
                     lists a vessel with registration number ${this.proposal.approval_vessel_rego_no}. 
-                        Do you want to list another vessel on your ${this.proposal.approval_type_text}?`;
+                        Do you want to apply to add another vessel to your ${this.proposal.approval_type_text}?`;
                 }
                 //return '';
             },
