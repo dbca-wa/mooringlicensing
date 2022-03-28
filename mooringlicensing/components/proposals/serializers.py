@@ -247,7 +247,7 @@ class BaseProposalSerializer(serializers.ModelSerializer):
     #        return moorings_str[0:-1] if moorings_str else ''
     def get_authorised_user_moorings_str(self, obj):
         if type(obj.child_obj) == AuthorisedUserApplication and obj.approval:
-            return obj.approval.child_obj.previous_moorings()
+            return obj.approval.child_obj.previous_moorings(obj)
 
     def get_waiting_list_application_id(self, obj):
         wla_id = None
@@ -272,7 +272,7 @@ class BaseProposalSerializer(serializers.ModelSerializer):
     def get_current_vessels_rego_list(self, obj):
         vessels = []
         if obj.approval and type(obj.approval.child_obj) is MooringLicence:
-            vessels = obj.approval.child_obj.current_vessels_rego
+            vessels = obj.approval.child_obj.current_vessels_rego(obj)
         return vessels
 
     def get_previous_application_preferred_bay_id(self, obj):
