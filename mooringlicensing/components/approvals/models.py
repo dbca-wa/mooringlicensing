@@ -379,9 +379,10 @@ class Approval(RevisionedMixin):
                 approval_letter=self.licence_document,
             )
 
-        stickers = self.stickers.filter(status__in=['ready', 'current', 'awaiting_printing'])
-        for sticker in stickers:
-            new_approval_history_entry.stickers.add(sticker)
+        # Move this logic to the 'export_and_email_sticker_data' cron job
+        # stickers = self.stickers.filter(status__in=['ready', 'current', 'awaiting_printing'])
+        # for sticker in stickers:
+        #     new_approval_history_entry.stickers.add(sticker)
 
         approval_history = self.approvalhistory_set.all()
         ## rewrite history
@@ -399,8 +400,14 @@ class Approval(RevisionedMixin):
                 # update previous_history_entry
                 previous_history_entry.end_date = end_date
                 previous_history_entry.save()
-        # TODO: need to worry about all entries for this approval?
 
+                if self.current_proposal.proposal_type.code == PROPOSAL_TYPE_AMENDMENT and self.current_proposal.vessel_ownership == self.current_proposal.previous_application.vessel_ownership:
+                    # When renewal and vessel not changed
+                    # Copy stickers from previous history to new history
+                    for sticker in previous_history_entry.stickers.all():
+                        new_approval_history_entry.stickers.add(sticker)
+
+        # TODO: need to worry about all entries for this approval?
         ## reason
         return new_approval_history_entry
 
