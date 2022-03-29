@@ -1001,7 +1001,7 @@ class AnnualAdmissionPermit(Approval):
 
             return [], []
         elif proposal.proposal_type.code == PROPOSAL_TYPE_AMENDMENT:
-            if proposal.vessel_details == proposal.previous_application.vessel_details:
+            if proposal.vessel_ownership == proposal.previous_application.vessel_ownership:
                 return [], []
             else:
                 # New sticker created with status Ready
@@ -1461,7 +1461,8 @@ class MooringLicence(Approval):
 
             max_vessel_length = 0
             # for vessel in self.current_vessels:
-            for vessel in self.get_current_vessels_for_licence_doc():
+            current_vessels = self.get_current_vessels_for_licence_doc()
+            for vessel in current_vessels:
                 v = {}
                 v['vessel_rego_no'] = vessel['rego_no']
                 v['vessel_name'] = vessel['latest_vessel_details'].vessel_name
@@ -1475,6 +1476,8 @@ class MooringLicence(Approval):
                         # Found a larger vessel than the one stored as a licenced.  Replace it by the larger one.
                         additional_vessels.append(licenced_vessel)
                         licenced_vessel = v
+                    else:
+                        additional_vessels.append(v)
 
             context = {
                 'approval': self,
@@ -2278,6 +2281,16 @@ class Sticker(models.Model):
         STICKER_STATUS_LOST,
         STICKER_STATUS_EXPIRED,
     )
+    STATUSES_FOR_FILTER = (
+        STICKER_STATUS_AWAITING_PRINTING,
+        STICKER_STATUS_CURRENT,
+        STICKER_STATUS_TO_BE_RETURNED,
+        STICKER_STATUS_RETURNED,
+        STICKER_STATUS_LOST,
+        STICKER_STATUS_EXPIRED,
+        STICKER_STATUS_CANCELLED,
+    )
+
     colour_default = 'green'
     colour_matrix = [
         {'length': 10, 'colour': 'green'},
