@@ -9,7 +9,7 @@ from mooringlicensing.components.main.models import (
 )
 from reversion.admin import VersionAdmin
 from mooringlicensing.components.proposals.models import StickerPrintingBatch, StickerPrintingResponse, \
-    StickerPrintingContact
+    StickerPrintingContact, StickerPrintedContact
 
 
 class ProposalDocumentInline(admin.TabularInline):
@@ -80,6 +80,12 @@ class GlobalSettingsAdmin(admin.ModelAdmin):
 
 @admin.register(StickerPrintingContact)
 class StickersPrintingContactAdmin(admin.ModelAdmin):
+    list_display = ['email', 'type', 'enabled',]
+    ordering = ('type', 'email',)
+
+
+@admin.register(StickerPrintedContact)
+class StickersPrintedContactAdmin(admin.ModelAdmin):
     list_display = ['email', 'type', 'enabled',]
     ordering = ('type', 'email',)
 
