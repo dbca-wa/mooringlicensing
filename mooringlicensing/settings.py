@@ -371,6 +371,7 @@ LOV_CACHE_TIMEOUT=10800
 CSRF_MIDDLEWARE_TOKEN=env('CSRF_MIDDLEWARE_TOKEN', '')
 EMAIL_INSTANCE = env('EMAIL_INSTANCE','DEV')
 os.environ['UPDATE_PAYMENT_ALLOCATION'] = 'True'
+UNALLOCATED_ORACLE_CODE = 'NNP449 GST'
 
 CRON_CLASSES = [
     'mooringlicensing.cron.OracleIntegrationCronJob',
@@ -380,3 +381,15 @@ CRON_CLASSES = [
 APPROVED_OPERATIONAL_STATUS = ['current', ]
 # Is licence/permit still approved?  Other than cancelled, expired or surrendered
 APPROVED_APPROVAL_STATUS = ['current', 'suspended', ]
+
+# Use git commit hash for purging cache in browser for deployment changes
+GIT_COMMIT_HASH = ''
+GIT_COMMIT_DATE = ''
+if  os.path.isdir(BASE_DIR+'/.git/') is True:
+    GIT_COMMIT_DATE = os.popen('cd '+BASE_DIR+' ; git log -1 --format=%cd').read()
+    GIT_COMMIT_HASH = os.popen('cd  '+BASE_DIR+' ; git log -1 --format=%H').read()
+if len(GIT_COMMIT_HASH) == 0: 
+    GIT_COMMIT_HASH = os.popen('cat /app/git_hash').read()
+    if len(GIT_COMMIT_HASH) == 0:
+       print ("ERROR: No git hash provided")
+
