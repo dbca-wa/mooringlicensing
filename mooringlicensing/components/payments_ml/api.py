@@ -16,6 +16,7 @@ from ledger.payments.models import Invoice, OracleAccountCode
 from ledger.payments.bpoint.models import BpointTransaction, BpointToken
 from ledger.checkout.utils import create_basket_session, create_checkout_session, place_order_submission, get_cookie_basket
 from mooringlicensing.components.proposals.models import Proposal
+from ledger.payments.invoice import utils
 
 logger = logging.getLogger('mooringlicensing')
 
@@ -134,7 +135,7 @@ class RefundOracleView(views.APIView):
                                 bpoint_failed_amount = Decimal(bp_txn['line-amount'])
                                 lines = []
                                 lines.append({'ledger_description':str("Refund failed for txn "+bp_txn['txn_number']),"quantity":1,"price_incl_tax":'0.00',"oracle_code":str(settings.UNALLOCATED_ORACLE_CODE), 'line_status': 1})
-                            order = utils.allocate_refund_to_invoice(request, booking, lines, invoice_text=None, internal=False, order_total='0.00',user=booking.submitter)
+                            order = allocate_refund_to_invoice(request, booking, lines, invoice_text=None, internal=False, order_total='0.00',user=booking.submitter)
                             new_invoice = Invoice.objects.get(order_number=order.number)
 
                             if refund:
@@ -156,7 +157,7 @@ class RefundOracleView(views.APIView):
 
                     for mt in money_to_json:
                         lines.append({'ledger_description':mt['line-text'],"quantity":1,"price_incl_tax":mt['line-amount'],"oracle_code":mt['oracle-code'], 'line_status': 1})
-                    order = utils.allocate_refund_to_invoice(request, booking, lines, invoice_text=None, internal=False, order_total='0.00',user=booking.submitter)
+                    order = allocate_refund_to_invoice(request, booking, lines, invoice_text=None, internal=False, order_total='0.00',user=booking.submitter)
                     new_invoice = Invoice.objects.get(order_number=order.number)
                     update_payments(new_invoice.reference)
 
