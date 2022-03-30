@@ -10,7 +10,7 @@ from django.conf import settings
 from django.db import connection, transaction
 
 from mooringlicensing.components.approvals.models import Sticker, AnnualAdmissionPermit, AuthorisedUserPermit, \
-    MooringLicence, Approval
+    MooringLicence, Approval, ApprovalHistory
 from mooringlicensing.components.approvals.serializers import ListApprovalSerializer
 from mooringlicensing.components.proposals.email import send_sticker_printing_batch_email
 from mooringlicensing.components.proposals.models import (
@@ -303,13 +303,20 @@ def email_stickers_document():
 
                 # Update sticker status
                 stickers = Sticker.objects.filter(sticker_printing_batch=batch)
-                stickers.update(status=Sticker.STICKER_STATUS_AWAITING_PRINTING)
+                # stickers.update(status=Sticker.STICKER_STATUS_AWAITING_PRINTING)
                 for sticker in stickers:
+                    sticker.status=Sticker.STICKER_STATUS_AWAITING_PRINTING
+                    sticker.save()
                     if sticker.sticker_to_replace:
                         # new sticker has the old sticker here if it's created for renewal
                         # When this sticker is created for renewal, set 'expiry' status to the old sticker.
                         sticker.sticker_to_replace.status = Sticker.STICKER_STATUS_EXPIRED
                         sticker.sticker_to_replace.save()
+
+                    # Update approval history with this sticker
+                    # latest_approval_history = ApprovalHistory.objects.filter(approval=sticker.approval, end_data__isnull=True).order_by('-start_date').first()
+                    # latest_approval_history.stickers.add(sticker)
+
     except Exception as e:
         err_msg = 'Error sending the sticker printing batch spreadsheet file(s): {}'.format(', '.join([batch.name for batch in batches]))
         logger.error('{}\n{}'.format(err_msg, str(e)))
