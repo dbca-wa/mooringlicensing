@@ -299,13 +299,14 @@ def send_sticker_import_batch_email(process_summary):
         ccs = StickerPrintedContact.objects.filter(type=StickerPrintingContact.TYPE_EMAIL_CC, enabled=True)
         bccs = StickerPrintedContact.objects.filter(type=StickerPrintingContact.TYPE_EMAIL_BCC, enabled=True)
 
-        to_address = [contact.email for contact in tos]
-        cc = [contact.email for contact in ccs]
-        bcc = [contact.email for contact in bccs]
+        if tos:
+            to_address = [contact.email for contact in tos]
+            cc = [contact.email for contact in ccs]
+            bcc = [contact.email for contact in bccs]
 
-        # Send email
-        msg = email.send(to_address, context=context, attachments=attachments, cc=cc, bcc=bcc,)
-        return msg
+            # Send email
+            msg = email.send(to_address, context=context, attachments=attachments, cc=cc, bcc=bcc,)
+            return msg
 
     except Exception as e:
         err_msg = 'Error sending sticker import email'
