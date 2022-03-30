@@ -15,8 +15,9 @@ from mooringlicensing.components.payments_ml.serializers import FeeConstructorSe
 from ledger.payments.models import Invoice, OracleAccountCode
 from ledger.payments.bpoint.models import BpointTransaction, BpointToken
 from ledger.checkout.utils import create_basket_session, create_checkout_session, place_order_submission, get_cookie_basket
+from ledger.payments.utils import oracle_parser_on_invoice, update_payments
 from mooringlicensing.components.proposals.models import Proposal
-from ledger.payments.invoice import utils
+from mooringlicensing import mooring_booking_utils as utils
 
 logger = logging.getLogger('mooringlicensing')
 
@@ -101,7 +102,7 @@ class RefundOracleView(views.APIView):
                              lines.append({'ledger_description':str("Temp fund transfer "+bp_txn['txn_number']),"quantity":1,"price_incl_tax":Decimal('{:.2f}'.format(float(bp_txn['line-amount']))),"oracle_code":str(settings.UNALLOCATED_ORACLE_CODE), 'line_status': 1})
 
 
-                    order = allocate_refund_to_invoice(request, booking, lines, invoice_text=None, internal=False, order_total='0.00',user=booking.submitter)
+                    order = utils.allocate_refund_to_invoice(request, booking, lines, invoice_text=None, internal=False, order_total='0.00',user=booking.submitter)
                     new_invoice = Invoice.objects.get(order_number=order.number)
                     update_payments(new_invoice.reference) 
                     #order = utils.allocate_refund_to_invoice(request, booking, lines, invoice_text=None, internal=False, order_total='0.00',user=booking.customer)
@@ -135,7 +136,7 @@ class RefundOracleView(views.APIView):
                                 bpoint_failed_amount = Decimal(bp_txn['line-amount'])
                                 lines = []
                                 lines.append({'ledger_description':str("Refund failed for txn "+bp_txn['txn_number']),"quantity":1,"price_incl_tax":'0.00',"oracle_code":str(settings.UNALLOCATED_ORACLE_CODE), 'line_status': 1})
-                            order = allocate_refund_to_invoice(request, booking, lines, invoice_text=None, internal=False, order_total='0.00',user=booking.submitter)
+                            order = utils.allocate_refund_to_invoice(request, booking, lines, invoice_text=None, internal=False, order_total='0.00',user=booking.submitter)
                             new_invoice = Invoice.objects.get(order_number=order.number)
 
                             if refund:
@@ -157,7 +158,7 @@ class RefundOracleView(views.APIView):
 
                     for mt in money_to_json:
                         lines.append({'ledger_description':mt['line-text'],"quantity":1,"price_incl_tax":mt['line-amount'],"oracle_code":mt['oracle-code'], 'line_status': 1})
-                    order = allocate_refund_to_invoice(request, booking, lines, invoice_text=None, internal=False, order_total='0.00',user=booking.submitter)
+                    order = utils.allocate_refund_to_invoice(request, booking, lines, invoice_text=None, internal=False, order_total='0.00',user=booking.submitter)
                     new_invoice = Invoice.objects.get(order_number=order.number)
                     update_payments(new_invoice.reference)
 
@@ -170,41 +171,4 @@ class RefundOracleView(views.APIView):
         except Exception as e:
            print(traceback.print_exc())
            raise
-
-
-def allocate_refund_to_invoice(request, booking, lines, invoice_text=None, internal=False, order_total='0.00',user=None):
-        booking_reference = None
-        if booking.__class__.__name__ == 'AdmissionsBooking':
-             booking_reference = 'AD-'+str(booking.id)
-        elif booking.__class__.__name__ == 'BookingAnnualAdmission':
-             booking_reference = 'AA-'+str(booking.id)
-        else:
-             booking_reference = 'PS-'+str(booking.id)
-
-        basket_params = {
-            'products': lines,
-            'vouchers': [],
-            'system': settings.PS_PAYMENT_SYSTEM_ID,
-            'custom_basket': True,
-            'booking_reference': booking_reference
-        }
-
-        basket, basket_hash = create_basket_session(request, basket_params)
-        ci = utils.CreateInvoiceBasket()
-        order  = ci.create_invoice_and_order(basket, total=None, shipping_method='No shipping required',shipping_charge=False, user=user, status='Submitted', invoice_text='Oracle Allocation Pools', )
-        #basket.status = 'Submitted'
-        #basket.save()
-        #new_order = Order.objects.get(basket=basket)
-        new_invoice = Invoice.objects.get(order_number=order.number)
-        update_payments(new_invoice.reference)
-        if booking.__class__.__name__ == 'AdmissionsBooking':
-            print ("AdmissionsBooking")
-            book_inv, created = AdmissionsBookingInvoice.objects.get_or_create(admissions_booking=booking, invoice_reference=new_invoice.reference, system_invoice=True)
-        elif booking.__class__.__name__ == 'BookingAnnualAdmission':
-            print ("BookingAnnualAdmission")
-            book_inv, created = models.BookingAnnualInvoice.objects.get_or_create(booking_annual_admission=booking, invoice_reference=new_invoice.reference, system_invoice=True)
-        else:
-            book_inv, created = BookingInvoice.objects.get_or_create(booking=booking, invoice_reference=new_invoice.reference, system_invoice=True)
-
-        return order
 
