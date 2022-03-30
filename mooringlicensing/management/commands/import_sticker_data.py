@@ -1,6 +1,7 @@
 import datetime
 import imaplib
 import email
+import mimetypes
 import ssl
 import openpyxl
 from django.utils import timezone
@@ -14,7 +15,10 @@ from mooringlicensing.components.approvals.models import Sticker
 
 import logging
 
-from mooringlicensing.components.proposals.models import StickerPrintingResponse, StickerPrintingResponseEmail
+from mooringlicensing.components.emails.emails import TemplateEmailBase
+from mooringlicensing.components.emails.utils import get_public_url
+from mooringlicensing.components.proposals.models import StickerPrintingResponse, StickerPrintingResponseEmail, \
+    StickerPrintedContact
 
 logger = logging.getLogger('mooringlicensing')
 
@@ -126,7 +130,12 @@ class Command(BaseCommand):
         ##########
         # 3. Process xlsx file saved in django model
         ##########
-        updates, errors = process_sticker_printing_response()
+        process_summary = {'stickers': [], 'errors': [], 'sticker_printing_responses': []}  # To be used for sticker processed email
+
+        updates, errors = process_sticker_printing_response(process_summary)
+
+        # Send sticker import batch emails
+        send_sticker_import_batch_email(process_summary)
 
         cmd_name = __name__.split('.')[-1].replace('_', ' ').upper()
         # error_count = len(errors) + len(error_filenames)
@@ -165,12 +174,13 @@ def is_empty(cell):
     return cell.value is None or not str(cell.value).strip()
 
 
-def process_sticker_printing_response():
+def process_sticker_printing_response(process_summary):
     errors = []
     updates = []
 
     responses = StickerPrintingResponse.objects.filter(processed=False)
     for response in responses:
+        process_summary['sticker_printing_responses'].append(response)
         if response._file:
             response.no_errors_when_process = True
             # Load file
@@ -242,6 +252,7 @@ def process_sticker_printing_response():
                         #    sticker.sticker_to_replace.status = Sticker.STICKER_STATUS_EXPIRED
                         #    sticker.sticker_to_replace.save()
                     sticker.save()
+                    process_summary['stickers'].append(sticker)
 
                     updates.append(sticker.number)
                 except Sticker.DoesNotExist as e:
@@ -249,12 +260,14 @@ def process_sticker_printing_response():
                     logger.exception('{}\n{}'.format(err_msg, str(e)))
                     errors.append(err_msg)
                     response.no_errors_when_process = False
+                    process_summary['errors'].append(err_msg)
                     continue
                 except Exception as e:
                     err_msg = 'Error updating the sticker {}'.format(sticker_number_value)
                     logger.exception('{}\n{}'.format(err_msg, str(e)))
                     errors.append(err_msg)
                     response.no_errors_when_process = False
+                    process_summary['errors'].append(err_msg)
                     continue
 
             # Update response obj not to process again
@@ -265,3 +278,36 @@ def process_sticker_printing_response():
             pass
 
     return updates, errors
+
+
+def send_sticker_import_batch_email(process_summary):
+    try:
+        email = TemplateEmailBase(
+            subject='Sticker Import Batch',
+            html_template='mooringlicensing/emails/send_sticker_import_batch.html',
+            txt_template='mooringlicensing/emails/send_sticker_import_batch.txt',
+        )
+
+        attachments = []
+        context = {
+            'public_url': get_public_url(),
+            'process_summary': process_summary,
+        }
+
+        from mooringlicensing.components.proposals.models import StickerPrintingContact
+        tos = StickerPrintedContact.objects.filter(type=StickerPrintingContact.TYPE_EMIAL_TO, enabled=True)
+        ccs = StickerPrintedContact.objects.filter(type=StickerPrintingContact.TYPE_EMAIL_CC, enabled=True)
+        bccs = StickerPrintedContact.objects.filter(type=StickerPrintingContact.TYPE_EMAIL_BCC, enabled=True)
+
+        to_address = [contact.email for contact in tos]
+        cc = [contact.email for contact in ccs]
+        bcc = [contact.email for contact in bccs]
+
+        # Send email
+        msg = email.send(to_address, context=context, attachments=attachments, cc=cc, bcc=bcc,)
+        return msg
+
+    except Exception as e:
+        err_msg = 'Error sending sticker import email'
+        logger.exception('{}\n{}'.format(err_msg, str(e)))
+

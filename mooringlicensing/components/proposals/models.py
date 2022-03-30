@@ -1675,6 +1675,26 @@ class StickerPrintingContact(models.Model):
         app_label = 'mooringlicensing'
 
 
+class StickerPrintedContact(models.Model):
+    TYPE_EMIAL_TO = 'to'
+    TYPE_EMAIL_CC = 'cc'
+    TYPE_EMAIL_BCC = 'bcc'
+    TYPES = (
+        (TYPE_EMIAL_TO, 'To'),
+        (TYPE_EMAIL_CC, 'Cc'),
+        (TYPE_EMAIL_BCC, 'Bcc'),
+    )
+    email = models.EmailField(blank=True, null=True)
+    type = models.CharField(max_length=255, choices=TYPES, blank=False, null=False,)
+    enabled = models.BooleanField(default=True)
+
+    def __str__(self):
+        return '{} ({})'.format(self.email, self.type)
+
+    class Meta:
+        app_label = 'mooringlicensing'
+
+
 class StickerPrintingBatch(Document):
     _file = models.FileField(upload_to=update_sticker_doc_filename, max_length=512)
     emailed_datetime = models.DateTimeField(blank=True, null=True)  # Once emailed, this field has a value

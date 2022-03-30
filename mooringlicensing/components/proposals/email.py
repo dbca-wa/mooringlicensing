@@ -1426,7 +1426,6 @@ def extract_file_for_attachment(attachments, my_file):
             attachments.append(attachment)
 
 
-
 def send_sticker_printing_batch_email(batches):
     if batches.count() == 0:
         return
