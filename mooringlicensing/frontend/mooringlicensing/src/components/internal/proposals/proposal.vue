@@ -557,7 +557,7 @@ export default {
             let vm = this;
             let unassign = true;
             let data = {};
-            if (vm.processing_status == 'With Approver'){
+            if (vm.proposal && vm.proposal.processing_status == 'With Approver'){
                 unassign = vm.proposal.assigned_approver != null && vm.proposal.assigned_approver != 'undefined' ? false: true;
                 data = {'assessor_id': vm.proposal.assigned_approver};
             }
