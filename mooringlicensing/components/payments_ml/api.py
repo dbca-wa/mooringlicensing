@@ -14,7 +14,7 @@ from mooringlicensing.components.payments_ml.models import FeeConstructor
 from mooringlicensing.components.payments_ml.serializers import FeeConstructorSerializer
 from ledger.payments.models import Invoice, OracleAccountCode
 from ledger.payments.bpoint.models import BpointTransaction, BpointToken
-from ledger.checkout.utils import create_basket_session, create_checkout_session, place_order_submission, get_cookie_basket
+from ledger.checkout.utils import create_basket_session, create_checkout_session, place_order_submission, get_cookie_basket, calculate_excl_gst
 from ledger.payments.utils import oracle_parser_on_invoice, update_payments
 from mooringlicensing.components.proposals.models import Proposal
 from mooringlicensing import mooring_booking_utils as utils
@@ -93,13 +93,27 @@ class RefundOracleView(views.APIView):
                     for mf in money_from_json:
                         if Decimal(mf['line-amount']) > 0: 
                             money_from_total = (Decimal(mf['line-amount']) - Decimal(mf['line-amount']) - Decimal(mf['line-amount']))
-                            lines.append({'ledger_description':str(mf['line-text']),"quantity":1,"price_incl_tax":money_from_total,"oracle_code":str(mf['oracle-code']), 'line_status': 3})
+                            lines.append({
+                                'ledger_description':str(mf['line-text']),
+                                "quantity":1,
+                                "price_incl_tax":money_from_total,
+                                "price_excl_tax":calculate_excl_gst(money_from_total),
+                                "oracle_code":str(mf['oracle-code']), 
+                                "line_status": 3
+                                })
 
                     for bp_txn in bpoint_trans_split_json:
                         bpoint_id = BpointTransaction.objects.get(txn_number=bp_txn['txn_number'])
                         info = {'amount': Decimal('{:.2f}'.format(float(bp_txn['line-amount']))), 'details' : 'Refund via system'}
                         if info['amount'] > 0:
-                             lines.append({'ledger_description':str("Temp fund transfer "+bp_txn['txn_number']),"quantity":1,"price_incl_tax":Decimal('{:.2f}'.format(float(bp_txn['line-amount']))),"oracle_code":str(settings.UNALLOCATED_ORACLE_CODE), 'line_status': 1})
+                             lines.append({
+                                 'ledger_description':str("Temp fund transfer "+bp_txn['txn_number']),
+                                 "quantity":1,
+                                 "price_incl_tax":Decimal('{:.2f}'.format(float(bp_txn['line-amount']))),
+                                 "price_excl_tax":calculate_excl_gst(Decimal('{:.2f}'.format(float(bp_txn['line-amount'])))),
+                                 "oracle_code":str(settings.UNALLOCATED_ORACLE_CODE), 
+                                 'line_status': 1
+                                 })
 
 
                     order = utils.allocate_refund_to_invoice(request, booking, lines, invoice_text=None, internal=False, order_total='0.00',user=booking.submitter)
@@ -128,14 +142,28 @@ class RefundOracleView(views.APIView):
                             try:
 
                                 bpoint_money_to = (Decimal('{:.2f}'.format(float(bp_txn['line-amount']))) - Decimal('{:.2f}'.format(float(bp_txn['line-amount']))) - Decimal('{:.2f}'.format(float(bp_txn['line-amount']))))
-                                lines.append({'ledger_description':str("Payment Gateway Refund to "+bp_txn['txn_number']),"quantity":1,"price_incl_tax": bpoint_money_to,"oracle_code":str(settings.UNALLOCATED_ORACLE_CODE), 'line_status': 3})
+                                lines.append({
+                                    'ledger_description':str("Payment Gateway Refund to "+bp_txn['txn_number']),
+                                    "quantity":1,
+                                    "price_incl_tax": bpoint_money_to,
+                                    "price_excl_tax": calculate_excl_gst(bpoint_money_to),
+                                    "oracle_code":str(settings.UNALLOCATED_ORACLE_CODE), 
+                                    'line_status': 3
+                                    })
                                 bpoint = BpointTransaction.objects.get(txn_number=bp_txn['txn_number'])
                                 refund = bpoint.refund(info,request.user)
                             except Exception as e:
                                 failed_refund = True
                                 bpoint_failed_amount = Decimal(bp_txn['line-amount'])
                                 lines = []
-                                lines.append({'ledger_description':str("Refund failed for txn "+bp_txn['txn_number']),"quantity":1,"price_incl_tax":'0.00',"oracle_code":str(settings.UNALLOCATED_ORACLE_CODE), 'line_status': 1})
+                                lines.append({
+                                    'ledger_description':str("Refund failed for txn "+bp_txn['txn_number']),
+                                    "quantity":1,
+                                    "price_incl_tax":'0.00',
+                                    "price_excl_tax":'0.00',
+                                    "oracle_code":str(settings.UNALLOCATED_ORACLE_CODE), 
+                                    'line_status': 1
+                                    })
                             order = utils.allocate_refund_to_invoice(request, booking, lines, invoice_text=None, internal=False, order_total='0.00',user=booking.submitter)
                             new_invoice = Invoice.objects.get(order_number=order.number)
 
@@ -153,11 +181,25 @@ class RefundOracleView(views.APIView):
                     for mf in money_from_json:
                         if Decimal(mf['line-amount']) > 0:
                             money_from_total = (Decimal(mf['line-amount']) - Decimal(mf['line-amount']) - Decimal(mf['line-amount']))
-                            lines.append({'ledger_description':str(mf['line-text']),"quantity":1,"price_incl_tax":money_from_total,"oracle_code":str(mf['oracle-code']), 'line_status': 3})
+                            lines.append({
+                                'ledger_description':str(mf['line-text']),
+                                "quantity":1,
+                                "price_incl_tax":money_from_total,
+                                "price_excl_tax":calculate_excl_gst(money_from_total),
+                                "oracle_code":str(mf['oracle-code']), 
+                                'line_status': 3
+                                })
     
 
                     for mt in money_to_json:
-                        lines.append({'ledger_description':mt['line-text'],"quantity":1,"price_incl_tax":mt['line-amount'],"oracle_code":mt['oracle-code'], 'line_status': 1})
+                        lines.append({
+                            'ledger_description':mt['line-text'],
+                            "quantity":1,
+                            "price_incl_tax":mt['line-amount'],
+                            "price_excl_tax":calculate_excl_gst(mt['line-amount']),
+                            "oracle_code":mt['oracle-code'], 
+                            'line_status': 1
+                            })
                     order = utils.allocate_refund_to_invoice(request, booking, lines, invoice_text=None, internal=False, order_total='0.00',user=booking.submitter)
                     new_invoice = Invoice.objects.get(order_number=order.number)
                     update_payments(new_invoice.reference)
