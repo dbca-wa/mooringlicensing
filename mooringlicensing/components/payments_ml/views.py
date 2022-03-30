@@ -4,6 +4,9 @@ from ledger.checkout.utils import calculate_excl_gst
 import pytz
 import json
 from ledger.settings_base import TIME_ZONE
+from decimal import *
+from ledger.payments.bpoint.models import BpointTransaction, BpointToken
+from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from mooringlicensing.components.main.models import ApplicationType
 from mooringlicensing.components.payments_ml.invoice_pdf import create_invoice_pdf_bytes
 
@@ -771,4 +774,173 @@ class InvoicePDFView(View):
 
     def get_object(self):
         return get_object_or_404(Invoice, reference=self.kwargs['reference'])
+
+
+class RefundProposalHistoryView(LoginRequiredMixin, TemplateView):
+#class RefundProposalHistory(LoginRequiredMixin, TemplateView):
+    template_name = 'mooringlicensing/payments_ml/proposal_refund_history.html'
+
+    def get(self, request, *args, **kwargs):
+        booking_id = kwargs['pk']
+        booking = None
+        print ("LOADED")
+        if request.user.is_superuser or request.user.groups.filter(name__in=['Mooring Licensing - Payment Officers']).exists():
+#            booking = Proposal.objects.get(customer=request.user, booking_type__in=(0, 1), is_canceled=False, pk=booking_id)
+             booking = Proposal.objects.get(pk=booking_id)
+             newest_booking = booking_id #self.get_newest_booking(booking_id)
+             booking_history = self.get_history(newest_booking, booking_array=[])
+             invoice_line_items = self.get_history_line_items(booking_history)
+             context = {
+                'booking_id': booking_id,
+                'booking': booking,
+                'newest_booking': newest_booking,
+                'booking_history' : booking_history,
+                'invoice_line_items' : invoice_line_items,
+                'oracle_code_refund_allocation_pool': settings.UNALLOCATED_ORACLE_CODE,
+                'GIT_COMMIT_DATE' : settings.GIT_COMMIT_DATE,
+                'GIT_COMMIT_HASH' : settings.GIT_COMMIT_HASH,
+                'API_URL' : '/api/refund_oracle',
+                'booking_class_type' : booking.__class__.__name__
+
+             }
+             return render(request, self.template_name,context)
+        else:
+             messages.error(self.request, 'Permission denied.')
+             return HttpResponseRedirect(reverse('home')) 
+
+    #def get_newest_booking(self, booking_id):
+    #    latest_id = booking_id
+    #    if Proposal.objects.filter(old_booking=booking_id).exclude(booking_type=3).count() > 0:
+    #        booking = Proposal.objects.filter(old_booking=booking_id)[0]
+    #        latest_id = self.get_newest_booking(booking.id)
+    #    return latest_id
+
+    def get_history_line_items(self, booking_history):
+
+        invoice_line_items = []
+        invoice_line_items_array = []
+        invoice_bpoint = []
+        rolling_total = Decimal('0.00')
+        bpoint_trans_totals = {}
+        unique_oracle_code_on_booking = {}
+        total_booking_allocation_pool = Decimal('0.00')
+        total_bpoint_amount_available = Decimal('0.00')
+        entry_count = 0
+        for bi in booking_history:
+            booking = Proposal.objects.get(pk=bi['booking'].id)
+            booking.invoices =()
+            #booking.invoices = ApplicationFee.objects.filter(booking=booking)
+
+            booking_invoices= ApplicationFee.objects.filter(proposal=booking)
+            for i in booking_invoices:
+                 bp = BpointTransaction.objects.filter(crn1=i.invoice_reference)
+                 for trans in bp:
+                     if trans.action == 'payment':
+                            if trans.txn_number not in bpoint_trans_totals:
+                                   bpoint_trans_totals[trans.txn_number] = {'crn1': '', 'amount': Decimal('0.00')}
+                             
+                            total_bpoint_amount_available = total_bpoint_amount_available + trans.amount
+                            bpoint_trans_totals[trans.txn_number]['amount'] = bpoint_trans_totals[trans.txn_number]['amount'] + trans.amount 
+                            bpoint_trans_totals[trans.txn_number]['crn1'] = trans.crn1
+                     if trans.action == 'refund':
+                            if trans.original_txn not in bpoint_trans_totals:
+                                   bpoint_trans_totals[trans.original_txn] = {'crn': '', 'amount': Decimal('0.00')}
+                            bpoint_trans_totals[trans.original_txn]['amount'] = bpoint_trans_totals[trans.original_txn]['amount'] - trans.amount
+                            total_bpoint_amount_available = total_bpoint_amount_available - trans.amount
+                     invoice_bpoint.append(trans)
+
+                 iv = Invoice.objects.filter(reference=i.invoice_reference)
+                 for b in iv:
+                    o = Order.objects.get(number=b.order_number)
+                    for ol in o.lines.all():
+                        if ol.oracle_code == settings.UNALLOCATED_ORACLE_CODE:
+                             total_booking_allocation_pool = total_booking_allocation_pool + ol.line_price_incl_tax
+                        #rolling_total = rolling_total + ol.line_price_incl_tax
+                        entry_count = entry_count + 1
+                        invoice_line_items_array.append({'line_id': ol.id, 'order_number': ol.order.number, 'title': ol.title, 'oracle_code': ol.oracle_code, 'line_price_incl_tax': ol.line_price_incl_tax, 'order_date_placed': ol.order.date_placed, 'rolling_total': '0.00' ,'entry_count': entry_count })
+                        invoice_line_items.append(ol)
+
+                        if ol.oracle_code == settings.UNALLOCATED_ORACLE_CODE:
+                             pass
+                        else:
+                             if ol.oracle_code not in unique_oracle_code_on_booking:
+                                 unique_oracle_code_on_booking[ol.oracle_code] = Decimal('0.00') 
+
+                             unique_oracle_code_on_booking[ol.oracle_code] = unique_oracle_code_on_booking[ol.oracle_code] + Decimal(ol.line_price_incl_tax)
+#                             unique_oracle_code_on_booking[ol.oracle_code] = float("%.2f".format(str(unique_oracle_code_on_booking[ol.oracle_code])))
+#                            unique_oracle_code_on_booking.append(ol.oracle_code)
+        for ocb in unique_oracle_code_on_booking:
+                unique_oracle_code_on_booking[ocb] = str(unique_oracle_code_on_booking[ocb])
+
+        for btt in bpoint_trans_totals:
+             bpoint_trans_totals[btt]['amount'] = str(bpoint_trans_totals[btt]['amount'])
+        #UNALLOCATED_ORACLE_CODE
+
+        invoice_line_items_array.sort(key=lambda item:item['order_date_placed'], reverse=False)
+       
+        for il in invoice_line_items_array:
+            rolling_total = Decimal(rolling_total) + Decimal(il['line_price_incl_tax'])
+            il['rolling_total'] = rolling_total
+        
+        booking_balance_issue = False
+        if rolling_total < 0:
+            booking_balance_issue = True
+
+        return {'invoice_line_items': invoice_line_items, 'invoice_line_items_array':  invoice_line_items_array, 'booking_balance_issue': booking_balance_issue,'total_booking_allocation_pool': total_booking_allocation_pool, 'invoice_bpoint': invoice_bpoint,'total_bpoint_amount_available': total_bpoint_amount_available, 'unique_oracle_code_on_booking': json.dumps(unique_oracle_code_on_booking),'bpoint_trans_totals': json.dumps(bpoint_trans_totals)}
+
+    def get_history(self, booking_id, booking_array=[]):
+        booking = Proposal.objects.get(pk=booking_id)
+        booking.invoices =()
+        booking_invoices= ApplicationFee.objects.filter(proposal=booking)
+        booking_array.append({'booking': booking, 'invoices': booking_invoices})
+ 
+        #if booking.old_booking:
+         #    self.get_history(booking.old_booking.id, booking_array)
+        return booking_array
+
+# include LoginRequiredMixin
+class ProposalPaymentHistoryView(LoginRequiredMixin, TemplateView):
+    template_name = 'mooringlicensing/payments_ml/proposal_payments_history.html'
+
+    def get(self, request, *args, **kwargs):
+        booking_id = kwargs['pk']
+        booking = None
+
+        if request.user.is_staff or request.user.is_superuser or Proposal.objects.filter(submitter=request.user,pk=booking_id).count() == 1:
+             booking = Proposal.objects.get(pk=booking_id)
+             #newest_booking = self.get_newest_booking(booking_id)
+             newest_booking = booking_id
+             booking_history = self.get_history(newest_booking, booking_array=[])
+             #print vars(booking_history['bookings'])
+
+        context = {
+           'booking_id': booking_id,
+           'booking': booking,
+           'booking_history' : booking_history,
+           'GIT_COMMIT_DATE' : settings.GIT_COMMIT_DATE,
+           'GIT_COMMIT_HASH' : settings.GIT_COMMIT_HASH,
+        }
+
+        return render(request, self.template_name,context)
+
+    #def get_newest_booking(self, booking_id):
+    #    latest_id = booking_id
+    #    if Booking.objects.filter(old_booking=booking_id).exclude(booking_type=3).count() > 0:
+    #        booking = Booking.objects.filter(old_booking=booking_id)[0]   
+    #        latest_id = self.get_newest_booking(booking.id)
+    #    return latest_id
+
+    def get_history(self, booking_id, booking_array=[]):
+        booking = Proposal.objects.get(pk=booking_id)
+        booking.invoices =()
+        #booking.invoices = BookingInvoice.objects.filter(booking=booking)
+        booking_invoices= ApplicationFee.objects.filter(proposal=booking) 
+#        for bi in booking_invoices:
+#            print bi
+#            booking.invoices.add(bi)
+
+        booking_array.append({'booking': booking, 'invoices': booking_invoices})
+        #if booking.old_booking:
+         #    self.get_history(booking.old_booking.id, booking_array)
+        return booking_array
 
