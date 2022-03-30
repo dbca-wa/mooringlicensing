@@ -1,6 +1,31 @@
 {% extends 'mooringlicensing/emails/base_email-rottnest.html' %}
 
 {% block content_body %}
-    <p>Dear services,</p>
-    <p>Please find the attached file and process it.</p>
+<p>Dear admins,</p>
+<p>Stickers processed</p>
+<table>
+    <tr>
+        <th>Number</th>
+        <th>Printed Date</th>
+        <th>Mailed Date</th>
+    </tr>
+    {% for sticker in process_summary.stickers %}
+    <tr>
+        <td>{{ sticker.number }}</td>
+        <td>{{ sticker.printing_date|date:"d/m/Y" }}</td>
+        <td>{{ sticker.mailing_date|date:"d/m/Y" }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<p>Errors</p>
+{% for error in process_summary.errors %}
+<span>{{ error }}</span><br />
+{% endfor %}
+
+<p>Files processed</p>
+{% for response in process_summary.sticker_printing_responses %}
+<span>{{ response.name }}</span><br />
+{% endfor %}
+
 {%  endblock %}

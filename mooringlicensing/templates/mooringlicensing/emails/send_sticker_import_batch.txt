@@ -1,0 +1,22 @@
+{% extends 'mooringlicensing/emails/base_email-rottnest.html' %}
+
+{% block content_body %}
+Dear admins,
+Stickers processed:
+    {% for sticker in process_summary.stickers %}
+        Number: {{ sticker.number }}
+        Printed Date: {{ sticker.printing_date|date:"d/m/Y" }}
+        Mailed Date: {{ sticker.mailing_date|date:"d/m/Y" }}
+    {% endfor %}
+
+Errors:
+{% for error in process_summary.errors %}
+    {{ error }}
+{% endfor %}
+
+Files processed:
+{% for response in process_summary.sticker_printing_responses %}
+    {{ response.name }}
+{% endfor %}
+
+{%  endblock %}

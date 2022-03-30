@@ -281,29 +281,33 @@ def process_sticker_printing_response(process_summary):
 
 
 def send_sticker_import_batch_email(process_summary):
-    email = TemplateEmailBase(
-        subject='Sticker Import Batch',
-        html_template='mooringlicensing/emails/send_sticker_printed_batch.html',
-        txt_template='mooringlicensing/emails/send_sticker_printed_batch.txt',
-    )
+    try:
+        email = TemplateEmailBase(
+            subject='Sticker Import Batch',
+            html_template='mooringlicensing/emails/send_sticker_import_batch.html',
+            txt_template='mooringlicensing/emails/send_sticker_import_batch.txt',
+        )
 
-    attachments = []
+        attachments = []
+        context = {
+            'public_url': get_public_url(),
+            'process_summary': process_summary,
+        }
 
-    context = {
-        'public_url': get_public_url(),
-        'process_summary': process_summary,
-    }
+        from mooringlicensing.components.proposals.models import StickerPrintingContact
+        tos = StickerPrintedContact.objects.filter(type=StickerPrintingContact.TYPE_EMIAL_TO, enabled=True)
+        ccs = StickerPrintedContact.objects.filter(type=StickerPrintingContact.TYPE_EMAIL_CC, enabled=True)
+        bccs = StickerPrintedContact.objects.filter(type=StickerPrintingContact.TYPE_EMAIL_BCC, enabled=True)
 
-    from mooringlicensing.components.proposals.models import StickerPrintingContact
-    tos = StickerPrintedContact.objects.filter(type=StickerPrintingContact.TYPE_EMIAL_TO, enabled=True)
-    ccs = StickerPrintedContact.objects.filter(type=StickerPrintingContact.TYPE_EMAIL_CC, enabled=True)
-    bccs = StickerPrintedContact.objects.filter(type=StickerPrintingContact.TYPE_EMAIL_BCC, enabled=True)
+        to_address = [contact.email for contact in tos]
+        cc = [contact.email for contact in ccs]
+        bcc = [contact.email for contact in bccs]
 
-    to_address = [contact.email for contact in tos]
-    cc = [contact.email for contact in ccs]
-    bcc = [contact.email for contact in bccs]
+        # Send email
+        msg = email.send(to_address, context=context, attachments=attachments, cc=cc, bcc=bcc,)
+        return msg
 
-    # Send email
-    msg = email.send(to_address, context=context, attachments=attachments, cc=cc, bcc=bcc,)
+    except Exception as e:
+        err_msg = 'Error sending sticker import email'
+        logger.exception('{}\n{}'.format(err_msg, str(e)))
 
-    return msg
