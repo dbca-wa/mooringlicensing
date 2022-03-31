@@ -1,15 +1,14 @@
 from django.core.management.base import BaseCommand
 from django.conf import settings
-#from django.core.mail import send_mail
-from django.core.mail import EmailMultiAlternatives, EmailMessage
+from django.core.mail import EmailMultiAlternatives
 from pathlib import Path
 import subprocess
-
 import logging
-logger = logging.getLogger(__name__)
 
-#LOGFILE = 'logs/cron_tasks.log'
-LOGFILE = 'logs/run_cron_tasks.log'
+
+logger = logging.getLogger('cron_tasks')
+
+LOGFILE = 'logs/run_cron_tasks.log'  # This file is used temporarily.  It's cleared whenever this cron starts, then at the end the contents of this file is emailed.
 
 
 class Command(BaseCommand):
@@ -21,6 +20,8 @@ class Command(BaseCommand):
         subprocess.call('cat /dev/null > {}'.format(LOGFILE), shell=True)  # empty the log file
 
         logger.info('Running command {}'.format(__name__))
+        print('<div>Running command {}</div>'.format(__name__))
+
         subprocess.call('python manage_ml.py update_compliance_status' + stdout_redirect, shell=True)
         subprocess.call('python manage_ml.py send_compliance_reminder' + stdout_redirect, shell=True)
         subprocess.call('python manage_ml.py send_endorser_reminder' + stdout_redirect, shell=True)
@@ -31,12 +32,14 @@ class Command(BaseCommand):
         subprocess.call('python manage_ml.py expire_mooring_licence_application_due_to_no_submit' + stdout_redirect, shell=True)
         subprocess.call('python manage_ml.py update_approval_status' + stdout_redirect, shell=True)
         subprocess.call('python manage_ml.py approval_renewal_notices' + stdout_redirect, shell=True)
-        subprocess.call('python manage_ml.py import_mooring_bookings_data' + stdout_redirect, shell=True) 
+        subprocess.call('python manage_ml.py import_mooring_bookings_data' + stdout_redirect, shell=True)
         subprocess.call('python manage_ml.py export_and_email_sticker_data' + stdout_redirect, shell=True)
         subprocess.call('python manage_ml.py import_sticker_data' + stdout_redirect, shell=True)
         subprocess.call('python manage_ml.py send_mooring_licence_application_submit_due_reminder' + stdout_redirect, shell=True)
 
         logger.info('Command {} completed'.format(__name__))
+        print('<div>Command {} completed</div>'.format(__name__))
+
         self.send_email()
 
     def send_email(self):
