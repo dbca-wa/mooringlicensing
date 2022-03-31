@@ -18,7 +18,7 @@ from mooringlicensing.components.proposals.models import ProposalType, AnnualAdm
     AuthorisedUserApplication, VesselDetails
 from smart_selects.db_fields import ChainedForeignKey
 
-logger = logging.getLogger('__name__')
+logger = logging.getLogger('mooringlicensing')
 
 
 class Payment(RevisionedMixin):
