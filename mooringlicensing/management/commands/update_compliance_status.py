@@ -12,7 +12,7 @@ import logging
 
 from mooringlicensing.settings import CODE_DAYS_BEFORE_DUE_COMPLIANCE
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('cron_tasks')
 
 
 class Command(BaseCommand):

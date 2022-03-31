@@ -5,7 +5,8 @@ from mooringlicensing.components.compliances.models import Compliance
 from ledger.accounts.models import EmailUser
 
 import logging
-logger = logging.getLogger(__name__)
+
+logger = logging.getLogger('cron_tasks')
 
 
 class Command(BaseCommand):

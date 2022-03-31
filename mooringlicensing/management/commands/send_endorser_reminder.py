@@ -14,7 +14,7 @@ from mooringlicensing.components.main.models import NumberOfDaysType, NumberOfDa
 from mooringlicensing.components.proposals.models import Proposal, AuthorisedUserApplication
 from mooringlicensing.settings import CODE_DAYS_FOR_ENDORSER_AUA
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('cron_tasks')
 
 
 class Command(BaseCommand):

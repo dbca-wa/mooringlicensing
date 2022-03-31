@@ -17,7 +17,8 @@ from mooringlicensing.components.approvals.email import (
 )
 
 import logging
-logger = logging.getLogger(__name__)
+
+logger = logging.getLogger('cron_tasks')
 
 
 class Command(BaseCommand):

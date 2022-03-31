@@ -20,7 +20,7 @@ from mooringlicensing.components.emails.utils import get_public_url
 from mooringlicensing.components.proposals.models import StickerPrintingResponse, StickerPrintingResponseEmail, \
     StickerPrintedContact
 
-logger = logging.getLogger('mooringlicensing')
+logger = logging.getLogger('cron_tasks')
 
 
 class Command(BaseCommand):

@@ -9,7 +9,7 @@ from mooringlicensing.components.approvals.email import send_approval_cancelled_
 from mooringlicensing.components.approvals.models import Approval, WaitingListAllocation, MooringLicence
 from mooringlicensing.management.commands.utils import ml_meet_vessel_requirement
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('cron_tasks')
 
 
 class Command(BaseCommand):
@@ -86,4 +86,3 @@ class Command(BaseCommand):
         msg = '<p>{} completed. {}. IDs updated: {}.</p>'.format(cmd_name, err_str, updates)
         logger.info(msg)
         print(msg)  # will redirect to cron_tasks.log file, by the parent script
-

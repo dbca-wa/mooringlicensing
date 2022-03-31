@@ -14,7 +14,7 @@ from mooringlicensing.components.main.models import NumberOfDaysType, NumberOfDa
 from mooringlicensing.components.proposals.models import Proposal, MooringLicenceApplication
 from mooringlicensing.settings import CODE_DAYS_IN_PERIOD_MLA, CODE_DAYS_BEFORE_PERIOD_MLA
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('cron_tasks')
 
 
 class Command(BaseCommand):

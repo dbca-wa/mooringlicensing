@@ -16,7 +16,7 @@ from mooringlicensing.settings import (
         CODE_DAYS_BEFORE_END_OF_SIX_MONTH_PERIOD_WLA,
         )
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('cron_tasks')
 
 
 class Command(BaseCommand):

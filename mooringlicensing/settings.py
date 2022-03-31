@@ -202,9 +202,22 @@ LOGGING['handlers']['file_mooringlicensing'] = {
     'formatter': 'verbose',
     'maxBytes': 5242880
 }
+# logs/run_cron_tasks.log file is temporarily used in cron_tasks.py, and it's cleared whenever cron runs.
+# Therefore we need persistent log files for cron job
+LOGGING['handlers']['file_cron_tasks'] = {
+    'level': 'INFO',
+    'class': 'logging.handlers.RotatingFileHandler',
+    'filename': os.path.join(BASE_DIR, 'logs', 'cron_tasks.log'),
+    'formatter': 'verbose',
+    'maxBytes': 5242880
+}
 # define logger
 LOGGING['loggers']['mooringlicensing'] = {
     'handlers': ['file_mooringlicensing'],
+    'level': 'INFO'
+}
+LOGGING['loggers']['cron_tasks'] = {
+    'handlers': ['file_cron_tasks'],
     'level': 'INFO'
 }
 GROUP_MOORING_LICENSING_ADMIN = 'Mooring Licensing - Admin'

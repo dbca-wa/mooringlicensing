@@ -2,8 +2,7 @@ import logging
 from django.core.management.base import BaseCommand
 from mooringlicensing.components.main.utils import sticker_export, email_stickers_document
 
-
-logger = logging.getLogger('mooringlicensing')
+logger = logging.getLogger('cron_tasks')
 
 
 class Command(BaseCommand):

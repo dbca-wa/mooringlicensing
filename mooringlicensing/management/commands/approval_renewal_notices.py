@@ -26,7 +26,7 @@ from mooringlicensing.settings import (
     CODE_DAYS_FOR_RENEWAL_DCVP,
 )
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('cron_tasks')
 
 
 class Command(BaseCommand):
