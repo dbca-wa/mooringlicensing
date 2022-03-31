@@ -334,7 +334,10 @@ def _log_compliance_email(email_message, compliance, sender=None):
 
     customer = compliance.submitter
 
-    staff = sender
+    if isinstance(sender, EmailUser):
+        staff = sender
+    else:
+        staff = EmailUser.objects.get(sender)
 
     kwargs = {
         'subject': subject,
