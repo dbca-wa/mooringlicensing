@@ -20,6 +20,8 @@ class Command(BaseCommand):
         subprocess.call('cat /dev/null > {}'.format(LOGFILE), shell=True)  # empty the log file
 
         logger.info('Running command {}'.format(__name__))
+        print('<div>Running command {}</div>'.format(__name__))
+
         subprocess.call('python manage_ml.py update_compliance_status' + stdout_redirect, shell=True)
         subprocess.call('python manage_ml.py send_compliance_reminder' + stdout_redirect, shell=True)
         subprocess.call('python manage_ml.py send_endorser_reminder' + stdout_redirect, shell=True)
@@ -34,7 +36,10 @@ class Command(BaseCommand):
         subprocess.call('python manage_ml.py export_and_email_sticker_data' + stdout_redirect, shell=True)
         subprocess.call('python manage_ml.py import_sticker_data' + stdout_redirect, shell=True)
         subprocess.call('python manage_ml.py send_mooring_licence_application_submit_due_reminder' + stdout_redirect, shell=True)
+
         logger.info('Command {} completed'.format(__name__))
+        print('<div>Command {} completed</div>'.format(__name__))
+
         self.send_email()
 
     def send_email(self):

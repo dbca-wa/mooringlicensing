@@ -17,4 +17,4 @@ class Command(BaseCommand):
         err_str = '<strong style="color: red;">Errors: {}</strong>'.format(error_count) if error_count else '<strong style="color: green;">Errors: 0</strong>'
         msg = '<p>{} completed. {}. IDs updated: {}.</p>'.format(cmd_name, err_str, updates)
         logger.info(msg)
-        print(msg)  # will redirect to cron_tasks.log file, by the parent script
+        print(msg)  # will redirect to run_cron_tasks.log file, by the parent script
