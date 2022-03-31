@@ -2,30 +2,50 @@
 
 {% block content_body %}
 <p>Dear admins,</p>
-<p>Stickers processed</p>
-<table>
-    <tr>
-        <th>Number</th>
-        <th>Printed Date</th>
-        <th>Mailed Date</th>
-    </tr>
-    {% for sticker in process_summary.stickers %}
-    <tr>
-        <td>{{ sticker.number }}</td>
-        <td>{{ sticker.printing_date|date:"d/m/Y" }}</td>
-        <td>{{ sticker.mailing_date|date:"d/m/Y" }}</td>
-    </tr>
-    {% endfor %}
-</table>
+<div><strong>Stickers processed:</strong></div>
+{% if process_summary.stickers %}
+    <table style="border: 1px solid black; border-collapse: collapse">
+        <tr style="border: 1px solid black; border-collapse: collapse">
+            <th style="border: 1px solid black; border-collapse: collapse">Number</th>
+            <th style="border: 1px solid black; border-collapse: collapse">Printed Date</th>
+            <th style="border: 1px solid black; border-collapse: collapse">Mailed Date</th>
+        </tr>
+        {% for sticker in process_summary.stickers %}
+            <tr style="border: 1px solid black; border-collapse: collapse">
+                <td style="border: 1px solid black; border-collapse: collapse">{{ sticker.number }}</td>
+                <td style="border: 1px solid black; border-collapse: collapse">{{ sticker.printing_date|date:"d/m/Y" }}</td>
+                <td style="border: 1px solid black; border-collapse: collapse">{{ sticker.mailing_date|date:"d/m/Y" }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% else %}
+    No stickers processed
+{% endif %}
 
-<p>Errors</p>
-{% for error in process_summary.errors %}
-<span>{{ error }}</span><br />
-{% endfor %}
 
-<p>Files processed</p>
-{% for response in process_summary.sticker_printing_responses %}
-<span>{{ response.name }}</span><br />
-{% endfor %}
+
+<div><strong>Errors:</strong></div>
+{% if process_summary.errors %}
+    <ul>
+        {% for error in process_summary.errors %}
+            <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+{% else %}
+    No errors
+{% endif %}
+
+
+
+<div><strong>Files processed:</strong></div>
+{% if process_summary.sticker_printing_responses %}
+    <ul>
+        {% for response in process_summary.sticker_printing_responses %}
+            <li>{{ response.name }}</li>
+        {% endfor %}
+    </ul>
+{% else %}
+    No files processed
+{% endif %}
 
 {%  endblock %}
