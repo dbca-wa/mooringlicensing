@@ -899,23 +899,28 @@ class WaitingListAllocation(Approval):
         raise NotImplementedError('This method cannot be called on a child_obj')
 
     def get_context_for_licence_permit(self):
-        # Return context for the licence/permit document
-        context = {
-            'approval': self,
-            'application': self.current_proposal,
-            'issue_date': self.issue_date.strftime('%d/%m/%Y'),
-            'applicant_name': self.submitter.get_full_name(),
-            'applicant_full_name': self.submitter.get_full_name(),
-            'bay_name': self.current_proposal.preferred_bay.name,
-            'allocation_date': self.wla_queue_date.strftime('%d/%m/%Y'),
-            'position_number': self.wla_order,
-            'vessel_rego_no': self.current_proposal.vessel_details.vessel.rego_no,
-            'vessel_name': self.current_proposal.vessel_details.vessel_name,
-            'vessel_length': self.current_proposal.vessel_details.vessel_applicable_length,
-            'vessel_draft': self.current_proposal.vessel_details.vessel_draft,
-            'public_url': get_public_url(),
-        }
-        return context
+        try:
+            # Return context for the licence/permit document
+            context = {
+                'approval': self,
+                'application': self.current_proposal,
+                'issue_date': self.issue_date.strftime('%d/%m/%Y'),
+                'applicant_name': self.submitter.get_full_name(),
+                'applicant_full_name': self.submitter.get_full_name(),
+                'bay_name': self.current_proposal.preferred_bay.name,
+                'allocation_date': self.wla_queue_date.strftime('%d/%m/%Y'),
+                'position_number': self.wla_order,
+                'vessel_rego_no': self.current_proposal.vessel_details.vessel.rego_no,
+                'vessel_name': self.current_proposal.vessel_details.vessel_name,
+                'vessel_length': self.current_proposal.vessel_details.vessel_applicable_length,
+                'vessel_draft': self.current_proposal.vessel_details.vessel_draft,
+                'public_url': get_public_url(),
+            }
+            return context
+        except Exception as e:
+            msg = 'Waiting List Allocation: {} cannot generate document. {}'.format(self.lodgement_number, str(e))
+            logger.error(msg)
+            raise e
 
     def save(self, *args, **kwargs):
         if self.lodgement_number == '':
@@ -949,24 +954,29 @@ class AnnualAdmissionPermit(Approval):
         raise NotImplementedError('This method cannot be called on a child_obj')
 
     def get_context_for_licence_permit(self):
-        # Return context for the licence/permit document
-        context = {
-            'approval': self,
-            'application': self.current_proposal,
-            'issue_date': self.issue_date.strftime('%d/%m/%Y'),
-            'applicant_name': self.submitter.get_full_name(),
-            'p_address_line1': self.postal_address_line1,
-            'p_address_line2': self.postal_address_line2,
-            'p_address_suburb': self.postal_address_suburb,
-            'p_address_state': self.postal_address_state,
-            'p_address_postcode': self.postal_address_postcode,
-            'vessel_rego_no': self.current_proposal.vessel_details.vessel.rego_no,
-            'vessel_name': self.current_proposal.vessel_details.vessel_name,
-            'vessel_length': self.current_proposal.vessel_details.vessel_applicable_length,
-            'expiry_date': self.expiry_date.strftime('%d/%m/%Y'),
-            'public_url': get_public_url(),
-        }
-        return context
+        try:
+            # Return context for the licence/permit document
+            context = {
+                'approval': self,
+                'application': self.current_proposal,
+                'issue_date': self.issue_date.strftime('%d/%m/%Y'),
+                'applicant_name': self.submitter.get_full_name(),
+                'p_address_line1': self.postal_address_line1,
+                'p_address_line2': self.postal_address_line2,
+                'p_address_suburb': self.postal_address_suburb,
+                'p_address_state': self.postal_address_state,
+                'p_address_postcode': self.postal_address_postcode,
+                'vessel_rego_no': self.current_proposal.vessel_details.vessel.rego_no,
+                'vessel_name': self.current_proposal.vessel_details.vessel_name,
+                'vessel_length': self.current_proposal.vessel_details.vessel_applicable_length,
+                'expiry_date': self.expiry_date.strftime('%d/%m/%Y'),
+                'public_url': get_public_url(),
+            }
+            return context
+        except Exception as e:
+            msg = 'Annual Admission Permit: {} cannot generate permit. {}'.format(self.lodgement_number, str(e))
+            logger.error(msg)
+            raise e
 
     def save(self, *args, **kwargs):
         if self.lodgement_number == '':
@@ -1134,41 +1144,46 @@ class AuthorisedUserPermit(Approval):
         raise NotImplementedError('This method cannot be called on a child_obj')
 
     def get_context_for_licence_permit(self):
-        # Return context for the licence/permit document
-        moorings = []
-        for mooring in self.current_moorings:
-            m = {}
-            # calculate phone number(s)
-            numbers = []
-            if mooring.mooring_licence.submitter.mobile_number:
-                numbers.append(mooring.mooring_licence.submitter.mobile_number)
-            elif mooring.mooring_licence.submitter.phone_number:
-                numbers.append(mooring.mooring_licence.submitter.phone_number)
-            m['name'] = mooring.name
-            m['licensee_full_name'] = mooring.mooring_licence.submitter.get_full_name()
-            m['licensee_email'] = mooring.mooring_licence.submitter.email
-            m['licensee_phone'] = ', '.join(numbers)
-            moorings.append(m)
+        try:
+            # Return context for the licence/permit document
+            moorings = []
+            for mooring in self.current_moorings:
+                m = {}
+                # calculate phone number(s)
+                numbers = []
+                if mooring.mooring_licence.submitter.mobile_number:
+                    numbers.append(mooring.mooring_licence.submitter.mobile_number)
+                elif mooring.mooring_licence.submitter.phone_number:
+                    numbers.append(mooring.mooring_licence.submitter.phone_number)
+                m['name'] = mooring.name
+                m['licensee_full_name'] = mooring.mooring_licence.submitter.get_full_name()
+                m['licensee_email'] = mooring.mooring_licence.submitter.email
+                m['licensee_phone'] = ', '.join(numbers)
+                moorings.append(m)
 
-        context = {
-            'approval': self,
-            'application': self.current_proposal,
-            'issue_date': self.issue_date.strftime('%d/%m/%Y'),
-            'applicant_name': self.submitter.get_full_name(),
-            'p_address_line1': self.postal_address_line1,
-            'p_address_line2': self.postal_address_line2,
-            'p_address_suburb': self.postal_address_suburb,
-            'p_address_state': self.postal_address_state,
-            'p_address_postcode': self.postal_address_postcode,
-            'vessel_rego_no': self.current_proposal.vessel_details.vessel.rego_no,
-            'vessel_name': self.current_proposal.vessel_details.vessel_name,
-            'vessel_length': self.current_proposal.vessel_details.vessel_applicable_length,
-            'vessel_draft': self.current_proposal.vessel_details.vessel_draft,
-            'moorings': moorings,  # m.name, m.licensee_full_name, m.licensee_email, m.licensee_phone
-            'expiry_date': self.expiry_date.strftime('%d/%m/%Y'),
-            'public_url': get_public_url(),
-        }
-        return context
+            context = {
+                'approval': self,
+                'application': self.current_proposal,
+                'issue_date': self.issue_date.strftime('%d/%m/%Y'),
+                'applicant_name': self.submitter.get_full_name(),
+                'p_address_line1': self.postal_address_line1,
+                'p_address_line2': self.postal_address_line2,
+                'p_address_suburb': self.postal_address_suburb,
+                'p_address_state': self.postal_address_state,
+                'p_address_postcode': self.postal_address_postcode,
+                'vessel_rego_no': self.current_proposal.vessel_details.vessel.rego_no,
+                'vessel_name': self.current_proposal.vessel_details.vessel_name,
+                'vessel_length': self.current_proposal.vessel_details.vessel_applicable_length,
+                'vessel_draft': self.current_proposal.vessel_details.vessel_draft,
+                'moorings': moorings,  # m.name, m.licensee_full_name, m.licensee_email, m.licensee_phone
+                'expiry_date': self.expiry_date.strftime('%d/%m/%Y'),
+                'public_url': get_public_url(),
+            }
+            return context
+        except Exception as e:
+            msg = 'Authorised User Permit: {} cannot generate permit. {}'.format(self.lodgement_number, str(e))
+            logger.error(msg)
+            raise e
 
     def save(self, *args, **kwargs):
         if self.lodgement_number == '':
@@ -1504,8 +1519,8 @@ class MooringLicence(Approval):
             }
             return context
         except Exception as e:
-            logger.error("get_context_for_licence_permit")
-            logger.error(e)
+            msg = 'Mooring Licence: {} cannot generate licence. {}'.format(self.lodgement_number, str(e))
+            logger.error(msg)
             raise e
 
     def save(self, *args, **kwargs):
