@@ -261,6 +261,8 @@ def process_sticker_printing_response(process_summary):
                     errors.append(err_msg)
                     response.no_errors_when_process = False
                     process_summary['errors'].append(err_msg)
+                    response.processed = True  # Update response obj not to process again.  But from no_errors_when_process flag tells admin that there was an error.
+                    response.save()
                     continue
                 except Exception as e:
                     err_msg = 'Error updating the sticker {}'.format(sticker_number_value)
@@ -268,10 +270,11 @@ def process_sticker_printing_response(process_summary):
                     errors.append(err_msg)
                     response.no_errors_when_process = False
                     process_summary['errors'].append(err_msg)
+                    response.processed = True  # Update response obj not to process again.  But from no_errors_when_process flag tells admin that there was an error.
+                    response.save()
                     continue
 
-            # Update response obj not to process again
-            response.processed = True
+            response.processed = True  # Update response obj not to process again
             response.save()
         else:
             # No fild is saved in the _file field
