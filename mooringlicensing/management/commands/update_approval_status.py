@@ -17,7 +17,8 @@ from mooringlicensing.components.approvals.email import (
 )
 
 import logging
-logger = logging.getLogger(__name__)
+
+logger = logging.getLogger('cron_tasks')
 
 
 class Command(BaseCommand):
@@ -173,4 +174,4 @@ class Command(BaseCommand):
         err_str = '<strong style="color: red;">Errors: {}</strong>'.format(len(errors)) if len(errors)>0 else '<strong style="color: green;">Errors: 0</strong>'
         msg = '<p>{} completed. {}. IDs updated: {}.</p>'.format(cmd_name, err_str, updates)
         logger.info(msg)
-        print(msg) # will redirect to cron_tasks.log file, by the parent script
+        print(msg)  # will redirect to run_cron_tasks.log file, by the parent script

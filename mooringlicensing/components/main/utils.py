@@ -192,6 +192,7 @@ def handle_validation_error(e):
         else:
             raise
 
+
 def handle_validation_error(e):
     if hasattr(e, 'error_dict'):
         raise serializers.ValidationError(repr(e.error_dict))
@@ -203,6 +204,7 @@ def handle_validation_error(e):
 
 
 def sticker_export():
+    logger = logging.getLogger('cron_tasks')
     # TODO: Implement below
     # Note: if the user wants to apply for e.g. three new authorisations,
     # then the user needs to submit three applications. The system will
@@ -289,6 +291,7 @@ def sticker_export():
 
 
 def email_stickers_document():
+    logger = logging.getLogger('cron_tasks')
     updates, errors = [], []
 
     try:
@@ -323,6 +326,7 @@ def email_stickers_document():
         errors.append(err_msg)
 
     return updates, errors
+
 
 ## DoT vessel rego check
 def get_client_ip(request):
