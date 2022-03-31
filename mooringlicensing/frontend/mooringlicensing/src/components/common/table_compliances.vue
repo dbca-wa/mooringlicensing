@@ -266,7 +266,8 @@ export default {
                         'render': function(row, type, full){
                             let dueDate = '';
                             if (full.requirement) {
-                                dueDate = full.requirement.read_due_date;
+                                //dueDate = full.requirement.read_due_date;
+                                dueDate = full.due_date_display;
                             }
                             return dueDate;
                         }
