@@ -176,11 +176,21 @@ def create_fee_lines(instance, invoice_text=None, vouchers=[], internal=False):
 
 def generate_line_item(application_type, fee_amount_adjusted, fee_constructor, instance, target_datetime):
     target_datetime_str = target_datetime.astimezone(pytz.timezone(TIME_ZONE)).strftime('%d/%m/%Y %I:%M %p')
-    proposal_type_text = '({})'.format(instance.proposal_type.description) if hasattr(instance, 'proposal_type') else ''
+    application_type_display = fee_constructor.application_type.description
+    application_type_display = application_type_display.replace('Application', '')
+    application_type_display = application_type_display.replace('fees', '')
+    application_type_display = application_type_display.strip()
+    vessel_rego_no = ''
+    if instance.vessel_details and instance.vessel_details.vessel:
+        vessel_rego_no = instance.vessel_details.vessel.rego_no
+
+    proposal_type_text = '{}'.format(instance.proposal_type.description) if hasattr(instance, 'proposal_type') else ''
     return {
-        'ledger_description': '{}({}) Fee: {} (Season: {} to {}) @{}'.format(
-            fee_constructor.application_type.description,
+        'ledger_description': '{} fee ({}, {}): {} (Season: {} to {}) @{}'.format(
+            # fee_constructor.application_type.description,
+            application_type_display,
             proposal_type_text,
+            vessel_rego_no,
             instance.lodgement_number,
             fee_constructor.fee_season.start_date.strftime('%d/%m/%Y'),
             fee_constructor.fee_season.end_date.strftime('%d/%m/%Y'),
