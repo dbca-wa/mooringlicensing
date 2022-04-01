@@ -13,6 +13,7 @@ from mooringlicensing.components.proposals.email import send_expire_mooring_lice
     send_expire_mla_notification_to_assessor
 from mooringlicensing.components.main.models import NumberOfDaysType, NumberOfDaysSetting
 from mooringlicensing.components.proposals.models import Proposal, MooringLicenceApplication
+from mooringlicensing.management.commands.utils import construct_email_message
 from mooringlicensing.settings import CODE_DAYS_IN_PERIOD_MLA
 
 logger = logging.getLogger('cron_tasks')
@@ -78,7 +79,8 @@ class Command(BaseCommand):
                 errors.append(err_msg)
 
         cmd_name = __name__.split('.')[-1].replace('_', ' ').upper()
-        err_str = '<strong style="color: red;">Errors: {}</strong>'.format(len(errors)) if len(errors) > 0 else '<strong style="color: green;">Errors: 0</strong>'
-        msg = '<p>{} completed. {}. IDs updated: {}.</p>'.format(cmd_name, err_str, updates)
+        # err_str = '<strong style="color: red;">Errors: {}</strong>'.format(len(errors)) if len(errors) > 0 else '<strong style="color: green;">Errors: 0</strong>'
+        # msg = '<p>{} completed. {}. IDs updated: {}.</p>'.format(cmd_name, err_str, updates)
+        msg = construct_email_message(cmd_name, errors, updates)
         logger.info(msg)
         cron_email.info(msg)
