@@ -402,7 +402,7 @@ class CompliancePaginatedViewSet(viewsets.ModelViewSet):
             else:
                 qs = Compliance.objects.all()
         elif is_customer(self.request):
-            qs = Compliance.objects.filter(Q(approval__submitter=request_user))
+            qs = Compliance.objects.filter(Q(approval__submitter=request_user)).exclude(processing_status="discarded")
 
         return qs
 
