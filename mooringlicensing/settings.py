@@ -194,7 +194,15 @@ APPLICATION_TYPES = [
     APPLICATION_TYPE_REPLACEMENT_STICKER,
     APPLICATION_TYPE_MOORING_SWAP,
 ]
+
+# Add a formatter for the contents of the cron email
+LOGGING['formatters']['msg_only'] = {
+    'format': '<div>{message}</div>',
+    'style': '{',
+}
+
 # Add a handler
+CRON_EMAIL_FILE_NAME = 'cron_email.log'
 LOGGING['handlers']['file_mooringlicensing'] = {
     'level': 'INFO',
     'class': 'logging.handlers.RotatingFileHandler',
@@ -211,15 +219,30 @@ LOGGING['handlers']['file_cron_tasks'] = {
     'formatter': 'verbose',
     'maxBytes': 5242880
 }
-# define logger
+# Contents of this log file is emailed nightly
+LOGGING['handlers']['file_cron_email'] = {
+    'level': 'INFO',
+    'class': 'logging.handlers.RotatingFileHandler',
+    'filename': os.path.join(BASE_DIR, 'logs', CRON_EMAIL_FILE_NAME),
+    'formatter': 'msg_only',
+    'maxBytes': 5242880
+}
+
+# Define loggers
 LOGGING['loggers']['mooringlicensing'] = {
     'handlers': ['file_mooringlicensing'],
-    'level': 'INFO'
+    'level': 'INFO',
 }
 LOGGING['loggers']['cron_tasks'] = {
     'handlers': ['file_cron_tasks'],
-    'level': 'INFO'
+    'level': 'INFO',
 }
+LOGGING['loggers']['cron_email'] = {
+    'handlers': ['file_cron_email'],
+    'level': 'INFO',
+    'propagate': False,  # This logger is just for the contents of cron email.  We don't want to propagate it.
+}
+
 GROUP_MOORING_LICENSING_ADMIN = 'Mooring Licensing - Admin'
 GROUP_MOORING_LICENSING_PAYMENT_OFFICER = 'Mooring Licensing - Payment Officers'
 GROUP_ASSESSOR_WAITING_LIST = 'Mooring Licensing - Assessors: Waiting List'
