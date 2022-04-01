@@ -21,7 +21,8 @@ class Command(BaseCommand):
         self.clear_cron_email_log()
 
         logger.info('===== Running command: {} ====='.format(__name__))
-        cron_email.info('<div>Running command: {}</div>'.format(__name__))
+        cron_email.info('<div><strong>Running command: {}</strong></div>'.format(__name__))
+        cron_email.info('<div style="margin-left: 1em;">')
 
         subprocess.call('python manage_ml.py update_compliance_status', shell=True)
         subprocess.call('python manage_ml.py send_compliance_reminder', shell=True)
@@ -38,7 +39,8 @@ class Command(BaseCommand):
         subprocess.call('python manage_ml.py send_mooring_licence_application_submit_due_reminder', shell=True)
 
         logger.info('===== Completed command: {} ====='.format(__name__))
-        cron_email.info('<div>Completed command: {}</div>'.format(__name__))
+        cron_email.info('</div>')
+        cron_email.info('<div><strong>Completed command: {}</strong></div>'.format(__name__))
 
         self.send_email()
 

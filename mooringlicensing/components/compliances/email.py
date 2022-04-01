@@ -436,7 +436,7 @@ def _log_user_email(email_message, target_email_user, customer, sender=None, att
     kwargs = {
         'subject': subject,
         'text': text,
-        'emailuser': target_email_user,
+        'emailuser': target_email_user if target_email_user else customer,
         'customer': customer,
         'staff': staff,
         'to': to,
