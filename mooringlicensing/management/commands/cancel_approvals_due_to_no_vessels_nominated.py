@@ -7,7 +7,7 @@ import logging
 
 from mooringlicensing.components.approvals.email import send_approval_cancelled_due_to_no_vessels_nominated_mail
 from mooringlicensing.components.approvals.models import Approval, WaitingListAllocation, MooringLicence
-from mooringlicensing.management.commands.utils import ml_meet_vessel_requirement
+from mooringlicensing.management.commands.utils import ml_meet_vessel_requirement, construct_email_message
 
 logger = logging.getLogger('cron_tasks')
 cron_email = logging.getLogger('cron_email')
@@ -82,8 +82,9 @@ class Command(BaseCommand):
                 errors.append(err_msg)
 
         cmd_name = __name__.split('.')[-1].replace('_', ' ').upper()
-        err_str = '<strong style="color: red;">Errors: {}</strong>'.format(len(errors)) if len(
-            errors) > 0 else '<strong style="color: green;">Errors: 0</strong>'
-        msg = '<p>{} ({}) completed. {}. IDs updated: {}.</p>'.format(cmd_name, approval_type, err_str, updates)
+        # err_str = '<strong style="color: red;">Errors: {}</strong>'.format(len(errors)) if len(
+        #     errors) > 0 else '<strong style="color: green;">Errors: 0</strong>'
+        # msg = '<p>{} ({}) completed. {}. IDs updated: {}.</p>'.format(cmd_name, approval_type, err_str, updates)
+        msg = construct_email_message(cmd_name, errors, updates)
         logger.info(msg)
         cron_email.info(msg)

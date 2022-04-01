@@ -18,6 +18,7 @@ from mooringlicensing.components.emails.emails import TemplateEmailBase
 from mooringlicensing.components.emails.utils import get_public_url
 from mooringlicensing.components.proposals.models import StickerPrintingResponse, StickerPrintingResponseEmail, \
     StickerPrintedContact
+from mooringlicensing.management.commands.utils import construct_email_message
 
 logger = logging.getLogger('cron_tasks')
 cron_email = logging.getLogger('cron_email')
@@ -36,7 +37,10 @@ class Command(BaseCommand):
         sticker_email_password = env('STICKER_EMAIL_PASSWORD', '')
 
         if not sticker_email_host or not sticker_email_port or not sticker_email_username or not sticker_email_password:
-            raise Exception('Configure email settings at .env to process sticker responses')
+            msg = 'Configure email settings at .env to process sticker responses'
+            logger.error(msg)
+            cron_email.info(msg)
+            raise Exception(msg)
 
         context = ssl.create_default_context()
         imapclient = imaplib.IMAP4_SSL(sticker_email_host, sticker_email_port, ssl_context=context)
@@ -54,8 +58,6 @@ class Command(BaseCommand):
 
         if (len(datas) - fetch_num) < 0:
             fetch_num = len(datas)
-
-        # msg_list = []
 
         for num in datas[len(datas) - fetch_num::]:
             try:
@@ -131,7 +133,6 @@ class Command(BaseCommand):
         # 3. Process xlsx file saved in django model
         ##########
         process_summary = {'stickers': [], 'errors': [], 'sticker_printing_responses': []}  # To be used for sticker processed email
-
         updates, errors = process_sticker_printing_response(process_summary)
 
         # Send sticker import batch emails
@@ -139,9 +140,10 @@ class Command(BaseCommand):
 
         cmd_name = __name__.split('.')[-1].replace('_', ' ').upper()
         # error_count = len(errors) + len(error_filenames)
-        error_count = len(errors)
-        err_str = '<strong style="color: red;">Errors: {}</strong>'.format(error_count) if error_count else '<strong style="color: green;">Errors: 0</strong>'
-        msg = '<p>{} completed. {}. IDs updated: {}.</p>'.format(cmd_name, err_str, updates)
+        # error_count = len(errors)
+        # err_str = '<strong style="color: red;">Errors: {}</strong>'.format(error_count) if error_count else '<strong style="color: green;">Errors: 0</strong>'
+        # msg = '<p>{} completed. {}. IDs updated: {}.</p>'.format(cmd_name, err_str, updates)
+        msg = construct_email_message(cmd_name, errors, updates)
         logger.info(msg)
         cron_email.info(msg)
 
