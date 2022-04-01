@@ -209,6 +209,7 @@ class ListComplianceSerializer(serializers.ModelSerializer):
     approval_type = serializers.SerializerMethodField()
     approval_submitter = serializers.SerializerMethodField()
     assigned_to_name = serializers.SerializerMethodField()
+    due_date_display = serializers.SerializerMethodField()
 
     class Meta:
         model = Compliance
@@ -222,6 +223,7 @@ class ListComplianceSerializer(serializers.ModelSerializer):
             'approval_submitter',
             'assigned_to_name',
             'can_process',
+            'due_date_display',
         )
         datatables_always_serialize = (
             'id',
@@ -233,7 +235,14 @@ class ListComplianceSerializer(serializers.ModelSerializer):
             'approval_submitter',
             'assigned_to_name',
             'can_process',
+            'due_date_display',
         )
+
+    def get_due_date_display(self, obj):
+        due_date_str = ''
+        if obj.due_date:
+            due_date_str = obj.due_date.strftime('%d/%m/%Y')
+        return due_date_str
 
     def get_status(self, obj):
         return obj.get_customer_status_display()
