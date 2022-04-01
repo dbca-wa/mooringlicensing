@@ -1139,13 +1139,19 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
 
                 # Generate compliances
                 from mooringlicensing.components.compliances.models import Compliance, ComplianceUserAction
-                target_proposal = self.previous_application if self.previous_application else self
-                approval_compliances = Compliance.objects.filter(
+                #target_proposal = self.previous_application if self.previous_application else self
+                target_proposal = self.previous_application if self.proposal_type.code == 'amendment' else self
+                for compliance in Compliance.objects.filter(
                     approval=self.approval.approval,
                     proposal=target_proposal,
                     processing_status='future',
-                )
-                approval_compliances.delete()
+                    ):
+                    compliance.processing_status='discarded'
+                    compliance.customer_status = 'discarded'
+                    compliance.reminder_sent=True
+                    compliance.post_reminder_sent=True
+                    compliance.save()
+                #approval_compliances.delete()
                 self.generate_compliances(approval, request)
 
                 # Log proposal action
@@ -1327,7 +1333,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
             try:
                 for r in self.requirements.filter(copied_from__isnull=False):
                     cs=[]
-                    cs=Compliance.objects.filter(requirement=r.copied_from, proposal=self.previous_application, processing_status='due')
+                    cs=Compliance.objects.filter(requirement=r.copied_from, proposal=self.previous_application, processing_status__in=['due','approved'])
                     if cs:
                         if r.is_deleted == True:
                             for c in cs:
@@ -1367,14 +1373,17 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                             for x in range(req.recurrence_schedule):
                             #Weekly
                                 if req.recurrence_pattern == 1:
-                                    current_date += timedelta(weeks=1)
+                                    #current_date += timedelta(weeks=1)
+                                    current_date += relativedelta(weeks=+1)
                             #Monthly
                                 elif req.recurrence_pattern == 2:
-                                    current_date += timedelta(weeks=4)
+                                    #current_date += timedelta(weeks=4)
+                                    current_date += relativedelta(months=+1)
                                     pass
                             #Yearly
                                 elif req.recurrence_pattern == 3:
-                                    current_date += timedelta(days=365)
+                                    #current_date += timedelta(days=365)
+                                    current_date += relativedelta(years=+1)
                             # Create the compliance
                             if current_date <= approval.expiry_date:
                                 try:
@@ -2362,13 +2371,18 @@ class AuthorisedUserApplication(Proposal):
         if request:
             # Generate compliances
             from mooringlicensing.components.compliances.models import Compliance, ComplianceUserAction
-            target_proposal = self.previous_application if self.previous_application else self.proposal
-            approval_compliances = Compliance.objects.filter(
+            target_proposal = self.previous_application if self.proposal_type.code == 'amendment' else self.proposal
+            for compliance in Compliance.objects.filter(
                 approval=self.approval.approval,
                 proposal=target_proposal,
                 processing_status='future',
-            )
-            approval_compliances.delete()
+                ):
+                #approval_compliances.delete()
+                compliance.processing_status='discarded'
+                compliance.customer_status = 'discarded'
+                compliance.reminder_sent=True
+                compliance.post_reminder_sent=True
+                compliance.save()
             self.generate_compliances(approval, request)
 
         # always reset this flag
@@ -2750,13 +2764,19 @@ class MooringLicenceApplication(Proposal):
                 # Generate compliances
                 from mooringlicensing.components.compliances.models import Compliance, ComplianceUserAction
                 #if self.proposal_type == PROPOSAL_TYPE_AMENDMENT:
-                target_proposal = self.previous_application if self.previous_application else self.proposal
-                approval_compliances = Compliance.objects.filter(
+                #target_proposal = self.previous_application if self.previous_application else self.proposal
+                target_proposal = self.previous_application if self.proposal_type.code == 'amendment' else self.proposal
+                for compliance in Compliance.objects.filter(
                     approval=self.approval.approval,
                     proposal=target_proposal,
                     processing_status='future',
-                )
-                approval_compliances.delete()
+                    ):
+                #approval_compliances.delete()
+                    compliance.processing_status='discarded'
+                    compliance.customer_status = 'discarded'
+                    compliance.reminder_sent=True
+                    compliance.post_reminder_sent=True
+                    compliance.save()
                 self.generate_compliances(approval, request)
 
             mooring.log_user_action(
