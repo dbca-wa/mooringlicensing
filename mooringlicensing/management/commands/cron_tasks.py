@@ -5,56 +5,56 @@ from pathlib import Path
 import subprocess
 import logging
 
+from mooringlicensing.settings import CRON_EMAIL_FILE_NAME
 
 logger = logging.getLogger('cron_tasks')
-
-LOGFILE = 'logs/run_cron_tasks.log'  # This file is used temporarily.  It's cleared whenever this cron starts, then at the end the contents of this file is emailed.
+cron_email = logging.getLogger('cron_email')
+LOGFILE = 'logs/' + CRON_EMAIL_FILE_NAME  # This file is used temporarily.  It's cleared whenever this cron starts, then at the end the contents of this file is emailed.
 
 
 class Command(BaseCommand):
     help = 'Run Mooring Licensing Cron tasks'
 
     def handle(self, *args, **options):
-        #print("cron tasks")
-        stdout_redirect = ' | tee -a {}'.format(LOGFILE)
-        subprocess.call('cat /dev/null > {}'.format(LOGFILE), shell=True)  # empty the log file
+        # Empty the cron email log file because this file is used only for the contents of the nightly cron email
+        # We don't want to accumulate the contents
+        self.clear_cron_email_log()
 
-        logger.info('Running command {}'.format(__name__))
-        print('<div>Running command {}</div>'.format(__name__))
+        logger.info('===== Running command: {} ====='.format(__name__))
+        cron_email.info('<div><strong>Running command: {}</strong></div>'.format(__name__))
+        cron_email.info('<div style="margin-left: 1em;">')
 
-        subprocess.call('python manage_ml.py update_compliance_status' + stdout_redirect, shell=True)
-        subprocess.call('python manage_ml.py send_compliance_reminder' + stdout_redirect, shell=True)
-        subprocess.call('python manage_ml.py send_endorser_reminder' + stdout_redirect, shell=True)
-        subprocess.call('python manage_ml.py send_vessel_nominate_reminder' + stdout_redirect, shell=True)
-        subprocess.call('python manage_ml.py cancel_approvals_due_to_no_vessels_nominated' + stdout_redirect, shell=True)
-        subprocess.call('python manage_ml.py send_waiting_list_application_submit_due_reminder' + stdout_redirect, shell=True)
-        subprocess.call('python manage_ml.py expire_mooring_licence_application_due_to_no_documents' + stdout_redirect, shell=True)
-        subprocess.call('python manage_ml.py expire_mooring_licence_application_due_to_no_submit' + stdout_redirect, shell=True)
-        subprocess.call('python manage_ml.py update_approval_status' + stdout_redirect, shell=True)
-        subprocess.call('python manage_ml.py approval_renewal_notices' + stdout_redirect, shell=True)
-        subprocess.call('python manage_ml.py import_mooring_bookings_data' + stdout_redirect, shell=True)
-        subprocess.call('python manage_ml.py export_and_email_sticker_data' + stdout_redirect, shell=True)
-        subprocess.call('python manage_ml.py import_sticker_data' + stdout_redirect, shell=True)
-        subprocess.call('python manage_ml.py send_mooring_licence_application_submit_due_reminder' + stdout_redirect, shell=True)
+        subprocess.call('python manage_ml.py update_compliance_status', shell=True)
+        subprocess.call('python manage_ml.py send_compliance_reminder', shell=True)
+        subprocess.call('python manage_ml.py send_endorser_reminder', shell=True)
+        subprocess.call('python manage_ml.py send_vessel_nominate_reminder', shell=True)
+        subprocess.call('python manage_ml.py cancel_approvals_due_to_no_vessels_nominated', shell=True)
+        subprocess.call('python manage_ml.py expire_mooring_licence_application_due_to_no_documents', shell=True)
+        subprocess.call('python manage_ml.py expire_mooring_licence_application_due_to_no_submit', shell=True)
+        subprocess.call('python manage_ml.py update_approval_status', shell=True)
+        subprocess.call('python manage_ml.py approval_renewal_notices', shell=True)
+        subprocess.call('python manage_ml.py import_mooring_bookings_data', shell=True)
+        subprocess.call('python manage_ml.py export_and_email_sticker_data', shell=True)
+        subprocess.call('python manage_ml.py import_sticker_data', shell=True)
+        subprocess.call('python manage_ml.py send_mooring_licence_application_submit_due_reminder', shell=True)
 
-        logger.info('Command {} completed'.format(__name__))
-        print('<div>Command {} completed</div>'.format(__name__))
+        logger.info('===== Completed command: {} ====='.format(__name__))
+        cron_email.info('</div>')
+        cron_email.info('<div><strong>Completed command: {}</strong></div>'.format(__name__))
 
         self.send_email()
 
     def send_email(self):
-        #email_instance = env('EMAIL_INSTANCE','DEV')
         email_instance = settings.EMAIL_INSTANCE
-        log_txt = Path(LOGFILE).read_text()
+        contents_of_cron_email = Path(LOGFILE).read_text()
         subject = '{} - Cronjob'.format(settings.SYSTEM_NAME_SHORT)
-        body = ''
         to = settings.CRON_NOTIFICATION_EMAIL if isinstance(settings.NOTIFICATION_EMAIL, list) else [settings.CRON_NOTIFICATION_EMAIL]
-        msg = EmailMultiAlternatives(subject, log_txt, settings.EMAIL_FROM, to,
-                #attachments=_attachments, cc=cc, bcc=bcc, 
-                #reply_to=reply_to, 
-                headers={'System-Environment': email_instance}
-                )
-        msg.attach_alternative(log_txt, "text/html")
+        msg = EmailMultiAlternatives(subject, contents_of_cron_email, settings.EMAIL_FROM, to,
+            headers={'System-Environment': email_instance}
+        )
+        msg.attach_alternative(contents_of_cron_email, "text/html")
         msg.send()
-        #send_mail(subject, body, settings.EMAIL_FROM, to, fail_silently=False, html_message=log_txt,)
 
+    def clear_cron_email_log(self):
+        with open(LOGFILE, 'w'):
+            pass

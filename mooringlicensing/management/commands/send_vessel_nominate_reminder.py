@@ -10,13 +10,14 @@ from mooringlicensing.components.approvals.email import send_vessel_nomination_r
 from mooringlicensing.components.approvals.models import Approval, WaitingListAllocation, \
     MooringLicence, AuthorisedUserPermit
 from mooringlicensing.components.main.models import NumberOfDaysType, NumberOfDaysSetting
-from mooringlicensing.management.commands.utils import ml_meet_vessel_requirement
+from mooringlicensing.management.commands.utils import ml_meet_vessel_requirement, construct_email_message
 from mooringlicensing.settings import (
         CODE_DAYS_BEFORE_END_OF_SIX_MONTH_PERIOD_ML,
         CODE_DAYS_BEFORE_END_OF_SIX_MONTH_PERIOD_WLA,
         )
 
 logger = logging.getLogger('cron_tasks')
+cron_email = logging.getLogger('cron_email')
 
 
 class Command(BaseCommand):
@@ -110,8 +111,9 @@ class Command(BaseCommand):
                 errors.append(err_msg)
 
         cmd_name = __name__.split('.')[-1].replace('_', ' ').upper()
-        err_str = '<strong style="color: red;">Errors: {}</strong>'.format(len(errors)) if len(
-            errors) > 0 else '<strong style="color: green;">Errors: 0</strong>'
-        msg = '<p>{} completed. {}. IDs updated: {}.</p>'.format(cmd_name, err_str, updates)
+        # err_str = '<strong style="color: red;">Errors: {}</strong>'.format(len(errors)) if len(
+        #     errors) > 0 else '<strong style="color: green;">Errors: 0</strong>'
+        # msg = '<p>{} ({}) completed. {}. IDs updated: {}.</p>'.format(cmd_name, approval_type, err_str, updates)
+        msg = construct_email_message(cmd_name, errors, updates)
         logger.info(msg)
-        print(msg)  # will redirect to run_cron_tasks.log file, by the parent script
+        cron_email.info(msg)
