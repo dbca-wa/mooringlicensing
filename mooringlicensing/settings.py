@@ -197,7 +197,7 @@ APPLICATION_TYPES = [
 
 # Add a formatter for the contents of the cron email
 LOGGING['formatters']['msg_only'] = {
-    'format': '<div>{message}</div>',
+    'format': '{message}',
     'style': '{',
 }
 
@@ -240,8 +240,11 @@ LOGGING['loggers']['cron_tasks'] = {
 LOGGING['loggers']['cron_email'] = {
     'handlers': ['file_cron_email'],
     'level': 'INFO',
-    'propagate': False,  # This logger is just for the contents of cron email.  We don't want to propagate it.
+    'propagate': True,
 }
+
+# Logging all to mooringlicensing.log file
+LOGGING['loggers']['']['handlers'].append('file_mooringlicensing')
 
 GROUP_MOORING_LICENSING_ADMIN = 'Mooring Licensing - Admin'
 GROUP_MOORING_LICENSING_PAYMENT_OFFICER = 'Mooring Licensing - Payment Officers'

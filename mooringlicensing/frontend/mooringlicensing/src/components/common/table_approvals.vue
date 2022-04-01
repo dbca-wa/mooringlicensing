@@ -327,7 +327,8 @@ export default {
                             } else {
                                 return full.lodgement_number
                             }
-                        }
+                        },
+                        name: 'lodgement_number',
                     }
         },
         columnApplicationNumberInBay: function() {
@@ -335,7 +336,7 @@ export default {
                         // 4. Application number in Bay
                         data: "id",
                         orderable: true,
-                        searchable: true,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             return full.current_proposal_number;
@@ -347,7 +348,7 @@ export default {
                         // 5. Status
                         data: "id",
                         orderable: true,
-                        searchable: true,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             return full.status
@@ -359,7 +360,7 @@ export default {
                         // 5. Status
                         data: "id",
                         orderable: true,
-                        searchable: true,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             return full.internal_status
@@ -371,7 +372,7 @@ export default {
                         // 6. Vessel Registration
                         data: "id",
                         orderable: true,
-                        searchable: true,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             return full.vessel_registration;
@@ -383,7 +384,7 @@ export default {
                         // 7. Vessel Name
                         data: "id",
                         orderable: true,
-                        searchable: true,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             return full.vessel_name;
@@ -395,7 +396,7 @@ export default {
                         // 8. Issue Date
                         data: "id",
                         orderable: true,
-                        searchable: true,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             return full.issue_date_str;
@@ -407,7 +408,7 @@ export default {
                         // 9. Expiry Date
                         data: "id",
                         orderable: true,
-                        searchable: true,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             return full.expiry_date_str;
@@ -420,7 +421,7 @@ export default {
                         // 10. Action
                         data: "id",
                         orderable: true,
-                        searchable: true,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             let links = '';
@@ -487,7 +488,7 @@ export default {
                         // 10. Action
                         data: "id",
                         orderable: true,
-                        searchable: true,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             return full.ria_generated_proposals;
@@ -502,14 +503,15 @@ export default {
                         visible: true,
                         'render': function(row, type, full){
                             return full.holder;
-                        }
+                        },
+                        name: 'submitter__first_name, submitter__last_name',
                     }
         },
         columnPreferredMooringBay: function() {
             return {
                         data: "id",
                         orderable: true,
-                        searchable: true,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             return full.preferred_mooring_bay;
@@ -520,7 +522,7 @@ export default {
             return {
                         data: "id",
                         orderable: true,
-                        searchable: true,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             return full.wla_order;
@@ -532,7 +534,7 @@ export default {
             return {
                         data: "id",
                         orderable: true,
-                        searchable: true,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             return full.vessel_length;
@@ -543,7 +545,7 @@ export default {
             return {
                         data: "id",
                         orderable: true,
-                        searchable: true,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             return full.vessel_draft;
@@ -555,7 +557,7 @@ export default {
             return {
                         data: "id",
                         orderable: true,
-                        searchable: true,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             //return full.vessel_draft;
@@ -579,14 +581,15 @@ export default {
                                 ret_str += sticker.number + '<br />'
                             }
                             return ret_str
-                        }
+                        },
+                        name: 'stickers__number',
                     }
         },
         columnStickerMailedDate: function() {
             return {
                         data: "id",
                         orderable: true,
-                        searchable: true,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             let ret_str = ''
@@ -606,7 +609,7 @@ export default {
             return {
                         data: "id",
                         orderable: true,
-                        searchable: true,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             let approval_letter_name = ''
@@ -654,7 +657,7 @@ export default {
             return {
                         data: "id",
                         orderable: true,
-                        searchable: true,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             return full.vessel_regos;
