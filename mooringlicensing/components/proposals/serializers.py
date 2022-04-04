@@ -501,6 +501,7 @@ class SaveWaitingListApplicationSerializer(serializers.ModelSerializer):
                 'preferred_bay_id',
                 'silent_elector',
                 'temporary_document_collection_id',
+                'keep_existing_vessel',
                 )
         read_only_fields=('id',)
 
