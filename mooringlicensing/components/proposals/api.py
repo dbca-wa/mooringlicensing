@@ -327,8 +327,8 @@ class GetApplicationStatusesDict(views.APIView):
     def get(self, request, format=None):
         data = {}
         if not cache.get('application_internal_statuses_dict') or not cache.get('application_external_statuses_dict'):
-            cache.set('application_internal_statuses_dict',[{'code': i[0], 'description': i[1]} for i in Proposal.CUSTOMER_STATUS_CHOICES], settings.LOV_CACHE_TIMEOUT)
-            cache.set('application_external_statuses_dict',[{'code': i[0], 'description': i[1]} for i in Proposal.PROCESSING_STATUS_CHOICES], settings.LOV_CACHE_TIMEOUT)
+            cache.set('application_internal_statuses_dict',[{'code': i[0], 'description': i[1]} for i in Proposal.PROCESSING_STATUS_CHOICES], settings.LOV_CACHE_TIMEOUT)
+            cache.set('application_external_statuses_dict',[{'code': i[0], 'description': i[1]} for i in Proposal.CUSTOMER_STATUS_CHOICES if i[0] != 'discarded'], settings.LOV_CACHE_TIMEOUT)
         data['external_statuses'] = cache.get('application_external_statuses_dict')
         data['internal_statuses'] = cache.get('application_internal_statuses_dict')
         return Response(data)
