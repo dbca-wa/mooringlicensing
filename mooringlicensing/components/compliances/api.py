@@ -346,7 +346,14 @@ class GetComplianceStatusesDict(views.APIView):
     renderer_classes = [JSONRenderer, ]
 
     def get(self, request, format=None):
-        data = [{'code': i[0], 'description': i[1]} for i in Compliance.CUSTOMER_STATUS_CHOICES]
+        #data = [{'code': i[0], 'description': i[1]} for i in Compliance.CUSTOMER_STATUS_CHOICES]
+        #return Response(data)
+        data = {}
+        if not cache.get('compliance_internal_statuses_dict') or not cache.get('compliance_external_statuses_dict'):
+            cache.set('compliance_internal_statuses_dict',[{'code': i[0], 'description': i[1]} for i in Compliance.PROCESSING_STATUS_CHOICES], settings.LOV_CACHE_TIMEOUT)
+            cache.set('compliance_external_statuses_dict',[{'code': i[0], 'description': i[1]} for i in Compliance.CUSTOMER_STATUS_CHOICES if i[0] != 'discarded'], settings.LOV_CACHE_TIMEOUT)
+        data['external_statuses'] = cache.get('compliance_external_statuses_dict')
+        data['internal_statuses'] = cache.get('compliance_internal_statuses_dict')
         return Response(data)
 
 
