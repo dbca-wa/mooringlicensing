@@ -1841,18 +1841,19 @@ class ApprovalLogDocument(Document):
         app_label = 'mooringlicensing'
 
 class ApprovalUserAction(UserAction):
-    ACTION_CREATE_APPROVAL = "Create licence {}"
-    ACTION_UPDATE_APPROVAL = "Create licence {}"
-    ACTION_EXPIRE_APPROVAL = "Expire licence {}"
-    ACTION_CANCEL_APPROVAL = "Cancel licence {}"
-    ACTION_EXTEND_APPROVAL = "Extend licence {}"
-    ACTION_SUSPEND_APPROVAL = "Suspend licence {}"
-    ACTION_REINSTATE_APPROVAL = "Reinstate licence {}"
-    ACTION_SURRENDER_APPROVAL = "surrender licence {}"
-    ACTION_RENEW_APPROVAL = "Create renewal Application for licence {}"
-    ACTION_AMEND_APPROVAL = "Create amendment Application for licence {}"
-    ACTION_REISSUE_APPROVAL = "Reissue licence {}"
+    ACTION_CREATE_APPROVAL = "Create approval {}"
+    ACTION_UPDATE_APPROVAL = "Create approval {}"
+    ACTION_EXPIRE_APPROVAL = "Expire approval {}"
+    ACTION_CANCEL_APPROVAL = "Cancel approval {}"
+    ACTION_EXTEND_APPROVAL = "Extend approval {}"
+    ACTION_SUSPEND_APPROVAL = "Suspend approval {}"
+    ACTION_REINSTATE_APPROVAL = "Reinstate approval {}"
+    ACTION_SURRENDER_APPROVAL = "Surrender approval {}"
+    ACTION_RENEW_APPROVAL = "Create renewal Application for approval {}"
+    ACTION_AMEND_APPROVAL = "Create amendment Application for approval {}"
+    ACTION_REISSUE_APPROVAL = "Reissue approval {}"
     ACTION_REISSUE_APPROVAL_ML = "Reissued due to change in Mooring Licence {}"
+    ACTION_RENEWAL_NOTICE_SENT_FOR_APPROVAL = "Renewal notice sent for approval {}"
 
     class Meta:
         app_label = 'mooringlicensing'
