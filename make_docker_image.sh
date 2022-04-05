@@ -6,12 +6,6 @@ if [[ $# -lt 1 ]]; then
     echo "$0 1"
     exit 1
 fi
-if [[ $# -gt 1 ]] && ! [[ $2 =~ ^[0-9]+$ ]]; then
-    #echo "ERROR: Must specify integer indicating incremental daily version e.g."
-    echo "ERROR: Incremental daily version must be an integer"
-    echo "$0 1"
-    exit 1
-fi
 
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 #REPO=$(basename -s .git `git config --get remote.origin.url` | sed 's/-//g')
