@@ -337,6 +337,7 @@ export default {
                 //payload.proposal.dot_name = this.$refs.waiting_list_application.$refs.vessels.dotName;
                 //payload.vessel.vessel_ownership.dot_name = this.$refs.waiting_list_application.$refs.vessels.vessel.vessel_ownership.dotName;
                 payload.proposal.temporary_document_collection_id = this.$refs.waiting_list_application.$refs.vessels.temporary_document_collection_id;
+                payload.proposal.keep_existing_vessel = this.$refs.waiting_list_application.keepCurrentVessel;
             }
             if (typeof(this.$refs.waiting_list_application.$refs.profile.silentElector) === 'boolean') {
                 payload.proposal.silent_elector = this.$refs.waiting_list_application.$refs.profile.silentElector;

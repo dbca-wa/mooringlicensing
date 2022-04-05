@@ -187,6 +187,9 @@ export default {
         is_external: function() {
             return this.level == 'external'
         },
+        is_internal: function() {
+            return this.level == 'internal'
+        },
         compliancesHeaders: function() {
             let headers = ['Number', 'Licence/Permit', 'Condition', 'Due Date', 'Status', 'Action'];
             if (this.level === 'internal') {
@@ -422,13 +425,23 @@ export default {
     methods: {
         fetchFilterLists: function(){
             let vm = this;
-
+            // Compliance Statuses
+            vm.$http.get(api_endpoints.compliance_statuses_dict).then((response) => {
+                if (vm.is_internal){
+                    vm.compliance_statuses = response.body.internal_statuses
+                } else {
+                    vm.compliance_statuses = response.body.external_statuses
+                }
+            },(error) => {
+            })
+            /*
             // Statuses
             vm.$http.get(api_endpoints.compliance_statuses_dict).then((response) => {
                 vm.compliance_statuses = response.body
             },(error) => {
                 console.log(error);
             })
+            */
         },
     },
     created: function(){
