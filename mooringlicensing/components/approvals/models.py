@@ -592,18 +592,21 @@ class Approval(RevisionedMixin):
             amend_renew = 'amend'
             ## test whether any renewal or amendment applications have been created
             customer_status_choices = []
+            ria_generated_proposal_qs = None
             if type(self.child_obj) == WaitingListAllocation:
                 customer_status_choices = ['with_assessor', 'draft']
-            elif type(self.child_obj) == AnnualAdmissionPermit:
-                customer_status_choices = ['with_assessor', 'draft', 'printing_sticker']
-            elif type(self.child_obj) == AuthorisedUserPermit:
-                customer_status_choices = ['with_assessor', 'draft', 'awaiting_endorsement', 'printing_sticker', 'awaiting_payment']
-            elif type(self.child_obj) == MooringLicence:
-                customer_status_choices = ['with_assessor', 'draft', 'awaiting_endorsement', 'printing_sticker', 'awaiting_payment', 'awaiting_documents']
+                ria_generated_proposal_qs = self.ria_generated_proposal.filter(customer_status__in=customer_status_choices)
+            else:
+                if type(self.child_obj) == AnnualAdmissionPermit:
+                    customer_status_choices = ['with_assessor', 'draft', 'printing_sticker']
+                elif type(self.child_obj) == AuthorisedUserPermit:
+                    customer_status_choices = ['with_assessor', 'draft', 'awaiting_endorsement', 'printing_sticker', 'awaiting_payment']
+                elif type(self.child_obj) == MooringLicence:
+                    customer_status_choices = ['with_assessor', 'draft', 'awaiting_endorsement', 'printing_sticker', 'awaiting_payment', 'awaiting_documents']
             existing_proposal_qs=self.proposal_set.filter(customer_status__in=customer_status_choices,
                     proposal_type__in=ProposalType.objects.filter(code__in=[PROPOSAL_TYPE_AMENDMENT, PROPOSAL_TYPE_RENEWAL]))
             ## cannot amend or renew
-            if existing_proposal_qs:
+            if existing_proposal_qs or ria_generated_proposal_qs:
                 amend_renew = None
             ## If Approval has been set for renewal, this takes priority
             elif self.renewal_document and self.renewal_sent:
