@@ -1163,8 +1163,8 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                     applicant_field.log_user_action(ProposalUserAction.ACTION_UPDATE_APPROVAL_.format(self.id), request)
                 else:
                     # When auto approve
-                    self.log_user_action(ProposalUserAction.ACTION_AUTO_APPROVED.format(self.id), request)
-                    applicant_field.log_user_action(ProposalUserAction.ACTION_AUTO_APPROVED.format(self.id), request)
+                    self.log_user_action(ProposalUserAction.ACTION_AUTO_APPROVED.format(self.id),)
+                    applicant_field.log_user_action(ProposalUserAction.ACTION_AUTO_APPROVED.format(self.id),)
 
                 # set proposal status to approved - can change later after manage_stickers
                 self.processing_status = Proposal.PROCESSING_STATUS_APPROVED
@@ -1446,10 +1446,12 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                         r.district_proposal=None
                         r.save()
                 # Create a log entry for the proposal
-                self.log_user_action(ProposalUserAction.ACTION_RENEW_PROPOSAL.format(self.id),request)
+                # self.log_user_action(ProposalUserAction.ACTION_RENEW_PROPOSAL.format(self.id),request)
+
                 # Create a log entry for the organisation
-                applicant_field=getattr(self, self.applicant_field)
-                applicant_field.log_user_action(ProposalUserAction.ACTION_RENEW_PROPOSAL.format(self.id),request)
+                # applicant_field=getattr(self, self.applicant_field)
+                # applicant_field.log_user_action(ProposalUserAction.ACTION_RENEW_PROPOSAL.format(self.id),request)
+
                 #Log entry for approval
                 from mooringlicensing.components.approvals.models import ApprovalUserAction
                 self.approval.log_user_action(ApprovalUserAction.ACTION_RENEW_APPROVAL.format(self.approval.id),request)
