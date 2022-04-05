@@ -1154,11 +1154,17 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                 #approval_compliances.delete()
                 self.generate_compliances(approval, request)
 
-                # Log proposal action
-                self.log_user_action(ProposalUserAction.ACTION_UPDATE_APPROVAL_.format(self.id), request)
                 # Log entry for organisation
                 applicant_field = getattr(self, self.applicant_field)
-                applicant_field.log_user_action(ProposalUserAction.ACTION_UPDATE_APPROVAL_.format(self.id), request)
+                # Log proposal action
+                if details:
+                    # When not auto-approve
+                    self.log_user_action(ProposalUserAction.ACTION_UPDATE_APPROVAL_.format(self.id), request)
+                    applicant_field.log_user_action(ProposalUserAction.ACTION_UPDATE_APPROVAL_.format(self.id), request)
+                else:
+                    # When auto approve
+                    self.log_user_action(ProposalUserAction.ACTION_AUTO_APPROVED.format(self.id), request)
+                    applicant_field.log_user_action(ProposalUserAction.ACTION_AUTO_APPROVED.format(self.id), request)
 
                 # set proposal status to approved - can change later after manage_stickers
                 self.processing_status = Proposal.PROCESSING_STATUS_APPROVED
@@ -3550,6 +3556,7 @@ class ProposalUserAction(UserAction):
     ACTION_STICKER_TO_BE_RETURNED = "Sticker to be returned for application {}"
     ACTION_APPROVE_APPLICATION = "Approve application {}"
     ACTION_UPDATE_APPROVAL_ = "Update Licence for application {}"
+    ACTION_AUTO_APPROVED = "Grant application {}"
     ACTION_EXPIRED_APPROVAL_ = "Expire Approval for proposal {}"
     ACTION_DISCARD_PROPOSAL = "Discard application {}"
     ACTION_APPROVAL_LEVEL_DOCUMENT = "Assign Approval level document {}"
