@@ -254,7 +254,7 @@ export default {
                 });
             }
             this.attachAnother();
-            vm.$router.push({ name: 'external-proposals-dash'}); //Navigate to dashboard
+            vm.$router.push({ name: 'external-dashboard'}); //Navigate to dashboard
         },
 
     addFormValidations: function() {
