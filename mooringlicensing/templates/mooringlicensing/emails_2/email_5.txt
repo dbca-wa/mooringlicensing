@@ -3,7 +3,7 @@
 {% block content_body %}
 {% include "mooringlicensing/emails_2/salutation.txt" %}
 Your {{ proposal.description }} {{ proposal.lodgement_number }} requires amendment.
-{% if details %}Details: {{ details }}{% endif %}
+{% if text %}Details: {{ text }}{% endif %}
 Please access {{ proposal_external_url }} to access your application.
 {% include "mooringlicensing/emails/signature-rottnest.txt" %}
 {% endblock %}
