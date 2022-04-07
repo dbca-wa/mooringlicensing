@@ -1315,6 +1315,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                                 )
 
                             send_application_approved_or_declined_email(self, 'approved', request)
+                            self.log_user_action(ProposalUserAction.ACTION_APPROVE_APPLICATION.format(self.id), request)
 
                         except Exception as e:
                             err_msg = 'Failed to create invoice'
@@ -2458,10 +2459,12 @@ class AuthorisedUserApplication(Proposal):
             send_au_summary_to_ml_holder(mooring_licence, request)
 
         # Log proposal action
-        if request:
-            self.log_user_action(ProposalUserAction.ACTION_APPROVE_APPLICATION.format(self.id), request)
+        if auto_renew == 'true' or not request:
+            self.log_user_action(ProposalUserAction.ACTION_AUTO_APPROVED.format(self.id))
         else:
-            self.log_user_action(ProposalUserAction.ACTION_APPROVE_APPLICATION.format(self.id))
+            # When get here without request, there should be already an action log for ACTION_APROVE_APPLICATION
+            pass
+        #     self.log_user_action(ProposalUserAction.ACTION_APPROVE_APPLICATION.format(self.id), request)
 
         # Write approval history
         if self.proposal_type == ProposalType.objects.get(code=PROPOSAL_TYPE_RENEWAL):
@@ -2841,10 +2844,12 @@ class MooringLicenceApplication(Proposal):
             send_application_approved_or_declined_email(self, 'approved_paid', request, stickers_to_be_returned)
 
             # Log proposal action
-            if request:
-                self.log_user_action(ProposalUserAction.ACTION_APPROVE_APPLICATION.format(self.id), request)
+            if auto_renew == 'true' or not request:
+                self.log_user_action(ProposalUserAction.ACTION_AUTO_APPROVED.format(self.id))
             else:
-                self.log_user_action(ProposalUserAction.ACTION_APPROVE_APPLICATION.format(self.id))
+                # When get here without request, there should be already an action log for ACTION_APROVE_APPLICATION
+                pass
+            #     self.log_user_action(ProposalUserAction.ACTION_APPROVE_APPLICATION.format(self.id), request)
 
             # write approval history
             if self.proposal_type == ProposalType.objects.get(code=PROPOSAL_TYPE_RENEWAL):
