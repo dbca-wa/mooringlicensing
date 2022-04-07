@@ -260,11 +260,20 @@ class ApprovalSurrenderSerializer(serializers.Serializer):
     surrender_date = serializers.DateField(input_formats=['%d/%m/%Y'])
     surrender_details = serializers.CharField()
 
+
 class ApprovalUserActionSerializer(serializers.ModelSerializer):
-    who = serializers.CharField(source='who.get_full_name')
+    who = serializers.SerializerMethodField()
+
     class Meta:
         model = ApprovalUserAction
         fields = '__all__'
+
+    def get_who(self, obj):
+        if obj.who:
+            return obj.who.get_full_name()
+        else:
+            return 'System'
+
 
 class ApprovalLogEntrySerializer(CommunicationLogEntrySerializer):
     documents = serializers.SerializerMethodField()
