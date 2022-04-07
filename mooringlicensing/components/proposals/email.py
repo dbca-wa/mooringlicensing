@@ -296,7 +296,7 @@ def send_amendment_email_notification(amendment_request, request, proposal):
         'recipient': proposal.submitter,
         'proposal': proposal,
         'reason': reason,
-        'text': text,
+        'text': amendment_request.text,
         'proposal_external_url': url
     }
 
