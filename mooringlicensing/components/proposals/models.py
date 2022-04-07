@@ -1633,8 +1633,13 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
         return target_date
 
     def auto_approve(self, request):
-        ## If renewal and no change to vessel
-        if self.proposal_type in ProposalType.objects.filter(code__in=[PROPOSAL_TYPE_RENEWAL, PROPOSAL_TYPE_AMENDMENT]):
+        #if self.proposal_type in ProposalType.objects.filter(code__in=[PROPOSAL_TYPE_RENEWAL, PROPOSAL_TYPE_AMENDMENT]):
+        auto_approve = None
+        # New AnnualAdmission can be auto_approved
+        if type(self.child_obj) == AnnualAdmissionApplication and self.proposal_type.code == 'new':
+            auto_approve = True
+        ## If renewal or amendment and no change to vessel
+        elif self.proposal_type in ProposalType.objects.filter(code__in=[PROPOSAL_TYPE_RENEWAL, PROPOSAL_TYPE_AMENDMENT]):
             auto_approve = True
             #auto_approve = False
             ## current and previous application both do not have a vessel
@@ -1660,14 +1665,14 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                     self.company_ownership_name != self.previous_application_status_filter.company_ownership_name
                     ):
                 auto_approve = False
-            ## WLA
-            if (type(self.child_obj) == WaitingListApplication and 
-                    self.preferred_bay != self.previous_application_status_filter.preferred_bay
-                    ):
-                auto_approve = False
+        ## WLA
+        if (type(self.child_obj) == WaitingListApplication and 
+                self.preferred_bay != self.previous_application_status_filter.preferred_bay
+                ):
+            auto_approve = False
 
-            if auto_approve:
-                self.final_approval_for_WLA_AAA(request, details={}, auto_approve=auto_approve)
+        if auto_approve:
+            self.final_approval_for_WLA_AAA(request, details={}, auto_approve=auto_approve)
 
 
 def update_sticker_doc_filename(instance, filename):
