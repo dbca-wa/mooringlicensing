@@ -217,6 +217,7 @@ export default {
             .then((response) => {
                 console.log(response);
                 vm.compliance = response.body;
+                vm.$router.push({ name: 'internal-compliances-dash'}); //Navigate to dashboard
             }, (error) => {
                 console.log(error);
             });

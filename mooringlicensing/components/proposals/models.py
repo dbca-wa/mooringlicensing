@@ -1148,7 +1148,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                 #target_proposal = self.previous_application if self.previous_application else self
                 target_proposal = self.previous_application if self.proposal_type.code == 'amendment' else self
                 for compliance in Compliance.objects.filter(
-                    approval=self.approval.approval,
+                    approval=approval.approval,
                     proposal=target_proposal,
                     processing_status='future',
                     ):
@@ -2387,7 +2387,7 @@ class AuthorisedUserApplication(Proposal):
             from mooringlicensing.components.compliances.models import Compliance, ComplianceUserAction
             target_proposal = self.previous_application if self.proposal_type.code == 'amendment' else self.proposal
             for compliance in Compliance.objects.filter(
-                approval=self.approval.approval,
+                approval=approval.approval,
                 proposal=target_proposal,
                 processing_status='future',
                 ):
@@ -2781,7 +2781,7 @@ class MooringLicenceApplication(Proposal):
                 #target_proposal = self.previous_application if self.previous_application else self.proposal
                 target_proposal = self.previous_application if self.proposal_type.code == 'amendment' else self.proposal
                 for compliance in Compliance.objects.filter(
-                    approval=self.approval.approval,
+                    approval=approval.approval,
                     proposal=target_proposal,
                     processing_status='future',
                     ):
