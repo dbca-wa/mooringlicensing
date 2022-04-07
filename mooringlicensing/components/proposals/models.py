@@ -1446,11 +1446,11 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                         r.district_proposal=None
                         r.save()
                 # Create a log entry for the proposal
-                # self.log_user_action(ProposalUserAction.ACTION_RENEW_PROPOSAL.format(self.id),request)
+                self.log_user_action(ProposalUserAction.ACTION_RENEW_PROPOSAL.format(self.id), request)
 
                 # Create a log entry for the organisation
-                # applicant_field=getattr(self, self.applicant_field)
-                # applicant_field.log_user_action(ProposalUserAction.ACTION_RENEW_PROPOSAL.format(self.id),request)
+                applicant_field = getattr(self, self.applicant_field)
+                applicant_field.log_user_action(ProposalUserAction.ACTION_RENEW_PROPOSAL.format(self.id), request)
 
                 #Log entry for approval
                 from mooringlicensing.components.approvals.models import ApprovalUserAction
@@ -2430,11 +2430,11 @@ class AuthorisedUserApplication(Proposal):
             else:
                 self.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
                 self.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
-                self.log_user_action(ProposalUserAction.ACTION_PRINTING_STICKER.format(self.id), request)
+                self.log_user_action(ProposalUserAction.ACTION_PRINTING_STICKER.format(self.id),)
         elif auto_renew:
             self.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
             self.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
-            self.log_user_action(ProposalUserAction.ACTION_PRINTING_STICKER.format(self.id), request)
+            self.log_user_action(ProposalUserAction.ACTION_PRINTING_STICKER.format(self.id),)
         else:
             self.processing_status = Proposal.PROCESSING_STATUS_APPROVED
             self.customer_status = Proposal.CUSTOMER_STATUS_APPROVED

@@ -942,10 +942,18 @@ class InternalProposalSerializer(BaseProposalSerializer):
 
 
 class ProposalUserActionSerializer(serializers.ModelSerializer):
-    who = serializers.CharField(source='who.get_full_name')
+    who = serializers.SerializerMethodField()
+
     class Meta:
         model = ProposalUserAction
         fields = '__all__'
+
+    def get_who(self, obj):
+        if obj.who:
+            return obj.who.get_full_name()
+        else:
+            return 'System'
+
 
 class ProposalLogEntrySerializer(CommunicationLogEntrySerializer):
     documents = serializers.SerializerMethodField()
