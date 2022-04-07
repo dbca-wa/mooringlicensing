@@ -1136,13 +1136,19 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                 if type(self.child_obj) == AnnualAdmissionApplication:
                     approval.export_to_mooring_booking = True
                 approval.save()
+                # set auto_approve ProposalRequirement due dates to those from previous application + 12 months
+                if auto_approve and self.proposal_type.code == 'renewal':
+                    for req in self.requirements.filter(is_deleted=False):
+                        if req.copied_from and req.copied_from.due_date:
+                            req.due_date = req.copied_from.due_date + relativedelta(months=+12)
+                            req.save()
 
                 # Generate compliances
                 from mooringlicensing.components.compliances.models import Compliance, ComplianceUserAction
                 #target_proposal = self.previous_application if self.previous_application else self
                 target_proposal = self.previous_application if self.proposal_type.code == 'amendment' else self
                 for compliance in Compliance.objects.filter(
-                    approval=self.approval.approval,
+                    approval=approval.approval,
                     proposal=target_proposal,
                     processing_status='future',
                     ):
@@ -2381,7 +2387,7 @@ class AuthorisedUserApplication(Proposal):
             from mooringlicensing.components.compliances.models import Compliance, ComplianceUserAction
             target_proposal = self.previous_application if self.proposal_type.code == 'amendment' else self.proposal
             for compliance in Compliance.objects.filter(
-                approval=self.approval.approval,
+                approval=approval.approval,
                 proposal=target_proposal,
                 processing_status='future',
                 ):
@@ -2775,7 +2781,7 @@ class MooringLicenceApplication(Proposal):
                 #target_proposal = self.previous_application if self.previous_application else self.proposal
                 target_proposal = self.previous_application if self.proposal_type.code == 'amendment' else self.proposal
                 for compliance in Compliance.objects.filter(
-                    approval=self.approval.approval,
+                    approval=approval.approval,
                     proposal=target_proposal,
                     processing_status='future',
                     ):

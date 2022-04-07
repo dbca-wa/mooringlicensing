@@ -301,7 +301,7 @@ export default {
                             let links = '';
                             if (!vm.is_external){
                                 //if (full.processing_status=='With Assessor' && vm.check_assessor(full)) {
-                                if (full.can_process) {
+                                if (full.can_process && full.status !== 'Approved') {
                                     links +=  `<a href='/internal/compliance/${full.id}'>Process</a><br/>`;
 
                                 }
