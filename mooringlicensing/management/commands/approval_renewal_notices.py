@@ -72,8 +72,8 @@ class Command(BaseCommand):
                 send_approval_renewal_email_notification(a)
                 a.renewal_sent = True
                 a.save()
-                a.log_user_action(ApprovalUserAction.ACTION_RENEW_APPROVAL.format(a.id),)
-                logger.info(ApprovalUserAction.ACTION_RENEW_APPROVAL.format(a.id))
+                a.log_user_action(ApprovalUserAction.ACTION_RENEWAL_NOTICE_SENT_FOR_APPROVAL.format(a.id),)
+                logger.info(ApprovalUserAction.ACTION_RENEWAL_NOTICE_SENT_FOR_APPROVAL.format(a.id))
                 updates.append(a.lodgement_number)
             except Exception as e:
                 err_msg = 'Error sending renewal notice for Approval {}'.format(a.lodgement_number)
