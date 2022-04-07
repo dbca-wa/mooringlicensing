@@ -257,7 +257,10 @@ from '@/utils/hooks'
         computed: {
             regoReadonly: function() {
                 let readonly = false;
-                if ((this.proposal && this.keep_current_vessel && ['amendment', 'renewal']. includes(this.proposal.proposal_type.code)) || this.readonly) {
+                if ((this.proposal && this.keep_current_vessel && ['amendment', 'renewal']. includes(this.proposal.proposal_type.code)) || 
+                    this.readonly || 
+                    (this.proposal.pending_amendment_request && ['wla','aaa'].includes(this.proposal.application_type_code))
+                ) {
                     readonly = true;
                 }
                 return readonly;

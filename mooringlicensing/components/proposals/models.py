@@ -1136,6 +1136,12 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                 if type(self.child_obj) == AnnualAdmissionApplication:
                     approval.export_to_mooring_booking = True
                 approval.save()
+                # set auto_approve ProposalRequirement due dates to those from previous application + 12 months
+                if auto_approve and self.proposal_type.code == 'renewal':
+                    for req in self.requirements.filter(is_deleted=False):
+                        if req.copied_from and req.copied_from.due_date:
+                            req.due_date = req.copied_from.due_date + relativedelta(months=+12)
+                            req.save()
 
                 # Generate compliances
                 from mooringlicensing.components.compliances.models import Compliance, ComplianceUserAction
