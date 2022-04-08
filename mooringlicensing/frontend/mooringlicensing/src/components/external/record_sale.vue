@@ -70,6 +70,7 @@ export default {
                 format: 'DD/MM/YYYY',
                 showClear:true,
                 useCurrent:false,
+                maxDate: new Date(),
                 /*
                 keepInvalid:true,
                 allowInputToggle:true
