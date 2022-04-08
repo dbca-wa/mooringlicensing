@@ -267,8 +267,9 @@ export default {
                         searchable: true,
                         visible: true,
                         'render': function(row, type, full){
+                            console.log(full)
                             let dueDate = '';
-                            if (full.requirement) {
+                            if (full.due_date_display) {
                                 //dueDate = full.requirement.read_due_date;
                                 dueDate = full.due_date_display;
                             }

@@ -3,7 +3,7 @@
 {% block content_body %}
 {% include "mooringlicensing/emails_2/salutation.html" %}
 <p>Your {{ proposal.description }} {{ proposal.lodgement_number }} requires amendment.</p>
-{% if details %}<p>Details: {{ details }}</p>{% endif %}
+{% if text %}<p>Details: {{ text }}</p>{% endif %}
 <p>Please click <a href="{{ proposal_external_url }}">here</a> to access your application.</p>
 {% include "mooringlicensing/emails/signature-rottnest.html" %}
 {% endblock %}

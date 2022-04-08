@@ -67,7 +67,7 @@
                     <a href="{% url 'home' %}" class="btn btn-info btn-lg">Log in</a><p>You must be logged in to see your invoice online.</p>
                 {% endif %}
             {% else %}
-                <p style="font-size: 1.5rem; font-weight: bold;">The DCV Permit and the invoice have been emailed to {{ dcv_admission.submitter.email }}.</p>
+                <p style="font-size: 1.5rem; font-weight: bold;">The DCV Admission and the invoice have been emailed to {{ dcv_admission.submitter.email }}.</p>
             {% endif %}
         </div>
     </div>
