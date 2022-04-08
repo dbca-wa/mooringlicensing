@@ -48,7 +48,7 @@ from mooringlicensing.components.proposals.models import (
 from mooringlicensing.components.proposals.serializers import (
     ProposalSerializer,
     InternalProposalSerializer,
-    SaveProposalSerializer,
+    #SaveProposalSerializer,
     ProposalUserActionSerializer,
     ProposalLogEntrySerializer,
     VesselLogEntrySerializer,
@@ -975,8 +975,11 @@ class ProposalViewSet(viewsets.ModelViewSet):
             elif approval and approval.amend_or_renew == 'amend':
                 instance = instance.amend_approval(request)
         ## return new application
-        serializer = SaveProposalSerializer(instance,context={'request':request})
-        return Response(serializer.data)
+        #serializer = ProposalSerializer(instance,context={'request':request})
+        #serializer_class = self.internal_serializer_class()
+        #serializer = serializer_class(instance,context={'request':request})
+        #return Response(serializer.data)
+        return Response({"proposal_id":instance.id})
 
     @detail_route(methods=['POST',])
     @basic_exception_handler

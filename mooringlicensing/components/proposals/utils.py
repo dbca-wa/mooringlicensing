@@ -32,7 +32,7 @@ from mooringlicensing.components.proposals.serializers import (
         SaveVesselOwnershipSerializer,
         SaveCompanyOwnershipSerializer,
         SaveDraftProposalVesselSerializer,
-        SaveProposalSerializer,
+        #SaveProposalSerializer,
         SaveWaitingListApplicationSerializer,
         SaveMooringLicenceApplicationSerializer,
         SaveAuthorisedUserApplicationSerializer,

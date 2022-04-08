@@ -310,6 +310,12 @@
                             this.showInsuranceTab = false;
                             this.$emit("updateSubmitText", "Submit");
                         }
+                        // auto approve
+                        if (this.higherVesselCategory || !this.keepCurrentVessel || this.changeMooring) {
+                            this.$emit("updateAutoApprove", false);
+                        } else {
+                            this.$emit("updateAutoApprove", true);
+                        }
                     });
                 } else if (this.proposal && this.proposal.proposal_type.code === 'renewal') {
                     this.$nextTick(() => {
@@ -317,17 +323,23 @@
                             this.showPaymentTab = true;
                             this.showInsuranceTab = false;
                             this.$emit("updateSubmitText", "Pay / Submit");
-                            this.$emit("updateAutoRenew", true);
+                            //this.$emit("updateAutoRenew", true);
                         } else if (!this.keepCurrentVessel) {
                             this.showPaymentTab = false;
                             this.showInsuranceTab = true;
                             this.$emit("updateSubmitText", "Submit");
-                            this.$emit("updateAutoRenew", false);
+                            //this.$emit("updateAutoRenew", false);
                         } else {
                             this.showPaymentTab = false;
                             this.showInsuranceTab = false;
                             this.$emit("updateSubmitText", "Submit");
-                            this.$emit("updateAutoRenew", false);
+                            //this.$emit("updateAutoRenew", false);
+                        }
+                        // auto approve
+                        if (this.higherVesselCategory || !this.keepCurrentVessel || this.changeMooring) {
+                            this.$emit("updateAutoApprove", false);
+                        } else {
+                            this.$emit("updateAutoApprove", true);
                         }
                     });
                 }

@@ -333,7 +333,7 @@ class ApplicationFeeView(TemplateView):
                 lines, db_processes_after_success = proposal.child_obj.create_fee_lines()  # Accessed by WL and AA
 
                 request.session['db_processes'] = db_processes_after_success
-                request.session['auto_renew'] = request.POST.get('auto_renew', False)
+                #request.session['auto_approve'] = request.POST.get('auto_approve', False)
                 checkout_response = checkout(
                     request,
                     proposal.submitter,
@@ -569,10 +569,12 @@ class ApplicationFeeSuccessView(TemplateView):
             # Retrieve db processes stored when calculating the fee, and delete the session
             db_operations = request.session['db_processes']
             del request.session['db_processes']
-            # Retrieve auto_renew stored when calculating the fee, and delete
-            auto_renew = request.session.get('auto_renew')
-            if request.session.get('auto_renew'):
-                del request.session['auto_renew']
+            #print("request.session.keys()")
+            #print(request.session.keys())
+            # Retrieve auto_approve stored when calculating the fee, and delete
+            #auto_approve = request.session.get('auto_approve')
+            #if 'auto_approve' in request.session.keys():
+             #   del request.session['auto_approve']
 
             proposal = application_fee.proposal
             recipient = proposal.applicant_email
@@ -647,7 +649,7 @@ class ApplicationFeeSuccessView(TemplateView):
 
                     if proposal.application_type.code in (AuthorisedUserApplication.code, MooringLicenceApplication.code):
                         # For AUA or MLA, as payment has been done, create approval
-                        approval, created = proposal.child_obj.update_or_create_approval(datetime.datetime.now(pytz.timezone(TIME_ZONE)), request, auto_renew)
+                        approval, created = proposal.child_obj.update_or_create_approval(datetime.datetime.now(pytz.timezone(TIME_ZONE)), request)
                     else:
                         # When WLA / AAA
                         if proposal.application_type.code in [WaitingListApplication.code, AnnualAdmissionApplication.code]:
@@ -689,7 +691,7 @@ class ApplicationFeeSuccessView(TemplateView):
                     proposal = application_fee.proposal
                     submitter = proposal.submitter
                     if type(proposal.child_obj) in [WaitingListApplication, AnnualAdmissionApplication]:
-                        proposal.auto_approve(request)
+                        proposal.auto_approve_check(request)
                 else:
                     msg = 'ApplicationFee with id: {} does not exist in the database'.format(str(request.session[self.LAST_APPLICATION_FEE_ID]))
                     logger.error(msg)
