@@ -24,8 +24,11 @@ class Command(BaseCommand):
         cron_email.info('<div><strong>Running command: {}</strong></div>'.format(__name__))
         cron_email.info('<div style="margin-left: 1em;">')
 
-        subprocess.call('python manage_ml.py update_compliance_status', shell=True)
-        subprocess.call('python manage_ml.py send_compliance_reminder', shell=True)
+        # For Compliances
+        subprocess.call('python manage_ml.py update_compliance_status', shell=True)  # 1. Update status
+        subprocess.call('python manage_ml.py send_compliance_reminder', shell=True)  # 2. Send notification
+
+        # For the others
         subprocess.call('python manage_ml.py send_endorser_reminder', shell=True)
         subprocess.call('python manage_ml.py send_vessel_nominate_reminder', shell=True)
         subprocess.call('python manage_ml.py cancel_approvals_due_to_no_vessels_nominated', shell=True)
