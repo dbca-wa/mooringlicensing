@@ -953,10 +953,10 @@ def send_reissue_aap_after_sale_recorded_email(approval, request, vessel_ownersh
         _log_user_email(msg, approval.submitter, proposal.submitter, sender=sender)
 
 
-def send_sticker_replacement_email(request, sticker, invoice):
+def send_sticker_replacement_email(request, old_sticker, new_sticker, invoice):
     # 36
     # email to licence/permit holder when sticker replacement request has been submitted (with payment)
-    approval = sticker.approval
+    approval = new_sticker.approval
     proposal = approval.current_proposal
 
     email = TemplateEmailBase(
@@ -974,7 +974,7 @@ def send_sticker_replacement_email(request, sticker, invoice):
     context = {
         'public_url': get_public_url(request),
         'recipient': approval.submitter,
-        'sticker': sticker,
+        'sticker': old_sticker,
         'dashboard_external_url': get_public_url(request),
     }
 
