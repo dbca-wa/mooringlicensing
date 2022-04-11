@@ -1400,7 +1400,7 @@ class VesselOwnershipViewSet(viewsets.ModelViewSet):
                         a_sticker.status = Sticker.STICKER_STATUS_CANCELLED
                         a_sticker.save()
                     # write approval history
-                    approval.write_approval_history('vessel_sold')
+                    approval.write_approval_history('Vessel sold by owner')
                     if approval.code == WaitingListAllocation.code:
                         send_reissue_wla_after_sale_recorded_email(approval, request, instance, stickers_to_be_returned)
                     elif approval.code == AnnualAdmissionPermit.code:
