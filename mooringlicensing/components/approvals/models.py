@@ -1974,15 +1974,17 @@ class DcvAdmissionArrival(RevisionedMixin):
         app_label = 'mooringlicensing'
 
     def get_context_for_licence_permit(self):
+        today = timezone.localtime(timezone.now()).date()
         context = {
             'lodgement_number': self.dcv_admission.lodgement_number,
             'organisation_name': self.dcv_admission.dcv_vessel.dcv_organisation.name if self.dcv_admission.dcv_vessel.dcv_organisation else '',
             'organisation_abn': self.dcv_admission.dcv_vessel.dcv_organisation.abn if self.dcv_admission.dcv_vessel.dcv_organisation else '',
-            'issue_date': self.dcv_admission.lodgement_datetime.strftime('%d/%m/%Y'),
+            'issue_date': today.strftime('%d/%m/%Y'),
             'vessel_rego_no': self.dcv_admission.dcv_vessel.rego_no,
             'vessel_name': self.dcv_admission.dcv_vessel.vessel_name,
             'arrival': self.get_summary(),
             'public_url': get_public_url(),
+            'date_registered': self.dcv_admission.lodgement_datetime.strftime('%d/%m/%Y'),
         }
         return context
 

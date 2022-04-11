@@ -1,4 +1,4 @@
-from django.conf import settings
+from django.utils import timezone
 from ledger.accounts.models import EmailUser,Address
 from mooringlicensing.components.compliances.models import (
     Compliance, ComplianceUserAction, ComplianceLogEntry, ComplianceAmendmentRequest, ComplianceAmendmentReason
@@ -224,6 +224,7 @@ class ListComplianceSerializer(serializers.ModelSerializer):
             'assigned_to_name',
             'can_process',
             'due_date_display',
+            'can_user_view',
         )
         datatables_always_serialize = (
             'id',
@@ -236,6 +237,7 @@ class ListComplianceSerializer(serializers.ModelSerializer):
             'assigned_to_name',
             'can_process',
             'due_date_display',
+            'can_user_view',
         )
 
     def get_due_date_display(self, obj):
@@ -245,7 +247,11 @@ class ListComplianceSerializer(serializers.ModelSerializer):
         return due_date_str
 
     def get_status(self, obj):
-        return obj.get_customer_status_display()
+        today = timezone.localtime(timezone.now()).date()
+        if obj.customer_status == Compliance.CUSTOMER_STATUS_DUE and today < obj.due_date:
+            return 'Overdue'
+        else:
+            return obj.get_customer_status_display()
 
     def get_approval_number(self, obj):
         return obj.approval.lodgement_number

@@ -236,7 +236,7 @@
             updateAmendmentRenewalProperties: function() {
                 console.log('updateAmendmentRenewalProperties in form_wla.vue')
                 //if (this.proposal && ['renewal', 'amendment'].includes(this.proposal.proposal_type.code)) {
-                if (this.proposal && this.proposal.proposal_type.code === 'amendment') {
+                if (this.proposal && (this.proposal.proposal_type.code === 'amendment' || this.proposal.pending_amendment_request)) {
                     this.$nextTick(() => {
                         if (this.higherVesselCategory) {
                             this.showPaymentTab = true;

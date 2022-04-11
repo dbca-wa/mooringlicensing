@@ -284,14 +284,15 @@ class StickerReplacementFeeSuccessView(TemplateView):
                 update_payments(invoice.reference)
 
                 for sticker_action_detail in sticker_action_details.all():
-                    new_sticker = sticker_action_detail.sticker.request_replacement(Sticker.STICKER_STATUS_LOST)
+                    old_sticker = sticker_action_detail.sticker
+                    new_sticker = old_sticker.request_replacement(Sticker.STICKER_STATUS_LOST)
 
                 sticker_action_fee.save()
                 request.session[self.LAST_STICKER_ACTION_FEE_ID] = sticker_action_fee.id
                 delete_session_sticker_action_invoice(request.session)  # This leads to raise an exception at the get_session_sticker_action_invoice() above
 
                 # Send email with the invoice
-                send_sticker_replacement_email(request, new_sticker, invoice)
+                send_sticker_replacement_email(request, old_sticker, new_sticker, invoice)
 
                 context = {
                     'submitter': owner,

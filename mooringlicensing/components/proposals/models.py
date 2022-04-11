@@ -1149,7 +1149,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                 #target_proposal = self.previous_application if self.previous_application else self
                 target_proposal = self.previous_application if self.proposal_type.code == 'amendment' else self
                 for compliance in Compliance.objects.filter(
-                    approval=self.approval.approval,
+                    approval=approval.approval,
                     proposal=target_proposal,
                     processing_status='future',
                     ):
@@ -1316,6 +1316,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                                 )
 
                             send_application_approved_or_declined_email(self, 'approved', request)
+                            self.log_user_action(ProposalUserAction.ACTION_APPROVE_APPLICATION.format(self.id), request)
 
                         except Exception as e:
                             err_msg = 'Failed to create invoice'
@@ -1453,11 +1454,11 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                         r.district_proposal=None
                         r.save()
                 # Create a log entry for the proposal
-                # self.log_user_action(ProposalUserAction.ACTION_RENEW_PROPOSAL.format(self.id),request)
+                # self.log_user_action(ProposalUserAction.ACTION_RENEW_PROPOSAL.format(self.id), request)
 
                 # Create a log entry for the organisation
-                # applicant_field=getattr(self, self.applicant_field)
-                # applicant_field.log_user_action(ProposalUserAction.ACTION_RENEW_PROPOSAL.format(self.id),request)
+                # applicant_field = getattr(self, self.applicant_field)
+                # applicant_field.log_user_action(ProposalUserAction.ACTION_RENEW_PROPOSAL.format(self.id), request)
 
                 #Log entry for approval
                 from mooringlicensing.components.approvals.models import ApprovalUserAction
@@ -2367,7 +2368,7 @@ class AuthorisedUserApplication(Proposal):
             from mooringlicensing.components.compliances.models import Compliance, ComplianceUserAction
             target_proposal = self.previous_application if self.proposal_type.code == 'amendment' else self.proposal
             for compliance in Compliance.objects.filter(
-                approval=self.approval.approval,
+                approval=approval.approval,
                 proposal=target_proposal,
                 processing_status='future',
                 ):
@@ -2416,11 +2417,11 @@ class AuthorisedUserApplication(Proposal):
             else:
                 self.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
                 self.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
-                self.log_user_action(ProposalUserAction.ACTION_PRINTING_STICKER.format(self.id), request)
+                self.log_user_action(ProposalUserAction.ACTION_PRINTING_STICKER.format(self.id),)
         elif self.auto_approve:
             self.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
             self.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
-            self.log_user_action(ProposalUserAction.ACTION_PRINTING_STICKER.format(self.id), request)
+            self.log_user_action(ProposalUserAction.ACTION_PRINTING_STICKER.format(self.id),)
         else:
             self.processing_status = Proposal.PROCESSING_STATUS_APPROVED
             self.customer_status = Proposal.CUSTOMER_STATUS_APPROVED
@@ -2438,10 +2439,12 @@ class AuthorisedUserApplication(Proposal):
             send_au_summary_to_ml_holder(mooring_licence, request)
 
         # Log proposal action
-        if request:
-            self.log_user_action(ProposalUserAction.ACTION_APPROVE_APPLICATION.format(self.id), request)
+        if auto_renew == 'true' or not request:
+            self.log_user_action(ProposalUserAction.ACTION_AUTO_APPROVED.format(self.id))
         else:
-            self.log_user_action(ProposalUserAction.ACTION_APPROVE_APPLICATION.format(self.id))
+            # When get here without request, there should be already an action log for ACTION_APROVE_APPLICATION
+            pass
+        #     self.log_user_action(ProposalUserAction.ACTION_APPROVE_APPLICATION.format(self.id), request)
 
         # Write approval history
         if self.proposal_type == ProposalType.objects.get(code=PROPOSAL_TYPE_RENEWAL):
@@ -2761,7 +2764,7 @@ class MooringLicenceApplication(Proposal):
                 #target_proposal = self.previous_application if self.previous_application else self.proposal
                 target_proposal = self.previous_application if self.proposal_type.code == 'amendment' else self.proposal
                 for compliance in Compliance.objects.filter(
-                    approval=self.approval.approval,
+                    approval=approval.approval,
                     proposal=target_proposal,
                     processing_status='future',
                     ):
@@ -2802,10 +2805,12 @@ class MooringLicenceApplication(Proposal):
             send_application_approved_or_declined_email(self, 'approved_paid', request, stickers_to_be_returned)
 
             # Log proposal action
-            if request:
-                self.log_user_action(ProposalUserAction.ACTION_APPROVE_APPLICATION.format(self.id), request)
+            if auto_renew == 'true' or not request:
+                self.log_user_action(ProposalUserAction.ACTION_AUTO_APPROVED.format(self.id))
             else:
-                self.log_user_action(ProposalUserAction.ACTION_APPROVE_APPLICATION.format(self.id))
+                # When get here without request, there should be already an action log for ACTION_APROVE_APPLICATION
+                pass
+            #     self.log_user_action(ProposalUserAction.ACTION_APPROVE_APPLICATION.format(self.id), request)
 
             # write approval history
             if self.proposal_type == ProposalType.objects.get(code=PROPOSAL_TYPE_RENEWAL):
@@ -3519,12 +3524,12 @@ class ProposalUserAction(UserAction):
     ACTION_DECLINE = "Decline application {}"
     ACTION_ENTER_CONDITIONS = "Enter requirement"
     ACTION_CREATE_CONDITION_ = "Create requirement {}"
-    ACTION_ISSUE_APPROVAL_ = "Issue Licence for application {}"
+    ACTION_ISSUE_APPROVAL_ = "Issue Approval for application {}"
     ACTION_AWAITING_PAYMENT_APPROVAL_ = "Awaiting Payment for application {}"
     ACTION_PRINTING_STICKER = "Printing Sticker for application {}"
     ACTION_STICKER_TO_BE_RETURNED = "Sticker to be returned for application {}"
     ACTION_APPROVE_APPLICATION = "Approve application {}"
-    ACTION_UPDATE_APPROVAL_ = "Update Licence for application {}"
+    ACTION_UPDATE_APPROVAL_ = "Update Approval for application {}"
     ACTION_AUTO_APPROVED = "Grant application {}"
     ACTION_EXPIRED_APPROVAL_ = "Expire Approval for proposal {}"
     ACTION_DISCARD_PROPOSAL = "Discard application {}"
@@ -3540,12 +3545,12 @@ class ProposalUserAction(UserAction):
     ACTION_BACK_TO_PROCESSING = "Back to processing for proposal {}"
 
     #Approval
-    ACTION_REISSUE_APPROVAL = "Reissue licence for application {}"
-    ACTION_CANCEL_APPROVAL = "Cancel licence for application {}"
-    ACTION_EXTEND_APPROVAL = "Extend licence"
-    ACTION_SUSPEND_APPROVAL = "Suspend licence for application {}"
-    ACTION_REINSTATE_APPROVAL = "Reinstate licence for application {}"
-    ACTION_SURRENDER_APPROVAL = "Surrender licence for application {}"
+    ACTION_REISSUE_APPROVAL = "Reissue approval for application {}"
+    ACTION_CANCEL_APPROVAL = "Cancel approval for application {}"
+    ACTION_EXTEND_APPROVAL = "Extend approval"
+    ACTION_SUSPEND_APPROVAL = "Suspend approval for application {}"
+    ACTION_REINSTATE_APPROVAL = "Reinstate approval for application {}"
+    ACTION_SURRENDER_APPROVAL = "Surrender approval for application {}"
     ACTION_RENEW_PROPOSAL = "Create Renewal application for application {}"
     ACTION_AMEND_PROPOSAL = "Create Amendment application for application {}"
     #Vessel
@@ -3784,7 +3789,7 @@ reversion.register(MooringUserAction, follow=[])
 reversion.register(Vessel, follow=['comms_logs', 'vesseldetails_set', 'companyownership_set', 'vesselownership_set', 'owner_set', 'company_set'])
 reversion.register(VesselLogDocument, follow=[])
 reversion.register(VesselLogEntry, follow=['documents'])
-reversion.register(VesselDetails, follow=['proposal_set', 'feeitemapplicationfee_set'])
+reversion.register(VesselDetails, follow=['proposal_set'])
 reversion.register(CompanyOwnership, follow=['blocking_proposal', 'vessel', 'company'])
 reversion.register(VesselOwnership, follow=['owner', 'vessel', 'company_ownership'])
 reversion.register(VesselRegistrationDocument, follow=[])
