@@ -1215,11 +1215,11 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
 
                 # write approval history
                 if self.proposal_type == ProposalType.objects.get(code=PROPOSAL_TYPE_RENEWAL):
-                    approval.write_approval_history('renewal application {}'.format(self.lodgement_number))
+                    approval.write_approval_history('Renewal application {}'.format(self.lodgement_number))
                 elif self.proposal_type == ProposalType.objects.get(code=PROPOSAL_TYPE_AMENDMENT):
-                    approval.write_approval_history('amendment application {}'.format(self.lodgement_number))
+                    approval.write_approval_history('Amendment application {}'.format(self.lodgement_number))
                 elif self.approval and self.approval.reissued:
-                    approval.write_approval_history('reissue via application {}'.format(self.lodgement_number))
+                    approval.write_approval_history('Reissue via application {}'.format(self.lodgement_number))
                 else:
                     approval.write_approval_history()
 
@@ -2468,11 +2468,11 @@ class AuthorisedUserApplication(Proposal):
 
         # Write approval history
         if self.proposal_type == ProposalType.objects.get(code=PROPOSAL_TYPE_RENEWAL):
-            approval.write_approval_history('renewal application {}'.format(self.lodgement_number))
+            approval.write_approval_history('Renewal application {}'.format(self.lodgement_number))
         elif self.proposal_type == ProposalType.objects.get(code=PROPOSAL_TYPE_AMENDMENT):
-            approval.write_approval_history('amendment application {}'.format(self.lodgement_number))
+            approval.write_approval_history('Amendment application {}'.format(self.lodgement_number))
         elif self.approval and self.approval.reissued:
-            approval.write_approval_history('reissue via application {}'.format(self.lodgement_number))
+            approval.write_approval_history('Reissue via application {}'.format(self.lodgement_number))
         else:
             approval.write_approval_history()
 
@@ -2853,11 +2853,11 @@ class MooringLicenceApplication(Proposal):
 
             # write approval history
             if self.proposal_type == ProposalType.objects.get(code=PROPOSAL_TYPE_RENEWAL):
-                approval.write_approval_history('renewal application {}'.format(self.lodgement_number))
+                approval.write_approval_history('Renewal application {}'.format(self.lodgement_number))
             elif self.proposal_type == ProposalType.objects.get(code=PROPOSAL_TYPE_AMENDMENT):
-                approval.write_approval_history('amendment application {}'.format(self.lodgement_number))
+                approval.write_approval_history('Amendment application {}'.format(self.lodgement_number))
             elif self.approval and self.approval.reissued:
-                approval.write_approval_history('reissue via application {}'.format(self.lodgement_number))
+                approval.write_approval_history('Reissue via application {}'.format(self.lodgement_number))
             else:
                 approval.write_approval_history()
 

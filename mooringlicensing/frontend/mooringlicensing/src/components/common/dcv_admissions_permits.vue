@@ -32,7 +32,7 @@
                         <tbody>
                             <tr v-for="admission in dcvAdmissions">
                                 <td>{{ admission.entity_type }}</td>
-                                <td>{{ approval.lodgement_number }}</td>
+                                <td>{{ admission.lodgement_number }}</td>
                                 <td></td>
                             </tr>
                             <tr v-for="permit in dcvPermits">

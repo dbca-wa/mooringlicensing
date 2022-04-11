@@ -58,7 +58,7 @@
                         </FormSection>
                     </div>
                     <div class="tab-pane fade" id="pills-dcv-admissions-permits" role="tabpanel" aria-labelledby="pills-dcv-admissions-permits-tab">
-                        <FormSection label="Dcv Admissions/Permits" Index="dcv_admissions_permits">
+                        <FormSection label="DCV Admissions/Permits" Index="dcv_admissions_permits">
                             <div v-if="entity.id">
                                 <DcvAdmissionsPermits
                                 :entity="entity"
