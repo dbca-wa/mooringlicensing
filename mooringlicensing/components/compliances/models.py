@@ -66,7 +66,7 @@ class Compliance(RevisionedMixin):
     CUSTOMER_STATUS_APPROVED = 'approved'
     CUSTOMER_STATUS_DISCARDED = 'discarded'
     CUSTOMER_STATUS_CHOICES = ((CUSTOMER_STATUS_DUE, 'Due'),
-                               (CUSTOMER_STATUS_OVERDUE, 'overdue'),
+                               (CUSTOMER_STATUS_OVERDUE, 'Overdue'),
                                (CUSTOMER_STATUS_FUTURE, 'Future'),
                                (CUSTOMER_STATUS_WITH_ASSESSOR, 'Under Review'),
                                (CUSTOMER_STATUS_APPROVED, 'Approved'),
@@ -80,7 +80,7 @@ class Compliance(RevisionedMixin):
     text = models.TextField(blank=True)
     num_participants = models.SmallIntegerField('Number of participants', blank=True, null=True)
     processing_status = models.CharField(choices=PROCESSING_STATUS_CHOICES,max_length=20)
-    customer_status = models.CharField(choices=CUSTOMER_STATUS_CHOICES,max_length=20, default=CUSTOMER_STATUS_CHOICES[1][0])
+    customer_status = models.CharField(choices=CUSTOMER_STATUS_CHOICES,max_length=20)
     assigned_to = models.ForeignKey(EmailUser,related_name='mooringlicensing_compliance_assignments',null=True,blank=True)
     requirement = models.ForeignKey(ProposalRequirement, blank=True, null=True, related_name='compliance_requirement', on_delete=models.SET_NULL)
     lodgement_date = models.DateTimeField(blank=True, null=True)
