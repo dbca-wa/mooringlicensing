@@ -1377,6 +1377,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                                     proposal=self,
                                     due_date=current_date,
                                     processing_status='future',
+                                    customer_status='future',
                                     approval=approval,
                                     requirement=req,
                         )
@@ -1406,6 +1407,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                                                 proposal=self,
                                                 due_date=current_date,
                                                 processing_status='future',
+                                                customer_status='future',
                                                 approval=approval,
                                                 requirement=req,
                                     )
