@@ -399,6 +399,7 @@ export default {
                     "data": function ( d ) {
                         // Add filters selected
                         d.filter_compliance_status = vm.filterComplianceStatus;
+                        d.level = vm.level;
                     }
                 },
                 dom: 'lBfrtip',
