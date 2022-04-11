@@ -224,6 +224,7 @@ class ListComplianceSerializer(serializers.ModelSerializer):
             'assigned_to_name',
             'can_process',
             'due_date_display',
+            'can_user_view',
         )
         datatables_always_serialize = (
             'id',
@@ -236,6 +237,7 @@ class ListComplianceSerializer(serializers.ModelSerializer):
             'assigned_to_name',
             'can_process',
             'due_date_display',
+            'can_user_view',
         )
 
     def get_due_date_display(self, obj):
