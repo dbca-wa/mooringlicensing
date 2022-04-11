@@ -540,8 +540,16 @@ class SaveAnnualAdmissionApplicationSerializer(serializers.ModelSerializer):
         if self.context.get("action") == 'submit':
             if ignore_insurance_check:
                 pass 
-            elif not data.get("insurance_choice"):
-                custom_errors["Insurance Choice"] = "You must make an insurance selection"
+            else:
+                insurance_choice = data.get("insurance_choice")
+                proposal = Proposal.objects.get(id=data.get("id"))
+                vessel_length = proposal.vessel_details.vessel_applicable_length
+                if not insurance_choice:
+                    custom_errors["Insurance Choice"] = "You must make an insurance selection"
+                elif vessel_length > "6.4" and insurance_choice not in ['ten_million', 'over_ten']:
+                    custom_errors["Insurance Choice"] = "Insurance selected is insufficient for your nominated vessel"
+            #elif not data.get("insurance_choice"):
+                #custom_errors["Insurance Choice"] = "You must make an insurance selection"
         if custom_errors.keys():
             raise serializers.ValidationError(custom_errors)
         return data
@@ -570,8 +578,15 @@ class SaveMooringLicenceApplicationSerializer(serializers.ModelSerializer):
             if ignore_insurance_check:
                 pass
             else:
-                if not data.get("insurance_choice"):
+                insurance_choice = data.get("insurance_choice")
+                proposal = Proposal.objects.get(id=data.get("id"))
+                vessel_length = proposal.vessel_details.vessel_applicable_length
+                if not insurance_choice:
                     custom_errors["Insurance Choice"] = "You must make an insurance selection"
+                elif vessel_length > "6.4" and insurance_choice not in ['ten_million', 'over_ten']:
+                    custom_errors["Insurance Choice"] = "Insurance selected is insufficient for your nominated vessel"
+                #if not data.get("insurance_choice"):
+                 #   custom_errors["Insurance Choice"] = "You must make an insurance selection"
                 if not self.instance.insurance_certificate_documents.all():
                     custom_errors["Insurance Certificate"] = "Please attach"
             # electoral roll validation
@@ -615,8 +630,13 @@ class SaveAuthorisedUserApplicationSerializer(serializers.ModelSerializer):
             if ignore_insurance_check:
                 pass
             else:
-                if not data.get("insurance_choice"):
+                insurance_choice = data.get("insurance_choice")
+                proposal = Proposal.objects.get(id=data.get("id"))
+                vessel_length = proposal.vessel_details.vessel_applicable_length
+                if not insurance_choice:
                     custom_errors["Insurance Choice"] = "You must make an insurance selection"
+                elif vessel_length > "6.4" and insurance_choice not in ['ten_million', 'over_ten']:
+                    custom_errors["Insurance Choice"] = "Insurance selected is insufficient for your nominated vessel"
                 if not self.instance.insurance_certificate_documents.all():
                     custom_errors["Insurance Certificate"] = "Please attach"
             if not data.get("mooring_authorisation_preference") and not data.get("keep_existing_mooring"):
