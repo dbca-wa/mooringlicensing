@@ -70,7 +70,7 @@ export default {
                 format: 'DD/MM/YYYY',
                 showClear:true,
                 useCurrent:false,
-                maxDate: new Date(),
+                maxDate: moment().endOf('day'),
                 /*
                 keepInvalid:true,
                 allowInputToggle:true

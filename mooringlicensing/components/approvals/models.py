@@ -1196,7 +1196,7 @@ class AuthorisedUserPermit(Approval):
         kwargs['no_revision'] = True
         super(Approval, self).save(*args, **kwargs)
 
-    def internal_reissue(self, mooring_licence):
+    def internal_reissue(self, mooring_licence=None):
         ## now reissue approval
         self.current_proposal.processing_status = 'printing_sticker'
         self.current_proposal.save()
@@ -1205,7 +1205,8 @@ class AuthorisedUserPermit(Approval):
         # Create a log entry for the proposal and approval
         self.current_proposal.log_user_action(ProposalUserAction.ACTION_REISSUE_APPROVAL.format(self.lodgement_number))
         self.approval.log_user_action(ApprovalUserAction.ACTION_REISSUE_APPROVAL.format(self.lodgement_number))
-        self.approval.log_user_action(ApprovalUserAction.ACTION_REISSUE_APPROVAL_ML.format(mooring_licence.lodgement_number))
+        if mooring_licence:
+            self.approval.log_user_action(ApprovalUserAction.ACTION_REISSUE_APPROVAL_ML.format(mooring_licence.lodgement_number))
         ## final approval
         self.current_proposal.final_approval()
 
