@@ -581,15 +581,15 @@ def submit_vessel_data(instance, request, vessel_data):
             instance.vessel_details.vessel_draft > mooring.vessel_draft_limit):
                 logger.error("Proposal {}: Vessel unsuitable for mooring".format(instance))
                 raise serializers.ValidationError("Vessel unsuitable for mooring")
-        # amend / renewal
-        if instance.approval:
-            # check existing moorings against current vessel dimensions
-            for moa in instance.approval.mooringonapproval_set.filter(end_date__isnull=True):
-                mooring = Mooring.objects.get(id=moa.mooring_id)
-                if (instance.vessel_details.vessel_applicable_length > mooring.vessel_size_limit or
-                instance.vessel_details.vessel_draft > mooring.vessel_draft_limit):
-                    logger.error("Proposal {}: Vessel unsuitable for one or more moorings".format(instance))
-                    raise serializers.ValidationError("Vessel unsuitable for one or more moorings")
+        ## amend / renewal
+        #if instance.approval:
+        #    # check existing moorings against current vessel dimensions
+        #    for moa in instance.approval.mooringonapproval_set.filter(end_date__isnull=True):
+        #        mooring = Mooring.objects.get(id=moa.mooring_id)
+        #        if (instance.vessel_details.vessel_applicable_length > mooring.vessel_size_limit or
+        #        instance.vessel_details.vessel_draft > mooring.vessel_draft_limit):
+        #            logger.error("Proposal {}: Vessel unsuitable for one or more moorings".format(instance))
+        #            raise serializers.ValidationError("Vessel unsuitable for one or more moorings")
 
     elif type(instance.child_obj) == WaitingListApplication:
         if instance.vessel_details.vessel_applicable_length < min_mooring_vessel_size:

@@ -120,7 +120,7 @@
                             <div class="col-sm-3">
                             </div>
                             <div class="col-sm-6">
-                              <input :readonly="readonly" type="checkbox" id="postal_same_as_residential" v-model="profile.postal_same_as_residential"/>
+                              <input :readonly="readonly" type="checkbox" id="postal_same_as_residential" v-model="profile.postal_same_as_residential" @change="togglePostal"/>
                               <label for="postal_same_as_residential" class="control-label">Same as residential address</label>
                             </div>
                           </div>
@@ -151,6 +151,7 @@
                             <div class="col-sm-4">
                                 <select :disabled="postalAddressReadonly" class="form-control" id="postal_country" name="Country" v-model="profile.postal_address.country">
                                     <!--option v-for="c in countries" :value="c.alpha2Code">{{ c.name }}</option-->
+                                    <option value=""></option>
                                     <option v-for="c in countries" :value="c.code">{{ c.name }}</option>
                                 </select>
                             </div>
@@ -159,7 +160,7 @@
 
                           <div class="form-group">
                             <div v-if="!readonly" class="col-sm-12">
-                                <button v-if="!updatingAddress" class="pull-right btn btn-primary" @click.prevent="updateAddress()">Update</button>
+                                <button v-if="!updatingAddress" class="pull-right btn btn-primary" @click.prevent="updateAddressWrapper()">Update</button>
                                 <button v-else disabled class="pull-right btn btn-primary"><i class="fa fa-spin fa-spinner"></i>&nbsp;Updating</button>
                             </div>
                           </div>
@@ -263,6 +264,7 @@ import { api_endpoints, helpers } from '@/utils/hooks'
 import FormSection from '@/components/forms/section_toggle.vue'
 import FileField from '@/components/forms/filefield_immediate.vue'
 import 'eonasdan-bootstrap-datetimepicker';
+import alert from '@vue-utils/alert.vue'
 //require("moment");
 require('eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css');
 require('eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js');
@@ -346,6 +348,7 @@ export default {
     components: {
         FormSection,
         FileField,
+        alert
     },
     watch: {
         managesOrg: function() {
@@ -441,6 +444,11 @@ export default {
         },
     },
     methods: {
+        togglePostal: function() {
+            if (!this.profile.postal_same_as_residential) {
+                this.profile.postal_address = {};
+            }
+        },
         addEventListeners: function () {
             let vm = this;
             let elDob = $(vm.$refs.dobDatePicker);
@@ -639,6 +647,11 @@ export default {
                 vm.updatingContact = false;
             });
           }
+        },
+        updateAddressWrapper: function() {
+            this.$nextTick(() => {
+                this.updateAddress();
+            });
         },
         updateAddress: async function() {
             let vm = this;
