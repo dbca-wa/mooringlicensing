@@ -1899,7 +1899,8 @@ class WaitingListApplication(Proposal):
      #   return False
 
     def is_approver(self, user):
-        return user in self.approver_group.user_set.all()
+        #return user in self.approver_group.user_set.all()
+        return user in self.assessor_group.user_set.all()
 
     def save(self, *args, **kwargs):
         super(WaitingListApplication, self).save(*args, **kwargs)
@@ -2088,7 +2089,8 @@ class AnnualAdmissionApplication(Proposal):
      #   return False
 
     def is_approver(self, user):
-        return user in self.approver_group.user_set.all()
+        #return user in self.approver_group.user_set.all()
+        return user in self.assessor_group.user_set.all()
 
     def save(self, *args, **kwargs):
         #application_type_acronym = self.application_type.acronym if self.application_type else None
