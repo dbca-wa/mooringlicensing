@@ -779,7 +779,7 @@ from '@/utils/hooks'
                 this.addEventListeners();
                 // read in Renewal/Amendment vessel details
                 //if (!this.keep_current_vessel && this.proposal.proposal_type.code !=='new' && this.proposal.application_type_code === 'mla') {
-                if (!this.keep_current_vessel && this.proposal.proposal_type.code !=='new') {
+                if (!this.keep_current_vessel && this.proposal && this.proposal.proposal_type.code !=='new') {
                     await this.fetchVessel();
                 } else if (!this.keep_current_vessel) {
                     // pass
