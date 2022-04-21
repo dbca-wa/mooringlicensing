@@ -109,7 +109,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d0e4f7', end
     <div class="container">
         <div class="row">
         <div class="col-sm-12">
-            <h2>Refund - Allocation Pool</h2>
+            <h2>Refund payment</h2>
 	</div>
 	<div class="col-sm-12 col-md-12 col-lg-12">
 	
@@ -144,7 +144,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d0e4f7', end
         <thead>
                 <tr> 
                   <th>Order Number</th>
-                  <th>Line Item (all bookings)</th>
+                  <th>Line Item</th>
                   <th>Oracle Code</th>
                   <th>Price (inc tax)</th>
 		  <th>Rolling Total</th>
@@ -156,7 +156,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d0e4f7', end
         {% for line in invoice_line_items.invoice_line_items_array|dictsort:"order_date_placed" %}
            <tr>
                 <th>#{{ line.order_number }}</th>
-                <th>{{ line.title }}</th>
+                <th>{{ line.title|linebreaks }}</th>
                 <th>{{ line.oracle_code }}</th>
                 <th>{{ line.line_price_incl_tax }}</th>
 		<th>{{ line.rolling_total }}</th>
@@ -238,7 +238,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d0e4f7', end
 
         <div class="col-sm-12 col-md-12 col-lg-12">
                <br>
-               <h4>From Money Pool</h4>
+               <h4>From</h4>
         </div>
  
 
@@ -312,7 +312,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d0e4f7', end
         <!-- BPOINT TRANS -->
         <div id='money-bpoint-div'>
         <div class="col-sm-12 col-md-12 col-lg-12">
-               <h4>BPOINT Allocation</h4>
+               <h4>To</h4>
         </div>
 
         <div class="col-sm-12 col-md-12 col-lg-12">
@@ -320,7 +320,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d0e4f7', end
         <table cellspacing="0" width="100%" id="money-bpoint-booking" class="hover table table-striped table-bordered dt-responsive nowrap dataTable no-footer dtr-inline" role="grid" aria-describedby="bookings-table_info">
         <thead>
                 <tr>
-                  <th style='width: 150px;'>Txn Number</th>
+                  <th style='width: 370px;'>Txn Number</th>
                   <th style='width: 100px;'>Amount</th>
                 </tr>
         </thead>
@@ -348,7 +348,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d0e4f7', end
 		<br>
  		<span class="pull-right">
                         <button id="refund-booking-wait" type="button" class="btn btn-warning btn-lg" target="_blank" style='display:none'>Please Wait</button>	
-			<button id="refund-booking" type="button" class="btn btn-primary btn-lg" target="_blank">Refund Proposal</button>
+			<button id="refund-booking" type="button" class="btn btn-primary btn-lg" target="_blank">Refund</button>
 		</span>
 	</div>
 
