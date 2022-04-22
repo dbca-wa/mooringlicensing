@@ -1107,8 +1107,6 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                 if self.proposal_type in (ProposalType.objects.filter(code__in=(PROPOSAL_TYPE_RENEWAL, PROPOSAL_TYPE_AMENDMENT))):
                     approval = self.approval.child_obj
                     approval.current_proposal=self
-                    if type(self.child_obj) == WaitingListApplication:
-                        approval.wla_queue_date = current_datetime
                     approval.issue_date = current_datetime
                     approval.start_date = current_datetime.date()
                     approval.expiry_date = self.end_date
@@ -1124,10 +1122,6 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                             'submitter': self.submitter,
                         }
                     )
-                    if type(self.child_obj) == WaitingListApplication:
-                        approval.wla_queue_date = current_datetime
-                        approval.internal_status = 'waiting'
-                        approval.save()
                 self.approval = approval
                 self.save()
 
@@ -1182,30 +1176,17 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
 
                 from mooringlicensing.components.approvals.models import Sticker
 
-                #####
-                # Set proposal status after manage_stickers
-                #####
-#                awaiting_printing = False
-#                if self.approval:
-#                    stickers = self.approval.stickers.filter(status__in=(Sticker.STICKER_STATUS_NOT_READY_YET, Sticker.STICKER_STATUS_READY, Sticker.STICKER_STATUS_AWAITING_PRINTING))
-#                    if stickers.count() > 0:
-#                        awaiting_printing = True
-#                if awaiting_printing:
-#                    if self.proposal_type.code == PROPOSAL_TYPE_AMENDMENT and len(stickers_to_be_returned) and self.vessel_ownership != self.previous_application.vessel_ownership:
-#                        # When amendment and there is a sticker to be returned, application status gets
-#                        self.processing_status = Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED
-#                        self.customer_status = Proposal.CUSTOMER_STATUS_STICKER_TO_BE_RETURNED
-#                        self.log_user_action(ProposalUserAction.ACTION_STICKER_TO_BE_RETURNED.format(self.id), request)
-#                    else:
-#                        self.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
-#                        self.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
-#                        self.log_user_action(ProposalUserAction.ACTION_PRINTING_STICKER.format(self.id), request)
-#                else:
-#                    self.processing_status = Proposal.PROCESSING_STATUS_APPROVED
-#                    self.customer_status = Proposal.CUSTOMER_STATUS_APPROVED
-#                self.save()
                 # set wla order
-                approval = approval.set_wla_order()
+                from mooringlicensing.components.approvals.models import WaitingListAllocation
+                if (type(approval) == WaitingListAllocation and 
+                        (self.proposal_type.code == PROPOSAL_TYPE_NEW or 
+                            (self.previous_application.preferred_bay != self.preferred_bay)
+                            )
+                        ):
+                    approval.internal_status = 'waiting'
+                    approval.wla_queue_date = current_datetime
+                    approval.save()
+                    approval = approval.set_wla_order()
 
                 # send Proposal approval email with attachment
                 approval.generate_doc()
