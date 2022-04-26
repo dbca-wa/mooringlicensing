@@ -1159,8 +1159,8 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                 # Log proposal action
                 if details:
                     # When not auto-approve
-                    self.log_user_action(ProposalUserAction.ACTION_UPDATE_APPROVAL_.format(self.id), request)
-                    applicant_field.log_user_action(ProposalUserAction.ACTION_UPDATE_APPROVAL_.format(self.id), request)
+                    self.log_user_action(ProposalUserAction.ACTION_APPROVAL_.format(self.id), request)
+                    applicant_field.log_user_action(ProposalUserAction.ACTION_APPROVAL_.format(self.id), request)
                 else:
                     # When auto approve
                     self.log_user_action(ProposalUserAction.ACTION_AUTO_APPROVED.format(self.id),)
@@ -3560,6 +3560,7 @@ class ProposalUserAction(UserAction):
     ACTION_STICKER_TO_BE_RETURNED = "Sticker to be returned for application {}"
     ACTION_APPROVE_APPLICATION = "Approve application {}"
     ACTION_UPDATE_APPROVAL_ = "Update Approval for application {}"
+    ACTION_APPROVED = "Grant application {}"
     ACTION_AUTO_APPROVED = "Grant application {}"
     ACTION_EXPIRED_APPROVAL_ = "Expire Approval for proposal {}"
     ACTION_DISCARD_PROPOSAL = "Discard application {}"
