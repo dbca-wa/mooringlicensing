@@ -2,7 +2,7 @@
 
 {% block content_body %}
 {% include "mooringlicensing/emails_2/salutation.html" %}
-{% if decision == 'approved' %}
+{% if decision == 'approved' or decision == 'approved_paid' %}
 <p>Your application {{ proposal.lodgement_number }} to amend your authorised user permit has been approved. Please see attached document for more details.</p>
 {% if stickers_to_be_returned|length > 0 %}
 <p>If you have not already done so, you are required to return your previous sticker
