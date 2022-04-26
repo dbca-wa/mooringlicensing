@@ -434,21 +434,21 @@ class Approval(RevisionedMixin):
                     )
         return mooring_on_approval, created
 
-    def set_wla_order(self):
-        place = 1
-        # set wla order per bay for current allocations
-        if type(self) == WaitingListAllocation:
-            for w in WaitingListAllocation.objects.filter(
-                    wla_queue_date__isnull=False,
-                    current_proposal__preferred_bay=self.current_proposal.preferred_bay,
-                    status__in=['current', 'suspended']).order_by(
-                    #status='current').order_by(
-                            'wla_queue_date'):
-                w.wla_order = place
-                w.save()
-                place += 1
-        self.refresh_from_db()
-        return self
+    #def set_wla_order(self):
+    #    place = 1
+    #    # set wla order per bay for current allocations
+    #    if type(self) == WaitingListAllocation:
+    #        for w in WaitingListAllocation.objects.filter(
+    #                wla_queue_date__isnull=False,
+    #                current_proposal__preferred_bay=self.current_proposal.preferred_bay,
+    #                status__in=['current', 'suspended']).order_by(
+    #                #status='current').order_by(
+    #                        'wla_queue_date'):
+    #            w.wla_order = place
+    #            w.save()
+    #            place += 1
+    #    self.refresh_from_db()
+    #    return self
 
     @property
     def bpay_allowed(self):
@@ -694,6 +694,13 @@ class Approval(RevisionedMixin):
                 else:
                     self.set_to_cancel = True
                 self.save()
+                if type(self.child_obj) == WaitingListAllocation:
+                    wla = self.child_obj
+                    wla.internal_status = None
+                    wla.wla_queue_date = None
+                    wla.wla_order = None
+                    wla.save()
+                    wla.set_wla_order()
                 # Log proposal action
                 self.log_user_action(ApprovalUserAction.ACTION_CANCEL_APPROVAL.format(self.id),request)
                 # Log entry for organisation
@@ -755,9 +762,16 @@ class Approval(RevisionedMixin):
                     self.surrender_details = {}
                 if self.status == 'suspended':
                     self.suspension_details = {}
-
+                previous_status = self.status
                 self.status = 'current'
                 self.save()
+                if type(self.child_obj) == WaitingListAllocation and previous_status in ['cancelled', 'surrendered']:
+                    wla = self.child_obj
+                    wla.internal_status = 'waiting'
+                    current_datetime = datetime.datetime.now(pytz.timezone(TIME_ZONE))
+                    wla.wla_queue_date = current_datetime
+                    wla.save()
+                    wla.set_wla_order()
                 send_approval_reinstate_email_notification(self, request)
                 # Log approval action
                 self.log_user_action(ApprovalUserAction.ACTION_REINSTATE_APPROVAL.format(self.id),request)
@@ -790,6 +804,13 @@ class Approval(RevisionedMixin):
                 else:
                     self.set_to_surrender = True
                 self.save()
+                if type(self.child_obj) == WaitingListAllocation:
+                    wla = self.child_obj
+                    wla.internal_status = None
+                    wla.wla_queue_date = None
+                    wla.wla_order = None
+                    wla.save()
+                    wla.set_wla_order()
                 # Log approval action
                 self.log_user_action(ApprovalUserAction.ACTION_SURRENDER_APPROVAL.format(self.id),request)
                 # Log entry for proposal
@@ -939,6 +960,21 @@ class WaitingListAllocation(Approval):
         proposal.customer_status = Proposal.CUSTOMER_STATUS_APPROVED
         proposal.save()
         return [], []
+
+    def set_wla_order(self):
+        place = 1
+        # set wla order per bay for current allocations
+        for w in WaitingListAllocation.objects.filter(
+                wla_queue_date__isnull=False,
+                current_proposal__preferred_bay=self.current_proposal.preferred_bay,
+                status__in=['current', 'suspended']).order_by(
+                #status='current').order_by(
+                        'wla_queue_date'):
+            w.wla_order = place
+            w.save()
+            place += 1
+        self.refresh_from_db()
+        return self
 
 
 class AnnualAdmissionPermit(Approval):
@@ -1196,7 +1232,7 @@ class AuthorisedUserPermit(Approval):
         kwargs['no_revision'] = True
         super(Approval, self).save(*args, **kwargs)
 
-    def internal_reissue(self, mooring_licence):
+    def internal_reissue(self, mooring_licence=None):
         ## now reissue approval
         self.current_proposal.processing_status = 'printing_sticker'
         self.current_proposal.save()
@@ -1205,7 +1241,8 @@ class AuthorisedUserPermit(Approval):
         # Create a log entry for the proposal and approval
         self.current_proposal.log_user_action(ProposalUserAction.ACTION_REISSUE_APPROVAL.format(self.lodgement_number))
         self.approval.log_user_action(ApprovalUserAction.ACTION_REISSUE_APPROVAL.format(self.lodgement_number))
-        self.approval.log_user_action(ApprovalUserAction.ACTION_REISSUE_APPROVAL_ML.format(mooring_licence.lodgement_number))
+        if mooring_licence:
+            self.approval.log_user_action(ApprovalUserAction.ACTION_REISSUE_APPROVAL_ML.format(mooring_licence.lodgement_number))
         ## final approval
         self.current_proposal.final_approval()
 
@@ -2569,12 +2606,12 @@ reversion.register(ApprovalLogDocument, follow=[])
 reversion.register(ApprovalUserAction, follow=[])
 reversion.register(DcvOrganisation, follow=['dcvvessel_set', 'dcvpermit_set'])
 reversion.register(DcvVessel, follow=['dcv_admissions', 'dcv_permits'])
-reversion.register(DcvAdmission, follow=['dcv_admission_fees', 'dcv_admission_arrivals', 'admissions'])
+reversion.register(DcvAdmission, follow=['dcv_admission_arrivals', 'admissions'])
 reversion.register(DcvAdmissionArrival, follow=['numberofpeople_set'])
-reversion.register(AgeGroup, follow=['feeitem_set', 'numberofpeople_set'])
-reversion.register(AdmissionType, follow=['feeitem_set', 'numberofpeople_set'])
+reversion.register(AgeGroup, follow=['numberofpeople_set'])
+reversion.register(AdmissionType, follow=['numberofpeople_set'])
 reversion.register(NumberOfPeople, follow=[])
-reversion.register(DcvPermit, follow=['dcv_permit_fees', 'permits', 'stickers'])
+reversion.register(DcvPermit, follow=['permits', 'stickers'])
 reversion.register(DcvAdmissionDocument, follow=[])
 reversion.register(DcvPermitDocument, follow=[])
 reversion.register(Sticker, follow=['mooringonapproval_set', 'approvalhistory_set', 'sticker_action_details'])

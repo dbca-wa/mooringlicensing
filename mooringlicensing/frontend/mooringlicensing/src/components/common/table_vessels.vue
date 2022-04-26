@@ -176,7 +176,7 @@ export default {
                         'render': function(row, type, full){
                             let links = '';
                             if (!full.sale_date) {
-                                links += `<a href='/external/vesselownership/${full.id}'>Edit</a><br/>`;
+                                links += `<a href='/external/vesselownership/${full.id}'>View</a><br/>`;
                                 links += full.record_sale_link;
                             }
                             return links

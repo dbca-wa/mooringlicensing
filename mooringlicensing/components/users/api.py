@@ -170,41 +170,50 @@ class UserViewSet(viewsets.ModelViewSet):
     @detail_route(methods=['POST',])
     def update_address(self, request, *args, **kwargs):
         try:
-            instance = self.get_object()
-            # residential address
-            residential_serializer = UserAddressSerializer(data=request.data.get('residential_address'))
-            residential_serializer.is_valid(raise_exception=True)
-            residential_address, created = Address.objects.get_or_create(
-                line1 = residential_serializer.validated_data['line1'],
-                locality = residential_serializer.validated_data['locality'],
-                state = residential_serializer.validated_data['state'],
-                country = residential_serializer.validated_data['country'],
-                postcode = residential_serializer.validated_data['postcode'],
-                user = instance
-            )
-            instance.residential_address = residential_address
-            # postal address
-            postal_address_data = request.data.get('postal_address')
-            if request.data.get('postal_same_as_residential'):
-                instance.postal_same_as_residential = True
-                instance.postal_address = residential_address
-            elif postal_address_data:
-                postal_serializer = UserAddressSerializer(data=postal_address_data)
-                postal_serializer.is_valid(raise_exception=True)
-                postal_address, created = Address.objects.get_or_create(
-                    line1 = postal_serializer.validated_data['line1'],
-                    locality = postal_serializer.validated_data['locality'],
-                    state = postal_serializer.validated_data['state'],
-                    country = postal_serializer.validated_data['country'],
-                    postcode = postal_serializer.validated_data['postcode'],
+            with transaction.atomic():
+                print(request.data)
+                instance = self.get_object()
+                # residential address
+                residential_serializer = UserAddressSerializer(data=request.data.get('residential_address'))
+                residential_serializer.is_valid(raise_exception=True)
+                residential_address, created = Address.objects.get_or_create(
+                    line1 = residential_serializer.validated_data['line1'],
+                    locality = residential_serializer.validated_data['locality'],
+                    state = residential_serializer.validated_data['state'],
+                    country = residential_serializer.validated_data['country'],
+                    postcode = residential_serializer.validated_data['postcode'],
                     user = instance
                 )
-                instance.postal_address = postal_address
-                instance.postal_same_as_residential = False
+                instance.residential_address = residential_address
+                # postal address
+                postal_address_data = request.data.get('postal_address')
+                postal_address = None
+                if request.data.get('postal_same_as_residential'):
+                    instance.postal_same_as_residential = True
+                    instance.postal_address = residential_address
+                elif postal_address_data and postal_address_data.get('line1'):
+                    postal_serializer = UserAddressSerializer(data=postal_address_data)
+                    postal_serializer.is_valid(raise_exception=True)
+                    postal_address, created = Address.objects.get_or_create(
+                        line1 = postal_serializer.validated_data['line1'],
+                        locality = postal_serializer.validated_data['locality'],
+                        state = postal_serializer.validated_data['state'],
+                        country = postal_serializer.validated_data['country'],
+                        postcode = postal_serializer.validated_data['postcode'],
+                        user = instance
+                    )
+                    instance.postal_address = postal_address
+                    instance.postal_same_as_residential = False
+                else:
+                    instance.postal_same_as_residential = False
+                instance.save()
 
-            instance.save()
-            serializer = UserSerializer(instance)
-            return Response(serializer.data)
+                # Postal address form must be completed or checkbox ticked
+                if not postal_address and not instance.postal_same_as_residential:
+                    raise serializers.ValidationError("Postal address not provided")
+
+                serializer = UserSerializer(instance)
+                return Response(serializer.data)
         except serializers.ValidationError:
             print(traceback.print_exc())
             raise

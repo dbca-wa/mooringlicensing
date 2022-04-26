@@ -858,7 +858,7 @@ class RefundProposalHistoryView(LoginRequiredMixin, TemplateView):
                              total_booking_allocation_pool = total_booking_allocation_pool + ol.line_price_incl_tax
                         #rolling_total = rolling_total + ol.line_price_incl_tax
                         entry_count = entry_count + 1
-                        invoice_line_items_array.append({'line_id': ol.id, 'order_number': ol.order.number, 'title': ol.title, 'oracle_code': ol.oracle_code, 'line_price_incl_tax': ol.line_price_incl_tax, 'order_date_placed': ol.order.date_placed, 'rolling_total': '0.00' ,'entry_count': entry_count })
+                        invoice_line_items_array.append({'line_id': ol.id, 'order_number': ol.order.number, 'title': ol.title.replace(':','\n',1), 'oracle_code': ol.oracle_code, 'line_price_incl_tax': ol.line_price_incl_tax, 'order_date_placed': ol.order.date_placed, 'rolling_total': '0.00' ,'entry_count': entry_count })
                         invoice_line_items.append(ol)
 
                         if ol.oracle_code == settings.UNALLOCATED_ORACLE_CODE:

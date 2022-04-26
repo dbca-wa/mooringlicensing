@@ -53,6 +53,7 @@
 
                         <FormSection :formCollapse="false" label="Waiting List" subtitle="" Index="waiting_list" >
                             <WaitingListTable
+                                ref="waiting_list_table"
                                 v-if="email_user"
                                 level="internal"
                                 :approvalTypeFilter="wlaApprovalTypeFilter"
@@ -62,6 +63,7 @@
 
                         <FormSection :formCollapse="false" label="Licences and Permits" subtitle="" Index="licences_and_permits" >
                             <LicencesAndPermitsTable
+                                ref="licences_and_permits_table"
                                 v-if="email_user"
                                 level="internal"
                                 :approvalTypeFilter="allApprovalTypeFilter"
@@ -71,6 +73,7 @@
 
                         <FormSection :formCollapse="false" label="Compliances" subtitle="" Index="compliances" >
                             <CompliancesTable
+                                ref="compliances_table"
                                 v-if="email_user"
                                 level="internal"
                                 :target_email_user_id="email_user.id"
@@ -82,7 +85,6 @@
                             <VesselsTable
                                 ref="vessels_table"
                                 v-if="email_user"
-                                level="internal"
                                 :target_email_user_id="email_user.id"
                             />
                         </FormSection>
@@ -162,6 +164,9 @@ export default {
         let vm=this;
         $('#pills-approvals-tab').on('shown.bs.tab', function (e) {
             vm.$refs.applications_table.$refs.application_datatable.vmDataTable.columns.adjust().responsive.recalc();
+            vm.$refs.waiting_list_table.$refs.approvals_datatable.vmDataTable.columns.adjust().responsive.recalc();
+            vm.$refs.licences_and_permits_table.$refs.approvals_datatable.vmDataTable.columns.adjust().responsive.recalc();
+            vm.$refs.compliances_table.$refs.compliances_datatable.vmDataTable.columns.adjust().responsive.recalc();
         });
         $('#pills-vessels-tab').on('shown.bs.tab', function (e) {
             console.log(vm.$refs.vessels_table);
