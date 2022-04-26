@@ -2,7 +2,7 @@ from io import BytesIO
 
 from django.core.files.base import ContentFile
 
-from mooringlicensing.doctopdf import create_dcv_permit_pdf_tytes, create_dcv_admission_pdf_tytes, \
+from mooringlicensing.doctopdf import create_dcv_permit_pdf_tytes, create_dcv_admission_pdf_bytes, \
     create_approval_doc_bytes, create_renewal_doc_bytes
 
 
@@ -22,7 +22,7 @@ def create_dcv_permit_document(dcv_permit):
 
 def create_dcv_admission_document(dcv_admission_arrival):
     # create bytes
-    contents_as_bytes = create_dcv_admission_pdf_tytes(dcv_admission_arrival)
+    contents_as_bytes = create_dcv_admission_pdf_bytes(dcv_admission_arrival)
 
     filename = 'dcv_admission-{}.pdf'.format(dcv_admission_arrival.dcv_admission.lodgement_number)
     from mooringlicensing.components.approvals.models import DcvAdmissionDocument

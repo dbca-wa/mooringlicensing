@@ -2,6 +2,8 @@
 
 {% block content_body %}
 <p>The {{ proposal.description }} {{ proposal.lodgement_number }} has been assessed and is ready for approval or decline.</p>
+{% comment %}
 {% if details %}<p>Details: {{ details }}</p>{% endif %}
+{% endcomment %}
 <p>Please click <a href="{{ proposal_internal_url }}">here</a> to access the application.</p>
 {% endblock %}
