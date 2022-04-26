@@ -40,9 +40,15 @@
                     <div class="row" style="margin-top:2em;">
                         <div class="col-sm-6">
                             {% if invoice.amount %}
-                            <div><strong>Invoice: </strong>: <a href="{% url 'invoice-pdf' fee_invoice.invoice_reference %}" target="_blank"><i style='color:red;' class='fa fa-file-pdf-o'></i> #{{ fee_invoice.invoice_reference }}</a></div>
+                            <div><strong>Invoice: </strong><a href="{% url 'invoice-pdf' fee_invoice.invoice_reference %}" target="_blank"><i style='color:red;' class='fa fa-file-pdf-o'></i> #{{ fee_invoice.invoice_reference }}</a></div>
                             {% endif %}
-                            <div><strong>DCV Admission: </strong><a href="{% url 'dcv-admission-pdf' dcv_admission.id %}" target="_blank"><i style='color:red;' class='fa fa-file-pdf-o'></i> #{{ dcv_admission.lodgement_number }}<a></div>
+                            <div><strong>DCV Admission: </strong>
+                                {% for url in admission_urls %}
+                                    <a href="{{ url }}"><i style='color:red;' class='fa fa-file-pdf-o'></i> Confirmation </a>
+                                {% endfor %}
+
+                                <!-- a href="{% url 'dcv-admission-pdf' dcv_admission.id %}" target="_blank"><i style='color:red;' class='fa fa-file-pdf-o'></i> #{{ dcv_admission.lodgement_number }}</a -->
+                            </div>
                         </div>
                     </div>
                     {% endif %}

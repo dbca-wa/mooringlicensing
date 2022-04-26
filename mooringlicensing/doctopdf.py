@@ -65,7 +65,7 @@ def create_dcv_permit_pdf_tytes(dcv_permit):
     return file_contents
 
 
-def create_dcv_admission_pdf_tytes(dcv_admission_arrival):
+def create_dcv_admission_pdf_bytes(dcv_admission_arrival):
     licence_template = GlobalSettings.objects.get(key=GlobalSettings.KEY_DCV_ADMISSION_TEMPLATE_FILE)
 
     if licence_template._file:

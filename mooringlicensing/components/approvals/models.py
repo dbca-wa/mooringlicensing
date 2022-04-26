@@ -1996,6 +1996,12 @@ class DcvAdmission(RevisionedMixin):
             summary.append(arrival.get_summary())
         return summary
 
+    def get_admission_urls(self):
+        urls = []
+        for admission in self.admissions.all():
+            urls.append(admission._file.url)
+        return urls
+
 
 class DcvAdmissionArrival(RevisionedMixin):
     dcv_admission = models.ForeignKey(DcvAdmission, null=True, blank=True, related_name='dcv_admission_arrivals')
