@@ -11,7 +11,7 @@ app_label = "mooringlicensing"
 # add through models here to produce a different set of follow relationships
 through_model_keys = [
         'userdelegation',
-        'feeitemapplicationfee',
+        #'feeitemapplicationfee',
         'vesselownership',
         'companyownership',
         'mooringonapproval',

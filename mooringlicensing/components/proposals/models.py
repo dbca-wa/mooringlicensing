@@ -1107,8 +1107,6 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                 if self.proposal_type in (ProposalType.objects.filter(code__in=(PROPOSAL_TYPE_RENEWAL, PROPOSAL_TYPE_AMENDMENT))):
                     approval = self.approval.child_obj
                     approval.current_proposal=self
-                    if type(self.child_obj) == WaitingListApplication:
-                        approval.wla_queue_date = current_datetime
                     approval.issue_date = current_datetime
                     approval.start_date = current_datetime.date()
                     approval.expiry_date = self.end_date
@@ -1124,10 +1122,6 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                             'submitter': self.submitter,
                         }
                     )
-                    if type(self.child_obj) == WaitingListApplication:
-                        approval.wla_queue_date = current_datetime
-                        approval.internal_status = 'waiting'
-                        approval.save()
                 self.approval = approval
                 self.save()
 
@@ -1182,30 +1176,17 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
 
                 from mooringlicensing.components.approvals.models import Sticker
 
-                #####
-                # Set proposal status after manage_stickers
-                #####
-#                awaiting_printing = False
-#                if self.approval:
-#                    stickers = self.approval.stickers.filter(status__in=(Sticker.STICKER_STATUS_NOT_READY_YET, Sticker.STICKER_STATUS_READY, Sticker.STICKER_STATUS_AWAITING_PRINTING))
-#                    if stickers.count() > 0:
-#                        awaiting_printing = True
-#                if awaiting_printing:
-#                    if self.proposal_type.code == PROPOSAL_TYPE_AMENDMENT and len(stickers_to_be_returned) and self.vessel_ownership != self.previous_application.vessel_ownership:
-#                        # When amendment and there is a sticker to be returned, application status gets
-#                        self.processing_status = Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED
-#                        self.customer_status = Proposal.CUSTOMER_STATUS_STICKER_TO_BE_RETURNED
-#                        self.log_user_action(ProposalUserAction.ACTION_STICKER_TO_BE_RETURNED.format(self.id), request)
-#                    else:
-#                        self.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
-#                        self.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
-#                        self.log_user_action(ProposalUserAction.ACTION_PRINTING_STICKER.format(self.id), request)
-#                else:
-#                    self.processing_status = Proposal.PROCESSING_STATUS_APPROVED
-#                    self.customer_status = Proposal.CUSTOMER_STATUS_APPROVED
-#                self.save()
                 # set wla order
-                approval = approval.set_wla_order()
+                from mooringlicensing.components.approvals.models import WaitingListAllocation
+                if (type(approval) == WaitingListAllocation and 
+                        (self.proposal_type.code == PROPOSAL_TYPE_NEW or 
+                            (self.previous_application.preferred_bay != self.preferred_bay)
+                            )
+                        ):
+                    approval.internal_status = 'waiting'
+                    approval.wla_queue_date = current_datetime
+                    approval.save()
+                    approval = approval.set_wla_order()
 
                 # send Proposal approval email with attachment
                 approval.generate_doc()
@@ -1214,12 +1195,12 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                 self.approval.documents.all().update(can_delete=False)
 
                 # write approval history
-                if self.proposal_type == ProposalType.objects.get(code=PROPOSAL_TYPE_RENEWAL):
-                    approval.write_approval_history('renewal application {}'.format(self.lodgement_number))
+                if self.approval and self.approval.reissued:
+                    approval.write_approval_history('Reissue via application {}'.format(self.lodgement_number))
+                elif self.proposal_type == ProposalType.objects.get(code=PROPOSAL_TYPE_RENEWAL):
+                    approval.write_approval_history('Renewal application {}'.format(self.lodgement_number))
                 elif self.proposal_type == ProposalType.objects.get(code=PROPOSAL_TYPE_AMENDMENT):
-                    approval.write_approval_history('amendment application {}'.format(self.lodgement_number))
-                elif self.approval and self.approval.reissued:
-                    approval.write_approval_history('reissue via application {}'.format(self.lodgement_number))
+                    approval.write_approval_history('Amendment application {}'.format(self.lodgement_number))
                 else:
                     approval.write_approval_history()
 
@@ -1377,6 +1358,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                                     proposal=self,
                                     due_date=current_date,
                                     processing_status='future',
+                                    customer_status='future',
                                     approval=approval,
                                     requirement=req,
                         )
@@ -1406,6 +1388,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                                                 proposal=self,
                                                 due_date=current_date,
                                                 processing_status='future',
+                                                customer_status='future',
                                                 approval=approval,
                                                 requirement=req,
                                     )
@@ -1893,8 +1876,12 @@ class WaitingListApplication(Proposal):
     def is_assessor(self, user):
         return user in self.assessor_group.user_set.all()
 
+    #def is_approver(self, user):
+     #   return False
+
     def is_approver(self, user):
-        return False
+        #return user in self.approver_group.user_set.all()
+        return user in self.assessor_group.user_set.all()
 
     def save(self, *args, **kwargs):
         super(WaitingListApplication, self).save(*args, **kwargs)
@@ -2079,8 +2066,12 @@ class AnnualAdmissionApplication(Proposal):
     def is_assessor(self, user):
         return user in self.assessor_group.user_set.all()
 
+    #def is_approver(self, user):
+     #   return False
+
     def is_approver(self, user):
-        return False
+        #return user in self.approver_group.user_set.all()
+        return user in self.assessor_group.user_set.all()
 
     def save(self, *args, **kwargs):
         #application_type_acronym = self.application_type.acronym if self.application_type else None
@@ -2467,12 +2458,12 @@ class AuthorisedUserApplication(Proposal):
         #     self.log_user_action(ProposalUserAction.ACTION_APPROVE_APPLICATION.format(self.id), request)
 
         # Write approval history
-        if self.proposal_type == ProposalType.objects.get(code=PROPOSAL_TYPE_RENEWAL):
-            approval.write_approval_history('renewal application {}'.format(self.lodgement_number))
+        if self.approval and self.approval.reissued:
+            approval.write_approval_history('Reissue via application {}'.format(self.lodgement_number))
+        elif self.proposal_type == ProposalType.objects.get(code=PROPOSAL_TYPE_RENEWAL):
+            approval.write_approval_history('Renewal application {}'.format(self.lodgement_number))
         elif self.proposal_type == ProposalType.objects.get(code=PROPOSAL_TYPE_AMENDMENT):
-            approval.write_approval_history('amendment application {}'.format(self.lodgement_number))
-        elif self.approval and self.approval.reissued:
-            approval.write_approval_history('reissue via application {}'.format(self.lodgement_number))
+            approval.write_approval_history('Amendment application {}'.format(self.lodgement_number))
         else:
             approval.write_approval_history()
 
@@ -2852,12 +2843,12 @@ class MooringLicenceApplication(Proposal):
             #     self.log_user_action(ProposalUserAction.ACTION_APPROVE_APPLICATION.format(self.id), request)
 
             # write approval history
-            if self.proposal_type == ProposalType.objects.get(code=PROPOSAL_TYPE_RENEWAL):
-                approval.write_approval_history('renewal application {}'.format(self.lodgement_number))
+            if self.approval and self.approval.reissued:
+                approval.write_approval_history('Reissue via application {}'.format(self.lodgement_number))
+            elif self.proposal_type == ProposalType.objects.get(code=PROPOSAL_TYPE_RENEWAL):
+                approval.write_approval_history('Renewal application {}'.format(self.lodgement_number))
             elif self.proposal_type == ProposalType.objects.get(code=PROPOSAL_TYPE_AMENDMENT):
-                approval.write_approval_history('amendment application {}'.format(self.lodgement_number))
-            elif self.approval and self.approval.reissued:
-                approval.write_approval_history('reissue via application {}'.format(self.lodgement_number))
+                approval.write_approval_history('Amendment application {}'.format(self.lodgement_number))
             else:
                 approval.write_approval_history()
 
@@ -3806,7 +3797,7 @@ import reversion
 
 reversion.register(ProposalDocument, follow=['approval_level_document'])
 reversion.register(RequirementDocument, follow=[])
-reversion.register(ProposalType, follow=['proposal_set', 'feeitem_set'])
+reversion.register(ProposalType, follow=['proposal_set',])
 # TODO: fix this to improve performance
 #reversion.register(Proposal, follow=['documents', 'succeeding_proposals', 'comms_logs', 'companyownership_set', 'insurance_certificate_documents', 'hull_identification_number_documents', 'electoral_roll_documents', 'mooring_report_documents', 'written_proof_documents', 'signed_licence_agreement_documents', 'proof_of_identity_documents', 'proposalrequest_set', 'proposaldeclineddetails', 'action_logs', 'requirements', 'application_fees', 'approval_history_records', 'approvals', 'sticker_set', 'compliances'])
 reversion.register(Proposal)
@@ -3814,10 +3805,10 @@ reversion.register(StickerPrintingContact, follow=[])
 reversion.register(StickerPrintingBatch, follow=['sticker_set'])
 reversion.register(StickerPrintingResponseEmail, follow=['stickerprintingresponse_set'])
 reversion.register(StickerPrintingResponse, follow=['sticker_set'])
-reversion.register(WaitingListApplication, follow=['documents', 'succeeding_proposals', 'comms_logs', 'companyownership_set', 'insurance_certificate_documents', 'hull_identification_number_documents', 'electoral_roll_documents', 'mooring_report_documents', 'written_proof_documents', 'signed_licence_agreement_documents', 'proof_of_identity_documents', 'proposalrequest_set', 'proposaldeclineddetails', 'action_logs', 'requirements', 'application_fees', 'approval_history_records', 'approvals', 'sticker_set', 'compliances'])
-reversion.register(AnnualAdmissionApplication, follow=['documents', 'succeeding_proposals', 'comms_logs', 'companyownership_set', 'insurance_certificate_documents', 'hull_identification_number_documents', 'electoral_roll_documents', 'mooring_report_documents', 'written_proof_documents', 'signed_licence_agreement_documents', 'proof_of_identity_documents', 'proposalrequest_set', 'proposaldeclineddetails', 'action_logs', 'requirements', 'application_fees', 'approval_history_records', 'approvals', 'sticker_set', 'compliances'])
-reversion.register(AuthorisedUserApplication, follow=['documents', 'succeeding_proposals', 'comms_logs', 'companyownership_set', 'insurance_certificate_documents', 'hull_identification_number_documents', 'electoral_roll_documents', 'mooring_report_documents', 'written_proof_documents', 'signed_licence_agreement_documents', 'proof_of_identity_documents', 'proposalrequest_set', 'proposaldeclineddetails', 'action_logs', 'requirements', 'application_fees', 'approval_history_records', 'approvals', 'sticker_set', 'compliances'])
-reversion.register(MooringLicenceApplication, follow=['documents', 'succeeding_proposals', 'comms_logs', 'companyownership_set', 'insurance_certificate_documents', 'hull_identification_number_documents', 'electoral_roll_documents', 'mooring_report_documents', 'written_proof_documents', 'signed_licence_agreement_documents', 'proof_of_identity_documents', 'proposalrequest_set', 'proposaldeclineddetails', 'action_logs', 'requirements', 'application_fees', 'approval_history_records', 'approvals', 'sticker_set', 'compliances'])
+reversion.register(WaitingListApplication, follow=['documents', 'succeeding_proposals', 'comms_logs', 'companyownership_set', 'insurance_certificate_documents', 'hull_identification_number_documents', 'electoral_roll_documents', 'mooring_report_documents', 'written_proof_documents', 'signed_licence_agreement_documents', 'proof_of_identity_documents', 'proposalrequest_set', 'proposaldeclineddetails', 'action_logs', 'requirements', 'approval_history_records', 'approvals', 'sticker_set', 'compliances'])
+reversion.register(AnnualAdmissionApplication, follow=['documents', 'succeeding_proposals', 'comms_logs', 'companyownership_set', 'insurance_certificate_documents', 'hull_identification_number_documents', 'electoral_roll_documents', 'mooring_report_documents', 'written_proof_documents', 'signed_licence_agreement_documents', 'proof_of_identity_documents', 'proposalrequest_set', 'proposaldeclineddetails', 'action_logs', 'requirements', 'approval_history_records', 'approvals', 'sticker_set', 'compliances'])
+reversion.register(AuthorisedUserApplication, follow=['documents', 'succeeding_proposals', 'comms_logs', 'companyownership_set', 'insurance_certificate_documents', 'hull_identification_number_documents', 'electoral_roll_documents', 'mooring_report_documents', 'written_proof_documents', 'signed_licence_agreement_documents', 'proof_of_identity_documents', 'proposalrequest_set', 'proposaldeclineddetails', 'action_logs', 'requirements', 'approval_history_records', 'approvals', 'sticker_set', 'compliances'])
+reversion.register(MooringLicenceApplication, follow=['documents', 'succeeding_proposals', 'comms_logs', 'companyownership_set', 'insurance_certificate_documents', 'hull_identification_number_documents', 'electoral_roll_documents', 'mooring_report_documents', 'written_proof_documents', 'signed_licence_agreement_documents', 'proof_of_identity_documents', 'proposalrequest_set', 'proposaldeclineddetails', 'action_logs', 'requirements', 'approval_history_records', 'approvals', 'sticker_set', 'compliances'])
 reversion.register(ProposalLogDocument, follow=[])
 reversion.register(ProposalLogEntry, follow=['documents'])
 reversion.register(MooringBay, follow=['proposal_set', 'mooring_set'])
@@ -3828,7 +3819,7 @@ reversion.register(MooringUserAction, follow=[])
 reversion.register(Vessel, follow=['comms_logs', 'vesseldetails_set', 'companyownership_set', 'vesselownership_set', 'owner_set', 'company_set'])
 reversion.register(VesselLogDocument, follow=[])
 reversion.register(VesselLogEntry, follow=['documents'])
-reversion.register(VesselDetails, follow=['proposal_set', 'feeitemapplicationfee_set'])
+reversion.register(VesselDetails, follow=['proposal_set'])
 reversion.register(CompanyOwnership, follow=['blocking_proposal', 'vessel', 'company'])
 reversion.register(VesselOwnership, follow=['owner', 'vessel', 'company_ownership'])
 reversion.register(VesselRegistrationDocument, follow=[])

@@ -424,6 +424,7 @@ export default {
                 }
             ).draw();
         }
+        vm.$refs.moorings_datatable.vmDataTable.columns.adjust().responsive.recalc();
     },
     constructMLVesselsTable: function() {
         let vm = this;
@@ -441,6 +442,7 @@ export default {
                 }
             ).draw();
         }
+        vm.$refs.ml_vessels_datatable.vmDataTable.columns.adjust().responsive.recalc();
     },
     constructMLAuthorisedUsersTable: function() {
         let vm = this;
@@ -460,6 +462,7 @@ export default {
                 ).draw();
             }
         }
+        vm.$refs.ml_authorised_users_datatable.vmDataTable.columns.adjust().responsive.recalc();
     },
 
     commaToNewline(s){

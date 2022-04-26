@@ -21,7 +21,7 @@ from smart_selects.db_fields import ChainedForeignKey
 logger = logging.getLogger('mooringlicensing')
 
 
-class Payment(RevisionedMixin):
+class Payment(models.Model):
     send_invoice = models.BooleanField(default=False)
     confirmation_sent = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
@@ -166,7 +166,8 @@ class StickerActionFee(Payment):
         app_label = 'mooringlicensing'
 
 
-class FeeItemApplicationFee(RevisionedMixin):
+#class FeeItemApplicationFee(RevisionedMixin):
+class FeeItemApplicationFee(models.Model):
     """
     This model is only used for the calculation of AnnualAdmission components
     """
@@ -211,7 +212,7 @@ class ApplicationFee(Payment):
         app_label = 'mooringlicensing'
 
 
-class FeeSeason(RevisionedMixin):
+class FeeSeason(models.Model):
     application_type = models.ForeignKey(ApplicationType, null=True, blank=True, limit_choices_to={'fee_by_fee_constructor': True})
     name = models.CharField(max_length=50, null=False, blank=False)
 
@@ -252,7 +253,7 @@ class FeeSeason(RevisionedMixin):
         verbose_name = 'season'
 
 
-class FeePeriod(RevisionedMixin):
+class FeePeriod(models.Model):
     fee_season = models.ForeignKey(FeeSeason, null=True, blank=True, related_name='fee_periods')
     name = models.CharField(max_length=50, null=True, blank=True, default='')
     start_date = models.DateField(null=True, blank=True)
@@ -271,7 +272,7 @@ class FeePeriod(RevisionedMixin):
         ordering = ['start_date']
 
 
-class FeeConstructor(RevisionedMixin):
+class FeeConstructor(models.Model):
     application_type = models.ForeignKey(ApplicationType, null=False, blank=False, limit_choices_to={'fee_by_fee_constructor': True})
     fee_season = ChainedForeignKey(FeeSeason,
                                    chained_field='application_type',
@@ -503,7 +504,7 @@ class FeeConstructor(RevisionedMixin):
         app_label = 'mooringlicensing'
 
 
-class FeeItemStickerReplacement(RevisionedMixin):
+class FeeItemStickerReplacement(models.Model):
     amount = models.DecimalField(max_digits=8, decimal_places=2, default='0.00', help_text='unit [$AU/Sticker]')
     date_of_enforcement = models.DateField(blank=True, null=True)
     enabled = models.BooleanField(default=True)
@@ -523,7 +524,7 @@ class FeeItemStickerReplacement(RevisionedMixin):
         verbose_name_plural = 'Fee (sticker replacement)'
 
 
-class FeeItem(RevisionedMixin):
+class FeeItem(models.Model):
     fee_constructor = models.ForeignKey(FeeConstructor, null=True, blank=True)
     fee_period = models.ForeignKey(FeePeriod, null=True, blank=True)
     vessel_size_category = models.ForeignKey(VesselSizeCategory, null=True, blank=True)
@@ -569,7 +570,7 @@ class FeeItem(RevisionedMixin):
         app_label = 'mooringlicensing'
 
 
-class OracleCodeItem(RevisionedMixin):
+class OracleCodeItem(models.Model):
     application_type = models.ForeignKey(ApplicationType, blank=True, null=True, related_name='oracle_code_items')
     value = models.CharField(max_length=50, null=True, blank=True, default='T1 EXEMPT')
     date_of_enforcement = models.DateField(blank=True, null=True)
@@ -579,15 +580,17 @@ class OracleCodeItem(RevisionedMixin):
 
 
 import reversion
-reversion.register(DcvAdmissionFee, follow=[])
-reversion.register(DcvPermitFee, follow=[])
-reversion.register(StickerActionFee, follow=['sticker_action_details'])
-reversion.register(FeeItemApplicationFee, follow=['fee_item', 'application_fee', 'vessel_details'])
-reversion.register(ApplicationFee, follow=['feeitemapplicationfee_set'])
-reversion.register(FeeSeason, follow=['fee_periods', 'fee_constructors', 'dcvadmissionarrival_set', 'dcv_permits', 'sticker_set'])
-reversion.register(FeePeriod, follow=['feeitem_set'])
-reversion.register(FeeConstructor, follow=['feeitem_set', 'dcv_admission_arrivals', 'sticker_set'])
-reversion.register(FeeItemStickerReplacement, follow=[])
-reversion.register(FeeItem, follow=['dcv_admission_fees', 'dcv_permit_fees', 'feeitemapplicationfee_set', 'application_fees'])
-reversion.register(OracleCodeItem, follow=[])
+#reversion.register(DcvAdmissionFee, follow=[])
+#reversion.register(DcvPermitFee, follow=[])
+#reversion.register(StickerActionFee, follow=['sticker_action_details'])
+#reversion.register(FeeItemApplicationFee, follow=['fee_item', 'application_fee', 'vessel_details'])
+#reversion.register(ApplicationFee, follow=['feeitemapplicationfee_set'])
+#reversion.register(ApplicationFee)
+#reversion.register(FeeSeason, follow=['fee_periods', 'fee_constructors', 'dcvadmissionarrival_set', 'dcv_permits', 'sticker_set'])
+#reversion.register(FeePeriod, follow=['feeitem_set'])
+#reversion.register(FeeConstructor, follow=['feeitem_set', 'dcv_admission_arrivals', 'sticker_set'])
+#reversion.register(FeeItemStickerReplacement, follow=[])
+#reversion.register(FeeItem, follow=['dcv_admission_fees', 'dcv_permit_fees', 'feeitemapplicationfee_set', 'application_fees'])
+#reversion.register(FeeItem, follow=['dcv_admission_fees', 'dcv_permit_fees', 'application_fees'])
+#reversion.register(OracleCodeItem, follow=[])
 
