@@ -288,6 +288,13 @@ class ApprovalLogEntrySerializer(CommunicationLogEntrySerializer):
         return [[d.name,d._file.url] for d in obj.documents.all()]
 
 
+class WaitingListAllocationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = WaitingListAllocation
+        fields = '__all__'
+
+
 class ApprovalSerializer(serializers.ModelSerializer):
     submitter = UserSerializer()
     current_proposal = InternalProposalSerializer()
@@ -502,7 +509,7 @@ class ApprovalSerializer(serializers.ModelSerializer):
     def get_ria_generated_proposals(self, obj):
         links = '<br/>'
         if type(obj.child_obj) == WaitingListAllocation:
-            for mla in obj.ria_generated_proposal.all():
+            for mla in obj.child_obj.ria_generated_proposal.all():
                 links += '<a href="/internal/proposal/{}">{} : {}</a><br/>'.format(
                         mla.id,
                         mla.lodgement_number,
@@ -817,7 +824,7 @@ class ListApprovalSerializer(serializers.ModelSerializer):
     def get_ria_generated_proposals(self, obj):
         links = '<br/>'
         if type(obj.child_obj) == WaitingListAllocation:
-            for mla in obj.ria_generated_proposal.all():
+            for mla in obj.child_obj.ria_generated_proposal.all():
                 links += '<a href="/internal/proposal/{}">{} : {}</a><br/>'.format(
                         mla.id,
                         mla.lodgement_number,
