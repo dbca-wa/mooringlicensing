@@ -2447,7 +2447,7 @@ class AuthorisedUserApplication(Proposal):
         # Email to ML holder when new moorings added
         for mooring_licence in mls_to_be_emailed:
             mooring_licence.generate_au_summary_doc(request.user)
-            send_au_summary_to_ml_holder(mooring_licence, request)
+            send_au_summary_to_ml_holder(mooring_licence, request, self)
 
         # Log proposal action
         if auto_renew == 'true' or not request:

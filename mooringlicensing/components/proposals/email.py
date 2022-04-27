@@ -1129,8 +1129,8 @@ def get_attachments(attach_invoice, attach_licence_doc, proposal, attach_au_summ
     return attachments
 
 
-def send_au_summary_to_ml_holder(approval, request):
-    subject = 'Authorised User Summary Updated'
+def send_au_summary_to_ml_holder(mooring_licence, request, au_proposal):
+    subject = 'Authorised User Summary for {} - Rottnest Island Authority'.format(mooring_licence.mooring.name)
     attachments = []
 
     email = TemplateEmailBase(
@@ -1139,28 +1139,33 @@ def send_au_summary_to_ml_holder(approval, request):
         txt_template='mooringlicensing/emails_2/au_summary.txt',
     )
 
-    if approval.authorised_user_summary_document:
-        au_summary_document = approval.authorised_user_summary_document._file
+    if mooring_licence.authorised_user_summary_document:
+        au_summary_document = mooring_licence.authorised_user_summary_document._file
         if au_summary_document is not None:
-            file_name = approval.authorised_user_summary_document.name
+            file_name = mooring_licence.authorised_user_summary_document.name
             attachment = (file_name, au_summary_document.file.read(), 'application/pdf')
             attachments.append(attachment)
 
-    proposal = approval.current_proposal
+    proposal = mooring_licence.current_proposal
     context = {
-        'public_url': get_public_url(request),
-        'approval': approval,
-        'recipient': proposal.submitter,
+        'authorised_user_full_name': au_proposal.applicant,
+        'mooring_number': mooring_licence.mooring.name,
+        'yourself_or_ria': 'ria' if au_proposal.mooring_authorisation_preference == 'ria' else 'yourself',
+        'approval_date': au_proposal.approval.issue_date.strftime('%d/%m/%Y'),
+        # 'public_url': get_public_url(request),
+        # 'approval': approval,
+        'recipient': mooring_licence.applicant,
+        'url_for_au_dashboard_page': get_public_url(request),  # Do we have AU dashboard page for external???
     }
 
-    to_address = approval.submitter.email
+    to_address = mooring_licence.submitter.email
 
     # Send email
     msg = email.send(to_address, context=context, attachments=attachments, cc=[], bcc=[],)
 
     sender = get_user_as_email_user(msg.from_email)
     # log_proposal_email(msg, proposal, sender, attachments)
-    _log_approval_email(msg, approval, sender, attachments)
+    _log_approval_email(msg, mooring_licence, sender, attachments)
     return msg
 
 
