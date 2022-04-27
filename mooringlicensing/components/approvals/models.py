@@ -595,7 +595,7 @@ class Approval(RevisionedMixin):
             ria_generated_proposal_qs = None
             if type(self.child_obj) == WaitingListAllocation:
                 customer_status_choices = ['with_assessor', 'draft']
-                ria_generated_proposal_qs = self.ria_generated_proposal.filter(customer_status__in=customer_status_choices)
+                ria_generated_proposal_qs = self.child_obj.ria_generated_proposal.filter(customer_status__in=customer_status_choices)
             else:
                 if type(self.child_obj) == AnnualAdmissionPermit:
                     customer_status_choices = ['with_assessor', 'draft', 'printing_sticker']
