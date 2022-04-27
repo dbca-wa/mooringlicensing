@@ -18,7 +18,8 @@ from mooringlicensing.components.emails.emails import TemplateEmailBase
 from datetime import datetime
 
 from mooringlicensing.components.main.models import NumberOfDaysType, NumberOfDaysSetting
-from mooringlicensing.components.emails.utils import get_user_as_email_user, make_url_for_internal, get_public_url
+from mooringlicensing.components.emails.utils import get_user_as_email_user, make_url_for_internal, get_public_url, \
+    make_url_for_external
 from mooringlicensing.settings import CODE_DAYS_FOR_SUBMIT_DOCUMENTS_MLA, CODE_DAYS_IN_PERIOD_MLA, \
     PROPOSAL_TYPE_AMENDMENT, PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL
 
@@ -297,7 +298,7 @@ def send_amendment_email_notification(amendment_request, request, proposal):
         'proposal': proposal,
         'reason': reason,
         'text': amendment_request.text,
-        'proposal_external_url': url
+        'proposal_external_url': make_url_for_external(url),
     }
 
     to = proposal.submitter.email
