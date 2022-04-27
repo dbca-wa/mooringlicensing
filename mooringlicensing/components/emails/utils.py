@@ -22,6 +22,18 @@ def make_url_for_internal(url):
     return url
 
 
+def make_url_for_external(url):
+    # Public URL should not have 'internal' substring
+    if '-dev-internal' in url:
+        web_url = url.replace('-dev-internal', '-dev')
+    elif '-uat-internal' in url:
+        web_url = url.replace('-uat-internal', '-uat')
+    else:
+        web_url = url.replace('-internal', '')
+
+    return web_url
+
+
 def get_public_url(request=None):
     if request:
         web_url = '{}://{}'.format(request.scheme, request.get_host())
@@ -29,11 +41,6 @@ def get_public_url(request=None):
         web_url = settings.SITE_URL if settings.SITE_URL else ''
 
     # Public URL should not have 'internal' substring
-    if '-dev-internal' in web_url:
-        web_url = web_url.replace('-dev-internal', '-dev')
-    elif '-dev-internal' in web_url:
-        web_url = web_url.replace('-uat-internal', '-uat')
-    else:
-        web_url = web_url.replace('-internal', '')
+    web_url = make_url_for_external(web_url)
 
     return web_url

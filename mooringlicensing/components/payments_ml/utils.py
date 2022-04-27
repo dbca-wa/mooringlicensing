@@ -174,14 +174,14 @@ def create_fee_lines(instance, invoice_text=None, vouchers=[], internal=False):
     return line_items, db_processes_after_success
 
 
-def generate_line_item(application_type, fee_amount_adjusted, fee_constructor, instance, target_datetime):
+def generate_line_item(application_type, fee_amount_adjusted, fee_constructor, instance, target_datetime, v_rego_no=''):
     target_datetime_str = target_datetime.astimezone(pytz.timezone(TIME_ZONE)).strftime('%d/%m/%Y %I:%M %p')
     application_type_display = fee_constructor.application_type.description
     application_type_display = application_type_display.replace('Application', '')
     application_type_display = application_type_display.replace('fees', '')
     application_type_display = application_type_display.strip()
-    vessel_rego_no = ''
-    if instance.vessel_details and instance.vessel_details.vessel:
+    vessel_rego_no = v_rego_no
+    if not vessel_rego_no and instance.vessel_details and instance.vessel_details.vessel:
         vessel_rego_no = instance.vessel_details.vessel.rego_no
 
     proposal_type_text = '{}'.format(instance.proposal_type.description) if hasattr(instance, 'proposal_type') else ''

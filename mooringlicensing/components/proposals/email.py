@@ -18,7 +18,8 @@ from mooringlicensing.components.emails.emails import TemplateEmailBase
 from datetime import datetime
 
 from mooringlicensing.components.main.models import NumberOfDaysType, NumberOfDaysSetting
-from mooringlicensing.components.emails.utils import get_user_as_email_user, make_url_for_internal, get_public_url
+from mooringlicensing.components.emails.utils import get_user_as_email_user, make_url_for_internal, get_public_url, \
+    make_url_for_external
 from mooringlicensing.settings import CODE_DAYS_FOR_SUBMIT_DOCUMENTS_MLA, CODE_DAYS_IN_PERIOD_MLA, \
     PROPOSAL_TYPE_AMENDMENT, PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL
 
@@ -267,7 +268,7 @@ def send_approver_approve_decline_email_notification(request, proposal):
 
     context = {
         'public_url': get_public_url(request),
-        'details': proposal.proposed_issuance_approval.get('details') if proposal.proposed_issuance_approval else '',
+        # 'details': proposal.proposed_issuance_approval.get('details') if proposal.proposed_issuance_approval else '',
         'proposal': proposal,
         'proposal_internal_url': url
     }
@@ -297,7 +298,7 @@ def send_amendment_email_notification(amendment_request, request, proposal):
         'proposal': proposal,
         'reason': reason,
         'text': amendment_request.text,
-        'proposal_external_url': url
+        'proposal_external_url': make_url_for_external(url),
     }
 
     to = proposal.submitter.email
@@ -711,8 +712,8 @@ def send_application_approved_or_declined_email(proposal, decision, request, sti
         # 18, 19
         send_aaa_approved_or_declined_email(proposal, decision, request, stickers_to_be_returned)  # require_payment should be always False for AAA because it should be paid at this stage.
     elif proposal.application_type.code == AuthorisedUserApplication.code:
-        # 20, 21,22
         if proposal.proposal_type.code in [PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL]:
+            # 20
             send_aua_approved_or_declined_email_new_renewal(proposal, decision, request, stickers_to_be_returned)
         elif proposal.proposal_type.code == PROPOSAL_TYPE_AMENDMENT:
             payment_required = False
@@ -722,9 +723,11 @@ def send_application_approved_or_declined_email(proposal, decision, request, sti
                 if invoice.payment_status not in ('paid', 'over_paid'):
                     payment_required = True
             if payment_required:
-                send_aua_approved_or_declined_email_amendment_yes_payment(proposal, decision, request, stickers_to_be_returned)
+                # 22 (22a, 22b, 22c)
+                send_aua_approved_or_declined_email_amendment_payment_required(proposal, decision, request, stickers_to_be_returned)
             else:
-                send_aua_approved_or_declined_email_amendment_no_payment(proposal, decision, request, stickers_to_be_returned)
+                # 21
+                send_aua_approved_or_declined_email_amendment_payment_not_required(proposal, decision, request, stickers_to_be_returned)
         else:
             pass
     elif proposal.application_type.code == MooringLicenceApplication.code:
@@ -898,7 +901,7 @@ def send_aua_approved_or_declined_email_new_renewal(proposal, decision, request,
         cc_list = proposal.proposed_issuance_approval.get('cc_email')
         if cc_list:
             all_ccs = cc_list.split(',')
-        attachments = get_attachments(True, True, proposal)
+        attachments = get_attachments(True, False, proposal)
 
         # Generate payment_url if needed
         if proposal.application_fees.count():
@@ -955,7 +958,7 @@ def send_aua_approved_or_declined_email_new_renewal(proposal, decision, request,
     return msg
 
 
-def send_aua_approved_or_declined_email_amendment_no_payment(proposal, decision, request, stickers_to_be_returned):
+def send_aua_approved_or_declined_email_amendment_payment_not_required(proposal, decision, request, stickers_to_be_returned):
     #21
     # email to applicant when application is issued or declined (authorised user application, amendment where no payment is required)
     all_ccs = []
@@ -972,6 +975,8 @@ def send_aua_approved_or_declined_email_amendment_no_payment(proposal, decision,
         if cc_list:
             all_ccs = cc_list.split(',')
         attachments = get_attachments(False, True, proposal)
+    elif decision == 'approved_paid':
+        return
     elif decision == 'declined':
         subject = 'Declined: Amendment Application for Rottnest Island Authorised User Permit'
         details = proposal.proposaldeclineddetails.reason
@@ -979,7 +984,7 @@ def send_aua_approved_or_declined_email_amendment_no_payment(proposal, decision,
         if cc_list:
             all_ccs = cc_list.split(',')
     else:
-        logger.warning('Decision is unclear when sending AAA approved/declined email for {}'.format(proposal.lodgement_number))
+        logger.warning('Decision is unclear when sending AUA approved/declined email for {}'.format(proposal.lodgement_number))
 
     email = TemplateEmailBase(
         subject=subject,
@@ -1006,7 +1011,7 @@ def send_aua_approved_or_declined_email_amendment_no_payment(proposal, decision,
     return msg
 
 
-def send_aua_approved_or_declined_email_amendment_yes_payment(proposal, decision, request, stickers_to_be_returned):
+def send_aua_approved_or_declined_email_amendment_payment_required(proposal, decision, request, stickers_to_be_returned):
     #22
     # email to applicant when application is issued or declined (authorised user application, amendment where payment is required)
     all_ccs = []
@@ -1030,7 +1035,7 @@ def send_aua_approved_or_declined_email_amendment_yes_payment(proposal, decision
         cc_list = proposal.proposed_issuance_approval.get('cc_email')
         if cc_list:
             all_ccs = cc_list.split(',')
-        attachments = get_attachments(True, True, proposal)
+        attachments = get_attachments(True, False, proposal)
 
         # Generate payment_url if needed
         if proposal.application_fees.count():
@@ -1085,6 +1090,7 @@ def send_aua_approved_or_declined_email_amendment_yes_payment(proposal, decision
     sender = get_user_as_email_user(msg.from_email)
     log_proposal_email(msg, proposal, sender, attachments)
     return msg
+
 
 def get_attachments(attach_invoice, attach_licence_doc, proposal, attach_au_summary_doc=False):
     from mooringlicensing.components.payments_ml.invoice_pdf import create_invoice_pdf_bytes
@@ -1318,7 +1324,7 @@ def send_mla_approved_or_declined_email_amendment_yes_payment(proposal, decision
         if cc_list:
             all_ccs = cc_list.split(',')
         attach_au_summary_doc = True if proposal.proposal_type.code in [PROPOSAL_TYPE_AMENDMENT, PROPOSAL_TYPE_RENEWAL,] else False
-        attachments = get_attachments(True, True, proposal, attach_au_summary_doc)
+        attachments = get_attachments(True, False, proposal, attach_au_summary_doc)
 
         # Generate payment_url if needed
         if proposal.application_fees.count():
