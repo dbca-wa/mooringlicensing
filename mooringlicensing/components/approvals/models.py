@@ -1739,7 +1739,8 @@ class MooringLicence(Approval):
                 # Sticker not found --> Create it
                 new_sticker = Sticker.objects.create(
                     approval=self,
-                    vessel_ownership=proposal.vessel_ownership,
+                    # vessel_ownership=proposal.vessel_ownership,
+                    vessel_ownership=vessel_ownership,
                     fee_constructor=proposal.fee_constructor,
                     proposal_initiated=proposal,
                     fee_season=self.latest_applied_season,
