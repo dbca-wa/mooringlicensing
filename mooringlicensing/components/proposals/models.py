@@ -1159,8 +1159,8 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                 # Log proposal action
                 if details:
                     # When not auto-approve
-                    self.log_user_action(ProposalUserAction.ACTION_APPROVAL_.format(self.id), request)
-                    applicant_field.log_user_action(ProposalUserAction.ACTION_APPROVAL_.format(self.id), request)
+                    self.log_user_action(ProposalUserAction.ACTION_APPROVED.format(self.id), request)
+                    applicant_field.log_user_action(ProposalUserAction.ACTION_APPROVED.format(self.id), request)
                 else:
                     # When auto approve
                     self.log_user_action(ProposalUserAction.ACTION_AUTO_APPROVED.format(self.id),)
