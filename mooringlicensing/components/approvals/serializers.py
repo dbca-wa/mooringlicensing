@@ -507,7 +507,7 @@ class ApprovalSerializer(serializers.ModelSerializer):
     def get_ria_generated_proposals(self, obj):
         links = '<br/>'
         if type(obj.child_obj) == WaitingListAllocation:
-            for mla in obj.ria_generated_proposal.all():
+            for mla in obj.child_obj.ria_generated_proposal.all():
                 links += '<a href="/internal/proposal/{}">{} : {}</a><br/>'.format(
                         mla.id,
                         mla.lodgement_number,
@@ -822,7 +822,7 @@ class ListApprovalSerializer(serializers.ModelSerializer):
     def get_ria_generated_proposals(self, obj):
         links = '<br/>'
         if type(obj.child_obj) == WaitingListAllocation:
-            for mla in obj.ria_generated_proposal.all():
+            for mla in obj.child_obj.ria_generated_proposal.all():
                 links += '<a href="/internal/proposal/{}">{} : {}</a><br/>'.format(
                         mla.id,
                         mla.lodgement_number,
