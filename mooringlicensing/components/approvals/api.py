@@ -35,6 +35,7 @@ from mooringlicensing.components.main.process_document import (
         process_generic_document, 
         )
 from mooringlicensing.components.approvals.serializers import (
+    WaitingListAllocationSerializer,
     ApprovalSerializer,
     ApprovalCancellationSerializer,
     ApprovalSuspensionSerializer,
@@ -1214,7 +1215,7 @@ class DcvAdmissionPaginatedViewSet(viewsets.ModelViewSet):
 
 class WaitingListAllocationViewSet(viewsets.ModelViewSet):
     queryset = WaitingListAllocation.objects.all().order_by('id')
-    serializer_class = ApprovalSerializer
+    serializer_class = WaitingListAllocationSerializer
 
     @detail_route(methods=['POST',])
     @basic_exception_handler

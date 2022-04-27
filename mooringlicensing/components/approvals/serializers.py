@@ -288,6 +288,13 @@ class ApprovalLogEntrySerializer(CommunicationLogEntrySerializer):
         return [[d.name,d._file.url] for d in obj.documents.all()]
 
 
+class WaitingListAllocationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = WaitingListAllocation
+        fields = '__all__'
+
+
 class ApprovalSerializer(serializers.ModelSerializer):
     submitter = UserSerializer()
     current_proposal = InternalProposalSerializer()
