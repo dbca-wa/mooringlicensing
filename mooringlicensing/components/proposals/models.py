@@ -293,7 +293,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
     endorser_reminder_sent = models.BooleanField(default=False)
     ## MLA
     allocated_mooring = models.ForeignKey('Mooring', null=True, blank=True, on_delete=models.SET_NULL, related_name="ria_generated_proposal")
-    waiting_list_allocation = models.ForeignKey('mooringlicensing.Approval',null=True,blank=True, related_name="ria_generated_proposal", on_delete=models.SET_NULL)
+    waiting_list_allocation = models.ForeignKey('mooringlicensing.WaitingListAllocation',null=True,blank=True, related_name="ria_generated_proposal", on_delete=models.SET_NULL)
     date_invited = models.DateField(blank=True, null=True)  # The date RIA has invited the WLAllocation holder.  This application is expired in a configurable number of days after the invitation without submit.
     invitee_reminder_sent = models.BooleanField(default=False)
     temporary_document_collection_id = models.IntegerField(blank=True, null=True)
