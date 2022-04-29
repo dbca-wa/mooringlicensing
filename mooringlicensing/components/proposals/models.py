@@ -482,8 +482,9 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                 raise ValidationError('proposals/models.py ln 461. End date set to null.')
                 #return None
         else:
-            logger.error('Proposal: {} has {} ApplicationFees.  There should be 0 or 1.'.format(self, self.application_fees.count()))
-            raise ValidationError('Proposal: {} has {} ApplicationFees.  There should be 0 or 1.'.format(self, self.application_fees.count()))
+            msg = 'Proposal: {} has {} ApplicationFees.  There should be 0 or 1.'.format(self, self.application_fees.count())
+            logger.error(msg)
+            raise ValidationError(msg)
 
     @property
     def editable_vessel_details(self):

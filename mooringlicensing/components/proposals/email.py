@@ -742,9 +742,9 @@ def send_application_approved_or_declined_email(proposal, decision, request, sti
                 if invoice.payment_status not in ('paid', 'over_paid'):
                     payment_required = True
             if payment_required:
-                send_mla_approved_or_declined_email_amendment_yes_payment(proposal, decision, request, stickers_to_be_returned)
+                send_mla_approved_or_declined_email_amendment_payment_required(proposal, decision, request, stickers_to_be_returned)
             else:
-                send_mla_approved_or_declined_email_amendment_no_payment(proposal, decision, request, stickers_to_be_returned)
+                send_mla_approved_or_declined_email_amendment_payment_not_required(proposal, decision, request, stickers_to_be_returned)
         else:
             pass
 
@@ -976,7 +976,12 @@ def send_aua_approved_or_declined_email_amendment_payment_not_required(proposal,
             all_ccs = cc_list.split(',')
         attachments = get_attachments(False, True, proposal)
     elif decision == 'approved_paid':
-        return
+        subject = 'Approved: Amendment Application for Rottnest Island Authorised User Permit'
+        details = proposal.proposed_issuance_approval.get('details')
+        cc_list = proposal.proposed_issuance_approval.get('cc_email')
+        if cc_list:
+            all_ccs = cc_list.split(',')
+        attachments = get_attachments(False, True, proposal)
     elif decision == 'declined':
         subject = 'Declined: Amendment Application for Rottnest Island Authorised User Permit'
         details = proposal.proposaldeclineddetails.reason
@@ -1150,7 +1155,7 @@ def send_au_summary_to_ml_holder(mooring_licence, request, au_proposal):
     context = {
         'authorised_user_full_name': au_proposal.applicant,
         'mooring_number': mooring_licence.mooring.name,
-        'yourself_or_ria': 'ria' if au_proposal.mooring_authorisation_preference == 'ria' else 'yourself',
+        'yourself_or_ria': 'ria' if au_proposal.mooring_authorisation_preference == 'RIA' else 'yourself',
         'approval_date': au_proposal.approval.issue_date.strftime('%d/%m/%Y'),
         # 'public_url': get_public_url(request),
         # 'approval': approval,
@@ -1252,7 +1257,7 @@ def send_mla_approved_or_declined_email_new_renewal(proposal, decision, request,
     return msg
 
 
-def send_mla_approved_or_declined_email_amendment_no_payment(proposal, decision, request, stickers_to_be_returned):
+def send_mla_approved_or_declined_email_amendment_payment_not_required(proposal, decision, request, stickers_to_be_returned):
     # 24 ML amendment(no payment), approval/decline
     # email to applicant when application is issued or declined (mooring licence application, amendment where no payment is required)
     all_ccs = []
@@ -1306,7 +1311,7 @@ def send_mla_approved_or_declined_email_amendment_no_payment(proposal, decision,
     return msg
 
 
-def send_mla_approved_or_declined_email_amendment_yes_payment(proposal, decision, request, stickers_to_be_returned):
+def send_mla_approved_or_declined_email_amendment_payment_required(proposal, decision, request, stickers_to_be_returned):
     # 25 ML amendment(payment), approval/decline
     # email to applicant when application is issued or declined (mooring licence application, amendment where payment is required) 
     all_ccs = []
