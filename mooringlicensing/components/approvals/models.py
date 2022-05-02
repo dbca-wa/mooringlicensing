@@ -1739,7 +1739,8 @@ class MooringLicence(Approval):
                 # Sticker not found --> Create it
                 new_sticker = Sticker.objects.create(
                     approval=self,
-                    vessel_ownership=proposal.vessel_ownership,
+                    # vessel_ownership=proposal.vessel_ownership,
+                    vessel_ownership=vessel_ownership,
                     fee_constructor=proposal.fee_constructor,
                     proposal_initiated=proposal,
                     fee_season=self.latest_applied_season,
@@ -1960,19 +1961,25 @@ class DcvAdmission(RevisionedMixin):
 
     @property
     def invoice(self):
-        if self.dcv_admission_fees.count() < 1:
-            return None
-        elif self.dcv_admission_fees.count() == 1:
-            dcv_admission_fee = self.dcv_admission_fees.first()
-            try:
+        invoice = None
+        for dcv_admission_fee in self.dcv_admission_fees.all():
+            if dcv_admission_fee.fee_items.count():
                 invoice = Invoice.objects.get(reference=dcv_admission_fee.invoice_reference)
-            except:
-                invoice = None
-            return invoice
-        else:
-            msg = 'DcvAdmission: {} has {} DcvAdmissionFees.  There should be 0 or 1.'.format(self, self.dcv_admission_fees.count())
-            logger.error(msg)
-            raise ValidationError(msg)
+        return invoice
+
+        # if self.dcv_admission_fees.count() < 1:
+        #     return None
+        # elif self.dcv_admission_fees.count() == 1:
+        #     dcv_admission_fee = self.dcv_admission_fees.first()
+        #     try:
+        #         invoice = Invoice.objects.get(reference=dcv_admission_fee.invoice_reference)
+        #     except:
+        #         invoice = None
+        #     return invoice
+        # else:
+        #     msg = 'DcvAdmission: {} has {} DcvAdmissionFees.  There should be 0 or 1.'.format(self, self.dcv_admission_fees.count())
+        #     logger.error(msg)
+        #     raise ValidationError(msg)
 
     @classmethod
     def get_next_id(cls):
@@ -2238,19 +2245,25 @@ class DcvPermit(RevisionedMixin):
 
     @property
     def invoice(self):
-        if self.dcv_permit_fees.count() < 1:
-            return None
-        elif self.dcv_permit_fees.count() == 1:
-            dcv_permit_fee = self.dcv_permit_fees.first()
-            try:
+        invoice = None
+        for dcv_permit_fee in self.dcv_permit_fees.all():
+            if dcv_permit_fee.fee_items.count():
                 invoice = Invoice.objects.get(reference=dcv_permit_fee.invoice_reference)
-                return invoice
-            except:
-                return None
-        else:
-            msg = 'DcvPermit: {} has {} DcvPermitFees.  There should be 0 or 1.'.format(self, self.dcv_permit_fees.count())
-            logger.error(msg)
-            raise ValidationError(msg)
+        return invoice
+
+        # if self.dcv_permit_fees.count() < 1:
+        #     return None
+        # elif self.dcv_permit_fees.count() == 1:
+        #     dcv_permit_fee = self.dcv_permit_fees.first()
+        #     try:
+        #         invoice = Invoice.objects.get(reference=dcv_permit_fee.invoice_reference)
+        #         return invoice
+        #     except:
+        #         return None
+        # else:
+        #     msg = 'DcvPermit: {} has {} DcvPermitFees.  There should be 0 or 1.'.format(self, self.dcv_permit_fees.count())
+        #     logger.error(msg)
+        #     raise ValidationError(msg)
 
     @classmethod
     def get_next_id(cls):
