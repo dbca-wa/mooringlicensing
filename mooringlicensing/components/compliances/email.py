@@ -167,21 +167,25 @@ def send_internal_reminder_email_notification(compliance, is_test=False):
 
 def send_due_email_notification(compliance, is_test=False):
     email = ComplianceDueNotificationEmail()
-    url=settings.SITE_URL
-    url+=reverse('external-compliance-detail',kwargs={'compliance_pk': compliance.id})
+    url = settings.SITE_URL
+    url += reverse('external-compliance-detail', kwargs={'compliance_pk': compliance.id})
+
+    submitter = compliance.submitter if compliance.submitter and compliance.submitter.email else compliance.proposal.submitter
+
     context = {
+        'recipient': submitter,
         'compliance': compliance,
-        'url': url,
+        'due_date': compliance.due_date.strftime('%d/%m/%Y'),
+        'external_compliance_url': url,
         'public_url': get_public_url(),
     }
 
-    submitter = compliance.submitter.email if compliance.submitter and compliance.submitter.email else compliance.proposal.submitter.email
     all_ccs = []
     if compliance.proposal.org_applicant and compliance.proposal.org_applicant.email:
         cc_list = compliance.proposal.org_applicant.email
         if cc_list:
             all_ccs = [cc_list]
-    msg = email.send(submitter,cc=all_ccs, context=context)
+    msg = email.send(submitter.email, cc=all_ccs, context=context)
     if is_test:
         return
 
@@ -257,10 +261,12 @@ def send_external_submit_email_notification(request, compliance, is_test=False):
     url = request.build_absolute_uri(reverse('external-compliance-detail',kwargs={'compliance_pk': compliance.id}))
     url = ''.join(url.split('-internal'))
     submitter = compliance.submitter if compliance.submitter and compliance.submitter.email else compliance.proposal.submitter
+
     context = {
         'compliance': compliance,
-        'submitter': submitter.get_full_name(),
+        'recipient': submitter,
         'url': url,
+        'due_date': compliance.due_date.strftime('%d/%m/%Y'),
         'public_url': get_public_url(request),
     }
     all_ccs = []

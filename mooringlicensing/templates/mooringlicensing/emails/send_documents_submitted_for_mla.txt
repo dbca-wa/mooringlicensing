@@ -1,6 +1,6 @@
 {% extends 'mooringlicensing/emails/base_email-rottnest.txt' %}
 
 {% block content_body %}
-The documents for the {{ proposal.description }} {{ proposal.lodgement_number }} has been submitted and is ready for assessment.
+The documents for the {{ proposal.description }} {{ proposal.lodgement_number }} has been submitted and the application is ready for assessment.
 Please access {{ url }} to assess the application.
 {%  endblock %}

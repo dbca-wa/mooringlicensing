@@ -1015,8 +1015,8 @@ export default {
         },
         reissueApproval:function (proposal_id) {
             let vm = this;
-            let status= 'with_approver'
-            let data = {'status': status}
+            let new_status = 'with_assessor'
+            let data = {'status': new_status}
             swal({
                 title: "Reissue Approval",
                 text: "Are you sure you want to reissue this approval?",

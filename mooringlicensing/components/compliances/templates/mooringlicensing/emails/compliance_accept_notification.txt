@@ -2,6 +2,6 @@
 
 {% block content_body %}
 {% include "mooringlicensing/emails_2/salutation.txt" %}
-The licence requirement to submit {{ compliance.reference }} has been completed.
+Your compliance with requirement {{ compliance.lodgement_number }} for licence/permit {{ compliance.approval.lodgement_number }} has been approved.
 {% include "mooringlicensing/emails/signature-rottnest.txt" %}
 {%  endblock %}
