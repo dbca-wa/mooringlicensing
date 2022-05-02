@@ -420,71 +420,91 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
 
     @property
     def fee_constructor(self):
-        if self.application_fees.count() < 1:
-            return None
-        elif self.application_fees.count() == 1:
-            application_fee = self.application_fees.first()
-            return application_fee.fee_constructor
-        else:
-            msg = 'Proposal: {} has {} ApplicationFees.  There should be 0 or 1.'.format(self, self.application_fees.count())
-            logger.error(msg)
-            raise ValidationError(msg)
+        fee_constructor = None
+        for af in self.application_fees.all():
+            if af.fee_constructor:
+                fee_constructor = af.fee_constructor
+        return fee_constructor
+
+        # if self.application_fees.count() < 1:
+        #     return None
+        # elif self.application_fees.count() == 1:
+        #     application_fee = self.application_fees.first()
+        #     return application_fee.fee_constructor
+        # else:
+        #     msg = 'Proposal: {} has {} ApplicationFees.  There should be 0 or 1.'.format(self, self.application_fees.count())
+        #     logger.error(msg)
+        #     raise ValidationError(msg)
 
     @property
     def invoice(self):
-        if self.application_fees.count() < 1:
-            return None
-        elif self.application_fees.count() == 1:
-            application_fee = self.application_fees.first()
-            invoice = Invoice.objects.get(reference=application_fee.invoice_reference)
-            return invoice
-        else:
-            msg = 'Proposal: {} has {} ApplicationFees.  There should be 0 or 1.'.format(self, self.application_fees.count())
-            logger.error(msg)
-            raise ValidationError(msg)
+        invoice = None
+        for af in self.application_fees.all():
+            if af.fee_constructor and af.invoice_reference:
+                # This invoice should not be for refund because relating to a fee_constructor
+                invoice = Invoice.objects.get(reference=af.invoice_reference)
+        return invoice
+
+        # if self.application_fees.count() < 1:
+        #     return None
+        # elif self.application_fees.count() == 1:
+        #     application_fee = self.application_fees.first()
+        #     invoice = Invoice.objects.get(reference=application_fee.invoice_reference)
+        #     return invoice
+        # else:
+        #     msg = 'Proposal: {} has {} ApplicationFees.  There should be 0 or 1.'.format(self, self.application_fees.count())
+        #     logger.error(msg)
+        #     raise ValidationError(msg)
 
     @property
     def start_date(self):
         if self.migrated:
             return datetime.datetime(2020,9,1).date()
 
-        if self.application_fees.count() < 1:
-            return None
-        elif self.application_fees.count() == 1:
-            application_fee = self.application_fees.first()
-            if application_fee.fee_constructor:
-                return application_fee.fee_constructor.start_date
-            else:
-                return None
-        else:
-            msg = 'Proposal: {} has {} ApplicationFees.  There should be 0 or 1.'.format(self, self.application_fees.count())
-            logger.error(msg)
-            raise ValidationError(msg)
+        start_date = None
+        for af in self.application_fees.all():
+            if af.fee_constructor:
+                start_date = af.fee_constructor.start_date
+        return start_date
+
+        # if self.application_fees.count() < 1:
+        #     return None
+        # elif self.application_fees.count() == 1:
+        #     application_fee = self.application_fees.first()
+        #     if application_fee.fee_constructor:
+        #         return application_fee.fee_constructor.start_date
+        #     else:
+        #         return None
+        # else:
+        #     msg = 'Proposal: {} has {} ApplicationFees.  There should be 0 or 1.'.format(self, self.application_fees.count())
+        #     logger.error(msg)
+        #     raise ValidationError(msg)
 
     @property
     def end_date(self):
         if self.migrated:
             return datetime.datetime(2021,11,30).date()
 
-        if self.application_fees.count() < 1:
-            # current_datetime = datetime.datetime.now(pytz.timezone(TIME_ZONE))
-            # target_date = self.get_target_date(current_datetime.date())
-            # current_approvals_dict = self.vessel_details.vessel.get_current_approvals(target_date)
-            if self.fee_season:
-                return self.fee_season.end_date
-            #return None
-            raise ValidationError('proposals/models.py ln 455. End date set to null.')
-        elif self.application_fees.count() == 1:
-            application_fee = self.application_fees.first()
-            if application_fee.fee_constructor:
-                return application_fee.fee_constructor.end_date
-            else:
-                raise ValidationError('proposals/models.py ln 461. End date set to null.')
-                #return None
-        else:
-            msg = 'Proposal: {} has {} ApplicationFees.  There should be 0 or 1.'.format(self, self.application_fees.count())
-            logger.error(msg)
-            raise ValidationError(msg)
+        end_date = None
+        for af in self.application_fees.all():
+            if af.fee_constructor:
+                end_date = af.fee_constructor.end_date
+        return end_date
+
+        # if self.application_fees.count() < 1:
+        #     if self.fee_season:
+        #         return self.fee_season.end_date
+        #     raise ValidationError('proposals/models.py ln 455. End date set to null.')
+        # elif self.application_fees.count() == 1:
+        #     application_fee = self.application_fees.first()
+        #     if application_fee.fee_constructor:
+        #         return application_fee.fee_constructor.end_date
+        #     else:
+        #         raise ValidationError('proposals/models.py ln 461. End date set to null.')
+        # else:
+        #     msg = 'Proposal: {} has {} ApplicationFees.  There should be 0 or 1.'.format(self, self.application_fees.count())
+        #     logger.error(msg)
+        #     raise ValidationError(msg)
 
     @property
     def editable_vessel_details(self):
