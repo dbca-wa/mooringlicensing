@@ -283,6 +283,12 @@
                             this.showInsuranceTab = false;
                             this.$emit("updateSubmitText", "Submit");
                         }
+                        // auto approve
+                        if (this.higherVesselCategory || !this.keepCurrentVessel) {
+                            this.$emit("updateAutoApprove", false);
+                        } else {
+                            this.$emit("updateAutoApprove", true);
+                        }
                     });
                 } else if (this.proposal && this.proposal.proposal_type.code === 'renewal') {
                     this.$nextTick(() => {
@@ -301,6 +307,12 @@
                             this.showInsuranceTab = false;
                             this.$emit("updateSubmitText", "Submit");
                             this.$emit("updateAutoRenew", false);
+                        }
+                        // auto approve
+                        if (this.higherVesselCategory || !this.keepCurrentVessel) {
+                            this.$emit("updateAutoApprove", false);
+                        } else {
+                            this.$emit("updateAutoApprove", true);
                         }
                     });
                 }
