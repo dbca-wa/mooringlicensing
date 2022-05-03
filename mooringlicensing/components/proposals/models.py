@@ -1110,8 +1110,8 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
 
                     if self.application_fees.count() < 1 and not self.migrated:
                         raise ValidationError('Payment record not found for the Annual Admission Application: {}'.format(self))
-                    elif self.application_fees.count() > 1:
-                        raise ValidationError('More than 1 payment records found for the Annual Admission Application: {}'.format(self))
+                    # elif self.application_fees.count() > 1:
+                    #     raise ValidationError('More than 1 payment records found for the Annual Admission Application: {}'.format(self))
 
                     if details:
                         # When auto_approve, there are no 'details' because details are created from the modal when assessment
