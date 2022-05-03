@@ -234,6 +234,12 @@
                             this.showPaymentTab = false;
                             this.$emit("updateSubmitText", "Submit");
                         }
+                        // auto approve
+                        if (this.higherVesselCategory || !this.keepCurrentVessel) {
+                            this.$emit("updateAutoApprove", false);
+                        } else {
+                            this.$emit("updateAutoApprove", true);
+                        }
 
                     });
                 } else if (this.proposal && this.proposal.proposal_type.code === 'renewal') {
@@ -246,6 +252,12 @@
                             this.showPaymentTab = true;
                             this.showInsuranceTab = false;
                             this.$emit("updateSubmitText", "Pay / Submit");
+                        }
+                        // auto approve
+                        if (this.higherVesselCategory || !this.keepCurrentVessel) {
+                            this.$emit("updateAutoApprove", false);
+                        } else {
+                            this.$emit("updateAutoApprove", true);
                         }
                     });
                 }
