@@ -460,7 +460,7 @@ class ApprovalViewSet(viewsets.ModelViewSet):
     @basic_exception_handler
     def stickers(self, request, *args, **kwargs):
         instance = self.get_object()
-        stickers = instance.stickers.filter(status__in=[Sticker.STICKER_STATUS_CURRENT,])
+        stickers = instance.stickers.filter(status__in=[Sticker.STICKER_STATUS_AWAITING_PRINTING, Sticker.STICKER_STATUS_CURRENT,])
         serializer = StickerSerializer(stickers, many=True)
         return Response({'stickers': serializer.data})
 

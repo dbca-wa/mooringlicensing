@@ -2,6 +2,8 @@
 
 {% block content_body %}
 {% include "mooringlicensing/emails_2/salutation.html" %}
-Authorised Users of your mooring updated
+<p>{{ authorised_user_full_name }} has been approved authorised use of your mooring site {{ mooring_number }} by {{ yourself_or_ria }} on {{ approval_date }}, as permitted under Regulation 31B and 31C of the Rottnest Island Regulations 1988.</p>
+<p>Attached is an updated copy of your Authorised User Summary for your records.</p>
+<p>You can view your current authorised users at any time by logging into your account <a href="{{ url_for_au_dashboard_page }}">here</a>.</p>
 {% include "mooringlicensing/emails/signature-rottnest.html" %}
 {% endblock %}

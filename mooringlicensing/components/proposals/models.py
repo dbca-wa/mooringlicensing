@@ -421,70 +421,91 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
 
     @property
     def fee_constructor(self):
-        if self.application_fees.count() < 1:
-            return None
-        elif self.application_fees.count() == 1:
-            application_fee = self.application_fees.first()
-            return application_fee.fee_constructor
-        else:
-            msg = 'Proposal: {} has {} ApplicationFees.  There should be 0 or 1.'.format(self, self.application_fees.count())
-            logger.error(msg)
-            raise ValidationError(msg)
+        fee_constructor = None
+        for af in self.application_fees.all():
+            if af.fee_constructor:
+                fee_constructor = af.fee_constructor
+        return fee_constructor
+
+        # if self.application_fees.count() < 1:
+        #     return None
+        # elif self.application_fees.count() == 1:
+        #     application_fee = self.application_fees.first()
+        #     return application_fee.fee_constructor
+        # else:
+        #     msg = 'Proposal: {} has {} ApplicationFees.  There should be 0 or 1.'.format(self, self.application_fees.count())
+        #     logger.error(msg)
+        #     raise ValidationError(msg)
 
     @property
     def invoice(self):
-        if self.application_fees.count() < 1:
-            return None
-        elif self.application_fees.count() == 1:
-            application_fee = self.application_fees.first()
-            invoice = Invoice.objects.get(reference=application_fee.invoice_reference)
-            return invoice
-        else:
-            msg = 'Proposal: {} has {} ApplicationFees.  There should be 0 or 1.'.format(self, self.application_fees.count())
-            logger.error(msg)
-            raise ValidationError(msg)
+        invoice = None
+        for af in self.application_fees.all():
+            if af.fee_constructor and af.invoice_reference:
+                # This invoice should not be for refund because relating to a fee_constructor
+                invoice = Invoice.objects.get(reference=af.invoice_reference)
+        return invoice
+
+        # if self.application_fees.count() < 1:
+        #     return None
+        # elif self.application_fees.count() == 1:
+        #     application_fee = self.application_fees.first()
+        #     invoice = Invoice.objects.get(reference=application_fee.invoice_reference)
+        #     return invoice
+        # else:
+        #     msg = 'Proposal: {} has {} ApplicationFees.  There should be 0 or 1.'.format(self, self.application_fees.count())
+        #     logger.error(msg)
+        #     raise ValidationError(msg)
 
     @property
     def start_date(self):
         if self.migrated:
             return datetime.datetime(2020,9,1).date()
 
-        if self.application_fees.count() < 1:
-            return None
-        elif self.application_fees.count() == 1:
-            application_fee = self.application_fees.first()
-            if application_fee.fee_constructor:
-                return application_fee.fee_constructor.start_date
-            else:
-                return None
-        else:
-            msg = 'Proposal: {} has {} ApplicationFees.  There should be 0 or 1.'.format(self, self.application_fees.count())
-            logger.error(msg)
-            raise ValidationError(msg)
+        start_date = None
+        for af in self.application_fees.all():
+            if af.fee_constructor:
+                start_date = af.fee_constructor.start_date
+        return start_date
+
+        # if self.application_fees.count() < 1:
+        #     return None
+        # elif self.application_fees.count() == 1:
+        #     application_fee = self.application_fees.first()
+        #     if application_fee.fee_constructor:
+        #         return application_fee.fee_constructor.start_date
+        #     else:
+        #         return None
+        # else:
+        #     msg = 'Proposal: {} has {} ApplicationFees.  There should be 0 or 1.'.format(self, self.application_fees.count())
+        #     logger.error(msg)
+        #     raise ValidationError(msg)
 
     @property
     def end_date(self):
         if self.migrated:
             return datetime.datetime(2021,11,30).date()
 
-        if self.application_fees.count() < 1:
-            # current_datetime = datetime.datetime.now(pytz.timezone(TIME_ZONE))
-            # target_date = self.get_target_date(current_datetime.date())
-            # current_approvals_dict = self.vessel_details.vessel.get_current_approvals(target_date)
-            if self.fee_season:
-                return self.fee_season.end_date
-            #return None
-            raise ValidationError('proposals/models.py ln 455. End date set to null.')
-        elif self.application_fees.count() == 1:
-            application_fee = self.application_fees.first()
-            if application_fee.fee_constructor:
-                return application_fee.fee_constructor.end_date
-            else:
-                raise ValidationError('proposals/models.py ln 461. End date set to null.')
-                #return None
-        else:
-            logger.error('Proposal: {} has {} ApplicationFees.  There should be 0 or 1.'.format(self, self.application_fees.count()))
-            raise ValidationError('Proposal: {} has {} ApplicationFees.  There should be 0 or 1.'.format(self, self.application_fees.count()))
+        end_date = None
+        for af in self.application_fees.all():
+            if af.fee_constructor:
+                end_date = af.fee_constructor.end_date
+        return end_date
+
+        # if self.application_fees.count() < 1:
+        #     if self.fee_season:
+        #         return self.fee_season.end_date
+        #     raise ValidationError('proposals/models.py ln 455. End date set to null.')
+        # elif self.application_fees.count() == 1:
+        #     application_fee = self.application_fees.first()
+        #     if application_fee.fee_constructor:
+        #         return application_fee.fee_constructor.end_date
+        #     else:
+        #         raise ValidationError('proposals/models.py ln 461. End date set to null.')
+        # else:
+        #     msg = 'Proposal: {} has {} ApplicationFees.  There should be 0 or 1.'.format(self, self.application_fees.count())
+        #     logger.error(msg)
+        #     raise ValidationError(msg)
 
     @property
     def editable_vessel_details(self):
@@ -868,9 +889,9 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
             elif self.processing_status == self.PROCESSING_STATUS_WITH_ASSESSOR_REQUIREMENTS:
                 self.log_user_action(ProposalUserAction.ACTION_ENTER_REQUIREMENTS.format(self.id), request)
 
-    def reissue_approval(self,request,status):
+    def reissue_approval(self, request, status):
         with transaction.atomic():
-            if not self.processing_status=='approved' :
+            if not self.processing_status == Proposal.PROCESSING_STATUS_APPROVED:
                 raise ValidationError('You cannot change the current status at this time')
             elif self.approval and self.approval.can_reissue and self.is_approver(request.user):
                 self.processing_status = status
@@ -1205,6 +1226,10 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                 else:
                     approval.write_approval_history()
 
+                # Reset flag
+                if self.approval:
+                    self.approval.reissued = False
+
                 return self
 
             except:
@@ -1231,7 +1256,11 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                         raise ValidationError('The applicant needs to have set their postal address before approving this proposal.')
 
                 # if no request, must be a system reissue - skip payment section
-                if request:
+                # when reissuing, no new invoices should be created
+                if not request or (request and self.approval and self.approval.reissued):
+                    # system reissue or admin reissue
+                    approval, created = self.child_obj.update_or_create_approval(datetime.datetime.now(pytz.timezone(TIME_ZONE)))
+                else:
                     ## update proposed_issuance_approval
                     ria_mooring_name = ''
                     mooring_id = details.get('mooring_id')
@@ -1302,9 +1331,13 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                         except Exception as e:
                             err_msg = 'Failed to create invoice'
                             logger.error('{}\n{}'.format(err_msg, str(e)))
-                else:
-                    # system reissue
-                    approval, created = self.child_obj.update_or_create_approval(datetime.datetime.now(pytz.timezone(TIME_ZONE)))
+                # else:
+                #     system reissue
+                    # approval, created = self.child_obj.update_or_create_approval(datetime.datetime.now(pytz.timezone(TIME_ZONE)))
+
+                # Reset flag
+                if self.approval:
+                    self.approval.reissued = False
 
                 return self
             except Exception as e:
@@ -1599,9 +1632,11 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
         elif self.proposal_type.code == settings.PROPOSAL_TYPE_RENEWAL:
             if applied_date < self.approval.latest_applied_season.start_date:  # This should be same as self.approval.expiry_date
                 # This renewal is being applied before the latest season starts
-                msg = 'Approval: {} has been probably renewed, already'.format(self.approval)
-                logger.error(msg)
-                raise Exception(msg)
+                # Therefore this application is renewal application reissued.
+                target_date = self.approval.latest_applied_season.start_date
+                # msg = 'Approval: {} has been probably renewed, already'.format(self.approval)
+                # logger.error(msg)
+                # raise Exception(msg)
             elif self.approval.latest_applied_season.start_date <= applied_date <= self.approval.latest_applied_season.end_date:
                 # This renewal application is being applied before the licence expiry
                 # This is the most likely case
@@ -2156,6 +2191,11 @@ class AuthorisedUserApplication(Proposal):
         fee_items_to_store = []
         line_items = []
 
+        f_items = []
+        for af in self.application_fees.all():
+            for fee_item in af.fee_items.all():
+                f_items.append(fee_item)
+
         fee_item = fee_constructor.get_fee_item(vessel_length, self.proposal_type, target_date, accept_null_vessel=accept_null_vessel)
         fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length)
         fee_item_amendment_calculation = self.get_corresponding_amendment_fee_item(accept_null_vessel, fee_constructor, fee_item, target_date, vessel_length)
@@ -2427,7 +2467,7 @@ class AuthorisedUserApplication(Proposal):
         # Email to ML holder when new moorings added
         for mooring_licence in mls_to_be_emailed:
             mooring_licence.generate_au_summary_doc(request.user)
-            send_au_summary_to_ml_holder(mooring_licence, request)
+            send_au_summary_to_ml_holder(mooring_licence, request, self)
 
         # Log proposal action
         if auto_renew == 'true' or not request:
