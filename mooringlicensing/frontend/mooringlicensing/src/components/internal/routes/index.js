@@ -18,6 +18,7 @@ import PersonDetail from '@/components/internal/person/person_detail.vue'
 import Compliance from '../compliances/access.vue'
 import Reports from '@/components/reports/reports.vue'
 import Approval from '@/components/internal/approvals/approval.vue'
+import ManageVessel from '@/components/internal/manage_vessel.vue'
 /*
 import User from '../users/manage.vue'
 import ProposalCompare from '../proposals/proposal_compare.vue'
@@ -101,6 +102,23 @@ export default
             ]
         },
         {
+            path: 'vesselownership',
+            component:
+            {
+                render(c)
+                {
+                    return c('router-view')
+                }
+            },
+            children: [
+                {
+                    path: ':vessel_id',
+                    component: ManageVessel,
+                    name:"manage-vessel"
+                },
+            ]
+        },
+        {
             path: 'dcv_vessel',
             //component: MooringsDash,
             component: {
@@ -138,29 +156,6 @@ export default
             component: Search,
             name:"internal-search"
         },
-        /*
-        // {
-        //     path: 'payment',
-        //     component: PaymentDash,
-        //     props: { level: 'internal' }
-        //     //component: PaymentOrder,
-        // },
-        // {
-        //     path: 'payment',
-        //     component: ParkBookingDash,
-        //     props: { level: 'internal' }
-        // },
-        {
-            path: 'payment',
-            component: ParkEntryFeesDashboard,
-        },
-        {
-            path: 'payment_order',
-            component: PaymentOrder,
-            name:"payment_order"
-        },
-        */
-
         {
             path:'reports',
             name:'reports',
@@ -193,24 +188,6 @@ export default
 
             ]
         },
-        /*
-        {
-            path: 'users',
-            component: {
-                render(c)
-                {
-                    return c('router-view')
-                }
-            },
-            children: [
-                {
-                    path: ':user_id',
-                    component: User,
-                    name:"internal-user-detail"
-                },
-            ]
-        },
-        */
         {
             path: 'dcv',
             component: {
@@ -250,78 +227,9 @@ export default
                             component: Proposal,
                             name:"internal-proposal"
                         },
-                        /*
-                        {
-                            path: 'referral/:referral_id',
-                            component: Referral,
-                            name:"internal-referral"
-                        },
-                        {
-                            path: 'district_proposal/:district_proposal_id',
-                            component: DistrictProposal,
-                            name:"internal-district-proposal"
-                        },
-                        */
                     ]
                 },
             ]
         },
-        /*
-        {
-            path: 'proposal_compare',
-            component: {
-                render(c)
-                {
-                    return c('router-view')
-                }
-            },
-            children: [
-                {
-                    path: ':proposal_id',
-                    component: {
-                        render(c)
-                        {
-                            return c('router-view')
-                        }
-                    },
-                    children: [
-                        {
-                            path: '/',
-                            component: ProposalCompare,
-                            name:"proposal-compare"
-                        }
-                    ]
-                },
-            ]
-        },
-        // {
-        //     path: 'district_proposal',
-        //     component: {
-        //         render(c)
-        //         {
-        //             return c('router-view')
-        //         }
-        //     },
-        //     children: [
-        //         {
-        //             path: ':district_proposal_id',
-        //             component: {
-        //                 render(c)
-        //                 {
-        //                     return c('router-view')
-        //                 }
-        //             },
-        //             children: [
-        //                 {
-        //                     path: '/',
-        //                     component: DistrictProposal,
-        //                     name:"internal-district-proposal"
-        //                 },
-        //             ]
-        //         },
-        //     ]
-        // },
-
-        */
     ]
 }
