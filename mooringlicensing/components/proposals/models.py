@@ -1228,6 +1228,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                 # Reset flag
                 if self.approval:
                     self.approval.reissued = False
+                    self.approval.save()
 
                 return self
 
@@ -1337,6 +1338,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                 # Reset flag
                 if self.approval:
                     self.approval.reissued = False
+                    self.approval.save()
 
                 return self
             except Exception as e:

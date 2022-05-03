@@ -616,7 +616,6 @@ class Approval(RevisionedMixin):
             raise e
 
     def generate_doc(self, preview=False):
-
         if preview:
             from mooringlicensing.doctopdf import create_approval_doc_bytes
             return create_approval_doc_bytes(self)
@@ -625,6 +624,7 @@ class Approval(RevisionedMixin):
 
         self.save(version_comment='Created Approval PDF: {}'.format(self.licence_document.name))
         self.current_proposal.save(version_comment='Created Approval PDF: {}'.format(self.licence_document.name))
+        logger.debug('Licence document for the approval: {} has been created'.format(self.lodgement_number))
 
     def generate_au_summary_doc(self, user):
         from mooringlicensing.doctopdf import create_authorised_user_summary_doc_bytes

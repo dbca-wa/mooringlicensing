@@ -234,17 +234,18 @@ def send_internal_due_email_notification(compliance, is_test=False):
 def send_compliance_accept_email_notification(compliance,request, is_test=False):
     email = ComplianceAcceptNotificationEmail()
 
+    submitter = compliance.submitter if compliance.submitter else compliance.proposal.submitter
     context = {
         'compliance': compliance,
         'public_url': get_public_url(request),
+        'recipient': submitter,
     }
-    submitter = compliance.submitter.email if compliance.submitter and compliance.submitter.email else compliance.proposal.submitter.email
     all_ccs = []
     if compliance.proposal.org_applicant and compliance.proposal.org_applicant.email:
         cc_list = compliance.proposal.org_applicant.email
         if cc_list:
             all_ccs = [cc_list]
-    msg = email.send(submitter, cc=all_ccs, context=context)
+    msg = email.send(submitter.email, cc=all_ccs, context=context)
     if is_test:
         return
 

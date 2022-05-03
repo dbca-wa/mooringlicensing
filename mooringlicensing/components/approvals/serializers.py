@@ -663,6 +663,7 @@ class ListApprovalSerializer(serializers.ModelSerializer):
     allowed_assessors_user = serializers.SerializerMethodField()
     stickers = serializers.SerializerMethodField()
     is_approver = serializers.SerializerMethodField()
+    is_assessor = serializers.SerializerMethodField()
     vessel_regos = serializers.SerializerMethodField()
 
     class Meta:
@@ -700,6 +701,7 @@ class ListApprovalSerializer(serializers.ModelSerializer):
             'stickers',
             'licence_document',
             'authorised_user_summary_document',
+            'is_assessor',
             'is_approver',
             'vessel_regos',
         )
@@ -738,6 +740,7 @@ class ListApprovalSerializer(serializers.ModelSerializer):
             'stickers',
             'licence_document',
             'authorised_user_summary_document',
+            'is_assessor',
             'is_approver',
             'vessel_regos',
         )
@@ -751,6 +754,13 @@ class ListApprovalSerializer(serializers.ModelSerializer):
 
     def get_current_proposal_approved(self, obj):
         return obj.current_proposal.processing_status == 'approved'
+
+    def get_is_assessor(self, obj):
+        request = self.context.get('request')
+        if request:
+            return obj.is_assessor(request.user)
+        else:
+            return False
 
     def get_is_approver(self, obj):
         request = self.context.get('request')
