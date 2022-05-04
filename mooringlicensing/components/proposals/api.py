@@ -1379,6 +1379,7 @@ class VesselOwnershipViewSet(viewsets.ModelViewSet):
                 serializer = SaveVesselOwnershipSaleDateSerializer(instance, {"end_date": sale_date})
                 serializer.is_valid(raise_exception=True)
                 serializer.save()
+
                 ## collect impacted Approvals
                 approval_list = []
                 for prop in instance.proposal_set.all():
@@ -1386,8 +1387,19 @@ class VesselOwnershipViewSet(viewsets.ModelViewSet):
                             prop.approval and 
                             prop.approval.status == 'current'
                             ):
-                        if prop.approval not in approval_list:
-                            approval_list.append(prop.approval)
+                        if prop.approval.code in [WaitingListAllocation.code, AnnualAdmissionPermit.code, AuthorisedUserPermit.code]:
+                            # When WLA, AAP or AUP
+                            if prop.approval.current_proposal.vessel_ownership == instance:
+                                # When the vessel of the approval is the same vessel, which was sold
+                                if prop.approval not in approval_list:
+                                    approval_list.append(prop.approval)
+                        elif prop.approval.code in [MooringLicence.code,]:
+                            # ML
+                            if instance in prop.approval.vessel_ownership_list:
+                                # When the vessel sold is one of the vessels of ML
+                                if prop.approval not in approval_list:
+                                    approval_list.append(prop.approval)
+
                 ## change Sticker status
                 stickers_to_be_returned = []
                 for approval in approval_list:
