@@ -1391,14 +1391,19 @@ class VesselOwnershipViewSet(viewsets.ModelViewSet):
                 ## change Sticker status
                 stickers_to_be_returned = []
                 for approval in approval_list:
-                    for a_sticker in instance.sticker_set.filter(status__in=['current', 'awaiting_printing']):
-                        a_sticker.status = 'to_be_returned'
+                    # Generate a new licence/permit document
+                    approval.generate_doc(False)
+
+                    # Update sticker status
+                    for a_sticker in instance.sticker_set.filter(status__in=[Sticker.STICKER_STATUS_CURRENT, Sticker.STICKER_STATUS_AWAITING_PRINTING]):
+                        a_sticker.status = Sticker.STICKER_STATUS_TO_BE_RETURNED
                         a_sticker.save()
                         stickers_to_be_returned.append(a_sticker)
                     for a_sticker in instance.sticker_set.filter(status=Sticker.STICKER_STATUS_READY):
                         # vessel sold before the sticker is picked up by cron for export (very rarely happens)
                         a_sticker.status = Sticker.STICKER_STATUS_CANCELLED
                         a_sticker.save()
+
                     # write approval history
                     approval.write_approval_history('Vessel sold by owner')
                     if approval.code == WaitingListAllocation.code:
