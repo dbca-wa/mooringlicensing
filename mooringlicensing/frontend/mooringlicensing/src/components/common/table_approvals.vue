@@ -424,6 +424,7 @@ export default {
                         searchable: false,
                         visible: true,
                         'render': function(row, type, full){
+                            console.log(full)
                             let links = '';
                             if(vm.debug){
                                 links +=  `<a href='#${full.id}' data-request-new-sticker='${full.id}'>Request New Sticker</a><br/>`;
@@ -451,8 +452,8 @@ export default {
                             } else if (!vm.is_external){
                                 links +=  `<a href='/internal/approval/${full.id}'>View</a><br/>`;
                                 links +=  `<a href='#${full.id}' data-history-approval='${full.id}'>History</a><br/>`;
-                                if(full.can_reissue && full.current_proposal_id && full.is_approver && full.current_proposal_approved){
-                                        links +=  `<a href='#${full.id}' data-reissue-approval='${full.current_proposal_id}'>Reissue</a><br/>`;
+                                if(full.can_reissue && full.current_proposal_id && full.is_assessor && full.current_proposal_approved){
+                                    links +=  `<a href='#${full.id}' data-reissue-approval='${full.current_proposal_id}'>Reissue</a><br/>`;
                                 }
                                 if (vm.is_internal && vm.wlaDash) {
                                     links += full.offer_link;

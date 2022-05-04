@@ -1110,8 +1110,8 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
 
                     if self.application_fees.count() < 1 and not self.migrated:
                         raise ValidationError('Payment record not found for the Annual Admission Application: {}'.format(self))
-                    elif self.application_fees.count() > 1:
-                        raise ValidationError('More than 1 payment records found for the Annual Admission Application: {}'.format(self))
+                    # elif self.application_fees.count() > 1:
+                    #     raise ValidationError('More than 1 payment records found for the Annual Admission Application: {}'.format(self))
 
                     if details:
                         # When auto_approve, there are no 'details' because details are created from the modal when assessment
@@ -1228,6 +1228,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                 # Reset flag
                 if self.approval:
                     self.approval.reissued = False
+                    self.approval.save()
 
                 return self
 
@@ -1254,29 +1255,29 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                     if not self.applicant_address:
                         raise ValidationError('The applicant needs to have set their postal address before approving this proposal.')
 
+                ## update proposed_issuance_approval
+                ria_mooring_name = ''
+                mooring_id = details.get('mooring_id')
+                if mooring_id:
+                    ria_mooring_name = Mooring.objects.get(id=mooring_id).name
+
+                self.proposed_issuance_approval = {
+                    'mooring_bay_id': details.get('mooring_bay_id'),
+                    'mooring_id': mooring_id,
+                    'ria_mooring_name': ria_mooring_name,
+                    'details': details.get('details'),
+                    'cc_email': details.get('cc_email'),
+                    'mooring_on_approval': details.get('mooring_on_approval'),
+                    'vessel_ownership': details.get('vessel_ownership'),
+                }
+                self.save()
+
                 # if no request, must be a system reissue - skip payment section
                 # when reissuing, no new invoices should be created
                 if not request or (request and self.approval and self.approval.reissued):
                     # system reissue or admin reissue
-                    approval, created = self.child_obj.update_or_create_approval(datetime.datetime.now(pytz.timezone(TIME_ZONE)))
+                    approval, created = self.child_obj.update_or_create_approval(datetime.datetime.now(pytz.timezone(TIME_ZONE)), request)
                 else:
-                    ## update proposed_issuance_approval
-                    ria_mooring_name = ''
-                    mooring_id = details.get('mooring_id')
-                    if mooring_id:
-                        ria_mooring_name = Mooring.objects.get(id=mooring_id).name
-
-                    self.proposed_issuance_approval = {
-                        'mooring_bay_id': details.get('mooring_bay_id'),
-                        'mooring_id': mooring_id,
-                        'ria_mooring_name': ria_mooring_name,
-                        'details': details.get('details'),
-                        'cc_email': details.get('cc_email'),
-                        'mooring_on_approval': details.get('mooring_on_approval'),
-                        'vessel_ownership': details.get('vessel_ownership'),
-                    }
-                    self.save()
-
                     ## prepare invoice
                     from mooringlicensing.components.payments_ml.utils import create_fee_lines, make_serializable
                     from mooringlicensing.components.payments_ml.models import FeeConstructor, ApplicationFee
@@ -1337,6 +1338,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                 # Reset flag
                 if self.approval:
                     self.approval.reissued = False
+                    self.approval.save()
 
                 return self
             except Exception as e:
