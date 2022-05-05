@@ -473,23 +473,23 @@ class ProposalSerializer(BaseProposalSerializer):
         return obj.can_user_view
 
 
-class SaveProposalSerializer(BaseProposalSerializer):
-    preferred_bay_id = serializers.IntegerField(write_only=True, required=False)
-    mooring_id = serializers.IntegerField(write_only=True, required=False)
-
-    class Meta:
-        model = Proposal
-        fields = (
-                'id',
-                'insurance_choice',
-                'preferred_bay_id',
-                'silent_elector',
-                'bay_preferences_numbered',
-                'site_licensee_email',
-                'mooring_id',
-                'mooring_authorisation_preference',
-                )
-        read_only_fields=('id',)
+#class SaveProposalSerializer(BaseProposalSerializer):
+#    preferred_bay_id = serializers.IntegerField(write_only=True, required=False)
+#    mooring_id = serializers.IntegerField(write_only=True, required=False)
+#
+#    class Meta:
+#        model = Proposal
+#        fields = (
+#                'id',
+#                'insurance_choice',
+#                'preferred_bay_id',
+#                'silent_elector',
+#                'bay_preferences_numbered',
+#                'site_licensee_email',
+#                'mooring_id',
+#                'mooring_authorisation_preference',
+#                )
+#        read_only_fields=('id',)
 
 
 class SaveWaitingListApplicationSerializer(serializers.ModelSerializer):
@@ -503,6 +503,7 @@ class SaveWaitingListApplicationSerializer(serializers.ModelSerializer):
                 'silent_elector',
                 'temporary_document_collection_id',
                 'keep_existing_vessel',
+                'auto_approve',
                 )
         read_only_fields=('id',)
 
@@ -531,6 +532,7 @@ class SaveAnnualAdmissionApplicationSerializer(serializers.ModelSerializer):
                 'insurance_choice',
                 'temporary_document_collection_id',
                 'keep_existing_vessel',
+                'auto_approve',
                 )
         read_only_fields=('id',)
 
@@ -568,6 +570,7 @@ class SaveMooringLicenceApplicationSerializer(serializers.ModelSerializer):
                 'processing_status',
                 'temporary_document_collection_id',
                 'keep_existing_vessel',
+                'auto_approve',
                 )
         read_only_fields=('id',)
 
@@ -618,6 +621,7 @@ class SaveAuthorisedUserApplicationSerializer(serializers.ModelSerializer):
                 'temporary_document_collection_id',
                 'keep_existing_mooring',
                 'keep_existing_vessel',
+                'auto_approve',
                 )
         read_only_fields=('id',)
 
@@ -679,8 +683,8 @@ class SaveDraftProposalVesselSerializer(serializers.ModelSerializer):
                 'company_ownership_name',
                 'dot_name',
                 'temporary_document_collection_id',
-                'keep_existing_mooring',
-                'keep_existing_vessel',
+                #'keep_existing_mooring',
+                #'keep_existing_vessel',
                 )
 
 
