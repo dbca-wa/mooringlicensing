@@ -1049,7 +1049,6 @@ class StickerRenderer(DatatablesRenderer):
 
 
 class StickerFilterBackend(DatatablesFilterBackend):
-    @query_debugger
     def filter_queryset(self, request, queryset, view):
         total_count = queryset.count()
 

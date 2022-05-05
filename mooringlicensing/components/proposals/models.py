@@ -2472,7 +2472,7 @@ class AuthorisedUserApplication(Proposal):
             send_au_summary_to_ml_holder(mooring_licence, request, self)
 
         # Log proposal action
-        if auto_renew == 'true' or not request:
+        if self.auto_approve or not request:
             self.log_user_action(ProposalUserAction.ACTION_AUTO_APPROVED.format(self.id))
         else:
             # When get here without request, there should be already an action log for ACTION_APROVE_APPLICATION
@@ -2838,7 +2838,7 @@ class MooringLicenceApplication(Proposal):
             send_application_approved_or_declined_email(self, 'approved_paid', request, stickers_to_be_returned)
 
             # Log proposal action
-            if auto_renew == 'true' or not request:
+            if self.auto_approve or not request:
                 self.log_user_action(ProposalUserAction.ACTION_AUTO_APPROVED.format(self.id))
             else:
                 # When get here without request, there should be already an action log for ACTION_APROVE_APPLICATION
