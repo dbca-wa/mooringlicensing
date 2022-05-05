@@ -1128,11 +1128,9 @@ export default {
 
                 })
                 .then((response) => {
-                   let proposal = {}
-                   proposal = response.body
-                   vm.$router.push({
-                    name:"draft_proposal",
-                    params:{proposal_id: proposal.id}
+                    vm.$router.push({
+                        name:"draft_proposal",
+                        params:{proposal_id: response.body.proposal_id}
                    });
 
                 }, (error) => {
@@ -1163,11 +1161,9 @@ export default {
 
                 })
                 .then((response) => {
-                   let proposal = {}
-                   proposal = response.body
                    vm.$router.push({
-                    name:"draft_proposal",
-                    params:{proposal_id: proposal.id}
+                        name:"draft_proposal",
+                        params:{proposal_id: response.body.proposal_id}
                    });
 
                 }, (error) => {

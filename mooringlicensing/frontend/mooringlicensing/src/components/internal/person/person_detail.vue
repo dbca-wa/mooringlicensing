@@ -85,6 +85,7 @@
                             <VesselsTable
                                 ref="vessels_table"
                                 v-if="email_user"
+                                level="internal"
                                 :target_email_user_id="email_user.id"
                             />
                         </FormSection>

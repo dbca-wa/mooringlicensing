@@ -39,6 +39,7 @@
             :showElectoralRoll="showElectoralRoll"
             :readonly="readonly"
             :submitterId="submitterId"
+            @updateAutoApprove="updateAutoApprove"
             @updateSubmitText="updateSubmitText"
             @vesselChanged="updateVesselChanged"
             @mooringPreferenceChanged="updateMooringPreference"
@@ -52,6 +53,7 @@
             :showElectoralRoll="showElectoralRoll"
             :readonly="readonly"
             :submitterId="submitterId"
+            @updateAutoApprove="updateAutoApprove"
             @updateSubmitText="updateSubmitText"
             @vesselChanged="updateVesselChanged"
             />
@@ -63,7 +65,7 @@
             :readonly="readonly"
             :submitterId="submitterId"
             @updateSubmitText="updateSubmitText"
-            @updateAutoRenew="updateAutoRenew"
+            @updateAutoApprove="updateAutoApprove"
             @vesselChanged="updateVesselChanged"
             @changeMooring="updateMooringAuth"
             />
@@ -76,7 +78,7 @@
             :readonly="readonly"
             :submitterId="submitterId"
             @updateSubmitText="updateSubmitText"
-            @updateAutoRenew="updateAutoRenew"
+            @updateAutoApprove="updateAutoApprove"
             @vesselChanged="updateVesselChanged"
             />
 
@@ -175,7 +177,7 @@ export default {
       // WLA
       mooringPreferenceChanged: false,
       submitText: "Submit",
-      autoRenew: false,
+      autoApprove: false,
     }
   },
   components: {
@@ -276,9 +278,9 @@ export default {
       },
   },
   methods: {
-    updateAutoRenew: function(renew) {
-        this.autoRenew = renew;
-        console.log("updateAutoRenew");
+    updateAutoApprove: function(approve) {
+        this.autoApprove = approve;
+        console.log("updateAutoApprove");
     },
     updateMooringAuth: function(changed) {
         this.mooringOptionsChanged = changed;
@@ -332,6 +334,7 @@ export default {
         }
         // WLA
         if (this.$refs.waiting_list_application) {
+            payload.proposal.auto_approve = this.autoApprove;
             if (this.$refs.waiting_list_application.$refs.vessels) {
                 payload.vessel = Object.assign({}, this.$refs.waiting_list_application.$refs.vessels.vessel);
                 //payload.proposal.dot_name = this.$refs.waiting_list_application.$refs.vessels.dotName;
@@ -348,6 +351,7 @@ export default {
             }
         // AAA
         } else if (this.$refs.annual_admission_application) {
+            payload.proposal.auto_approve = this.autoApprove;
             if (this.$refs.annual_admission_application.$refs.vessels) {
                 payload.vessel = Object.assign({}, this.$refs.annual_admission_application.$refs.vessels.vessel);
                 payload.proposal.temporary_document_collection_id = this.$refs.annual_admission_application.$refs.vessels.temporary_document_collection_id;
@@ -365,6 +369,7 @@ export default {
             */
         // AUA
         } else if (this.$refs.authorised_user_application) {
+            payload.proposal.auto_approve = this.autoApprove;
             if (this.$refs.authorised_user_application.$refs.vessels) {
                 payload.vessel = Object.assign({}, this.$refs.authorised_user_application.$refs.vessels.vessel);
                 payload.proposal.temporary_document_collection_id = this.$refs.authorised_user_application.$refs.vessels.temporary_document_collection_id;
@@ -397,6 +402,7 @@ export default {
             */
         // MLA
         } else if (this.$refs.mooring_licence_application) {
+            payload.proposal.auto_approve = this.autoApprove;
             //this.vesselChanged = await this.$refs.mooring_licence_application.$refs.vessels.vesselChanged();
             //console.log(vesselChanged);
             if (this.$refs.mooring_licence_application.$refs.vessels) {
@@ -473,11 +479,11 @@ export default {
         try {
             const res = await this.save(false, this.proposal_submit_url);
             this.$nextTick(async () => {
-                if (['wla', 'aaa'].includes(this.proposal.application_type_code)) {
+                if (this.autoApprove) {
+                    //await this.post_and_redirect(this.application_fee_url, {'auto_approve': true, 'csrfmiddlewaretoken' : this.csrf_token});
                     await this.post_and_redirect(this.application_fee_url, {'csrfmiddlewaretoken' : this.csrf_token});
-                //} else if (['mla', 'aua'].includes(this.proposal.application_type_code) && this.autoRenew) {
-                } else if (this.autoRenew) {
-                    await this.post_and_redirect(this.application_fee_url, {'auto_renew': true, 'csrfmiddlewaretoken' : this.csrf_token});
+                } else if (['wla', 'aaa'].includes(this.proposal.application_type_code)) {
+                    await this.post_and_redirect(this.application_fee_url, {'csrfmiddlewaretoken' : this.csrf_token});
                 } else {
                     await this.post_and_redirect(this.confirmation_url, {'csrfmiddlewaretoken' : this.csrf_token});
                     //this.$router.push({

@@ -7,7 +7,7 @@
         :readonly=true
         :key="uuid"
         />
-        <div>
+        <!--div>
             <div class="row" style="margin-bottom: 50px">
                     <div  class="container">
                       <div class="row" style="margin-bottom: 50px">
@@ -23,7 +23,7 @@
                         </div>
                     </div>
             </div>
-        </div>
+        </div-->
 
     </div>
 </template>

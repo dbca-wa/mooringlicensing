@@ -306,6 +306,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
 
     fee_season = models.ForeignKey('FeeSeason', null=True, blank=True)  # In some case, proposal doesn't have any fee related objects.  Which results in the impossibility to retrieve season, start_date, end_date, etc.
                                                                         # To prevent that, fee_season is used in order to store those data.
+    auto_approve = models.BooleanField(default=False)
 
     class Meta:
         app_label = 'mooringlicensing'
@@ -1090,7 +1091,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
             except:
                 raise
 
-    def final_approval_for_WLA_AAA(self, request, details=None, auto_approve=False):
+    def final_approval_for_WLA_AAA(self, request, details=None):
         with transaction.atomic():
             try:
                 current_datetime = datetime.datetime.now(pytz.timezone(TIME_ZONE))
@@ -1101,9 +1102,9 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                     # for 'Awaiting Payment' approval. External/Internal user fires this method after full payment via Make/Record Payment
                     pass
                 else:
-                    if not auto_approve and not self.can_assess(request.user):
+                    if not self.auto_approve and not self.can_assess(request.user):
                         raise exceptions.ProposalNotAuthorized()
-                    if not auto_approve and self.processing_status not in (Proposal.PROCESSING_STATUS_WITH_ASSESSOR_REQUIREMENTS, Proposal.PROCESSING_STATUS_WITH_ASSESSOR):
+                    if not self.auto_approve and self.processing_status not in (Proposal.PROCESSING_STATUS_WITH_ASSESSOR_REQUIREMENTS, Proposal.PROCESSING_STATUS_WITH_ASSESSOR):
                         raise ValidationError('You cannot issue the approval if it is not with an assessor')
                     if not self.applicant_address:
                         raise ValidationError('The applicant needs to have set their postal address before approving this proposal.')
@@ -1152,7 +1153,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                     approval.export_to_mooring_booking = True
                 approval.save()
                 # set auto_approve ProposalRequirement due dates to those from previous application + 12 months
-                if auto_approve and self.proposal_type.code == 'renewal':
+                if self.auto_approve and self.proposal_type.code == 'renewal':
                     for req in self.requirements.filter(is_deleted=False):
                         if req.copied_from and req.copied_from.due_date:
                             req.due_date = req.copied_from.due_date + relativedelta(months=+12)
@@ -1653,42 +1654,21 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
 
         return target_date
 
-    def auto_approve(self, request):
-        ## If renewal and no change to vessel
-        if self.proposal_type in ProposalType.objects.filter(code__in=[PROPOSAL_TYPE_RENEWAL, PROPOSAL_TYPE_AMENDMENT]):
-            auto_approve = True
-            #auto_approve = False
-            ## current and previous application both do not have a vessel
-            if not self.vessel_details and not self.previous_application_status_filter.vessel_details:
-                pass
-            ## either current or previous application does not have a vessel
-            elif not self.vessel_details or not self.previous_application_status_filter.vessel_details:
-                auto_approve = False
-                #pass
-            ## compare current vessel data to previous application's vessel data
-            elif (
-                    # Vessel Details and rego
-                    self.vessel_details.vessel != self.previous_application_status_filter.vessel_details.vessel or
-                    self.vessel_details.vessel_type != self.previous_application_status_filter.vessel_details.vessel_type or
-                    self.vessel_details.vessel_length != self.previous_application_status_filter.vessel_details.vessel_length or
-                    self.vessel_details.vessel_draft != self.previous_application_status_filter.vessel_details.vessel_draft or
-                    self.vessel_details.vessel_beam != self.previous_application_status_filter.vessel_details.vessel_beam or
-                    self.vessel_details.vessel_weight != self.previous_application_status_filter.vessel_details.vessel_weight or
-                    # Vessel Ownership
-                    self.percentage != self.previous_application_status_filter.percentage or
-                    self.individual_owner != self.previous_application_status_filter.individual_owner or
-                    self.company_ownership_percentage != self.previous_application_status_filter.company_ownership_percentage or
-                    self.company_ownership_name != self.previous_application_status_filter.company_ownership_name
-                    ):
-                auto_approve = False
-            ## WLA
-            if (type(self.child_obj) == WaitingListApplication and 
-                    self.preferred_bay != self.previous_application_status_filter.preferred_bay
-                    ):
-                auto_approve = False
+    def auto_approve_check(self, request):
+        # New AnnualAdmission can be auto_approved
+        if type(self.child_obj) == AnnualAdmissionApplication and self.proposal_type.code == 'new':
+            self.auto_approve = True
+            self.save()
+        ## WLA
+        if (type(self.child_obj) == WaitingListApplication and 
+                self.previous_application_status_filter and 
+                self.preferred_bay != self.previous_application_status_filter.preferred_bay
+                ):
+            auto_approve = False
+            self.save()
 
-            if auto_approve:
-                self.final_approval_for_WLA_AAA(request, details={}, auto_approve=auto_approve)
+        if self.auto_approve:
+            self.final_approval_for_WLA_AAA(request, details={})
 
 
 def update_sticker_doc_filename(instance, filename):
@@ -2341,7 +2321,7 @@ class AuthorisedUserApplication(Proposal):
             send_confirmation_email_upon_submit(request, self, False)
             send_notification_email_upon_submit_to_assessor(request, self)
 
-    def update_or_create_approval(self, current_datetime, request=None, auto_renew=None):
+    def update_or_create_approval(self, current_datetime, request=None):
         # This function is called after payment success for new/amendment/renewal application
 
         created = None
@@ -2383,9 +2363,9 @@ class AuthorisedUserApplication(Proposal):
             approval.renewal_count += 1
             approval.save()
 
-        # update proposed_issuance_approval and MooringOnApproval if not system reissue (no request) or auto_renew
+        # update proposed_issuance_approval and MooringOnApproval if not system reissue (no request) or auto_approve
         existing_mooring_count = None
-        if request and not auto_renew:
+        if request and not self.auto_approve:
             # Create MooringOnApproval records
             ## also see logic in approval.add_mooring()
             mooring_id_pk = self.proposed_issuance_approval.get('mooring_id')
@@ -2409,8 +2389,8 @@ class AuthorisedUserApplication(Proposal):
                     elif moa1.get("id") == moa2.id and moa1.get("checked") and moa2.end_date:
                         moa2.end_date = None
                         moa2.save()
-        # set auto_renew ProposalRequirement due dates to those from previous application + 12 months
-        if auto_renew:
+        # set auto_approve renewal application ProposalRequirement due dates to those from previous application + 12 months
+        if self.auto_approve and self.proposal_type.code == 'renewal':
             for req in self.requirements.filter(is_deleted=False):
                 if req.copied_from and req.copied_from.due_date:
                     req.due_date = req.copied_from.due_date + relativedelta(months=+12)
@@ -2471,7 +2451,7 @@ class AuthorisedUserApplication(Proposal):
                 self.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
                 self.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
                 self.log_user_action(ProposalUserAction.ACTION_PRINTING_STICKER.format(self.id),)
-        elif auto_renew:
+        elif self.auto_approve:
             self.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
             self.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
             self.log_user_action(ProposalUserAction.ACTION_PRINTING_STICKER.format(self.id),)
@@ -2492,7 +2472,7 @@ class AuthorisedUserApplication(Proposal):
             send_au_summary_to_ml_holder(mooring_licence, request, self)
 
         # Log proposal action
-        if auto_renew == 'true' or not request:
+        if self.auto_approve or not request:
             self.log_user_action(ProposalUserAction.ACTION_AUTO_APPROVED.format(self.id))
         else:
             # When get here without request, there should be already an action log for ACTION_APROVE_APPLICATION
@@ -2733,7 +2713,7 @@ class MooringLicenceApplication(Proposal):
             self.save()
             send_documents_upload_for_mooring_licence_application_email(request, self)
 
-    def update_or_create_approval(self, current_datetime, request=None, auto_renew=None):
+    def update_or_create_approval(self, current_datetime, request=None):
         try:
             # renewal/amendment/reissue - associated ML must have a mooring
             if self.approval and self.approval.child_obj.mooring:
@@ -2786,8 +2766,8 @@ class MooringLicenceApplication(Proposal):
                     self.waiting_list_allocation.save()
                     self.waiting_list_allocation.set_wla_order()
 
-            # update proposed_issuance_approval and MooringOnApproval if not system reissue (no request) or auto_renew
-            if request and not auto_renew:
+            # update proposed_issuance_approval and MooringOnApproval if not system reissue (no request) or auto_approve
+            if request and not self.auto_approve:
                 # Create VesselOwnershipOnApproval records
                 ## also see logic in approval.add_vessel_ownership()
                 vooa, created = approval.add_vessel_ownership(vessel_ownership=self.vessel_ownership)
@@ -2803,8 +2783,8 @@ class MooringLicenceApplication(Proposal):
                         elif vo1.get("id") == vo2.vessel_ownership.id and vo1.get("checked") and vo2.end_date:
                             vo2.end_date = None
                             vo2.save()
-            # set auto_renew ProposalRequirement due dates to those from previous application + 12 months
-            if auto_renew:
+            # set auto_approve renewal application ProposalRequirement due dates to those from previous application + 12 months
+            if self.auto_approve and self.proposal_type.code == 'renewal':
                 for req in self.requirements.filter(is_deleted=False):
                     if req.copied_from and req.copied_from.due_date:
                         req.due_date = req.copied_from.due_date + relativedelta(months=+12)
@@ -2848,25 +2828,6 @@ class MooringLicenceApplication(Proposal):
             # manage stickers
             moas_to_be_reallocated, stickers_to_be_returned = approval.manage_stickers(self)
 
-            ## set proposal status after manage _stickers
-#            from mooringlicensing.components.approvals.models import Sticker
-#            awaiting_printing = False
-#
-#            if self.approval:
-#                stickers = self.approval.stickers.filter(status__in=(Sticker.STICKER_STATUS_READY, Sticker.STICKER_STATUS_AWAITING_PRINTING))
-#                if stickers.count() >0:
-#                    awaiting_printing = True
-#
-#            if awaiting_printing or auto_renew:
-#                self.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
-#                self.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
-#                # Log proposal action
-#                self.log_user_action(ProposalUserAction.ACTION_PRINTING_STICKER.format(self.id), request)
-#            else:
-#                self.processing_status = Proposal.PROCESSING_STATUS_APPROVED
-#                self.customer_status = Proposal.CUSTOMER_STATUS_APPROVED
-#            self.save()
-
             # Creating documents should be performed at the end
             approval.generate_doc()
             if self.proposal_type.code in [PROPOSAL_TYPE_RENEWAL, PROPOSAL_TYPE_AMENDMENT,]:
@@ -2877,7 +2838,7 @@ class MooringLicenceApplication(Proposal):
             send_application_approved_or_declined_email(self, 'approved_paid', request, stickers_to_be_returned)
 
             # Log proposal action
-            if auto_renew == 'true' or not request:
+            if self.auto_approve or not request:
                 self.log_user_action(ProposalUserAction.ACTION_AUTO_APPROVED.format(self.id))
             else:
                 # When get here without request, there should be already an action log for ACTION_APROVE_APPLICATION

@@ -167,7 +167,7 @@
                 profile: {},
                 uuid: 0,
                 keepCurrentVessel: true,
-                //mooringPreferenceChanged: false,
+                mooringPreferenceChanged: false,
                 //vesselLength: null,
                 showPaymentTab: true,
                 higherVesselCategory: false,
@@ -212,7 +212,7 @@
                 await this.$emit("vesselChanged", vesselChanged);
             },
             toggleMooringPreference: async function(preferenceChanged) {
-                //this.mooringPreferenceChanged = preferenceChanged;
+                this.mooringPreferenceChanged = preferenceChanged;
                 await this.$emit("mooringPreferenceChanged", preferenceChanged);
                 //this.updateAmendmentRenewalProperties();
             },
@@ -245,11 +245,24 @@
                             this.showPaymentTab = false;
                             this.$emit("updateSubmitText", "Submit");
                         }
+                        // auto approve
+                        if (this.higherVesselCategory || !this.keepCurrentVessel || this.mooringPreferenceChanged) {
+                            this.$emit("updateAutoApprove", false);
+                        } else {
+                            this.$emit("updateAutoApprove", true);
+                        }
+
                     });
                 } else if (this.proposal && this.proposal.proposal_type.code === 'renewal') {
                     this.$nextTick(() => {
                         this.showPaymentTab = true;
                         this.$emit("updateSubmitText", "Pay / Submit");
+                        // auto approve
+                        if (this.higherVesselCategory || !this.keepCurrentVessel || this.mooringPreferenceChanged) {
+                            this.$emit("updateAutoApprove", false);
+                        } else {
+                            this.$emit("updateAutoApprove", true);
+                        }
                     });
                 }
             },
