@@ -44,7 +44,16 @@ export default {
             type: Number,
             required: false,
             default: 0,
-        }
+        },
+        level:{
+            type: String,
+            required: true,
+            validator: function(val) {
+                let options = ['internal', 'referral', 'external'];
+                return options.indexOf(val) != -1 ? true: false;
+            }
+        },
+
     },
     data() {
         let vm = this;
@@ -175,8 +184,14 @@ export default {
                         visible: true,
                         'render': function(row, type, full){
                             let links = '';
-                            if (!full.sale_date) {
+                            // internal/external view
+                            if (vm.level === 'internal') {
+                                links += `<a href='/internal/vesselownership/${full.id}'>View</a><br/>`;
+                            } else {
                                 links += `<a href='/external/vesselownership/${full.id}'>View</a><br/>`;
+                            }
+                            // record sale
+                            if (!full.sale_date) {
                                 links += full.record_sale_link;
                             }
                             return links
