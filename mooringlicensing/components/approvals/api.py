@@ -20,7 +20,7 @@ from collections import OrderedDict
 from django.core.cache import cache
 from mooringlicensing import forms
 from mooringlicensing.components.proposals.email import send_create_mooring_licence_application_email_notification
-from mooringlicensing.components.main.decorators import basic_exception_handler, query_debugger
+from mooringlicensing.components.main.decorators import basic_exception_handler, query_debugger, timeit
 from mooringlicensing.components.payments_ml.api import logger
 from mooringlicensing.components.payments_ml.models import FeeSeason
 from mooringlicensing.components.payments_ml.serializers import DcvPermitSerializer, DcvAdmissionSerializer, \
@@ -1049,16 +1049,21 @@ class StickerRenderer(DatatablesRenderer):
 
 
 class StickerFilterBackend(DatatablesFilterBackend):
+    @query_debugger
     def filter_queryset(self, request, queryset, view):
         total_count = queryset.count()
 
         # Filter by approval types (wla, aap, aup, ml)
         filter_approval_type = request.GET.get('filter_approval_type')
-        #import ipdb; ipdb.set_trace()
         if filter_approval_type and not filter_approval_type.lower() == 'all':
-            filter_approval_type_list = filter_approval_type.split(',')
-            filtered_ids = [a.id for a in Approval.objects.all() if a.child_obj.code in filter_approval_type_list]
-            queryset = queryset.filter(approval__id__in=filtered_ids)
+            if filter_approval_type == 'wla':
+                queryset = queryset.filter(approval__in=Approval.objects.filter(waitinglistallocation__in=WaitingListAllocation.objects.all()))
+            elif filter_approval_type == 'aap':
+                queryset = queryset.filter(approval__in=Approval.objects.filter(annualadmissionpermit__in=AnnualAdmissionPermit.objects.all()))
+            elif filter_approval_type == 'aup':
+                queryset = queryset.filter(approval__in=Approval.objects.filter(authoriseduserpermit__in=AuthorisedUserPermit.objects.all()))
+            elif filter_approval_type == 'ml':
+                queryset = queryset.filter(approval__in=Approval.objects.filter(mooringlicence__in=MooringLicence.objects.all()))
 
         # Filter Year (FeeSeason)
         filter_fee_season_id = request.GET.get('filter_year')
