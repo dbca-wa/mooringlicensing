@@ -43,6 +43,7 @@
             @updateSubmitText="updateSubmitText"
             @vesselChanged="updateVesselChanged"
             @mooringPreferenceChanged="updateMooringPreference"
+            @noVessel="noVessel"
             />
 
             <AnnualAdmissionApplication
@@ -56,6 +57,7 @@
             @updateAutoApprove="updateAutoApprove"
             @updateSubmitText="updateSubmitText"
             @vesselChanged="updateVesselChanged"
+            @noVessel="noVessel"
             />
             <AuthorisedUserApplication
             v-if="proposal && proposal.application_type_code==='aua'"
@@ -68,6 +70,7 @@
             @updateAutoApprove="updateAutoApprove"
             @vesselChanged="updateVesselChanged"
             @changeMooring="updateMooringAuth"
+            @noVessel="noVessel"
             />
             <MooringLicenceApplication
             v-if="proposal && proposal.application_type_code==='mla'"
@@ -80,6 +83,7 @@
             @updateSubmitText="updateSubmitText"
             @updateAutoApprove="updateAutoApprove"
             @vesselChanged="updateVesselChanged"
+            @noVessel="noVessel"
             />
 
             <div>
@@ -178,6 +182,7 @@ export default {
       mooringPreferenceChanged: false,
       submitText: "Submit",
       autoApprove: false,
+      missingVessel: false,
     }
   },
   components: {
@@ -186,10 +191,17 @@ export default {
       AuthorisedUserApplication,
       MooringLicenceApplication,
   },
+  watch: {
+      disableSubmit() {
+          //console.log("disableSubmit")
+      },
+  },
   computed: {
       disableSubmit: function() {
           let disable = false;
-          if (this.proposal.proposal_type.code ==='amendment') {
+          if (this.proposal && this.proposal.proposal_type.code ==='amendment' && this.missingVessel) {
+              disable = true;
+          } else if (this.proposal && this.proposal.proposal_type.code ==='amendment') {
               if (['aaa', 'mla'].includes(this.proposal.application_type_code) && !this.vesselChanged) {
                   disable = true;
               } else if (this.proposal.application_type_code === 'wla' && !this.vesselChanged && !this.mooringPreferenceChanged) {
@@ -278,21 +290,24 @@ export default {
       },
   },
   methods: {
+    noVessel: function(noVessel) {
+        this.missingVessel = noVessel;
+    },
     updateAutoApprove: function(approve) {
         this.autoApprove = approve;
-        console.log("updateAutoApprove");
+        //console.log("updateAutoApprove");
     },
     updateMooringAuth: function(changed) {
         this.mooringOptionsChanged = changed;
-        console.log("updateMooringAuth");
+        //console.log("updateMooringAuth");
     },
     updateVesselChanged: function(vesselChanged) {
         this.vesselChanged = vesselChanged;
-        console.log("updateVesselChanged");
+        //console.log("updateVesselChanged");
     },
     updateMooringPreference: function(preferenceChanged) {
         this.mooringPreferenceChanged = preferenceChanged;
-        console.log("updateMooringPreference");
+        //console.log("updateMooringPreference");
     },
     proposal_refs:function(){
       if(this.applicationTypeCode == 'wla') {
@@ -475,7 +490,7 @@ export default {
     },
     save_and_pay: async function() {
         //let formData = this.set_formData()
-        console.log('in save_and_pay')
+        //console.log('in save_and_pay')
         try {
             const res = await this.save(false, this.proposal_submit_url);
             this.$nextTick(async () => {
@@ -492,8 +507,8 @@ export default {
                 }
             });
         } catch(err) {
-            console.log(err)
-            console.log(typeof(err.body))
+            //console.log(err)
+            //console.log(typeof(err.body))
             await swal({
                 title: 'Submit Error',
                 //text: helpers.apiVueResourceError(err),
@@ -517,8 +532,8 @@ export default {
                 });
             }
         } catch(err) {
-            console.log(err)
-            console.log(typeof(err.body))
+            //console.log(err)
+            //console.log(typeof(err.body))
             await swal({
                 title: 'Submit Error',
                 //text: helpers.apiVueResourceError(err),
@@ -708,7 +723,7 @@ export default {
 
     },
     submit: async function(){
-        console.log('in submit()')
+        //console.log('in submit()')
         //let vm = this;
 
         // remove the confirm prompt when navigating away from window (on button 'Submit' click)
@@ -739,9 +754,6 @@ export default {
     },
 
     post_and_redirect: function(url, postData) {
-        console.log('url: ' + url)
-        console.log('postData: ')
-        console.log(postData)
         /* http.post and ajax do not allow redirect from Django View (post method),
            this function allows redirect by mimicking a form submit.
 
@@ -758,16 +770,6 @@ export default {
         var formElement = $(postFormStr);
         $('body').append(formElement);
         $(formElement).submit();
-    },
-    fetchProposalParks: function(proposal_id){
-      let vm=this;
-      vm.$http.get(helpers.add_endpoint_json(api_endpoints.proposal,proposal_id+'/parks_and_trails')).then(response => {
-                vm.proposal_parks = helpers.copyObject(response.body);
-                console.log(vm.proposal_parks)
-            },
-              error => {
-            });
-
     },
 
   },
@@ -804,7 +806,7 @@ export default {
               });
           },
         err => {
-          console.log(err);
+          //console.log(err);
         });
     }
       /*

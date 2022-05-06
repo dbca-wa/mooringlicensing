@@ -894,6 +894,16 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
             if not self.processing_status == Proposal.PROCESSING_STATUS_APPROVED:
                 raise ValidationError('You cannot change the current status at this time')
             elif self.approval and self.approval.can_reissue and self.is_approver(request.user):
+                # update vessel details
+                vessel_details = self.vessel_details.vessel.latest_vessel_details
+                self.vessel_type = vessel_details.vessel_type
+                self.vessel_name = vessel_details.vessel_name
+                self.vessel_length = vessel_details.vessel_length
+                self.vessel_draft = vessel_details.vessel_draft
+                self.vessel_beam = vessel_details.vessel_beam
+                self.vessel_weight = vessel_details.vessel_weight
+                self.berth_mooring = vessel_details.berth_mooring
+
                 self.processing_status = status
                 self.proposed_issuance_approval = {}
                 self.save()
@@ -1674,6 +1684,20 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
         if self.auto_approve:
             self.final_approval_for_WLA_AAA(request, details={})
 
+    def vessel_on_proposal(self):
+        # Test to see if vessel should be read in from submitted data
+        vessel_exists = False
+        if obj.approval and type(obj.approval) is not MooringLicence:
+            vessel_exists = (True if
+                    obj.approval and obj.approval.current_proposal and 
+                    obj.approval.current_proposal.vessel_details and
+                    not obj.approval.current_proposal.vessel_ownership.end_date
+                    else False)
+        else:
+            vessel_exists = True if obj.listed_vessels.filter(end_date__isnull=True) else False
+        return vessel_exists
+
+
 
 def update_sticker_doc_filename(instance, filename):
     return '{}/stickers/batch/{}'.format(settings.MEDIA_APP_DIR, filename)
@@ -2134,7 +2158,7 @@ class AuthorisedUserApplication(Proposal):
     proposal = models.OneToOneField(Proposal, parent_link=True, on_delete=models.CASCADE)
     code = 'aua'
     prefix = 'AU'
-    new_application_text = "I want to apply for an an authorised user permit"
+    new_application_text = "I want to apply for an authorised user permit"
     apply_page_visibility = True
     description = 'Authorised User Application'
 

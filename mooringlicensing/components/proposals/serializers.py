@@ -149,6 +149,7 @@ class BaseProposalSerializer(serializers.ModelSerializer):
     previous_application_vessel_details_obj = serializers.SerializerMethodField()
     previous_application_vessel_ownership_obj = serializers.SerializerMethodField()
     max_vessel_length_with_no_payment = serializers.SerializerMethodField()
+    approval_reissued = serializers.SerializerMethodField()
 
     class Meta:
         model = Proposal
@@ -226,8 +227,15 @@ class BaseProposalSerializer(serializers.ModelSerializer):
                 'max_vessel_length_with_no_payment',
                 'keep_existing_mooring',
                 'keep_existing_vessel',
+                'approval_reissued',
                 )
         read_only_fields=('documents',)
+
+    def get_approval_reissued(self, obj):
+        reissue = False
+        if obj.approval:
+            reissue = obj.approval.reissued
+        return reissue
 
     def get_previous_application_vessel_details_obj(self, obj):
         #if (type(obj.child_obj) in [AuthorisedUserApplication, MooringLicenceApplication] and obj.previous_application and 
@@ -262,7 +270,8 @@ class BaseProposalSerializer(serializers.ModelSerializer):
         rego_no = None
         if obj.approval and type(obj.approval) is not MooringLicence:
             rego_no = (obj.approval.current_proposal.vessel_details.vessel.rego_no if
-                    obj.approval and obj.approval.current_proposal and obj.approval.current_proposal.vessel_details
+                    obj.approval and obj.approval.current_proposal and obj.approval.current_proposal.vessel_details and
+                    not obj.approval.current_proposal.vessel_ownership.end_date
                     else None)
         return rego_no
 
@@ -275,7 +284,7 @@ class BaseProposalSerializer(serializers.ModelSerializer):
     def get_current_vessels_rego_list(self, obj):
         if obj.approval and type(obj.approval.child_obj) is MooringLicence:
             vessels_str = ''
-            vessels_str += ', '.join([vo.vessel.rego_no for vo in obj.listed_vessels.all()])
+            vessels_str += ', '.join([vo.vessel.rego_no for vo in obj.listed_vessels.filter(end_date__isnull=True)])
             return vessels_str
 
     def get_previous_application_preferred_bay_id(self, obj):
@@ -824,7 +833,8 @@ class InternalProposalSerializer(BaseProposalSerializer):
         rego_no = None
         if obj.approval and type(obj.approval) is not MooringLicence:
             rego_no = (obj.approval.current_proposal.vessel_details.vessel.rego_no if
-                    obj.approval and obj.approval.current_proposal and obj.approval.current_proposal.vessel_details
+                    obj.approval and obj.approval.current_proposal and obj.approval.current_proposal.vessel_details and
+                    not obj.approval.current_proposal.vessel_ownership.end_date
                     else None)
         return rego_no
 
@@ -849,7 +859,7 @@ class InternalProposalSerializer(BaseProposalSerializer):
     def get_current_vessels_rego_list(self, obj):
         if obj.approval and type(obj.approval.child_obj) is MooringLicence:
             vessels_str = ''
-            vessels_str += ', '.join([vo.vessel.rego_no for vo in obj.listed_vessels.all()])
+            vessels_str += ', '.join([vo.vessel.rego_no for vo in obj.listed_vessels.filter(end_date__isnull=True)])
             return vessels_str
 
    # def get_current_vessels_rego_list(self, obj):
