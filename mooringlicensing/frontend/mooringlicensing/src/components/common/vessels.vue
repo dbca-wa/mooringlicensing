@@ -257,7 +257,10 @@ from '@/utils/hooks'
         computed: {
             regoReadonly: function() {
                 let readonly = false;
-                if ((this.proposal && this.keep_current_vessel && ['amendment', 'renewal']. includes(this.proposal.proposal_type.code)) || 
+                //if (this.proposal && this.proposal.approval_reissued && !this.proposal.approval_vessel_rego_no && 
+                if (this.proposal && !this.proposal.approval_vessel_rego_no && !this.proposal.current_vessels_rego_list) {
+                    readonly = false;
+                } else if ((this.proposal && this.keep_current_vessel && ['amendment', 'renewal'].includes(this.proposal.proposal_type.code)) || 
                     this.readonly || 
                     (this.proposal.pending_amendment_request && ['wla','aaa'].includes(this.proposal.application_type_code))
                 ) {
@@ -414,7 +417,9 @@ from '@/utils/hooks'
                         vesselChanged = true;
                     }
                 });
-                this.$emit("vesselChanged", vesselChanged)
+                await this.$emit("vesselChanged", vesselChanged)
+                const missingVessel = this.vessel.rego_no ? false : true;
+                await this.$emit("noVessel", missingVessel)
                 //return vesselChanged;
             },
             addToTemporaryDocumentCollectionList(temp_doc_id) {
@@ -425,7 +430,7 @@ from '@/utils/hooks'
             },
             */
             retrieveIndividualOwner: async function() {
-                console.log("retrieve individual owner")
+                //console.log("retrieve individual owner")
                 if (this.individualOwner && this.vessel.id) {
                     const url = api_endpoints.lookupIndividualOwnership(this.vessel.id);
                     const res = await this.$http.post(url);
@@ -525,7 +530,7 @@ from '@/utils/hooks'
                             true, 
                             true
                         );
-                        console.log(option);
+                        //console.log(option);
                         $(vm.$refs.company_name).append(option).trigger('change');
                     }
                 });
@@ -557,30 +562,30 @@ from '@/utils/hooks'
                         },
                     },
                     templateSelection: function(data) {
-                        console.log("templateSelection");
+                        //console.log("templateSelection");
                         return vm.validateRegoNo(data.text);
                     },
                 }).
                 on("select2:select", function (e) {
-                    console.log("select2:select");
+                    //console.log("select2:select");
                     if (!e.params.data.selected) {
                         e.preventDefault();
                         e.stopPropagation();
-                        console.log("No selection");
+                        //console.log("No selection");
                         return false;
                     }
-                    console.log("Process select2");
+                    //console.log("Process select2");
                     let data = e.params.data;
                     vm.$nextTick(async () => {
                         if (!data.tag) {
-                            console.log("fetch existing vessel");
+                            //console.log("fetch existing vessel");
                             // fetch draft/approved vessel
                             await vm.lookupVessel(data.id);
                             // retrieve list of Vessel Owners
                             const res = await vm.$http.get(`${api_endpoints.vessel}${data.id}/lookup_vessel_ownership`);
                             await vm.parseVesselOwnershipList(res);
                         } else {
-                            console.log("new vessel");
+                            //console.log("new vessel");
                             const validatedRego = vm.validateRegoNo(data.id);
 
                             vm.vessel = Object.assign({},
@@ -598,7 +603,7 @@ from '@/utils/hooks'
                     });
                 }).
                 on("select2:unselect",function (e) {
-                    console.log("select2:unselect")
+                    //console.log("select2:unselect")
                     var selected = $(e.currentTarget);
                     vm.vessel.rego_no = '';
                     vm.vessel = Object.assign({}, 
@@ -612,7 +617,7 @@ from '@/utils/hooks'
                         });
                 }).
                 on("select2:open",function (e) {
-                    console.log("select2:open")
+                    //console.log("select2:open")
                     const searchField = $(".select2-search__field")
                     // move focus to select2 field
                     searchField[0].focus();
@@ -675,14 +680,14 @@ from '@/utils/hooks'
                 }
             },
             lookupCompanyOwnership: async function(id) {
-                console.log(id)
+                //console.log(id)
                 const url = api_endpoints.lookupCompanyOwnership(id);
                 const payload = {
                     "vessel_id": this.vessel.id,
                 }
                 const res = await this.$http.post(url, payload);
                 const companyOwnershipData = res.body;
-                console.log(res);
+                //console.log(res);
                 if (companyOwnershipData && companyOwnershipData.company) {
                     this.$set(this.vessel.vessel_ownership, 'company_ownership', Object.assign({}, res.body));
                     this.vessel = Object.assign({}, this.vessel);
@@ -695,9 +700,8 @@ from '@/utils/hooks'
             },
 
             fetchVessel: async function() {
-                // changed to read in application data for amendment/request amendment/renewal
                 if (this.proposal.processing_status === 'Draft' && (!this.readonly || this.is_internal)) {
-                    console.log("new")
+                    // read in draft proposal data pre-submit
                     this.vessel.rego_no = this.proposal.rego_no;
                     //this.vessel.vessel_id = this.proposal.vessel_id;
                     this.vessel.id = this.proposal.vessel_id;
@@ -713,6 +717,7 @@ from '@/utils/hooks'
                     this.vessel.vessel_details = Object.assign({}, vessel_details);
                     this.readOwnershipFromProposal();
                 } else {
+                    // fetch submitted proposal data
                     let url = '';
                     if (this.proposal && this.proposal.id && this.proposal.vessel_details_id) {
                         url = helpers.add_endpoint_join(
@@ -785,13 +790,13 @@ from '@/utils/hooks'
                     // pass
                 } else if (this.proposal && this.proposal.pending_amendment_request) {
                     // ensure an Amendment which has been sent back to draft with request amendment does not have the logic applied below
-                    console.log("amendment request")
+                    //console.log("amendment request")
                     // pass
                 } else if (this.proposal && this.proposal.processing_status === 'Draft' && 
                     !this.proposal.vessel_details_id && (this.proposal.proposal_type.code !=='new' || this.proposal.application_type_code === 'mla') &&
                     !this.vessel.rego_no
                 ) {
-                    console.log("Amendment/Renewal/Reissue & MLA");
+                    //console.log("Amendment/Renewal/Reissue & MLA");
                     let vm = this;
                     let res = null;
                     // if mla, get vessel from waiting list
@@ -801,7 +806,7 @@ from '@/utils/hooks'
                             this.proposal.waiting_list_application_id + '/fetch_vessel/'
                         );
                         res = await this.$http.get(url);
-                        console.log(res)
+                        //console.log(res)
                     } else if (this.proposal.previous_application_vessel_details_id) {
                         // check vessel ownership on the previous application
                         const url = helpers.add_endpoint_join(
@@ -832,6 +837,9 @@ from '@/utils/hooks'
                 // read in temporary_document_collection_id
                 if (this.proposal && this.proposal.temporary_document_collection_id) {
                     this.temporary_document_collection_id = this.proposal.temporary_document_collection_id;
+                }
+                if (!this.vessel.rego_no) {
+                    await this.$emit("noVessel", true)
                 }
             });
         },
