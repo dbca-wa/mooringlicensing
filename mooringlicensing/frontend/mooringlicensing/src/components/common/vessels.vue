@@ -257,7 +257,10 @@ from '@/utils/hooks'
         computed: {
             regoReadonly: function() {
                 let readonly = false;
-                if ((this.proposal && this.keep_current_vessel && ['amendment', 'renewal']. includes(this.proposal.proposal_type.code)) || 
+                //if (this.proposal && this.proposal.approval_reissued && !this.proposal.approval_vessel_rego_no && 
+                if (this.proposal && !this.proposal.approval_vessel_rego_no && !this.proposal.current_vessels_rego_list) {
+                    readonly = false;
+                } else if ((this.proposal && this.keep_current_vessel && ['amendment', 'renewal'].includes(this.proposal.proposal_type.code)) || 
                     this.readonly || 
                     (this.proposal.pending_amendment_request && ['wla','aaa'].includes(this.proposal.application_type_code))
                 ) {
@@ -695,9 +698,8 @@ from '@/utils/hooks'
             },
 
             fetchVessel: async function() {
-                // changed to read in application data for amendment/request amendment/renewal
                 if (this.proposal.processing_status === 'Draft' && (!this.readonly || this.is_internal)) {
-                    console.log("new")
+                    // read in draft proposal data pre-submit
                     this.vessel.rego_no = this.proposal.rego_no;
                     //this.vessel.vessel_id = this.proposal.vessel_id;
                     this.vessel.id = this.proposal.vessel_id;
@@ -713,6 +715,7 @@ from '@/utils/hooks'
                     this.vessel.vessel_details = Object.assign({}, vessel_details);
                     this.readOwnershipFromProposal();
                 } else {
+                    // fetch submitted proposal data
                     let url = '';
                     if (this.proposal && this.proposal.id && this.proposal.vessel_details_id) {
                         url = helpers.add_endpoint_join(
