@@ -114,7 +114,7 @@ export default
                 {
                     path: ':vessel_id',
                     component: ManageVessel,
-                    name:"manage-vessel"
+                    name:"internal-manage-vessel"
                 },
             ]
         },

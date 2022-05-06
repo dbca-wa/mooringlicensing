@@ -80,6 +80,7 @@
                   :is_internal="is_internal"
                   @updateVesselLength="updateVesselLength"
                   @vesselChanged="vesselChanged"
+                  @noVessel="noVessel"
                   />
               </div>
               <div class="tab-pane fade" id="pills-mooring" role="tabpanel" aria-labelledby="pills-mooring-tab">
@@ -208,6 +209,9 @@
             },
         },
         methods:{
+            noVessel: async function(noVessel) {
+                await this.$emit("noVessel", noVessel);
+            },
             vesselChanged: async function(vesselChanged) {
                 await this.$emit("vesselChanged", vesselChanged);
             },
