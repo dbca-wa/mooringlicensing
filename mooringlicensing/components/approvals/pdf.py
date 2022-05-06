@@ -1,3 +1,4 @@
+import datetime
 from io import BytesIO
 
 from django.core.files.base import ContentFile
@@ -38,7 +39,9 @@ def create_approval_doc(approval):
     # create bytes
     contents_as_bytes = create_approval_doc_bytes(approval)
 
-    filename = 'approval-{}.pdf'.format(approval.lodgement_number)
+    now = datetime.datetime.now()
+
+    filename = 'approval-{}-{}.pdf'.format(approval.lodgement_number, now.strftime('%Y%m%d-%H%M%S'))
     from mooringlicensing.components.approvals.models import ApprovalDocument
     document = ApprovalDocument.objects.create(approval=approval, name=filename)
 
