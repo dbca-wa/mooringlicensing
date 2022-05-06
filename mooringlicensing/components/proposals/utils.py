@@ -572,9 +572,16 @@ def submit_vessel_data(instance, request, vessel_data):
     min_vessel_size = float(min_vessel_size_str)
     min_mooring_vessel_size = float(min_mooring_vessel_size_str)
 
-    if (not vessel_data.get('rego_no') and instance.proposal_type.code in [PROPOSAL_TYPE_RENEWAL, PROPOSAL_TYPE_AMENDMENT] and
-            type(instance.child_obj) in [WaitingListApplication, MooringLicenceApplication, AnnualAdmissionApplication]):
-        return
+    #if (not vessel_data.get('rego_no') and instance.proposal_type.code in [PROPOSAL_TYPE_RENEWAL, PROPOSAL_TYPE_AMENDMENT] and
+     #       type(instance.child_obj) in [WaitingListApplication, MooringLicenceApplication, AnnualAdmissionApplication]):
+      #  return
+    if not vessel_data.get('rego_no'):
+        if (instance.proposal_type.code == PROPOSAL_TYPE_RENEWAL and 
+        type(instance.child_obj) in [MooringLicenceApplication, AuthorisedUserApplication]):
+            return
+        else:
+            raise serializers.ValidationError("Application cannot be submitted without a vessel listed")
+
     ## save vessel data into proposal first
     save_vessel_data(instance, request, vessel_data)
     vessel, vessel_details = store_vessel_data(request, vessel_data)
