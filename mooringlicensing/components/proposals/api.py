@@ -1062,27 +1062,30 @@ class ProposalViewSet(viewsets.ModelViewSet):
     def fetch_vessel(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
-            vessel_details = instance.vessel_details
-            vessel_details_serializer = VesselDetailsSerializer(vessel_details, context={'request': request})
-            vessel = vessel_details.vessel
-            vessel_serializer = VesselSerializer(vessel)
-            vessel_data = vessel_serializer.data
-            vessel_ownership_data = {}
-            if not instance.editable_vessel_details:
-                vessel_data["rego_no"] = vessel.rego_no
-            #else:
-            vessel_ownership_data = {}
-            vessel_ownership = instance.vessel_ownership
-            if vessel_ownership:
-                vessel_ownership_serializer = VesselOwnershipSerializer(vessel_ownership)
-                vessel_ownership_data = deepcopy(vessel_ownership_serializer.data)
-                vessel_ownership_data["individual_owner"] = False if vessel_ownership.company_ownership else True
+            if instance.vessel_ownership and not instance.vessel_ownership.end_date:
+                vessel_details = instance.vessel_details
+                vessel_details_serializer = VesselDetailsSerializer(vessel_details, context={'request': request})
+                vessel = vessel_details.vessel
+                vessel_serializer = VesselSerializer(vessel)
+                vessel_data = vessel_serializer.data
+                vessel_ownership_data = {}
+                if not instance.editable_vessel_details:
+                    vessel_data["rego_no"] = vessel.rego_no
+                #else:
+                vessel_ownership_data = {}
+                vessel_ownership = instance.vessel_ownership
+                if vessel_ownership:
+                    vessel_ownership_serializer = VesselOwnershipSerializer(vessel_ownership)
+                    vessel_ownership_data = deepcopy(vessel_ownership_serializer.data)
+                    vessel_ownership_data["individual_owner"] = False if vessel_ownership.company_ownership else True
+                else:
+                    vessel_ownership_data["percentage"] = instance.percentage
+                    vessel_ownership_data["individual_owner"] = instance.individual_owner
+                vessel_data["vessel_details"] = vessel_details_serializer.data
+                vessel_data["vessel_ownership"] = vessel_ownership_data
+                return Response(vessel_data)
             else:
-                vessel_ownership_data["percentage"] = instance.percentage
-                vessel_ownership_data["individual_owner"] = instance.individual_owner
-            vessel_data["vessel_details"] = vessel_details_serializer.data
-            vessel_data["vessel_ownership"] = vessel_ownership_data
-            return Response(vessel_data)
+                return Response()
         except Exception as e:
             print(traceback.print_exc())
             if hasattr(e,'message'):

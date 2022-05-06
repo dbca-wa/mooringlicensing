@@ -1668,6 +1668,20 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
         if self.auto_approve:
             self.final_approval_for_WLA_AAA(request, details={})
 
+    def vessel_on_proposal(self):
+        # Test to see if vessel should be read in from submitted data
+        vessel_exists = False
+        if obj.approval and type(obj.approval) is not MooringLicence:
+            vessel_exists = (True if
+                    obj.approval and obj.approval.current_proposal and 
+                    obj.approval.current_proposal.vessel_details and
+                    not obj.approval.current_proposal.vessel_ownership.end_date
+                    else False)
+        else:
+            vessel_exists = True if obj.listed_vessels.filter(end_date__isnull=True) else False
+        return vessel_exists
+
+
 
 def update_sticker_doc_filename(instance, filename):
     return '{}/stickers/batch/{}'.format(settings.MEDIA_APP_DIR, filename)
@@ -2128,7 +2142,7 @@ class AuthorisedUserApplication(Proposal):
     proposal = models.OneToOneField(Proposal, parent_link=True, on_delete=models.CASCADE)
     code = 'aua'
     prefix = 'AU'
-    new_application_text = "I want to apply for an an authorised user permit"
+    new_application_text = "I want to apply for an authorised user permit"
     apply_page_visibility = True
     description = 'Authorised User Application'
 
