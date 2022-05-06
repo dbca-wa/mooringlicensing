@@ -637,6 +637,7 @@ class ApprovalSerializer(serializers.ModelSerializer):
 
 class ListApprovalSerializer(serializers.ModelSerializer):
     licence_document = serializers.CharField(source='licence_document._file.url')
+    # licence_document = serializers.SerializerMethodField()
     authorised_user_summary_document = serializers.CharField(source='authorised_user_summary_document._file.url')
     renewal_document = serializers.SerializerMethodField(read_only=True)
     status = serializers.SerializerMethodField()

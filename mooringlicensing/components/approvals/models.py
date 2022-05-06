@@ -432,6 +432,8 @@ class Approval(RevisionedMixin):
                     approval=self,
                     site_licensee=site_licensee
                     )
+            if created:
+                logger.info('Mooring {} has been added to the approval {}'.format(mooring.name, self.lodgement_number))
         return mooring_on_approval, created
 
     #def set_wla_order(self):
@@ -625,6 +627,10 @@ class Approval(RevisionedMixin):
         self.save(version_comment='Created Approval PDF: {}'.format(self.licence_document.name))
         self.current_proposal.save(version_comment='Created Approval PDF: {}'.format(self.licence_document.name))
         logger.debug('Licence document for the approval: {} has been created'.format(self.lodgement_number))
+
+        if hasattr(self, 'approval') and self.approval:
+            self.approval.licence_document = self.licence_document
+            self.approval.save()
 
     def generate_au_summary_doc(self, user):
         from mooringlicensing.doctopdf import create_authorised_user_summary_doc_bytes
@@ -1218,7 +1224,7 @@ class AuthorisedUserPermit(Approval):
 
     def internal_reissue(self, mooring_licence=None):
         ## now reissue approval
-        self.current_proposal.processing_status = 'printing_sticker'
+        self.current_proposal.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
         self.current_proposal.save()
         self.reissued=True
         self.save()
@@ -1557,7 +1563,7 @@ class MooringLicence(Approval):
 
     def internal_reissue(self):
         ## now reissue approval
-        self.current_proposal.processing_status = 'printing_sticker'
+        self.current_proposal.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
         self.current_proposal.save()
         self.reissued=True
         self.save()

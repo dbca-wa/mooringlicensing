@@ -1267,27 +1267,31 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                         raise ValidationError('The applicant needs to have set their postal address before approving this proposal.')
 
                 ## update proposed_issuance_approval
-                ria_mooring_name = ''
-                mooring_id = details.get('mooring_id')
-                if mooring_id:
-                    ria_mooring_name = Mooring.objects.get(id=mooring_id).name
+                if details:
+                    ria_mooring_name = ''
+                    mooring_id = details.get('mooring_id')
+                    if mooring_id:
+                        ria_mooring_name = Mooring.objects.get(id=mooring_id).name
 
-                self.proposed_issuance_approval = {
-                    'mooring_bay_id': details.get('mooring_bay_id'),
-                    'mooring_id': mooring_id,
-                    'ria_mooring_name': ria_mooring_name,
-                    'details': details.get('details'),
-                    'cc_email': details.get('cc_email'),
-                    'mooring_on_approval': details.get('mooring_on_approval'),
-                    'vessel_ownership': details.get('vessel_ownership'),
-                }
-                self.save()
+                    self.proposed_issuance_approval = {
+                        'mooring_bay_id': details.get('mooring_bay_id'),
+                        'mooring_id': mooring_id,
+                        'ria_mooring_name': ria_mooring_name,
+                        'details': details.get('details'),
+                        'cc_email': details.get('cc_email'),
+                        'mooring_on_approval': details.get('mooring_on_approval'),
+                        'vessel_ownership': details.get('vessel_ownership'),
+                    }
+                    self.save()
 
                 # if no request, must be a system reissue - skip payment section
                 # when reissuing, no new invoices should be created
                 if not request or (request and self.approval and self.approval.reissued):
                     # system reissue or admin reissue
                     approval, created = self.child_obj.update_or_create_approval(datetime.datetime.now(pytz.timezone(TIME_ZONE)), request)
+                    # self.refresh_from_db()
+                    self.approval = approval.approval
+                    self.save()
                 else:
                     ## prepare invoice
                     from mooringlicensing.components.payments_ml.utils import create_fee_lines, make_serializable
@@ -2483,6 +2487,7 @@ class AuthorisedUserApplication(Proposal):
             self.processing_status = Proposal.PROCESSING_STATUS_APPROVED
             self.customer_status = Proposal.CUSTOMER_STATUS_APPROVED
         self.save()
+        self.proposal.refresh_from_db()
 
         approval.generate_doc()
 

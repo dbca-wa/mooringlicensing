@@ -229,16 +229,16 @@ LOGGING['handlers']['file_cron_email'] = {
     'formatter': 'msg_only',
     'maxBytes': 5242880
 }
-LOGGING['handlers']['console'] = {
-    'level': 'DEBUG',
-    'class': 'logging.StreamHandler',
-    'stream': sys.stdout,
-    'formatter': 'verbose',
-}
+# LOGGING['handlers']['console'] = {
+#     'level': 'DEBUG',
+#     'class': 'logging.StreamHandler',
+#     'stream': sys.stdout,
+#     'formatter': 'verbose',
+# }
 
 # Define loggers
 LOGGING['loggers']['mooringlicensing'] = {
-    'handlers': ['file_mooringlicensing', 'console'],
+    'handlers': ['file_mooringlicensing',],
     'level': 'DEBUG',
 }
 LOGGING['loggers']['cron_tasks'] = {
