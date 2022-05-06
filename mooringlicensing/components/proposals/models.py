@@ -894,6 +894,16 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
             if not self.processing_status == Proposal.PROCESSING_STATUS_APPROVED:
                 raise ValidationError('You cannot change the current status at this time')
             elif self.approval and self.approval.can_reissue and self.is_approver(request.user):
+                # update vessel details
+                vessel_details = self.vessel_details.vessel.latest_vessel_details
+                self.vessel_type = vessel_details.vessel_type
+                self.vessel_name = vessel_details.vessel_name
+                self.vessel_length = vessel_details.vessel_length
+                self.vessel_draft = vessel_details.vessel_draft
+                self.vessel_beam = vessel_details.vessel_beam
+                self.vessel_weight = vessel_details.vessel_weight
+                self.berth_mooring = vessel_details.berth_mooring
+
                 self.processing_status = status
                 self.proposed_issuance_approval = {}
                 self.save()

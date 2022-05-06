@@ -517,23 +517,23 @@ def dot_check_wrapper(request, payload, vessel_lookup_errors, vessel_data):
     if not boat_found or not boat_owner_match or not dot_boat_length == float(ml_boat_length):
         vessel_lookup_errors[vessel_data.get("rego_no")] = "The provided details do not match those recorded with the Department of Transport"
 
-def delete_draft_vessel_data(instance):
-    instance.rego_no = ''
-    instance.vessel_id = None
-    instance.vessel_type = ''
-    instance.vessel_name = ''
-    instance.vessel_length = '0.00'
-    instance.vessel_draft = '0.00'
-    instance.vessel_beam = '0.00'
-    instance.vessel_weight = '0.00'
-    instance.berth_mooring = ''
-    instance.percentage = None
-    instance.individual_owner = None
-    instance.company_ownership_percentage = None
-    instance.company_ownership_name = ''
-    instance.dot_name = ''
-    instance.temporary_document_collection_id = None
-    instance.save()
+#def delete_draft_vessel_data(instance):
+#    instance.rego_no = ''
+#    instance.vessel_id = None
+#    instance.vessel_type = ''
+#    instance.vessel_name = ''
+#    instance.vessel_length = '0.00'
+#    instance.vessel_draft = '0.00'
+#    instance.vessel_beam = '0.00'
+#    instance.vessel_weight = '0.00'
+#    instance.berth_mooring = ''
+#    instance.percentage = None
+#    instance.individual_owner = None
+#    instance.company_ownership_percentage = None
+#    instance.company_ownership_name = ''
+#    instance.dot_name = ''
+#    instance.temporary_document_collection_id = None
+#    instance.save()
 
 def submit_vessel_data(instance, request, vessel_data):
     print("submit vessel data")
@@ -572,9 +572,16 @@ def submit_vessel_data(instance, request, vessel_data):
     min_vessel_size = float(min_vessel_size_str)
     min_mooring_vessel_size = float(min_mooring_vessel_size_str)
 
-    if (not vessel_data.get('rego_no') and instance.proposal_type.code in [PROPOSAL_TYPE_RENEWAL, PROPOSAL_TYPE_AMENDMENT] and
-            type(instance.child_obj) in [WaitingListApplication, MooringLicenceApplication, AnnualAdmissionApplication]):
-        return
+    #if (not vessel_data.get('rego_no') and instance.proposal_type.code in [PROPOSAL_TYPE_RENEWAL, PROPOSAL_TYPE_AMENDMENT] and
+     #       type(instance.child_obj) in [WaitingListApplication, MooringLicenceApplication, AnnualAdmissionApplication]):
+      #  return
+    if not vessel_data.get('rego_no'):
+        if (instance.proposal_type.code == PROPOSAL_TYPE_RENEWAL and 
+        type(instance.child_obj) in [MooringLicenceApplication, AuthorisedUserApplication]):
+            return
+        else:
+            raise serializers.ValidationError("Application cannot be submitted without a vessel listed")
+
     ## save vessel data into proposal first
     save_vessel_data(instance, request, vessel_data)
     vessel, vessel_details = store_vessel_data(request, vessel_data)
@@ -716,7 +723,7 @@ def submit_vessel_data(instance, request, vessel_data):
 
     ## vessel ownership cannot be greater than 100%
     ownership_percentage_validation(vessel_ownership)
-    delete_draft_vessel_data(instance)
+    #delete_draft_vessel_data(instance)
 
 def store_vessel_data(request, vessel_data):
     if not vessel_data.get('rego_no'):
