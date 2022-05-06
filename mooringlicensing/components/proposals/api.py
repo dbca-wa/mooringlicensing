@@ -1064,7 +1064,7 @@ class ProposalViewSet(viewsets.ModelViewSet):
             instance = self.get_object()
             if instance.vessel_ownership and not instance.vessel_ownership.end_date:
                 #vessel_details = instance.vessel_details
-                vessel_details = instance.vessel_details.rego_no.latest_vessel_details
+                vessel_details = instance.vessel_details.vessel.latest_vessel_details
                 vessel_details_serializer = VesselDetailsSerializer(vessel_details, context={'request': request})
                 vessel = vessel_details.vessel
                 vessel_serializer = VesselSerializer(vessel)

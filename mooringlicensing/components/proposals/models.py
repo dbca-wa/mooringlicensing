@@ -895,7 +895,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                 raise ValidationError('You cannot change the current status at this time')
             elif self.approval and self.approval.can_reissue and self.is_approver(request.user):
                 # update vessel details
-                vessel_details = self.vessel_details.rego_no.latest_vessel_details
+                vessel_details = self.vessel_details.vessel.latest_vessel_details
                 self.vessel_type = vessel_details.vessel_type
                 self.vessel_name = vessel_details.vessel_name
                 self.vessel_length = vessel_details.vessel_length
