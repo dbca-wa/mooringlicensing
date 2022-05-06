@@ -1386,6 +1386,7 @@ class VesselOwnershipViewSet(viewsets.ModelViewSet):
                 serializer = SaveVesselOwnershipSaleDateSerializer(instance, {"end_date": sale_date})
                 serializer.is_valid(raise_exception=True)
                 serializer.save()
+
                 ## collect impacted Approvals
                 approval_list = []
                 for prop in instance.proposal_set.all():
@@ -1393,19 +1394,35 @@ class VesselOwnershipViewSet(viewsets.ModelViewSet):
                             prop.approval and 
                             prop.approval.status == 'current'
                             ):
-                        if prop.approval not in approval_list:
-                            approval_list.append(prop.approval)
+                        if prop.approval.code in [WaitingListAllocation.code, AnnualAdmissionPermit.code, AuthorisedUserPermit.code]:
+                            # When WLA, AAP or AUP
+                            if prop.approval.current_proposal.vessel_ownership == instance:
+                                # When the vessel of the approval is the same vessel, which was sold
+                                if prop.approval not in approval_list:
+                                    approval_list.append(prop.approval)
+                        elif prop.approval.code in [MooringLicence.code,]:
+                            # ML
+                            if instance in prop.approval.vessel_ownership_list:
+                                # When the vessel sold is one of the vessels of ML
+                                if prop.approval not in approval_list:
+                                    approval_list.append(prop.approval)
+
                 ## change Sticker status
                 stickers_to_be_returned = []
                 for approval in approval_list:
-                    for a_sticker in instance.sticker_set.filter(status__in=['current', 'awaiting_printing']):
-                        a_sticker.status = 'to_be_returned'
+                    # Generate a new licence/permit document
+                    approval.generate_doc(False)
+
+                    # Update sticker status
+                    for a_sticker in instance.sticker_set.filter(status__in=[Sticker.STICKER_STATUS_CURRENT, Sticker.STICKER_STATUS_AWAITING_PRINTING]):
+                        a_sticker.status = Sticker.STICKER_STATUS_TO_BE_RETURNED
                         a_sticker.save()
                         stickers_to_be_returned.append(a_sticker)
                     for a_sticker in instance.sticker_set.filter(status=Sticker.STICKER_STATUS_READY):
                         # vessel sold before the sticker is picked up by cron for export (very rarely happens)
                         a_sticker.status = Sticker.STICKER_STATUS_CANCELLED
                         a_sticker.save()
+
                     # write approval history
                     approval.write_approval_history('Vessel sold by owner')
                     if approval.code == WaitingListAllocation.code:

@@ -1,3 +1,5 @@
+import sys
+
 from django.core.exceptions import ImproperlyConfigured
 
 import os
@@ -227,11 +229,17 @@ LOGGING['handlers']['file_cron_email'] = {
     'formatter': 'msg_only',
     'maxBytes': 5242880
 }
+# LOGGING['handlers']['console'] = {
+#     'level': 'DEBUG',
+#     'class': 'logging.StreamHandler',
+#     'stream': sys.stdout,
+#     'formatter': 'verbose',
+# }
 
 # Define loggers
 LOGGING['loggers']['mooringlicensing'] = {
-    'handlers': ['file_mooringlicensing'],
-    'level': 'INFO',
+    'handlers': ['file_mooringlicensing',],
+    'level': 'DEBUG',
 }
 LOGGING['loggers']['cron_tasks'] = {
     'handlers': ['file_cron_tasks'],
