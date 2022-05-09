@@ -6,6 +6,7 @@ from django.core.urlresolvers import reverse
 from django.conf import settings
 
 from mooringlicensing.components.emails.emails import TemplateEmailBase
+from mooringlicensing.components.emails.utils import make_http_https
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +103,7 @@ def send_organisation_request_link_email_notification(
 
     context = {
         'request': org_request,
-        'url': url,
+        'url': make_http_https(url),
     }
 
     msg = email.send(contact, context=context)
@@ -228,7 +229,7 @@ def send_organisation_request_email_notification(org_request, request, contact):
 
     context = {
         'request': request.data,
-        'url': url,
+        'url': make_http_https(url),
     }
     msg = email.send(contact, context=context)
     sender = request.user if request else settings.DEFAULT_FROM_EMAIL
@@ -274,7 +275,7 @@ def send_org_access_group_request_accept_email_notification(org_request, request
     context = {
         'name': request.data.get('name'),
         'abn': request.data.get('abn'),
-        'url': url,
+        'url': make_http_https(url),
     }
 
     msg = email.send(recipient_list, context=context)
