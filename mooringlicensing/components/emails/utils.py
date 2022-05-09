@@ -40,6 +40,10 @@ def get_public_url(request=None):
     else:
         web_url = settings.SITE_URL if settings.SITE_URL else ''
 
+    # Make http https
+    if web_url.startswith('http') and not web_url.startswith('https'):
+        web_url = web_url.replace('http', 'https', 1)
+
     # Public URL should not have 'internal' substring
     web_url = make_url_for_external(web_url)
 
