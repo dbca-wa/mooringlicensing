@@ -1121,8 +1121,8 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
 
                     if self.application_fees.count() < 1 and not self.migrated:
                         raise ValidationError('Payment record not found for the Annual Admission Application: {}'.format(self))
-                    elif self.application_fees.count() > 1:
-                        raise ValidationError('More than 1 payment records found for the Annual Admission Application: {}'.format(self))
+                    # elif self.application_fees.count() > 1:
+                    #     raise ValidationError('More than 1 payment records found for the Annual Admission Application: {}'.format(self))
 
                     if details:
                         # When auto_approve, there are no 'details' because details are created from the modal when assessment
@@ -1239,6 +1239,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                 # Reset flag
                 if self.approval:
                     self.approval.reissued = False
+                    self.approval.save()
 
                 return self
 
@@ -1265,13 +1266,8 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                     if not self.applicant_address:
                         raise ValidationError('The applicant needs to have set their postal address before approving this proposal.')
 
-                # if no request, must be a system reissue - skip payment section
-                # when reissuing, no new invoices should be created
-                if not request or (request and self.approval and self.approval.reissued):
-                    # system reissue or admin reissue
-                    approval, created = self.child_obj.update_or_create_approval(datetime.datetime.now(pytz.timezone(TIME_ZONE)))
-                else:
-                    ## update proposed_issuance_approval
+                ## update proposed_issuance_approval
+                if details:
                     ria_mooring_name = ''
                     mooring_id = details.get('mooring_id')
                     if mooring_id:
@@ -1288,6 +1284,15 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                     }
                     self.save()
 
+                # if no request, must be a system reissue - skip payment section
+                # when reissuing, no new invoices should be created
+                if not request or (request and self.approval and self.approval.reissued):
+                    # system reissue or admin reissue
+                    approval, created = self.child_obj.update_or_create_approval(datetime.datetime.now(pytz.timezone(TIME_ZONE)), request)
+                    # self.refresh_from_db()
+                    self.approval = approval.approval
+                    self.save()
+                else:
                     ## prepare invoice
                     from mooringlicensing.components.payments_ml.utils import create_fee_lines, make_serializable
                     from mooringlicensing.components.payments_ml.models import FeeConstructor, ApplicationFee
@@ -1348,6 +1353,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                 # Reset flag
                 if self.approval:
                     self.approval.reissued = False
+                    self.approval.save()
 
                 return self
             except Exception as e:
@@ -2481,6 +2487,7 @@ class AuthorisedUserApplication(Proposal):
             self.processing_status = Proposal.PROCESSING_STATUS_APPROVED
             self.customer_status = Proposal.CUSTOMER_STATUS_APPROVED
         self.save()
+        self.proposal.refresh_from_db()
 
         approval.generate_doc()
 
@@ -2494,7 +2501,7 @@ class AuthorisedUserApplication(Proposal):
             send_au_summary_to_ml_holder(mooring_licence, request, self)
 
         # Log proposal action
-        if auto_renew == 'true' or not request:
+        if self.auto_approve or not request:
             self.log_user_action(ProposalUserAction.ACTION_AUTO_APPROVED.format(self.id))
         else:
             # When get here without request, there should be already an action log for ACTION_APROVE_APPLICATION
@@ -2860,7 +2867,7 @@ class MooringLicenceApplication(Proposal):
             send_application_approved_or_declined_email(self, 'approved_paid', request, stickers_to_be_returned)
 
             # Log proposal action
-            if auto_renew == 'true' or not request:
+            if self.auto_approve or not request:
                 self.log_user_action(ProposalUserAction.ACTION_AUTO_APPROVED.format(self.id))
             else:
                 # When get here without request, there should be already an action log for ACTION_APROVE_APPLICATION

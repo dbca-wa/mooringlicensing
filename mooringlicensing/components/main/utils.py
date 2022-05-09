@@ -193,16 +193,6 @@ def handle_validation_error(e):
             raise
 
 
-def handle_validation_error(e):
-    if hasattr(e, 'error_dict'):
-        raise serializers.ValidationError(repr(e.error_dict))
-    else:
-        if hasattr(e, 'message'):
-            raise serializers.ValidationError(e.message)
-        else:
-            raise
-
-
 def sticker_export():
     logger = logging.getLogger('cron_tasks')
     # TODO: Implement below
