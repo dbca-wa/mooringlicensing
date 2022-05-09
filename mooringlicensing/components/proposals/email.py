@@ -19,7 +19,7 @@ from datetime import datetime
 
 from mooringlicensing.components.main.models import NumberOfDaysType, NumberOfDaysSetting
 from mooringlicensing.components.emails.utils import get_user_as_email_user, make_url_for_internal, get_public_url, \
-    make_url_for_external
+    make_url_for_external, make_http_https
 from mooringlicensing.settings import CODE_DAYS_FOR_SUBMIT_DOCUMENTS_MLA, CODE_DAYS_IN_PERIOD_MLA, \
     PROPOSAL_TYPE_AMENDMENT, PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL
 
@@ -342,7 +342,7 @@ def send_create_mooring_licence_application_email_notification(request, waiting_
         'recipient': mooring_licence_application.submitter,
         'application_period': days_setting_application_period.number_of_days,
         'documents_period': days_setting_documents_period.number_of_days,
-        'proposal_external_url': url,
+        'proposal_external_url': make_url_for_external(url),
     }
     sender = settings.DEFAULT_FROM_EMAIL
     try:
@@ -386,8 +386,8 @@ def send_documents_upload_for_mooring_licence_application_email(request, proposa
         'public_url': get_public_url(request),
         'proposal': proposal,
         'recipient': proposal.submitter,
-        'documents_upload_url': document_upload_url,
-        'proposal_external_url': url,
+        'documents_upload_url': make_http_https(document_upload_url),
+        'proposal_external_url': make_http_https(url),
         'num_of_days_to_submit_documents': days_setting.number_of_days,
     }
     to_address = proposal.submitter.email
@@ -422,7 +422,7 @@ def send_comppliance_due_date_notification(approval, compliance,):
         'approval': approval,
         'compliance': compliance,
         'recipient': compliance.submitter,
-        'compliance_external_url': url,
+        'compliance_external_url': make_http_https(url),
     }
     to_address = compliance.submitter.email
     cc = []
@@ -455,7 +455,7 @@ def send_comliance_overdue_notification(request, approval, compliance,):
         'approval': approval,
         'compliance': compliance,
         'recipient': compliance.submitter,
-        'compliance_external_url': url,
+        'compliance_external_url': make_http_https(url),
     }
     to_address = compliance.submitter.email
     cc = []
@@ -490,7 +490,7 @@ def send_invitee_reminder_email(proposal, due_date, number_of_days, request=None
         'public_url': get_public_url(request),
         'proposal': proposal,
         'recipient': proposal.submitter,
-        'proposal_external_url': url,
+        'proposal_external_url': make_http_https(url),
         'due_date': due_date,
         'number_of_days': number_of_days,
     }
@@ -524,7 +524,7 @@ def send_expire_mooring_licence_application_email(proposal, reason, due_date,):
         'public_url': get_public_url(),
         'proposal': proposal,
         'recipient': proposal.submitter,
-        'dashboard_url': dashboard_url,
+        'dashboard_url': make_http_https(dashboard_url),
     }
     to_address = proposal.submitter.email
     cc = []
@@ -557,7 +557,7 @@ def send_expire_mooring_licence_by_no_documents_email(proposal, reason, due_date
         'public_url': get_public_url(),
         'proposal': proposal,
         'recipient': proposal.submitter,
-        'dashboard_url': dashboard_url,
+        'dashboard_url': make_http_https(dashboard_url),
     }
     to_address = proposal.submitter.email
     cc = []
@@ -631,9 +631,9 @@ def send_endorser_reminder_email(proposal, request=None):
         'recipient': proposal.submitter,
         'endorser': endorser,
         'applicant': proposal.submitter,
-        'endorse_url': endorse_url,
-        'decline_url': decline_url,
-        'proposal_url': proposal_url,
+        'endorse_url': make_http_https(endorse_url),
+        'decline_url': make_http_https(decline_url),
+        'proposal_url': make_http_https(proposal_url),
         'mooring_name': mooring_name,
         'due_date': due_date,
     }
@@ -671,7 +671,7 @@ def send_approval_renewal_email_notification(approval):
         'vessel_rego_no': proposal.vessel_details.vessel.rego_no,  # TODO
         'recipient': proposal.submitter,
         'expiry_date': approval.expiry_date,
-        'dashboard_external_url': url,
+        'dashboard_external_url': make_http_https(url),
     }
 
     sender = settings.DEFAULT_FROM_EMAIL
@@ -1086,7 +1086,7 @@ def send_aua_approved_or_declined_email_amendment_payment_required(proposal, dec
         'decision': decision,
         'details': details,
         'stickers_to_be_returned': stickers_to_be_returned,  # TODO: if existing sticker needs to be replaced, assign sticker object here.
-        'payment_url': payment_url,
+        'payment_url': make_http_https(payment_url),
     }
 
     to_address = proposal.submitter.email
@@ -1246,7 +1246,7 @@ def send_mla_approved_or_declined_email_new_renewal(proposal, decision, request,
         'decision': decision,
         'details': details,
         'stickers_to_be_returned': stickers_to_be_returned,  # TODO: if existing sticker needs to be replaced, assign sticker object here.
-        'payment_url': payment_url,
+        'payment_url': make_http_https(payment_url),
     }
 
     to_address = proposal.submitter.email
@@ -1281,8 +1281,8 @@ def send_mla_approved_or_declined_email_amendment_payment_not_required(proposal,
         attachments = get_attachments(False, True, proposal, attach_au_summary_doc)
     elif decision == 'approved_paid':
         subject = 'Approved: Amendment Application for Rottnest Island Mooring Site Licence'
-        details = proposal.proposed_issuance_approval.get('details')
-        cc_list = proposal.proposed_issuance_approval.get('cc_email')
+        details = proposal.proposed_issuance_approval.get('details') if proposal.proposed_issuance_approval else ''
+        cc_list = proposal.proposed_issuance_approval.get('cc_email') if proposal.proposed_issuance_approval else ''
         if cc_list:
             all_ccs = cc_list.split(',')
         attach_au_summary_doc = True if proposal.proposal_type.code in [PROPOSAL_TYPE_AMENDMENT, PROPOSAL_TYPE_RENEWAL,] else False
@@ -1391,7 +1391,7 @@ def send_mla_approved_or_declined_email_amendment_payment_required(proposal, dec
         'decision': decision,
         'details': details,
         'stickers_to_be_returned': stickers_to_be_returned,  # TODO: if existing sticker needs to be replaced, assign sticker object here.
-        'payment_url': payment_url,
+        'payment_url': make_http_https(payment_url),
     }
 
     to_address = proposal.submitter.email
@@ -1519,9 +1519,9 @@ def send_endorsement_of_authorised_user_application_email(request, proposal):
         'recipient': proposal.submitter,
         'endorser': endorser,
         'applicant': proposal.submitter,
-        'endorse_url': endorse_url,
-        'decline_url': decline_url,
-        'proposal_url': proposal_url,
+        'endorse_url': make_http_https(endorse_url),
+        'decline_url': make_http_https(decline_url),
+        'proposal_url': make_http_https(proposal_url),
         'mooring_name': mooring_name,
         'due_date': due_date,
     }

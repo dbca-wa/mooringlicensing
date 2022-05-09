@@ -11,7 +11,7 @@ from ledger.payments.pdf import create_invoice_pdf_bytes
 from mooringlicensing import settings
 from mooringlicensing.components.emails.emails import TemplateEmailBase, _extract_email_headers
 from ledger.accounts.models import EmailUser
-from mooringlicensing.components.emails.utils import get_user_as_email_user, get_public_url
+from mooringlicensing.components.emails.utils import get_user_as_email_user, get_public_url, make_http_https
 from mooringlicensing.components.organisations.models import OrganisationLogEntry, Organisation
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
@@ -84,7 +84,7 @@ def send_auth_user_no_moorings_notification(approval):
         'public_url': get_public_url(),
         'approval': approval,
         'proposal': proposal,
-        'url': url
+        'url': make_http_https(url),
     }
     all_ccs = []
     if proposal.org_applicant and proposal.org_applicant.email:
@@ -124,7 +124,7 @@ def send_auth_user_mooring_removed_notification(approval, mooring_licence):
         'approval': approval,
         'proposal': proposal,
         'mooring_licence': mooring_licence,
-        'url': url
+        'url': make_http_https(url),
     }
     all_ccs = []
     if proposal.org_applicant and proposal.org_applicant.email:
@@ -169,7 +169,7 @@ def send_approval_expire_email_notification(approval):
         'public_url': get_public_url(),
         'approval': approval,
         'proposal': proposal,
-        'url': url
+        'url': make_http_https(url),
     }
     all_ccs = []
     if proposal.org_applicant and proposal.org_applicant.email:
@@ -254,7 +254,7 @@ def send_vessel_nomination_reminder_mail(approval, request=None):
         'public_url': get_public_url(request),
         'approval': approval,
         'date_to_nominate_new_vessel': approval.current_proposal.vessel_ownership.end_date + relativedelta(months=+6),
-        'dashboard_external_url': url,
+        'dashboard_external_url': make_http_https(url),
     }
 
     sender = settings.DEFAULT_FROM_EMAIL

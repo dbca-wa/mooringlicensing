@@ -938,10 +938,10 @@ class WaitingListAllocation(Approval):
                 vessel_length = v_details.vessel_applicable_length
                 vessel_draft = v_details.vessel_draft
             else:
-                vessel_rego_no = '-'
-                vessel_name = '-'
-                vessel_length = '-'
-                vessel_draft = '-'
+                vessel_rego_no = ''
+                vessel_name = ''
+                vessel_length = ''
+                vessel_draft = ''
 
             # Return context for the licence/permit document
             context = {
@@ -1021,9 +1021,9 @@ class AnnualAdmissionPermit(Approval):
                 vessel_name = v_details.vessel_name
                 vessel_length = v_details.vessel_applicable_length
             else:
-                vessel_rego_no = '-'
-                vessel_name = '-'
-                vessel_length = '-'
+                vessel_rego_no = ''
+                vessel_name = ''
+                vessel_length = ''
 
             context = {
                 'approval': self,
@@ -1185,10 +1185,10 @@ class AuthorisedUserPermit(Approval):
                 vessel_length = v_details.vessel_applicable_length
                 vessel_draft = v_details.vessel_draft
             else:
-                vessel_rego_no = '-'
-                vessel_name = '-'
-                vessel_length = '-'
-                vessel_draft = '-'
+                vessel_rego_no = ''
+                vessel_name = ''
+                vessel_length = ''
+                vessel_draft = ''
 
             context = {
                 'approval': self,
