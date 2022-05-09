@@ -1281,8 +1281,8 @@ def send_mla_approved_or_declined_email_amendment_payment_not_required(proposal,
         attachments = get_attachments(False, True, proposal, attach_au_summary_doc)
     elif decision == 'approved_paid':
         subject = 'Approved: Amendment Application for Rottnest Island Mooring Site Licence'
-        details = proposal.proposed_issuance_approval.get('details')
-        cc_list = proposal.proposed_issuance_approval.get('cc_email')
+        details = proposal.proposed_issuance_approval.get('details') if proposal.proposed_issuance_approval else ''
+        cc_list = proposal.proposed_issuance_approval.get('cc_email') if proposal.proposed_issuance_approval else ''
         if cc_list:
             all_ccs = cc_list.split(',')
         attach_au_summary_doc = True if proposal.proposal_type.code in [PROPOSAL_TYPE_AMENDMENT, PROPOSAL_TYPE_RENEWAL,] else False
