@@ -3336,7 +3336,6 @@ class VesselOwnership(RevisionedMixin):
                     proposal.approval.internal_reissue()
 
 
-
 class VesselRegistrationDocument(Document):
     vessel_ownership = models.ForeignKey(VesselOwnership,related_name='vessel_registration_documents', on_delete=models.CASCADE)
     _file = models.FileField(max_length=512)
