@@ -9,10 +9,12 @@ from ledger.payments.bpoint.models import BpointTransaction, BpointToken
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from mooringlicensing.components.main.models import ApplicationType
 from mooringlicensing.components.payments_ml.invoice_pdf import create_invoice_pdf_bytes
+from rest_framework.response import Response
 
 import dateutil.parser
 from django.db import transaction
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
+from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
@@ -331,7 +333,10 @@ class ApplicationFeeView(TemplateView):
             with transaction.atomic():
                 set_session_application_invoice(request.session, application_fee)
 
-                lines, db_processes_after_success = proposal.child_obj.create_fee_lines()  # Accessed by WL and AA
+                try:
+                    lines, db_processes_after_success = proposal.child_obj.create_fee_lines()  # Accessed by WL and AA
+                except Exception as e:
+                    return HttpResponseRedirect(reverse('external-proposal-detail', kwargs={'proposal_pk': proposal.id}))
 
                 request.session['db_processes'] = db_processes_after_success
                 #request.session['auto_approve'] = request.POST.get('auto_approve', False)
