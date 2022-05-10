@@ -316,6 +316,14 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
     def __str__(self):
         return str(self.lodgement_number)
 
+    @property
+    def latest_vessel_details(self):
+        return self.vessel_ownership.vessel.latest_vessel_details
+
+    @property
+    def latest_vessel_ownership(self):
+        return self.vessel_ownership.vessel.latest_vessel_ownership
+
     @staticmethod
     def get_corresponding_amendment_fee_item(accept_null_vessel, fee_constructor, fee_item, target_date, vessel_length):
         proposal_type_amendment = ProposalType.objects.get(code=PROPOSAL_TYPE_AMENDMENT)
@@ -3159,6 +3167,10 @@ class Vessel(RevisionedMixin):
         return self.filtered_vesseldetails_set.first()
 
     @property
+    def latest_vessel_ownership(self):
+        return self.filtered_vesselownership_set.first()
+
+    @property
     def filtered_vesselownership_set(self):
         return self.vesselownership_set.filter(
                 id__in=VesselOwnership.filtered_objects.values_list('id', flat=True)
@@ -3334,7 +3346,6 @@ class VesselOwnership(RevisionedMixin):
             for proposal in proposal_set:
                 if proposal.approval and type(proposal.approval) == MooringLicence and proposal.approval.status == 'current':
                     proposal.approval.internal_reissue()
-
 
 
 class VesselRegistrationDocument(Document):
