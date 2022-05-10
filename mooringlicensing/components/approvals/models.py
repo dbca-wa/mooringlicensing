@@ -932,7 +932,7 @@ class WaitingListAllocation(Approval):
         try:
             # v_details = self.current_proposal.vessel_details
             v_details = self.current_proposal.latest_vessel_details
-            v_ownership = self.current_proposal.latest_vessel_ownership
+            v_ownership = self.current_proposal.vessel_ownership
             if not v_ownership.end_date:
                 vessel_rego_no = v_details.vessel.rego_no
                 vessel_name = v_details.vessel_name
@@ -1016,7 +1016,7 @@ class AnnualAdmissionPermit(Approval):
         try:
             # Return context for the licence/permit document
             v_details = self.current_proposal.latest_vessel_details
-            v_ownership = self.current_proposal.latest_vessel_ownership
+            v_ownership = self.current_proposal.vessel_ownership
             if not v_ownership.end_date:
                 vessel_rego_no = v_details.vessel.rego_no
                 vessel_name = v_details.vessel_name
@@ -1179,7 +1179,7 @@ class AuthorisedUserPermit(Approval):
                 moorings.append(m)
 
             v_details = self.current_proposal.latest_vessel_details
-            v_ownership = self.current_proposal.latest_vessel_ownership
+            v_ownership = self.current_proposal.vessel_ownership
             if not v_ownership.end_date:
                 vessel_rego_no = v_details.vessel.rego_no
                 vessel_name = v_details.vessel_name
