@@ -150,6 +150,7 @@ class BaseProposalSerializer(serializers.ModelSerializer):
     previous_application_vessel_ownership_obj = serializers.SerializerMethodField()
     max_vessel_length_with_no_payment = serializers.SerializerMethodField()
     approval_reissued = serializers.SerializerMethodField()
+    vessel_on_proposal = serializers.SerializerMethodField()
 
     class Meta:
         model = Proposal
@@ -228,8 +229,12 @@ class BaseProposalSerializer(serializers.ModelSerializer):
                 'keep_existing_mooring',
                 'keep_existing_vessel',
                 'approval_reissued',
+                'vessel_on_proposal',
                 )
         read_only_fields=('documents',)
+
+    def get_vessel_on_proposal(self, obj):
+        return obj.vessel_on_proposal()
 
     def get_approval_reissued(self, obj):
         reissue = False
@@ -729,6 +734,7 @@ class InternalProposalSerializer(BaseProposalSerializer):
     approval_type_text = serializers.SerializerMethodField()
     approval_lodgement_number = serializers.SerializerMethodField()
     approval_vessel_rego_no = serializers.SerializerMethodField()
+    vessel_on_proposal = serializers.SerializerMethodField()
 
     class Meta:
         model = Proposal
@@ -823,11 +829,15 @@ class InternalProposalSerializer(BaseProposalSerializer):
                 'approval_type_text',
                 'approval_lodgement_number',
                 'approval_vessel_rego_no',
+                'vessel_on_proposal',
                 )
         read_only_fields = (
             'documents',
             'requirements',
         )
+
+    def get_vessel_on_proposal(self, obj):
+        return obj.vessel_on_proposal()
 
     def get_approval_vessel_rego_no(self, obj):
         rego_no = None

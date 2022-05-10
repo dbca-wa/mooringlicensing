@@ -340,7 +340,7 @@
                             //this.$emit("updateAutoRenew", false);
                         }
                         // auto approve
-                        if (this.higherVesselCategory || !this.keepCurrentVessel || this.changeMooring) {
+                        if (!this.proposal.vessel_on_proposal || this.higherVesselCategory || !this.keepCurrentVessel || this.changeMooring) {
                             this.$emit("updateAutoApprove", false);
                         } else {
                             this.$emit("updateAutoApprove", true);
@@ -348,53 +348,6 @@
                     });
                 }
             },
-
-            /*
-            updateAmendmentRenewalProperties: function() {
-                console.log('updateAmendmentRenewalProperties in form_aua.vue')
-                if (this.proposal && ['renewal', 'amendment'].includes(this.proposal.proposal_type.code)) {
-                    this.$nextTick(() => {
-                        if (this.keepCurrentVessel && !this.higherVesselCategory && !this.changeMooring) {
-                            this.showPaymentTab = true;
-                            this.showInsuranceTab = false;
-                            this.$emit("updateSubmitText", "Pay / Submit");
-                            this.$emit("updateAutoRenew", true);
-                            console.log("here");
-                        } else if (this.keepCurrentVessel && this.higherVesselCategory && !this.changeMooring) {
-                            this.showPaymentTab = false;
-                            this.showInsuranceTab = false;
-                            this.$emit("updateSubmitText", "Submit");
-                            this.$emit("updateAutoRenew", false);
-                            console.log("here");
-                        } else if (!this.keepCurrentVessel && !this.changeMooring) {
-                            this.showPaymentTab = false;
-                            this.showInsuranceTab = true;
-                            this.$emit("updateSubmitText", "Submit");
-                            this.$emit("updateAutoRenew", false);
-                            console.log("here");
-                        } else if (!this.keepCurrentVessel && !this.higherVesselCategory && this.changeMooring) {
-                            this.showPaymentTab = false;
-                            this.showInsuranceTab = false;
-                            this.$emit("updateSubmitText", "Submit");
-                            this.$emit("updateAutoRenew", false);
-                            console.log("here");
-                        } else if (this.keepCurrentVessel && this.changeMooring) {
-                            this.showPaymentTab = false;
-                            this.showInsuranceTab = false;
-                            this.$emit("updateSubmitText", "Submit");
-                            this.$emit("updateAutoRenew", false);
-                            console.log("here");
-                        } else if (this.higherVesselCategory && this.changeMooring) {
-                            this.showPaymentTab = false;
-                            this.showInsuranceTab = false;
-                            this.$emit("updateSubmitText", "Submit");
-                            this.$emit("updateAutoRenew", false);
-                            console.log("here");
-                        }
-                    });
-                }
-            },
-            */
             populateProfile: function(profile) {
                 this.profile = Object.assign({}, profile);
             },
