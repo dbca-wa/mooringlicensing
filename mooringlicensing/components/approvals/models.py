@@ -930,8 +930,9 @@ class WaitingListAllocation(Approval):
 
     def get_context_for_licence_permit(self):
         try:
-            v_details = self.current_proposal.vessel_details
-            v_ownership = self.current_proposal.vessel_ownership
+            # v_details = self.current_proposal.vessel_details
+            v_details = self.current_proposal.latest_vessel_details
+            v_ownership = self.current_proposal.latest_vessel_ownership
             if not v_ownership.end_date:
                 vessel_rego_no = v_details.vessel.rego_no
                 vessel_name = v_details.vessel_name
@@ -1014,8 +1015,8 @@ class AnnualAdmissionPermit(Approval):
     def get_context_for_licence_permit(self):
         try:
             # Return context for the licence/permit document
-            v_details = self.current_proposal.vessel_details
-            v_ownership = self.current_proposal.vessel_ownership
+            v_details = self.current_proposal.latest_vessel_details
+            v_ownership = self.current_proposal.latest_vessel_ownership
             if not v_ownership.end_date:
                 vessel_rego_no = v_details.vessel.rego_no
                 vessel_name = v_details.vessel_name
@@ -1177,8 +1178,8 @@ class AuthorisedUserPermit(Approval):
                 m['licensee_phone'] = ', '.join(numbers)
                 moorings.append(m)
 
-            v_details = self.current_proposal.vessel_details
-            v_ownership = self.current_proposal.vessel_ownership
+            v_details = self.current_proposal.latest_vessel_details
+            v_ownership = self.current_proposal.latest_vessel_ownership
             if not v_ownership.end_date:
                 vessel_rego_no = v_details.vessel.rego_no
                 vessel_name = v_details.vessel_name
