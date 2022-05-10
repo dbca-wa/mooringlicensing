@@ -1685,16 +1685,17 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
             self.final_approval_for_WLA_AAA(request, details={})
 
     def vessel_on_proposal(self):
+        from mooringlicensing.components.approvals.models import MooringLicence
         # Test to see if vessel should be read in from submitted data
         vessel_exists = False
-        if obj.approval and type(obj.approval) is not MooringLicence:
+        if self.approval and type(self.approval) is not MooringLicence:
             vessel_exists = (True if
-                    obj.approval and obj.approval.current_proposal and 
-                    obj.approval.current_proposal.vessel_details and
-                    not obj.approval.current_proposal.vessel_ownership.end_date
+                    self.approval and self.approval.current_proposal and 
+                    self.approval.current_proposal.vessel_details and
+                    not self.approval.current_proposal.vessel_ownership.end_date
                     else False)
         else:
-            vessel_exists = True if obj.listed_vessels.filter(end_date__isnull=True) else False
+            vessel_exists = True if self.listed_vessels.filter(end_date__isnull=True) else False
         return vessel_exists
 
 
