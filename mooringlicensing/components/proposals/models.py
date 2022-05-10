@@ -3279,7 +3279,9 @@ class CompanyOwnership(RevisionedMixin):
 
 class VesselOwnershipManager(models.Manager):
     def get_queryset(self):
-        latest_ids = VesselOwnership.objects.values("owner", "vessel", "company_ownership").annotate(id=Max('id')).values_list('id', flat=True)
+        #latest_ids = VesselOwnership.objects.values("owner", "vessel", "company_ownership").annotate(id=Max('id')).values_list('id', flat=True)
+        # Do not show sold vessels
+        latest_ids = VesselOwnership.objects.filter(end_date__isnull=True).values("owner", "vessel", "company_ownership").annotate(id=Max('id')).values_list('id', flat=True)
         return super(VesselOwnershipManager, self).get_queryset().filter(id__in=latest_ids)
 
 
