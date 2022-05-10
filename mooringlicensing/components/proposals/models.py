@@ -316,6 +316,10 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
     def __str__(self):
         return str(self.lodgement_number)
 
+    @property
+    def latest_vessel_details(self):
+        return self.vessel_ownership.vessel.latest_vessel_details
+
     @staticmethod
     def get_corresponding_amendment_fee_item(accept_null_vessel, fee_constructor, fee_item, target_date, vessel_length):
         proposal_type_amendment = ProposalType.objects.get(code=PROPOSAL_TYPE_AMENDMENT)
@@ -1833,7 +1837,8 @@ class WaitingListApplication(Proposal):
                 vessel_length = -1
                 accept_null_vessel = True
             else:
-                msg = 'No vessel specified for the application {}'.format(self.lodgement_number)
+                # msg = 'No vessel specified for the application {}'.format(self.lodgement_number)
+                msg = 'The application fee admin data has not been set up correctly for the Waiting List application type.  Please contact the Rottnest Island Authority.'
                 logger.error(msg)
                 raise Exception(msg)
 
@@ -1949,7 +1954,7 @@ class WaitingListApplication(Proposal):
 
     @property
     def does_accept_null_vessel(self):
-        if self.proposal_type.code in (PROPOSAL_TYPE_AMENDMENT, PROPOSAL_TYPE_RENEWAL):
+        if self.proposal_type.code in (PROPOSAL_TYPE_AMENDMENT,):
             return True
         return False
 
@@ -2018,7 +2023,8 @@ class AnnualAdmissionApplication(Proposal):
                 vessel_length = -1
                 accept_null_vessel = True
             else:
-                msg = 'No vessel specified for the application {}'.format(self.lodgement_number)
+                # msg = 'No vessel specified for the application {}'.format(self.lodgement_number)
+                msg = 'The application fee admin data has not been set up correctly for the Annual Admission Permit application type.  Please contact the Rottnest Island Authority.'
                 logger.error(msg)
                 raise Exception(msg)
 
@@ -2143,7 +2149,7 @@ class AnnualAdmissionApplication(Proposal):
 
     @property
     def does_accept_null_vessel(self):
-        if self.proposal_type.code in (PROPOSAL_TYPE_AMENDMENT, PROPOSAL_TYPE_RENEWAL):
+        if self.proposal_type.code in (PROPOSAL_TYPE_AMENDMENT,):
             return True
         return False
 
@@ -2194,7 +2200,8 @@ class AuthorisedUserApplication(Proposal):
                 vessel_length = -1
                 accept_null_vessel = True
             else:
-                msg = 'No vessel specified for the application {}'.format(self.lodgement_number)
+                # msg = 'No vessel specified for the application {}'.format(self.lodgement_number)
+                msg = 'The application fee admin data has not been set up correctly for the Authorised User Permit application type.  Please contact the Rottnest Island Authority.'
                 logger.error(msg)
                 raise Exception(msg)
 
@@ -2530,6 +2537,8 @@ class AuthorisedUserApplication(Proposal):
 
     @property
     def does_accept_null_vessel(self):
+        if self.proposal_type.code in (PROPOSAL_TYPE_AMENDMENT, PROPOSAL_TYPE_RENEWAL,):
+            return True
         return False
 
     def does_have_valid_associations(self):
@@ -2601,7 +2610,8 @@ class MooringLicenceApplication(Proposal):
                 vessel_length = -1
                 accept_null_vessel = True
             else:
-                msg = 'No vessel specified for the application {}'.format(self.lodgement_number)
+                # msg = 'No vessel specified for the application {}'.format(self.lodgement_number)
+                msg = 'The application fee admin data has not been set up correctly for the Mooring Licence application type.  Please contact the Rottnest Island Authority.'
                 logger.error(msg)
                 raise Exception(msg)
 
@@ -3337,7 +3347,6 @@ class VesselOwnership(RevisionedMixin):
             for proposal in proposal_set:
                 if proposal.approval and type(proposal.approval) == MooringLicence and proposal.approval.status == 'current':
                     proposal.approval.internal_reissue()
-
 
 
 class VesselRegistrationDocument(Document):

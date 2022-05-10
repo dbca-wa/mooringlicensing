@@ -498,7 +498,9 @@ export default {
                     //await this.post_and_redirect(this.application_fee_url, {'auto_approve': true, 'csrfmiddlewaretoken' : this.csrf_token});
                     await this.post_and_redirect(this.application_fee_url, {'csrfmiddlewaretoken' : this.csrf_token});
                 } else if (['wla', 'aaa'].includes(this.proposal.application_type_code)) {
+                    console.log('aho1')
                     await this.post_and_redirect(this.application_fee_url, {'csrfmiddlewaretoken' : this.csrf_token});
+                    console.log('aho2')
                 } else {
                     await this.post_and_redirect(this.confirmation_url, {'csrfmiddlewaretoken' : this.csrf_token});
                     //this.$router.push({
@@ -507,8 +509,9 @@ export default {
                 }
             });
         } catch(err) {
-            //console.log(err)
-            //console.log(typeof(err.body))
+            console.log('aho3')
+            console.log(err)
+            console.log(typeof(err.body))
             await swal({
                 title: 'Submit Error',
                 //text: helpers.apiVueResourceError(err),
@@ -746,19 +749,32 @@ export default {
 
         if (!this.proposal.fee_paid) {
             this.$nextTick(async () => {
-                await this.save_and_pay();
+                try {
+                    await this.save_and_pay();
+                    console.log('aho5')
+                } catch (err) {
+                    console.log(err)
+                    await swal({
+                        title: 'Submit Error',
+                        //text: helpers.apiVueResourceError(err),
+                        html: helpers.formatError(err),
+                        type: "error",
+                        //html: true,
+                    })
+                }
             });
         } else {
             await this.save_without_pay();
         }
     },
-
     post_and_redirect: function(url, postData) {
         /* http.post and ajax do not allow redirect from Django View (post method),
            this function allows redirect by mimicking a form submit.
 
            usage:  vm.post_and_redirect(vm.application_fee_url, {'csrfmiddlewaretoken' : vm.csrf_token});
         */
+        console.log(url)
+        console.log(postData)
         var postFormStr = "<form method='POST' action='" + url + "'>";
 
         for (var key in postData) {
@@ -770,6 +786,7 @@ export default {
         var formElement = $(postFormStr);
         $('body').append(formElement);
         $(formElement).submit();
+        console.log('aho4')
     },
 
   },

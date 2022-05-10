@@ -930,7 +930,8 @@ class WaitingListAllocation(Approval):
 
     def get_context_for_licence_permit(self):
         try:
-            v_details = self.current_proposal.vessel_details
+            # v_details = self.current_proposal.vessel_details
+            v_details = self.current_proposal.latest_vessel_details
             v_ownership = self.current_proposal.vessel_ownership
             if not v_ownership.end_date:
                 vessel_rego_no = v_details.vessel.rego_no
@@ -938,10 +939,10 @@ class WaitingListAllocation(Approval):
                 vessel_length = v_details.vessel_applicable_length
                 vessel_draft = v_details.vessel_draft
             else:
-                vessel_rego_no = '-'
-                vessel_name = '-'
-                vessel_length = '-'
-                vessel_draft = '-'
+                vessel_rego_no = ''
+                vessel_name = ''
+                vessel_length = ''
+                vessel_draft = ''
 
             # Return context for the licence/permit document
             context = {
@@ -1014,16 +1015,16 @@ class AnnualAdmissionPermit(Approval):
     def get_context_for_licence_permit(self):
         try:
             # Return context for the licence/permit document
-            v_details = self.current_proposal.vessel_details
+            v_details = self.current_proposal.latest_vessel_details
             v_ownership = self.current_proposal.vessel_ownership
             if not v_ownership.end_date:
                 vessel_rego_no = v_details.vessel.rego_no
                 vessel_name = v_details.vessel_name
                 vessel_length = v_details.vessel_applicable_length
             else:
-                vessel_rego_no = '-'
-                vessel_name = '-'
-                vessel_length = '-'
+                vessel_rego_no = ''
+                vessel_name = ''
+                vessel_length = ''
 
             context = {
                 'approval': self,
@@ -1177,7 +1178,7 @@ class AuthorisedUserPermit(Approval):
                 m['licensee_phone'] = ', '.join(numbers)
                 moorings.append(m)
 
-            v_details = self.current_proposal.vessel_details
+            v_details = self.current_proposal.latest_vessel_details
             v_ownership = self.current_proposal.vessel_ownership
             if not v_ownership.end_date:
                 vessel_rego_no = v_details.vessel.rego_no
@@ -1185,10 +1186,10 @@ class AuthorisedUserPermit(Approval):
                 vessel_length = v_details.vessel_applicable_length
                 vessel_draft = v_details.vessel_draft
             else:
-                vessel_rego_no = '-'
-                vessel_name = '-'
-                vessel_length = '-'
-                vessel_draft = '-'
+                vessel_rego_no = ''
+                vessel_name = ''
+                vessel_length = ''
+                vessel_draft = ''
 
             context = {
                 'approval': self,

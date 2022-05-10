@@ -10,7 +10,7 @@ from ledger.accounts.models import EmailUser
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 
-from mooringlicensing.components.emails.utils import get_public_url
+from mooringlicensing.components.emails.utils import get_public_url, make_http_https
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +77,7 @@ def send_amendment_email_notification(amendment_request, request, compliance, is
         'compliance': compliance,
         'reason': reason,
         'amendment_request_text': amendment_request.text,
-        'url': url,
+        'url': make_http_https(url),
         'public_url': get_public_url(request),
     }
 
@@ -109,7 +109,7 @@ def send_reminder_email_notification(compliance, is_test=False):
     login_url+=reverse('external')
     context = {
         'compliance': compliance,
-        'url': url,
+        'url': make_http_https(url),
         'login_url': login_url,
         'public_url': get_public_url(),
     }
@@ -145,7 +145,7 @@ def send_internal_reminder_email_notification(compliance, is_test=False):
 
     context = {
         'compliance': compliance,
-        'url': url,
+        'url': make_http_https(url),
         'public_url': get_public_url(),
     }
 
@@ -176,7 +176,7 @@ def send_due_email_notification(compliance, is_test=False):
         'recipient': submitter,
         'compliance': compliance,
         'due_date': compliance.due_date.strftime('%d/%m/%Y'),
-        'external_compliance_url': url,
+        'external_compliance_url': make_http_https(url),
         'public_url': get_public_url(),
     }
 
@@ -211,7 +211,7 @@ def send_internal_due_email_notification(compliance, is_test=False):
 
     context = {
         'compliance': compliance,
-        'url': url,
+        'url': make_http_https(url),
         'public_url': get_public_url(),
     }
 
@@ -266,7 +266,7 @@ def send_external_submit_email_notification(request, compliance, is_test=False):
     context = {
         'compliance': compliance,
         'recipient': submitter,
-        'url': url,
+        'url': make_http_https(url),
         'due_date': compliance.due_date.strftime('%d/%m/%Y'),
         'public_url': get_public_url(request),
     }
@@ -296,7 +296,7 @@ def send_submit_email_notification(request, compliance, is_test=False):
 
     context = {
         'compliance': compliance,
-        'url': url,
+        'url': make_http_https(url),
         'public_url': get_public_url(request),
     }
 

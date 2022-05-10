@@ -15,7 +15,7 @@ from ledger.settings_base import TIME_ZONE
 from mooringlicensing import settings
 from mooringlicensing.components.main.models import ApplicationType, VesselSizeCategoryGroup, VesselSizeCategory
 from mooringlicensing.components.proposals.models import ProposalType, AnnualAdmissionApplication, \
-    AuthorisedUserApplication, VesselDetails
+    AuthorisedUserApplication, VesselDetails, WaitingListApplication
 from smart_selects.db_fields import ChainedForeignKey
 
 logger = logging.getLogger('mooringlicensing')
@@ -473,9 +473,9 @@ class FeeConstructor(models.Model):
                     else:
                         for proposal_type in proposal_types:
                             if vessel_size_category.null_vessel and \
-                                    ((self.application_type.code in (AnnualAdmissionApplication.code, AuthorisedUserApplication.code) and proposal_type.code == settings.PROPOSAL_TYPE_RENEWAL) or
+                                    ((self.application_type.code in (WaitingListApplication.code, AnnualAdmissionApplication.code) and proposal_type.code == settings.PROPOSAL_TYPE_RENEWAL) or
                                      proposal_type.code == settings.PROPOSAL_TYPE_NEW):
-                                # When null vessel and AAA/AUA and renewal application
+                                # When null vessel and WLA/AAA and renewal application
                                 # When null vessel and new application
                                 # ==> No fees
                                 continue
