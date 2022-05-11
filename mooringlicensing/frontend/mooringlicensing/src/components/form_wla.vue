@@ -262,7 +262,7 @@
                         this.showPaymentTab = true;
                         this.$emit("updateSubmitText", "Pay / Submit");
                         // auto approve
-                        if (this.higherVesselCategory || !this.keepCurrentVessel || this.mooringPreferenceChanged) {
+                        if (!this.proposal.vessel_on_proposal || this.higherVesselCategory || !this.keepCurrentVessel || this.mooringPreferenceChanged) {
                             this.$emit("updateAutoApprove", false);
                         } else {
                             this.$emit("updateAutoApprove", true);
