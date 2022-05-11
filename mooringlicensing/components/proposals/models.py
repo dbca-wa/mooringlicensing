@@ -1689,16 +1689,17 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
             self.final_approval_for_WLA_AAA(request, details={})
 
     def vessel_on_proposal(self):
+        from mooringlicensing.components.approvals.models import MooringLicence
         # Test to see if vessel should be read in from submitted data
         vessel_exists = False
-        if obj.approval and type(obj.approval) is not MooringLicence:
+        if self.approval and type(self.approval) is not MooringLicence:
             vessel_exists = (True if
-                    obj.approval and obj.approval.current_proposal and 
-                    obj.approval.current_proposal.vessel_details and
-                    not obj.approval.current_proposal.vessel_ownership.end_date
+                    self.approval and self.approval.current_proposal and 
+                    self.approval.current_proposal.vessel_details and
+                    not self.approval.current_proposal.vessel_ownership.end_date
                     else False)
         else:
-            vessel_exists = True if obj.listed_vessels.filter(end_date__isnull=True) else False
+            vessel_exists = True if self.listed_vessels.filter(end_date__isnull=True) else False
         return vessel_exists
 
 
@@ -3289,7 +3290,9 @@ class CompanyOwnership(RevisionedMixin):
 
 class VesselOwnershipManager(models.Manager):
     def get_queryset(self):
-        latest_ids = VesselOwnership.objects.values("owner", "vessel", "company_ownership").annotate(id=Max('id')).values_list('id', flat=True)
+        #latest_ids = VesselOwnership.objects.values("owner", "vessel", "company_ownership").annotate(id=Max('id')).values_list('id', flat=True)
+        # Do not show sold vessels
+        latest_ids = VesselOwnership.objects.filter(end_date__isnull=True).values("owner", "vessel", "company_ownership").annotate(id=Max('id')).values_list('id', flat=True)
         return super(VesselOwnershipManager, self).get_queryset().filter(id__in=latest_ids)
 
 
