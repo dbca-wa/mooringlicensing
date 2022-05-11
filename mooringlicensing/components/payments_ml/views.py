@@ -709,7 +709,9 @@ class ApplicationFeeSuccessView(TemplateView):
                     proposal = application_fee.proposal
                     submitter = proposal.submitter
                     if type(proposal.child_obj) in [WaitingListApplication, AnnualAdmissionApplication]:
-                        proposal.auto_approve_check(request)
+                        #proposal.auto_approve_check(request)
+                        if proposal.auto_approve:
+                            proposal.final_approval_for_WLA_AAA(request, details={})
                 else:
                     msg = 'ApplicationFee with id: {} does not exist in the database'.format(str(request.session[self.LAST_APPLICATION_FEE_ID]))
                     logger.error(msg)

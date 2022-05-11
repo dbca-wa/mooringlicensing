@@ -259,7 +259,7 @@
             */
             updateVesselLength: function(length) {
                 if (this.is_external && this.proposal) {
-                    if (this.proposal.max_vessel_length_with_no_payment && 
+                    if (this.proposal.max_vessel_length_with_no_payment !== null && 
                         this.proposal.max_vessel_length_with_no_payment <= length) {
                         // vessel length is in higher category
                         this.higherVesselCategory = true;
@@ -288,7 +288,7 @@
                             this.$emit("updateSubmitText", "Submit");
                         }
                         // auto approve
-                        if (this.higherVesselCategory || !this.keepCurrentVessel) {
+                        if (!this.proposal.vessel_on_proposal || this.higherVesselCategory || !this.keepCurrentVessel) {
                             this.$emit("updateAutoApprove", false);
                         } else {
                             this.$emit("updateAutoApprove", true);
