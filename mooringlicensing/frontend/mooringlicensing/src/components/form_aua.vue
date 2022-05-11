@@ -280,7 +280,7 @@
             */
             updateVesselLength: function(length) {
                 if (this.is_external && this.proposal) {
-                    if (this.proposal.max_vessel_length_with_no_payment &&
+                    if (this.proposal.max_vessel_length_with_no_payment !== null &&
                         this.proposal.max_vessel_length_with_no_payment <= length) {
                         // vessel length is in higher category
                         this.higherVesselCategory = true;
