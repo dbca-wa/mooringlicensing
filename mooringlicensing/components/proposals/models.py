@@ -1672,21 +1672,21 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
 
         return target_date
 
-    def auto_approve_check(self, request):
-        # New AnnualAdmission can be auto_approved
-        if type(self.child_obj) == AnnualAdmissionApplication and self.proposal_type.code == 'new':
-            self.auto_approve = True
-            self.save()
-        ## WLA
-        if (type(self.child_obj) == WaitingListApplication and 
-                self.previous_application_status_filter and 
-                self.preferred_bay != self.previous_application_status_filter.preferred_bay
-                ):
-            auto_approve = False
-            self.save()
+    #def auto_approve_check(self, request):
+    #    # New AnnualAdmission can be auto_approved
+    #    if type(self.child_obj) == AnnualAdmissionApplication and self.proposal_type.code == 'new':
+    #        self.auto_approve = True
+    #        self.save()
+    #    ## WLA
+    #    if (type(self.child_obj) == WaitingListApplication and 
+    #            self.previous_application_status_filter and 
+    #            self.preferred_bay != self.previous_application_status_filter.preferred_bay
+    #            ):
+    #        self.auto_approve = False
+    #        self.save()
 
-        if self.auto_approve:
-            self.final_approval_for_WLA_AAA(request, details={})
+    #    if self.auto_approve:
+    #        self.final_approval_for_WLA_AAA(request, details={})
 
     def vessel_on_proposal(self):
         from mooringlicensing.components.approvals.models import MooringLicence

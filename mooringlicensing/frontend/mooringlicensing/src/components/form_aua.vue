@@ -315,7 +315,7 @@
                             this.$emit("updateSubmitText", "Submit");
                         }
                         // auto approve
-                        if (this.higherVesselCategory || !this.keepCurrentVessel || this.changeMooring) {
+                        if (!this.proposal.vessel_on_proposal || this.higherVesselCategory || !this.keepCurrentVessel || this.changeMooring) {
                             this.$emit("updateAutoApprove", false);
                         } else {
                             this.$emit("updateAutoApprove", true);
