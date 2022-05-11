@@ -258,7 +258,7 @@ from '@/utils/hooks'
             regoReadonly: function() {
                 let readonly = false;
                 //if (this.proposal && this.proposal.approval_reissued && !this.proposal.approval_vessel_rego_no && 
-                if (this.proposal && !this.proposal.approval_vessel_rego_no && !this.proposal.current_vessels_rego_list) {
+                if (this.proposal && !this.proposal.approval_vessel_rego_no && !this.proposal.current_vessels_rego_list && !this.readonly) {
                     readonly = false;
                 } else if ((this.proposal && this.keep_current_vessel && ['amendment', 'renewal'].includes(this.proposal.proposal_type.code)) || 
                     this.readonly || 
