@@ -324,6 +324,9 @@ class ApplicationFeeView(TemplateView):
     def get_object(self):
         return get_object_or_404(Proposal, id=self.kwargs['proposal_pk'])
 
+    def get(self, request, *args, **kwargs):
+        pass
+
     def post(self, request, *args, **kwargs):
         proposal = self.get_object()
         application_fee = ApplicationFee.objects.create(proposal=proposal, created_by=request.user, payment_type=ApplicationFee.PAYMENT_TYPE_TEMPORARY)
@@ -336,7 +339,14 @@ class ApplicationFeeView(TemplateView):
                 try:
                     lines, db_processes_after_success = proposal.child_obj.create_fee_lines()  # Accessed by WL and AA
                 except Exception as e:
-                    return HttpResponseRedirect(reverse('external-proposal-detail', kwargs={'proposal_pk': proposal.id}))
+                    # return HttpResponseRedirect(reverse('external-proposal-detail', kwargs={'proposal_pk': proposal.id}))
+                    # return HttpResponse({'error': e})
+
+                    self.template_name = 'mooringlicensing/payments_ml/fee_calculation_error.html'
+                    context = {
+                        'error_message': str(e),
+                    }
+                    return render(request, self.template_name, context)
 
                 request.session['db_processes'] = db_processes_after_success
                 #request.session['auto_approve'] = request.POST.get('auto_approve', False)
