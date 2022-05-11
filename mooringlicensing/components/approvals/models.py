@@ -1118,10 +1118,11 @@ class AnnualAdmissionPermit(Approval):
             if not proposal.approval.reissued or not proposal.keep_existing_vessel:
                 # New sticker goes to ready
                 current_stickers = self._get_current_stickers()
-                sticker_to_be_replaced = current_stickers.first()  # There should be only one current sticker
+                sticker_to_be_replaced = current_stickers.first()  # There should be 0 or 1 current sticker (0: when vessel sold before renewal)
                 new_sticker = Sticker.objects.create(
                     approval=self,
-                    vessel_ownership=sticker_to_be_replaced.vessel_ownership,
+                    # vessel_ownership=sticker_to_be_replaced.vessel_ownership,
+                    vessel_ownership=proposal.vessel_ownership if proposal.vessel_ownership else sticker_to_be_replaced.vessel_ownership if sticker_to_be_replaced else None,
                     fee_constructor=proposal.fee_constructor if proposal.fee_constructor else sticker_to_be_replaced.fee_constructor if sticker_to_be_replaced else None,
                     proposal_initiated=proposal,
                     fee_season=self.latest_applied_season,

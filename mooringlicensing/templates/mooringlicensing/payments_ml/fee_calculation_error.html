@@ -1,0 +1,23 @@
+{% extends 'mooringlicensing/base.html' %}
+{% load static %}
+{% block content %}
+    <div class="container">
+        <div class="well">
+            <div class="row"><div class="col-sm-12">
+                <h2>Error</h2>
+            </div></div>
+
+            <div>
+                <p>{{ error_message }}.</p>
+            </div>
+        </div>
+
+        <div class="row"><div class="col-sm-12" style="margin-top: 1em">
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="{% url 'external' %}" class="pull-right btn btn-info btn-lg">Return to Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
