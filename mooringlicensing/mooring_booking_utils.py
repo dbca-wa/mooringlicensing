@@ -1065,8 +1065,7 @@ def allocate_refund_to_invoice(request, booking, lines, invoice_text=None, inter
         #    book_inv, created = models.BookingAnnualInvoice.objects.get_or_create(booking_annual_admission=booking, invoice_reference=new_invoice.reference, system_invoice=True)
         #else:
             
-        #book_inv, created = ApplicationFee.objects.get_or_create(proposal=booking, invoice_reference=new_invoice.reference, system_invoice=True)
-        book_inv, created = ApplicationFee.objects.get_or_create(proposal=booking, invoice_reference=new_invoice.reference)
+        book_inv, created = ApplicationFee.objects.get_or_create(proposal=booking, invoice_reference=new_invoice.reference, system_invoice=True)
 
         return order
 
