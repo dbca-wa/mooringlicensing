@@ -912,8 +912,6 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                 exclude(id=self.id).
                 exclude(processing_status__in=['discarded', 'sticker_to_be_returned', 'printing_sticker', 'approved', 'declined'])
                 ])
-            print("proposals")
-            print(proposals)
 
             if not self.processing_status == Proposal.PROCESSING_STATUS_APPROVED:
                 raise ValidationError('You cannot change the current status at this time')
