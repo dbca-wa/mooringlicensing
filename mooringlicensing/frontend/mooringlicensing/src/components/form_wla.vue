@@ -237,23 +237,23 @@
                 this.uuid++
                 this.updateAmendmentRenewalProperties();
             },
-            updateAmendmentRenewalProperties: function() {
+            updateAmendmentRenewalProperties: async function() {
                 console.log('updateAmendmentRenewalProperties in form_wla.vue')
                 //if (this.proposal && ['renewal', 'amendment'].includes(this.proposal.proposal_type.code)) {
                 if (this.proposal && (this.proposal.proposal_type.code === 'amendment' || this.proposal.pending_amendment_request)) {
                     this.$nextTick(() => {
                         if (this.higherVesselCategory) {
                             this.showPaymentTab = true;
-                            this.$emit("updateSubmitText", "Pay / Submit");
+                            await this.$emit("updateSubmitText", "Pay / Submit");
                         } else {
                             this.showPaymentTab = false;
-                            this.$emit("updateSubmitText", "Submit");
+                            await this.$emit("updateSubmitText", "Submit");
                         }
                         // auto approve
                         if (!this.proposal.vessel_on_proposal || this.higherVesselCategory || !this.keepCurrentVessel || this.mooringPreferenceChanged) {
-                            this.$emit("updateAutoApprove", false);
+                            await this.$emit("updateAutoApprove", false);
                         } else {
-                            this.$emit("updateAutoApprove", true);
+                            await this.$emit("updateAutoApprove", true);
                         }
 
                     });
@@ -263,9 +263,9 @@
                         this.$emit("updateSubmitText", "Pay / Submit");
                         // auto approve
                         if (!this.proposal.vessel_on_proposal || this.higherVesselCategory || !this.keepCurrentVessel || this.mooringPreferenceChanged) {
-                            this.$emit("updateAutoApprove", false);
+                            await this.$emit("updateAutoApprove", false);
                         } else {
-                            this.$emit("updateAutoApprove", true);
+                            await this.$emit("updateAutoApprove", true);
                         }
                     });
                 }
@@ -290,12 +290,12 @@
             },
 
         },
-        mounted: function() {
+        mounted: async function() {
             let vm = this;
             vm.set_tabs();
             vm.form = document.forms.new_proposal;
-            this.updateAmendmentRenewalProperties();
-            this.$emit("updateSubmitText", "Pay / Submit");
+            await this.$emit("updateSubmitText", "Pay / Submit");
+            await this.updateAmendmentRenewalProperties();
             //window.addEventListener('beforeunload', vm.leaving);
             //indow.addEventListener('onblur', vm.leaving);
 

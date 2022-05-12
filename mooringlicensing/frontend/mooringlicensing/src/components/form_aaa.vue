@@ -219,7 +219,7 @@
                 this.uuid++
                 this.updateAmendmentRenewalProperties();
             },
-            updateAmendmentRenewalProperties: function() {
+            updateAmendmentRenewalProperties: async function() {
                 console.log('updateAmendmentRenewalProperties in form_aaa.vue')
                 //if (this.proposal && this.proposal.proposal_type.code === 'amendment') {
                 if (this.proposal && (this.proposal.proposal_type.code === 'amendment' || this.proposal.pending_amendment_request)) {
@@ -233,67 +233,10 @@
                         // payment
                         if (this.higherVesselCategory) {
                             this.showPaymentTab = true;
-                            this.$emit("updateSubmitText", "Pay / Submit");
+                            await this.$emit("updateSubmitText", "Pay / Submit");
                         } else {
                             this.showPaymentTab = false;
-                            this.$emit("updateSubmitText", "Submit");
-                        }
-                        // auto approve
-                        this.$emit("updateAutoApprove", true);
-                        /*
-                        if (this.higherVesselCategory || !this.keepCurrentVessel) {
-                            this.$emit("updateAutoApprove", false);
-                        } else {
-                            this.$emit("updateAutoApprove", true);
-                        }
-                        */
-
-                    });
-                } else if (this.proposal && this.proposal.proposal_type.code === 'renewal') {
-                    this.$nextTick(() => {
-                        if (!this.keepCurrentVessel) {
-                            this.showPaymentTab = true;
-                            this.showInsuranceTab = true;
-                            this.$emit("updateSubmitText", "Pay / Submit");
-                        } else {
-                            this.showPaymentTab = true;
-                            this.showInsuranceTab = false;
-                            this.$emit("updateSubmitText", "Pay / Submit");
-                        }
-                        // auto approve
-                        this.$emit("updateAutoApprove", true);
-                        /*
-                        if (this.higherVesselCategory || !this.keepCurrentVessel) {
-                            this.$emit("updateAutoApprove", false);
-                        } else {
-                            this.$emit("updateAutoApprove", true);
-                        }
-                        */
-                    });
-                }
-            },
-
-            /*
-            updateAmendmentRenewalProperties: function() {
-                console.log('updateAmendmentRenewalProperties in form_aaa.vue')
-                if (this.proposal && this.proposal.proposal_type.code === 'amendment') {
-                    this.$nextTick(() => {
-                        if (this.keepCurrentVessel && this.higherVesselCategory) {
-                            this.showPaymentTab = true;
-                            this.showInsuranceTab = false;
-                            this.$emit("updateSubmitText", "Pay / Submit");
-                        } else if (!this.keepCurrentVessel && !higherVesselCategory) {
-                            this.showPaymentTab = false;
-                            this.showInsuranceTab = true;
-                            this.$emit("updateSubmitText", "Submit");
-                        } else if (!this.keepCurrentVessel && higherVesselCategory) {
-                            this.showPaymentTab = true;
-                            this.showInsuranceTab = true;
-                            this.$emit("updateSubmitText", "Pay / Submit");
-                        } else {
-                            this.showPaymentTab = false;
-                            this.showInsuranceTab = false;
-                            this.$emit("updateSubmitText", "Submit");
+                            await this.$emit("updateSubmitText", "Submit");
                         }
                     });
                 } else if (this.proposal && this.proposal.proposal_type.code === 'renewal') {
@@ -301,17 +244,15 @@
                         if (!this.keepCurrentVessel) {
                             this.showPaymentTab = true;
                             this.showInsuranceTab = true;
-                            this.$emit("updateSubmitText", "Pay / Submit");
+                            await this.$emit("updateSubmitText", "Pay / Submit");
                         } else {
                             this.showPaymentTab = true;
                             this.showInsuranceTab = false;
-                            this.$emit("updateSubmitText", "Pay / Submit");
+                            await this.$emit("updateSubmitText", "Pay / Submit");
                         }
                     });
                 }
             },
-            */
-
             populateProfile: function(profile) {
                 this.profile = Object.assign({}, profile);
             },
@@ -330,12 +271,13 @@
             },
 
         },
-        mounted: function() {
+        mounted: async function() {
             let vm = this;
             vm.set_tabs();
             vm.form = document.forms.new_proposal;
-            this.updateAmendmentRenewalProperties();
-            this.$emit("updateSubmitText", "Pay / Submit");
+            await this.$emit("updateSubmitText", "Pay / Submit");
+            await this.$emit("updateAutoApprove", true);
+            await this.updateAmendmentRenewalProperties();
             //window.addEventListener('beforeunload', vm.leaving);
             //indow.addEventListener('onblur', vm.leaving);
 
