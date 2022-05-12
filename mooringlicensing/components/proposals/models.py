@@ -895,8 +895,28 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
 
     def reissue_approval(self, request, status):
         with transaction.atomic():
+            vessels = []
+            if type(self.child_obj) == MooringLicenceApplication:
+                vessels.append([vo.vessel for vo in self.listed_vessels])
+            else:
+                vessels.append(self.vessel_details.vessel)
+            # Non MLA
+            proposals = [proposal for proposal in Proposal.objects.filter(vessel_details__vessel__in=vessels).
+                    exclude(id=self.id).
+                    exclude(processing_status__in=['discarded', 'sticker_to_be_returned', 'printing_sticker', 'approved', 'declined'])
+                        ]
+            # MLA
+            proposals.extend([proposal for proposal in Proposal.objects.
+                filter(listed_vessels__end_date__isnull=True).
+                filter(listed_vessels__vessel__in=vessels).
+                exclude(id=self.id).
+                exclude(processing_status__in=['discarded', 'sticker_to_be_returned', 'printing_sticker', 'approved', 'declined'])
+                ])
+
             if not self.processing_status == Proposal.PROCESSING_STATUS_APPROVED:
                 raise ValidationError('You cannot change the current status at this time')
+            elif proposals:
+                raise ValidationError('Error message: there is an application in status other than (Discarded, Sticker To Be Returned, Printing Sticker, Approved, or Declined)')
             elif self.approval and self.approval.can_reissue and self.is_approver(request.user):
                 # update vessel details
                 vessel_details = self.vessel_details.vessel.latest_vessel_details
