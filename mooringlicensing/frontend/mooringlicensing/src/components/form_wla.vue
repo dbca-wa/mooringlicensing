@@ -241,7 +241,7 @@
                 console.log('updateAmendmentRenewalProperties in form_wla.vue')
                 //if (this.proposal && ['renewal', 'amendment'].includes(this.proposal.proposal_type.code)) {
                 if (this.proposal && (this.proposal.proposal_type.code === 'amendment' || this.proposal.pending_amendment_request)) {
-                    this.$nextTick(() => {
+                    this.$nextTick(async () => {
                         if (this.higherVesselCategory) {
                             this.showPaymentTab = true;
                             await this.$emit("updateSubmitText", "Pay / Submit");
@@ -258,7 +258,7 @@
 
                     });
                 } else if (this.proposal && this.proposal.proposal_type.code === 'renewal') {
-                    this.$nextTick(() => {
+                    this.$nextTick(async () => {
                         this.showPaymentTab = true;
                         this.$emit("updateSubmitText", "Pay / Submit");
                         // auto approve
