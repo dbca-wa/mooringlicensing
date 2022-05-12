@@ -230,6 +230,7 @@ class BaseProposalSerializer(serializers.ModelSerializer):
                 'keep_existing_vessel',
                 'approval_reissued',
                 'vessel_on_proposal',
+                'null_vessel_on_create',
                 )
         read_only_fields=('documents',)
 
@@ -830,6 +831,7 @@ class InternalProposalSerializer(BaseProposalSerializer):
                 'approval_lodgement_number',
                 'approval_vessel_rego_no',
                 'vessel_on_proposal',
+                'null_vessel_on_create',
                 )
         read_only_fields = (
             'documents',
