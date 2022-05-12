@@ -223,7 +223,7 @@
                 console.log('updateAmendmentRenewalProperties in form_aaa.vue')
                 //if (this.proposal && this.proposal.proposal_type.code === 'amendment') {
                 if (this.proposal && (this.proposal.proposal_type.code === 'amendment' || this.proposal.pending_amendment_request)) {
-                    this.$nextTick(() => {
+                    this.$nextTick(async () => {
                         // insurance
                         if (!this.keepCurrentVessel) {
                             this.showInsuranceTab = true;
@@ -240,7 +240,7 @@
                         }
                     });
                 } else if (this.proposal && this.proposal.proposal_type.code === 'renewal') {
-                    this.$nextTick(() => {
+                    this.$nextTick(async () => {
                         if (!this.keepCurrentVessel) {
                             this.showPaymentTab = true;
                             this.showInsuranceTab = true;
