@@ -116,7 +116,7 @@ class RefundOracleView(views.APIView):
                                  })
 
 
-                    order = utils.allocate_refund_to_invoice(request, booking, lines, invoice_text=None, internal=False, order_total='0.00',user=booking.submitter)
+                    order = utils.allocate_refund_to_invoice(request, booking, lines, invoice_text=None, internal=False, order_total='0.00',user=booking.submitter, system_invoice=True)
                     new_invoice = Invoice.objects.get(order_number=order.number)
                     update_payments(new_invoice.reference) 
                     #order = utils.allocate_refund_to_invoice(request, booking, lines, invoice_text=None, internal=False, order_total='0.00',user=booking.customer)
@@ -164,7 +164,7 @@ class RefundOracleView(views.APIView):
                                     "oracle_code":str(settings.UNALLOCATED_ORACLE_CODE), 
                                     'line_status': 1
                                     })
-                            order = utils.allocate_refund_to_invoice(request, booking, lines, invoice_text=None, internal=False, order_total='0.00',user=booking.submitter)
+                            order = utils.allocate_refund_to_invoice(request, booking, lines, invoice_text=None, internal=False, order_total='0.00',user=booking.submitter, system_invoice=False)
                             new_invoice = Invoice.objects.get(order_number=order.number)
 
                             if refund:
@@ -200,7 +200,7 @@ class RefundOracleView(views.APIView):
                             "oracle_code":mt['oracle-code'], 
                             'line_status': 1
                             })
-                    order = utils.allocate_refund_to_invoice(request, booking, lines, invoice_text=None, internal=False, order_total='0.00',user=booking.submitter)
+                    order = utils.allocate_refund_to_invoice(request, booking, lines, invoice_text=None, internal=False, order_total='0.00',user=booking.submitter, system_invoice=False)
                     new_invoice = Invoice.objects.get(order_number=order.number)
                     update_payments(new_invoice.reference)
 

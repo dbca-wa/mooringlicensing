@@ -1031,7 +1031,7 @@ def allocate_failedrefund_to_unallocated(request, booking, lines, invoice_text=N
         return order
 
 # Booking changed to Proposal
-def allocate_refund_to_invoice(request, booking, lines, invoice_text=None, internal=False, order_total='0.00',user=None):
+def allocate_refund_to_invoice(request, booking, lines, invoice_text=None, internal=False, order_total='0.00',user=None, system_invoice=False):
         booking_reference = None
         #if booking.__class__.__name__ == 'AdmissionsBooking':
         #     booking_reference = 'AD-'+str(booking.id)
@@ -1065,7 +1065,7 @@ def allocate_refund_to_invoice(request, booking, lines, invoice_text=None, inter
         #    book_inv, created = models.BookingAnnualInvoice.objects.get_or_create(booking_annual_admission=booking, invoice_reference=new_invoice.reference, system_invoice=True)
         #else:
             
-        book_inv, created = ApplicationFee.objects.get_or_create(proposal=booking, invoice_reference=new_invoice.reference, system_invoice=True)
+        book_inv, created = ApplicationFee.objects.get_or_create(proposal=booking, invoice_reference=new_invoice.reference, system_invoice=system_invoice)
 
         return order
 
