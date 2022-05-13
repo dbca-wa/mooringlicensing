@@ -33,7 +33,8 @@ from mooringlicensing.components.proposals.models import (
     Mooring, MooringLicenceApplication, AuthorisedUserApplication,
 )
 from mooringlicensing.settings import PROPOSAL_TYPE_AMENDMENT, PROPOSAL_TYPE_RENEWAL, PROPOSAL_TYPE_NEW
-from mooringlicensing.components.approvals.models import MooringLicence, MooringOnApproval
+from mooringlicensing.components.approvals.models import MooringLicence, MooringOnApproval, AuthorisedUserPermit, \
+    AnnualAdmissionPermit
 from mooringlicensing.components.main.serializers import CommunicationLogEntrySerializer, InvoiceSerializer
 from mooringlicensing.components.users.serializers import UserSerializer
 from mooringlicensing.components.users.serializers import UserAddressSerializer, DocumentSerializer
@@ -375,7 +376,16 @@ class BaseProposalSerializer(serializers.ModelSerializer):
 
             # All the amendment FeeItems interested
             # Ordered by 'start_size' ascending order, which means the cheapest fee_item first.
-            fee_items_interested = fee_constructor.feeitem_set.filter(proposal_type=ProposalType.objects.get(code=PROPOSAL_TYPE_AMENDMENT)).order_by('vessel_size_category__start_size')
+            fee_items_interested = fee_constructor.feeitem_set.filter(proposal_type=ProposalType.objects.get(code=PROPOSAL_TYPE_AMENDMENT))
+
+            if proposal.application_type.code in [MooringLicence.code, AuthorisedUserPermit.code,]:
+                # When AU/ML, we have to take account for AA component, too
+                application_type_aa = ApplicationType.objects.get(code=AnnualAdmissionPermit.code)
+                fee_constructor = FeeConstructor.get_fee_constructor_by_application_type_and_date(application_type_aa, datetime.now(pytz.timezone(TIME_ZONE)).date())
+                fee_items_interested_aa = fee_constructor.feeitem_set.filter(proposal_type=ProposalType.objects.get(code=PROPOSAL_TYPE_AMENDMENT))
+                fee_items_interested = fee_items_interested | fee_items_interested_aa
+
+            fee_items_interested.order_by('vessel_size_category__start_size')
 
             for fee_item in fee_items_interested:
                 if fee_item.incremental_amount:
@@ -387,12 +397,13 @@ class BaseProposalSerializer(serializers.ModelSerializer):
                     else:
                         max_number_of_increment = 1000  # We probably would like to cap the number of increments
 
-                    increment = 0
+                    increment = 0.0
                     while increment <= max_number_of_increment:
-                        fee_amount_to_pay = fee_item.get_absolute_amount(smallest_vessel_size + increment)
+                        test_vessel_size = smallest_vessel_size + increment
+                        fee_amount_to_pay = fee_item.get_absolute_amount(test_vessel_size)
                         if fee_amount_to_pay <= max_amount_paid:
-                            if not max_length or smallest_vessel_size < max_length:
-                                max_length = smallest_vessel_size
+                            if not max_length or test_vessel_size > max_length:
+                                max_length = test_vessel_size
                         increment += 1
                 else:
                     fee_amount_to_pay = fee_item.get_absolute_amount()
@@ -400,14 +411,14 @@ class BaseProposalSerializer(serializers.ModelSerializer):
                         # Find out start size of one larger category
                         larger_category = fee_item.vessel_size_category.vessel_size_category_group.get_one_larger_category(fee_item.vessel_size_category)
                         if larger_category:
-                            if not max_length or larger_category.start_size < max_length:
+                            if not max_length or larger_category.start_size > max_length:
                                 if larger_category.include_start_size:
                                     max_length = float(larger_category.start_size) - 0.00001
                                 else:
                                     max_length = float(larger_category.start_size)
                         else:
                             if not max_length:
-                                max_length = 99999
+                                max_length = None
                     else:
                         # The amount to pay is now more than the max amount paid
                         # Assuming larger vessel is more expensive, the all the fee_items left are more expensive than max_amount_paid

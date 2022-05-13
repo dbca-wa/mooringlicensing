@@ -554,12 +554,16 @@ class FeeItem(models.Model):
             return self.amount
         else:
             # This self.amount is the incremental amount.  Therefore the absolute amount must be calculated based on the fee_item of one smaller vessel size category
+            vessel_size = float(vessel_size)
             smaller_vessel_size_category = self.vessel_size_category.get_one_smaller_category()
             if smaller_vessel_size_category:
                 smaller_fee_item = self.fee_constructor.feeitem_set.filter(fee_period=self.fee_period, proposal_type=self.proposal_type, vessel_size_category=smaller_vessel_size_category)
                 if smaller_fee_item.count() == 1:
                     smaller_fee_item = smaller_fee_item.first()
-                    number_of_increment = ceil(vessel_size - self.vessel_size_category.start_size)
+                    number_of_increment = ceil(vessel_size - float(self.vessel_size_category.start_size))
+                    if number_of_increment == 0 and self.vessel_size_category.include_start_size:
+                        # In this case, 'vessel_size' is at the first step of this fee_item object.
+                        number_of_increment += 1
                     absolute_amount = smaller_fee_item.get_absolute_amount(self.vessel_size_category.start_size) + number_of_increment * self.amount
                     return absolute_amount
                 else:
@@ -567,7 +571,7 @@ class FeeItem(models.Model):
                     raise Exception('FeeItem object not found in the FeeConstructor: {} for {}, {} and {}'.format(self.fee_constructor, self.fee_period, self.proposal_type, smaller_vessel_size_category))
             else:
                 # This fee_item is for the smallest vessel size category and also incremental
-                number_of_increment = ceil(vessel_size - self.vessel_size_category.start_size)
+                number_of_increment = ceil(vessel_size - float(self.vessel_size_category.start_size))
                 absolute_amount = self.amount * number_of_increment
                 return absolute_amount
 
