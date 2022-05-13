@@ -1,9 +1,16 @@
 import logging
+from ledger.settings_base import TIME_ZONE
+import pytz
+from datetime import datetime
 from decimal import Decimal
+from math import ceil
 
 from django.conf import settings
 from ledger.accounts.models import EmailUser,Address
 from ledger.payments.invoice.models import Invoice
+
+from mooringlicensing.components.main.models import ApplicationType
+from mooringlicensing.components.payments_ml.models import FeeConstructor
 from mooringlicensing.components.proposals.models import (
     Proposal,
     ProposalUserAction,
@@ -25,7 +32,7 @@ from mooringlicensing.components.proposals.models import (
     CompanyOwnership,
     Mooring, MooringLicenceApplication, AuthorisedUserApplication,
 )
-from mooringlicensing.settings import PROPOSAL_TYPE_AMENDMENT, PROPOSAL_TYPE_RENEWAL
+from mooringlicensing.settings import PROPOSAL_TYPE_AMENDMENT, PROPOSAL_TYPE_RENEWAL, PROPOSAL_TYPE_NEW
 from mooringlicensing.components.approvals.models import MooringLicence, MooringOnApproval
 from mooringlicensing.components.main.serializers import CommunicationLogEntrySerializer, InvoiceSerializer
 from mooringlicensing.components.users.serializers import UserSerializer
@@ -351,25 +358,136 @@ class BaseProposalSerializer(serializers.ModelSerializer):
             serializer = InvoiceSerializer(invoices, many=True)
             return serializer.data
 
-    def get_max_vessel_length_with_no_payment(self, obj):
-        max_length = 0
-        # no need to specify current proposal type due to previous_application check
-        if obj.previous_application and obj.previous_application.application_fees.count():
-            app_fee = obj.previous_application.application_fees.first()
-            for fee_item in app_fee.fee_items.all():
-                vessel_size_category = fee_item.vessel_size_category
-                #import ipdb; ipdb.set_trace()
-                larger_group = fee_item.vessel_size_category.vessel_size_category_group.get_one_larger_category(vessel_size_category)
-                if larger_group:
-                    if not max_length or larger_group.start_size < max_length:
-                        max_length = larger_group.start_size
-            # no larger categories
-            if not max_length:
-                for fee_item in app_fee.fee_items.all():
-                    vessel_size_category = fee_item.vessel_size_category
-                    if not max_length or vessel_size_category.start_size < max_length:
-                        max_length = vessel_size_category.start_size
+    def get_max_vessel_length_with_no_payment(self, proposal):
+        # Find out minimum max_vessel_length, which doesn't require payments.
+        max_length = 0  # Store minimum Max length which doesn't require payment
+
+        if proposal.proposal_type.code in [PROPOSAL_TYPE_RENEWAL, PROPOSAL_TYPE_NEW,]:
+            # New/Renewal means starting a new season, nothing paid for any vessel.  Return 0[m]
+            pass
+        else:
+            # Amendment
+            # Max amount paid for this season
+            max_amount_paid = proposal.get_max_amount_paid_in_this_season()
+
+            # FeeConstructor to use
+            fee_constructor = FeeConstructor.get_fee_constructor_by_application_type_and_date(proposal.application_type, datetime.now(pytz.timezone(TIME_ZONE)).date())
+
+            # All the amendment FeeItems interested
+            # Ordered by 'start_size' ascending order, which means the cheapest fee_item first.
+            fee_items_interested = fee_constructor.feeitem_set.filter(proposal_type=ProposalType.objects.get(code=PROPOSAL_TYPE_AMENDMENT)).order_by('vessel_size_category__start_size')
+
+            for fee_item in fee_items_interested:
+                if fee_item.incremental_amount:
+                    smallest_vessel_size = float(fee_item.vessel_size_category.start_size)
+
+                    larger_category = fee_item.vessel_size_category.vessel_size_category_group.get_one_larger_category(fee_item.vessel_size_category)
+                    if larger_category:
+                        max_number_of_increment = round(larger_category.start_size - fee_item.vessel_size_category.start_size)
+                    else:
+                        max_number_of_increment = 1000  # We probably would like to cap the number of increments
+
+                    increment = 0
+                    while increment <= max_number_of_increment:
+                        fee_amount_to_pay = fee_item.get_absolute_amount(smallest_vessel_size + increment)
+                        if fee_amount_to_pay <= max_amount_paid:
+                            if not max_length or smallest_vessel_size < max_length:
+                                max_length = smallest_vessel_size
+                        increment += 1
+                else:
+                    fee_amount_to_pay = fee_item.get_absolute_amount()
+                    if fee_amount_to_pay <= max_amount_paid:
+                        # Find out start size of one larger category
+                        larger_category = fee_item.vessel_size_category.vessel_size_category_group.get_one_larger_category(fee_item.vessel_size_category)
+                        if larger_category:
+                            if not max_length or larger_category.start_size < max_length:
+                                if larger_category.include_start_size:
+                                    max_length = float(larger_category.start_size) - 0.00001
+                                else:
+                                    max_length = float(larger_category.start_size)
+                        else:
+                            if not max_length:
+                                max_length = 99999
+                    else:
+                        # The amount to pay is now more than the max amount paid
+                        # Assuming larger vessel is more expensive, the all the fee_items left are more expensive than max_amount_paid
+                        break
+
         return max_length
+
+#                vessel_length = fee_item.vessel_details.vessel_applicable_length  # This is the vessel length when paid for this fee_item
+#                amount_paid = fee_item.get_absolute_amount(vessel_length)
+#
+#                if fee_item.incremental_amount:
+#                    vessel_length = fee_item.vessel_details.vessel_applicable_length  # This is the vessel length when paid for this fee_item
+#                    number_of_increment = ceil(vessel_length - fee_item.vessel_size_category.start_size)
+#                    m_length = self.vessel_size_category.start_size + number_of_increment
+#                    if not max_length or m_length < max_length:
+#                        if fee_item.vessel_size_category.include_start_size:
+#                            max_length = float(m_length) - 0.00001
+#                        else:
+#                            max_length = float(m_length)
+#
+#                else:
+#                    vessel_size_category = fee_item.vessel_size_category
+#                    larger_category = fee_item.vessel_size_category.vessel_size_category_group.get_one_larger_category(
+#                        vessel_size_category
+#                    )
+#                    if larger_category:
+#                        if not max_length or larger_category.start_size < max_length:
+#                            if larger_category.include_start_size:
+#                                max_length = float(larger_category.start_size) - 0.00001
+#                            else:
+#                                max_length = float(larger_category.start_size)
+#                    else:
+#                        if not max_length:
+#                            max_length = 99999
+#
+#        return max_length
+
+
+#            # no need to specify current proposal type due to previous_application check
+#            if proposal.previous_application and proposal.previous_application.application_fees.count():
+#                # app_fee = proposal.previous_application.application_fees.first()
+#                for application_fee in proposal.previous_application.application_fees.all():
+#                    if application_fee.fee_constructor:
+#                        app_fee = application_fee
+#                        break
+#
+#                for fee_item in app_fee.fee_items.all():
+#
+#                    # TEST
+#                    corresponding_fee_item = fee_item.get_corresponding_fee_item(Proposal.objects.get(code=PROPOSAL_TYPE_AMENDMENT))
+#
+#                    if fee_item.incremental_amount:
+#                        # Determine vessel length
+#                        vessel_length = proposal.previous_application.latest_vessel_details.vessel_length
+#                        number_of_increment = ceil(vessel_length - fee_item.vessel_size_category.start_size)
+#                        m_length = self.vessel_size_category.start_size + number_of_increment
+#                        if not max_length or m_length < max_length:
+#                            if fee_item.vessel_size_category.include_start_size:
+#                                max_length = float(m_length) - 0.00001
+#                            else:
+#                                max_length = float(m_length)
+#
+#                    else:
+#                        vessel_size_category = fee_item.vessel_size_category
+#                        larger_category = fee_item.vessel_size_category.vessel_size_category_group.get_one_larger_category(vessel_size_category)
+#                        if larger_category:
+#                            if not max_length or larger_category.start_size < max_length:
+#                                if larger_category.include_start_size:
+#                                    max_length = float(larger_category.start_size) - 0.00001
+#                                else:
+#                                    max_length = float(larger_category.start_size)
+#
+#                # no larger categories
+#                if not max_length:
+#                    # for fee_item in app_fee.fee_items.all():
+#                    #     vessel_size_category = fee_item.vessel_size_category
+#                    #     if not max_length or vessel_size_category.start_size < max_length:
+#                    #         max_length = vessel_size_category.start_size
+#                    max_length = 9999
+#        return max_length
 
 
 class ListProposalSerializer(BaseProposalSerializer):

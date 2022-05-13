@@ -316,6 +316,47 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
     def __str__(self):
         return str(self.lodgement_number)
 
+    def get_max_amount_paid_in_this_season(self):
+        prev_application = self.previous_application
+
+        max_amount_paid = 0
+        max_count = 50  # To avoid infinite loop, set max number of iterations
+        loop_count = 0
+
+        while loop_count <= max_count:
+            loop_count += 1
+            if prev_application:
+                for application_fee in prev_application.application_fees.all():
+                    for fee_item_application_fee in application_fee.feeitemapplicationfee_set.all():
+                        fee_item = fee_item_application_fee.fee_item
+                        vessel_length = fee_item_application_fee.vessel_details.vessel_applicable_length
+                        amount_paid = float(fee_item.get_absolute_amount(vessel_length))
+                        if not max_amount_paid or max_amount_paid < amount_paid:
+                            max_amount_paid = amount_paid
+                if prev_application.proposal_type.code in [PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL,]:
+                    # 'prev_application' is the very first application of this season
+                    # We are not interested in any older applications
+                    break
+                else:
+                    # Assign the previous application, then do above again
+                    prev_application = prev_application.previous_application
+            else:
+                break
+
+        return max_amount_paid
+
+#            if prev_application.proposal_type.code in [PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL,]:
+#                # 'prev_application' is the very first application of this season
+#                # We are not interested in any older applications
+#                break
+#            else:
+#                prev_application = prev_application.previous_application  # Assign the previous application, then do above again
+#
+#        if loop_count >= max_count:
+#            logger.warning('Proposal: {} has more than {} previous proposals in this season.').format(self, max_count)
+#
+#        return fee_items_interested
+
     @property
     def latest_vessel_details(self):
         return self.vessel_ownership.vessel.latest_vessel_details
@@ -1866,7 +1907,8 @@ class WaitingListApplication(Proposal):
         db_processes_after_success['season_start_date'] = fee_constructor.fee_season.start_date.__str__()
         db_processes_after_success['season_end_date'] = fee_constructor.fee_season.end_date.__str__()
         db_processes_after_success['datetime_for_calculating_fee'] = current_datetime_str
-        db_processes_after_success['fee_item_id'] = fee_item_for_amendment_calculation.id if fee_item_for_amendment_calculation else 0
+        # db_processes_after_success['fee_item_id'] = fee_item_for_amendment_calculation.id if fee_item_for_amendment_calculation else 0
+        db_processes_after_success['fee_item_id'] = fee_item.id if fee_item else 0
 
         line_items = []
         line_items.append(
@@ -1904,7 +1946,8 @@ class WaitingListApplication(Proposal):
                 # TODO: We don't charge for this application but when new replacement vessel details are provided,calculate fee and charge it
                 fee_amount_adjusted = 0
             else:
-                raise Exception('FeeItem not found.')
+                msg = 'The application fee admin data might have not been set up correctly.  Please contact the Rottnest Island Authority.'
+                raise Exception(msg)
 
         return fee_amount_adjusted
 
@@ -2058,7 +2101,8 @@ class AnnualAdmissionApplication(Proposal):
         db_processes_after_success['season_start_date'] = fee_constructor.fee_season.start_date.__str__()
         db_processes_after_success['season_end_date'] = fee_constructor.fee_season.end_date.__str__()
         db_processes_after_success['datetime_for_calculating_fee'] = current_datetime_str
-        db_processes_after_success['fee_item_id'] = fee_item_for_amendment_calculation.id if fee_item_for_amendment_calculation else 0
+        # db_processes_after_success['fee_item_id'] = fee_item_for_amendment_calculation.id if fee_item_for_amendment_calculation else 0
+        db_processes_after_success['fee_item_id'] = fee_item.id if fee_item else 0
 
         line_items = []
         line_items.append(generate_line_item(self.application_type, fee_amount_adjusted, fee_constructor, self, current_datetime))
@@ -2095,7 +2139,8 @@ class AnnualAdmissionApplication(Proposal):
                 # TODO: We don't charge for this application but when new replacement vessel details are provided,calculate fee and charge it
                 fee_amount_adjusted = 0
             else:
-                raise Exception('FeeItem not found.')
+                msg = 'The application fee admin data might have not been set up correctly.  Please contact the Rottnest Island Authority.'
+                raise Exception(msg)
 
         return fee_amount_adjusted
 
@@ -2238,7 +2283,8 @@ class AuthorisedUserApplication(Proposal):
         fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length)
         fee_item_amendment_calculation = self.get_corresponding_amendment_fee_item(accept_null_vessel, fee_constructor, fee_item, target_date, vessel_length)
         # fee_items_to_store.append({'fee_item': fee_item_amendment_calculation, 'vessel_details': self.vessel_details})
-        fee_items_to_store.append({'fee_item_id': fee_item_amendment_calculation.id, 'vessel_details_id': self.vessel_details.id})
+        # fee_items_to_store.append({'fee_item_id': fee_item_amendment_calculation.id, 'vessel_details_id': self.vessel_details.id})
+        fee_items_to_store.append({'fee_item_id': fee_item.id, 'vessel_details_id': self.vessel_details.id})
         line_items.append(generate_line_item(self.application_type, fee_amount_adjusted, fee_constructor, self, current_datetime))
 
         if not aap_exists_for_this_vessel:
@@ -2246,7 +2292,8 @@ class AuthorisedUserApplication(Proposal):
             fee_amount_adjusted_additional = self.get_fee_amount_adjusted(fee_item_for_aa, vessel_length) if fee_item_for_aa else None
             fee_item_for_aa_amendment_calculation = self.get_corresponding_amendment_fee_item(accept_null_vessel, fee_constructor_for_aa, fee_item_for_aa, target_date, vessel_length)
             # fee_items_to_store.append({'fee_item': fee_item_for_aa_amendment_calculation, 'vessel_details': self.vessel_details})
-            fee_items_to_store.append({'fee_item_id': fee_item_for_aa_amendment_calculation.id, 'vessel_details_id': self.vessel_details.id})
+            # fee_items_to_store.append({'fee_item_id': fee_item_for_aa_amendment_calculation.id, 'vessel_details_id': self.vessel_details.id})
+            fee_items_to_store.append({'fee_item_id': fee_item_for_aa.id, 'vessel_details_id': self.vessel_details.id})
             line_items.append(generate_line_item(annual_admission_type, fee_amount_adjusted_additional, fee_constructor_for_aa, self, current_datetime))
 
         logger.info('{}'.format(line_items))
@@ -2282,7 +2329,8 @@ class AuthorisedUserApplication(Proposal):
                 # TODO: We don't charge for this application but when new replacement vessel details are provided,calculate fee and charge it
                 fee_amount_adjusted = 0
             else:
-                raise Exception('FeeItem not found.')
+                msg = 'The application fee admin data might have not been set up correctly.  Please contact the Rottnest Island Authority.'
+                raise Exception(msg)
 
         return fee_amount_adjusted
 
@@ -2619,7 +2667,8 @@ class MooringLicenceApplication(Proposal):
         fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length)
         fee_item_amendment_calculation = self.get_corresponding_amendment_fee_item(accept_null_vessel, fee_constructor_for_ml, fee_item, target_date, vessel_length)
         # fee_items_to_store.append({'fee_item': fee_item_amendment_calculation, 'vessel_details': vessel_details_largest})
-        fee_items_to_store.append({'fee_item_id': fee_item_amendment_calculation.id, 'vessel_details_id': vessel_details_largest.id})
+        # fee_items_to_store.append({'fee_item_id': fee_item_amendment_calculation.id, 'vessel_details_id': vessel_details_largest.id})
+        fee_items_to_store.append({'fee_item_id': fee_item.id, 'vessel_details_id': vessel_details_largest.id})
         line_items.append(generate_line_item(self.application_type, fee_amount_adjusted, fee_constructor_for_ml, self, current_datetime))
 
         # For Annual Admission component
@@ -2639,7 +2688,8 @@ class MooringLicenceApplication(Proposal):
                 fee_amount_adjusted_additional = self.get_fee_amount_adjusted(fee_item_for_aa, vessel_length)
                 fee_item_for_aa_amendment_calculation = self.get_corresponding_amendment_fee_item(accept_null_vessel, fee_constructor_for_aa, fee_item_for_aa, target_date, vessel_length)
                 # fee_items_to_store.append({'fee_item': fee_item_for_aa_amendment_calculation, 'vessel_details': vessel_details})
-                fee_items_to_store.append({'fee_item_id': fee_item_for_aa_amendment_calculation.id, 'vessel_details_id': vessel_details.id})
+                # fee_items_to_store.append({'fee_item_id': fee_item_for_aa_amendment_calculation.id, 'vessel_details_id': vessel_details.id})
+                fee_items_to_store.append({'fee_item_id': fee_item_for_aa.id, 'vessel_details_id': vessel_details.id})
                 line_items.append(generate_line_item(annual_admission_type, fee_amount_adjusted_additional, fee_constructor_for_aa, self, current_datetime, vessel_details.vessel.rego_no))
 
         logger.info('{}'.format(line_items))
@@ -2679,7 +2729,8 @@ class MooringLicenceApplication(Proposal):
                 # TODO: We don't charge for this application but when new replacement vessel details are provided,calculate fee and charge it
                 fee_amount_adjusted = 0
             else:
-                raise Exception('FeeItem not found.')
+                msg = 'The application fee admin data might have not been set up correctly.  Please contact the Rottnest Island Authority.'
+                raise Exception(msg)
 
         logger.info('Adjusted amount: {}'.format(fee_amount_adjusted))
         return fee_amount_adjusted

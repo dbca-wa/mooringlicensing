@@ -166,7 +166,6 @@ class StickerActionFee(Payment):
         app_label = 'mooringlicensing'
 
 
-#class FeeItemApplicationFee(RevisionedMixin):
 class FeeItemApplicationFee(models.Model):
     """
     This model is only used for the calculation of AnnualAdmission components
@@ -474,10 +473,10 @@ class FeeConstructor(models.Model):
                         for proposal_type in proposal_types:
                             if vessel_size_category.null_vessel and \
                                     ((self.application_type.code in (WaitingListApplication.code, AnnualAdmissionApplication.code) and proposal_type.code == settings.PROPOSAL_TYPE_RENEWAL) or
-                                     proposal_type.code == settings.PROPOSAL_TYPE_NEW):
-                                # When null vessel and WLA/AAA and renewal application
-                                # When null vessel and new application
-                                # ==> No fees
+                                     proposal_type.code in [settings.PROPOSAL_TYPE_NEW, settings.PROPOSAL_TYPE_AMENDMENT,]):
+                                # When WLA/AAA and renewal application
+                                # When new/amendment application
+                                # No fee_items created
                                 continue
                             else:
                                 fee_item, created = FeeItem.objects.get_or_create(fee_constructor=self,
@@ -530,13 +529,25 @@ class FeeItem(models.Model):
     vessel_size_category = models.ForeignKey(VesselSizeCategory, null=True, blank=True)
     proposal_type = models.ForeignKey('ProposalType', null=True, blank=True)
     amount = models.DecimalField(max_digits=8, decimal_places=2, default='0.00', help_text='$')
-    incremental_amount = models.BooleanField(default=False, help_text='When ticked, The amount will be the increase in the rate per meter')  # When True, the amount is the price for this item.  When False, self.amount is the price per meter.
+    incremental_amount = models.BooleanField(default=False, help_text='When ticked, The amount will be the increase in the rate per meter')  # When False, the 'amount' value is the price for this item.  When True, the 'amount' is the price per meter.
     # For DcvAdmission
     age_group = models.ForeignKey('AgeGroup', null=True, blank=True)
     admission_type = models.ForeignKey('AdmissionType', null=True, blank=True)
 
     def __str__(self):
-        return '${}: {}, {}, {}'.format(self.amount, self.fee_constructor.application_type, self.fee_period, self.vessel_size_category)
+        return '${}: {}, {}, {}, {}'.format(self.amount, self.fee_constructor.application_type, self.fee_period, self.vessel_size_category, self.proposal_type)
+
+    def get_corresponding_fee_item(self, proposal_type):
+        fee_item = self.fee_constructor.feeitem_set.filter(
+            fee_period=self.fee_period,
+            vessel_size_category=self.vessel_size_category,
+            proposal_type=proposal_type,
+        )
+        if fee_item.count():
+            fee_item = fee_item.first()
+            return fee_item
+        else:
+            raise Exception('FeeItem for fee_period: {}, vessel_size_category: {}, proposal_type: {} not found.'.format(self.fee_period, self.vessel_size_category, self.proposal_type))
 
     def get_absolute_amount(self, vessel_size=None):
         if not self.incremental_amount or not vessel_size:
