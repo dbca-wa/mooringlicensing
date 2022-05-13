@@ -321,6 +321,11 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
     def latest_vessel_details(self):
         return self.vessel_ownership.vessel.latest_vessel_details
 
+    def invoices_display(self):
+        ret_list = []
+        invoice_references = [item.invoice_reference for item in self.application_fees.filter(system_invoice=False)]
+        return Invoice.objects.filter(reference__in=invoice_references)
+
     @staticmethod
     def get_corresponding_amendment_fee_item(accept_null_vessel, fee_constructor, fee_item, target_date, vessel_length):
         proposal_type_amendment = ProposalType.objects.get(code=PROPOSAL_TYPE_AMENDMENT)
