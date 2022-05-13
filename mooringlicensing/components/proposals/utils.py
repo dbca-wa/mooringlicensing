@@ -962,7 +962,8 @@ def get_fee_amount_adjusted(proposal, fee_item_being_applied, vessel_length):
             # TODO: We don't charge for this application but when new replacement vessel details are provided,calculate fee and charge it
             fee_amount_adjusted = 0
         else:
-            raise Exception('FeeItem not found.')
+            msg = 'The application fee admin data might have not been set up correctly.  Please contact the Rottnest Island Authority.'
+            raise Exception(msg)
 
     return fee_amount_adjusted
 
