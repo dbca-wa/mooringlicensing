@@ -317,45 +317,45 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
         return str(self.lodgement_number)
 
     def get_max_amount_paid_in_this_season(self):
-        fee_items = self.get_all_fee_items_in_this_season()
-
-        max_amount_paid = 0
-
-        for fee_item in fee_items:
-            vessel_length = fee_item.vessel_details.vessel_applicable_length  # This is the vessel length when paid for this fee_item
-            amount_paid = fee_item.get_absolute_amount(vessel_length)
-            if not max_amount_paid or max_amount_paid < amount_paid:
-                max_amount_paid = amount_paid
-
-        return max_amount_paid
-
-    def get_all_fee_items_in_this_season(self):
-        fee_items_interested = []
         prev_application = self.previous_application
 
+        max_amount_paid = 0
         max_count = 50  # To avoid infinite loop, set max number of iterations
         loop_count = 0
+
         while loop_count <= max_count:
             loop_count += 1
             if prev_application:
                 for application_fee in prev_application.application_fees.all():
-                    for fee_item in application_fee.fee_items.all():
-                        # test Are we interested in fee_items for 'amendment'???
-                        corresponding_fee_item = fee_item.get_corresponding_fee_item(ProposalType.objects.get(code=PROPOSAL_TYPE_AMENDMENT))
-                        # end test
-                        fee_items_interested.append(fee_item)
-
-            if prev_application.proposal_type.code in [PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL,]:
-                # 'prev_application' is the very first application of this season
-                # We are not interested in any older applications
-                break
+                    for fee_item_application_fee in application_fee.feeitemapplicationfee_set.all():
+                        fee_item = fee_item_application_fee.fee_item
+                        vessel_length = fee_item_application_fee.vessel_details.vessel_applicable_length
+                        amount_paid = float(fee_item.get_absolute_amount(vessel_length))
+                        if not max_amount_paid or max_amount_paid < amount_paid:
+                            max_amount_paid = amount_paid
+                if prev_application.proposal_type.code in [PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL,]:
+                    # 'prev_application' is the very first application of this season
+                    # We are not interested in any older applications
+                    break
+                else:
+                    # Assign the previous application, then do above again
+                    prev_application = prev_application.previous_application
             else:
-                prev_application = prev_application.previous_application  # Assign the previous application, then do above again
+                break
 
-        if loop_count >= max_count:
-            logger.warning('Proposal: {} has more than {} previous proposals in this season.').format(self, max_count)
+        return max_amount_paid
 
-        return fee_items_interested
+#            if prev_application.proposal_type.code in [PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL,]:
+#                # 'prev_application' is the very first application of this season
+#                # We are not interested in any older applications
+#                break
+#            else:
+#                prev_application = prev_application.previous_application  # Assign the previous application, then do above again
+#
+#        if loop_count >= max_count:
+#            logger.warning('Proposal: {} has more than {} previous proposals in this season.').format(self, max_count)
+#
+#        return fee_items_interested
 
     @property
     def latest_vessel_details(self):

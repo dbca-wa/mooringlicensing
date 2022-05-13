@@ -360,7 +360,7 @@ class BaseProposalSerializer(serializers.ModelSerializer):
 
     def get_max_vessel_length_with_no_payment(self, proposal):
         # Find out minimum max_vessel_length, which doesn't require payments.
-        max_length = 99999  # Store minimum Max length which doesn't require payment
+        max_length = 0  # Store minimum Max length which doesn't require payment
 
         if proposal.proposal_type.code in [PROPOSAL_TYPE_RENEWAL, PROPOSAL_TYPE_NEW,]:
             # New/Renewal means starting a new season, nothing paid for any vessel.  Return 0[m]
@@ -408,6 +408,10 @@ class BaseProposalSerializer(serializers.ModelSerializer):
                         else:
                             if not max_length:
                                 max_length = 99999
+                    else:
+                        # The amount to pay is now more than the max amount paid
+                        # Assuming larger vessel is more expensive, the all the fee_items left are more expensive than max_amount_paid
+                        break
 
         return max_length
 
