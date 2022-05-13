@@ -1907,7 +1907,8 @@ class WaitingListApplication(Proposal):
         db_processes_after_success['season_start_date'] = fee_constructor.fee_season.start_date.__str__()
         db_processes_after_success['season_end_date'] = fee_constructor.fee_season.end_date.__str__()
         db_processes_after_success['datetime_for_calculating_fee'] = current_datetime_str
-        db_processes_after_success['fee_item_id'] = fee_item_for_amendment_calculation.id if fee_item_for_amendment_calculation else 0
+        # db_processes_after_success['fee_item_id'] = fee_item_for_amendment_calculation.id if fee_item_for_amendment_calculation else 0
+        db_processes_after_success['fee_item_id'] = fee_item.id if fee_item else 0
 
         line_items = []
         line_items.append(
@@ -2100,7 +2101,8 @@ class AnnualAdmissionApplication(Proposal):
         db_processes_after_success['season_start_date'] = fee_constructor.fee_season.start_date.__str__()
         db_processes_after_success['season_end_date'] = fee_constructor.fee_season.end_date.__str__()
         db_processes_after_success['datetime_for_calculating_fee'] = current_datetime_str
-        db_processes_after_success['fee_item_id'] = fee_item_for_amendment_calculation.id if fee_item_for_amendment_calculation else 0
+        # db_processes_after_success['fee_item_id'] = fee_item_for_amendment_calculation.id if fee_item_for_amendment_calculation else 0
+        db_processes_after_success['fee_item_id'] = fee_item.id if fee_item else 0
 
         line_items = []
         line_items.append(generate_line_item(self.application_type, fee_amount_adjusted, fee_constructor, self, current_datetime))
@@ -2281,7 +2283,8 @@ class AuthorisedUserApplication(Proposal):
         fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length)
         fee_item_amendment_calculation = self.get_corresponding_amendment_fee_item(accept_null_vessel, fee_constructor, fee_item, target_date, vessel_length)
         # fee_items_to_store.append({'fee_item': fee_item_amendment_calculation, 'vessel_details': self.vessel_details})
-        fee_items_to_store.append({'fee_item_id': fee_item_amendment_calculation.id, 'vessel_details_id': self.vessel_details.id})
+        # fee_items_to_store.append({'fee_item_id': fee_item_amendment_calculation.id, 'vessel_details_id': self.vessel_details.id})
+        fee_items_to_store.append({'fee_item_id': fee_item.id, 'vessel_details_id': self.vessel_details.id})
         line_items.append(generate_line_item(self.application_type, fee_amount_adjusted, fee_constructor, self, current_datetime))
 
         if not aap_exists_for_this_vessel:
@@ -2289,7 +2292,8 @@ class AuthorisedUserApplication(Proposal):
             fee_amount_adjusted_additional = self.get_fee_amount_adjusted(fee_item_for_aa, vessel_length) if fee_item_for_aa else None
             fee_item_for_aa_amendment_calculation = self.get_corresponding_amendment_fee_item(accept_null_vessel, fee_constructor_for_aa, fee_item_for_aa, target_date, vessel_length)
             # fee_items_to_store.append({'fee_item': fee_item_for_aa_amendment_calculation, 'vessel_details': self.vessel_details})
-            fee_items_to_store.append({'fee_item_id': fee_item_for_aa_amendment_calculation.id, 'vessel_details_id': self.vessel_details.id})
+            # fee_items_to_store.append({'fee_item_id': fee_item_for_aa_amendment_calculation.id, 'vessel_details_id': self.vessel_details.id})
+            fee_items_to_store.append({'fee_item_id': fee_item_for_aa.id, 'vessel_details_id': self.vessel_details.id})
             line_items.append(generate_line_item(annual_admission_type, fee_amount_adjusted_additional, fee_constructor_for_aa, self, current_datetime))
 
         logger.info('{}'.format(line_items))
@@ -2663,7 +2667,8 @@ class MooringLicenceApplication(Proposal):
         fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length)
         fee_item_amendment_calculation = self.get_corresponding_amendment_fee_item(accept_null_vessel, fee_constructor_for_ml, fee_item, target_date, vessel_length)
         # fee_items_to_store.append({'fee_item': fee_item_amendment_calculation, 'vessel_details': vessel_details_largest})
-        fee_items_to_store.append({'fee_item_id': fee_item_amendment_calculation.id, 'vessel_details_id': vessel_details_largest.id})
+        # fee_items_to_store.append({'fee_item_id': fee_item_amendment_calculation.id, 'vessel_details_id': vessel_details_largest.id})
+        fee_items_to_store.append({'fee_item_id': fee_item.id, 'vessel_details_id': vessel_details_largest.id})
         line_items.append(generate_line_item(self.application_type, fee_amount_adjusted, fee_constructor_for_ml, self, current_datetime))
 
         # For Annual Admission component
@@ -2683,7 +2688,8 @@ class MooringLicenceApplication(Proposal):
                 fee_amount_adjusted_additional = self.get_fee_amount_adjusted(fee_item_for_aa, vessel_length)
                 fee_item_for_aa_amendment_calculation = self.get_corresponding_amendment_fee_item(accept_null_vessel, fee_constructor_for_aa, fee_item_for_aa, target_date, vessel_length)
                 # fee_items_to_store.append({'fee_item': fee_item_for_aa_amendment_calculation, 'vessel_details': vessel_details})
-                fee_items_to_store.append({'fee_item_id': fee_item_for_aa_amendment_calculation.id, 'vessel_details_id': vessel_details.id})
+                # fee_items_to_store.append({'fee_item_id': fee_item_for_aa_amendment_calculation.id, 'vessel_details_id': vessel_details.id})
+                fee_items_to_store.append({'fee_item_id': fee_item_for_aa.id, 'vessel_details_id': vessel_details.id})
                 line_items.append(generate_line_item(annual_admission_type, fee_amount_adjusted_additional, fee_constructor_for_aa, self, current_datetime, vessel_details.vessel.rego_no))
 
         logger.info('{}'.format(line_items))
