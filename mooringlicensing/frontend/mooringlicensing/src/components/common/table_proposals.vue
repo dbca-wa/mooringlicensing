@@ -224,6 +224,7 @@ export default {
                 }
             }
         },
+        /*
         column_invoice: function(){
             let vm = this
             return {
@@ -253,6 +254,21 @@ export default {
                 }
             }
         },
+        */
+        column_invoice: function(){
+            let vm = this
+            return {
+                // 7. Invoice
+                data: "id",
+                orderable: true,
+                searchable: true,
+                visible: true,
+                'render': function(row, type, full){
+                    return full.invoice_links
+                }
+            }
+        },
+
         column_action: function(){
             let vm = this
             return {
