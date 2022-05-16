@@ -238,6 +238,7 @@ class BaseProposalSerializer(serializers.ModelSerializer):
                 'keep_existing_vessel',
                 'approval_reissued',
                 'vessel_on_proposal',
+                'null_vessel_on_create',
                 )
         read_only_fields=('documents',)
 
@@ -515,6 +516,7 @@ class ListProposalSerializer(BaseProposalSerializer):
     uuid = serializers.SerializerMethodField()
     document_upload_url = serializers.SerializerMethodField()
     can_view_payment_details = serializers.SerializerMethodField()
+    invoice_links = serializers.SerializerMethodField()
 
     class Meta:
         model = Proposal
@@ -540,6 +542,7 @@ class ListProposalSerializer(BaseProposalSerializer):
                 'uuid',
                 'document_upload_url',
                 'can_view_payment_details',
+                'invoice_links',
                 )
         # the serverSide functionality of datatables is such that only columns that have field 'data' defined are requested from the serializer. We
         # also require the following additional fields for some of the mRender functions
@@ -564,7 +567,24 @@ class ListProposalSerializer(BaseProposalSerializer):
                 'uuid',
                 'document_upload_url',
                 'can_view_payment_details',
+                'invoice_links',
                 )
+
+    def get_invoice_links(self, proposal):
+        # pdf
+        links = ""
+        for invoice in proposal.invoices_display():
+            links += "<div><a href='/payments/invoice-pdf/{}.pdf' target='_blank'><i style='color:red;' class='fa fa-file-pdf-o'></i> #{}</a></div>".format(
+                    invoice.reference, invoice.reference)
+        # invoices url
+        invoices_str=''
+        for inv in proposal.invoices_display():
+            invoices_str += 'invoice={}&'.format(inv.reference)
+        invoices_str = invoices_str[:-1]
+        links += "<div><a href='/ledger/payments/invoice/payment?{}' target='_blank'>View Payment</a></div>".format(invoices_str)
+        # refund url
+        links += "<div><a href='/proposal-payment-history-refund/{}' target='_blank'>Refund Payment</a></div>".format(proposal.id)
+        return links
 
     def get_can_view_payment_details(self, proposal):
         if 'request' in self.context:
@@ -959,6 +979,7 @@ class InternalProposalSerializer(BaseProposalSerializer):
                 'approval_lodgement_number',
                 'approval_vessel_rego_no',
                 'vessel_on_proposal',
+                'null_vessel_on_create',
                 )
         read_only_fields = (
             'documents',

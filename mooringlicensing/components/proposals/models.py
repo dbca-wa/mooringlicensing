@@ -307,6 +307,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
     fee_season = models.ForeignKey('FeeSeason', null=True, blank=True)  # In some case, proposal doesn't have any fee related objects.  Which results in the impossibility to retrieve season, start_date, end_date, etc.
                                                                         # To prevent that, fee_season is used in order to store those data.
     auto_approve = models.BooleanField(default=False)
+    null_vessel_on_create = models.BooleanField(default=True)
 
     class Meta:
         app_label = 'mooringlicensing'
@@ -360,6 +361,11 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
     @property
     def latest_vessel_details(self):
         return self.vessel_ownership.vessel.latest_vessel_details
+
+    def invoices_display(self):
+        ret_list = []
+        invoice_references = [item.invoice_reference for item in self.application_fees.filter(system_invoice=False)]
+        return Invoice.objects.filter(reference__in=invoice_references)
 
     @staticmethod
     def get_corresponding_amendment_fee_item(accept_null_vessel, fee_constructor, fee_item, target_date, vessel_length):
@@ -936,8 +942,28 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
 
     def reissue_approval(self, request, status):
         with transaction.atomic():
+            vessels = []
+            if type(self.child_obj) == MooringLicenceApplication:
+                vessels.append([vo.vessel for vo in self.listed_vessels])
+            else:
+                vessels.append(self.vessel_details.vessel)
+            # Non MLA
+            proposals = [proposal for proposal in Proposal.objects.filter(vessel_details__vessel__in=vessels).
+                    exclude(id=self.id).
+                    exclude(processing_status__in=['discarded', 'sticker_to_be_returned', 'printing_sticker', 'approved', 'declined'])
+                        ]
+            # MLA
+            proposals.extend([proposal for proposal in Proposal.objects.
+                filter(listed_vessels__end_date__isnull=True).
+                filter(listed_vessels__vessel__in=vessels).
+                exclude(id=self.id).
+                exclude(processing_status__in=['discarded', 'sticker_to_be_returned', 'printing_sticker', 'approved', 'declined'])
+                ])
+
             if not self.processing_status == Proposal.PROCESSING_STATUS_APPROVED:
                 raise ValidationError('You cannot change the current status at this time')
+            elif proposals:
+                raise ValidationError('Error message: there is an application in status other than (Discarded, Sticker To Be Returned, Printing Sticker, Approved, or Declined)')
             elif self.approval and self.approval.can_reissue and self.is_approver(request.user):
                 # update vessel details
                 vessel_details = self.vessel_details.vessel.latest_vessel_details
@@ -3785,6 +3811,7 @@ def clone_proposal_with_status_reset(original_proposal):
             proposal.processing_status = 'draft'
             proposal.previous_application = original_proposal
             proposal.approval = original_proposal.approval
+            proposal.null_vessel_on_create = not original_proposal.vessel_on_proposal
 
             proposal.save(no_revision=True)
             return proposal

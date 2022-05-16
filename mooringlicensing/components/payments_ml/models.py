@@ -196,6 +196,7 @@ class ApplicationFee(Payment):
     created_by = models.ForeignKey(EmailUser,on_delete=models.PROTECT, blank=True, null=True,related_name='created_by_application_fee')
     invoice_reference = models.CharField(max_length=50, null=True, blank=True, default='')
     fee_items = models.ManyToManyField('FeeItem', related_name='application_fees', through='FeeItemApplicationFee')
+    system_invoice = models.BooleanField(default=False)
 
     def __str__(self):
         return 'Application {} : Invoice {}'.format(self.proposal, self.invoice_reference)

@@ -1,5 +1,5 @@
 <template lang="html">
-    <div id="current_vessels">
+    <div id="current_vessels" v-if="vesselExists">
         <FormSection v-if="mooringLicenceCurrentVesselDisplayText || currentVesselDisplayText" label="Current Vessel" Index="current_vessel">
             <div v-if="mooringLicenceCurrentVesselDisplayText" class="row form-group">
                 <div class="col-sm-9">
@@ -105,6 +105,11 @@ from '@/utils/hooks'
             },
         },
         computed: {
+            vesselExists: function() {
+                if (this.proposal && !this.proposal.null_vessel_on_create) {
+                    return true;
+                }
+            },
             mooringLicenceCurrentVesselDisplayText: function() {
                 //if (this.proposal && this.proposal.mooring_licence_vessels && this.proposal.mooring_licence_vessels.length) {
                 if (this.proposal && this.proposal.current_vessels_rego_list && this.proposal.current_vessels_rego_list.length > 0) {
