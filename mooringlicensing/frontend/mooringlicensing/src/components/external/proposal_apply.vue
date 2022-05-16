@@ -476,7 +476,7 @@ export default {
                 const proposal = res.body;
                 this.$router.push({
                     name:"draft_proposal",
-                    params:{proposal_id:proposal.id}
+                    params:{proposal_id:proposal.proposal_id}
                 });
                 this.creatingProposal = false;
             } catch(error) {
