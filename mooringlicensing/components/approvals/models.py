@@ -1234,8 +1234,10 @@ class AuthorisedUserPermit(Approval):
 
     def internal_reissue(self, mooring_licence=None):
         ## now reissue approval
-        self.current_proposal.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
-        self.current_proposal.save()
+        if self.current_proposal.vessel_ownership and not self.current_proposal.vessel_ownership.end_date:
+            # When there is a current vessel
+            self.current_proposal.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
+            self.current_proposal.save()
         self.reissued=True
         self.save()
         # Create a log entry for the proposal and approval
