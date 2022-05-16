@@ -1096,23 +1096,31 @@ class AnnualAdmissionPermit(Approval):
 
                 # Old sticker goes to status To be Returned
                 current_stickers = self._get_current_stickers()
-                for current_sticker in current_stickers:  # There should be only one sticker
+                for current_sticker in current_stickers:
                     current_sticker.status = Sticker.STICKER_STATUS_TO_BE_RETURNED
                     current_sticker.save()
 
-                # Application goes to status...
-                if proposal.vessel_ownership == proposal.previous_application.vessel_ownership:
-                    # Printing Sticker – when application does not change to new vessel
+                if current_stickers:
+                    if proposal.vessel_ownership == proposal.previous_application.vessel_ownership:
+                        # When the application does not change to new vessel,
+                        # it gets 'printing_sticker' status
+                        proposal.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
+                        proposal.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
+                        proposal.save()
+                    else:
+                        # When the application changes to new vessel
+                        # it gets 'sticker_to_be_returned' status
+                        new_sticker.status = Sticker.STICKER_STATUS_NOT_READY_YET
+                        new_sticker.save()
+                        proposal.processing_status = Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED
+                        proposal.customer_status = Proposal.CUSTOMER_STATUS_STICKER_TO_BE_RETURNED
+                        proposal.save()
+                else:
+                    # Even when 'amendment' application, there might be no current stickers because of sticker-lost, etc
                     proposal.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
                     proposal.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
                     proposal.save()
-                else:
-                    # Sticker to be Returned – when application changes to new vessel
-                    new_sticker.status = Sticker.STICKER_STATUS_NOT_READY_YET
-                    new_sticker.save()
-                    proposal.processing_status = Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED
-                    proposal.customer_status = Proposal.CUSTOMER_STATUS_STICKER_TO_BE_RETURNED
-                    proposal.save()
+
                 return [], list(current_stickers)
         elif proposal.proposal_type.code == PROPOSAL_TYPE_RENEWAL:
             if not proposal.approval.reissued or not proposal.keep_existing_vessel:
@@ -1226,8 +1234,10 @@ class AuthorisedUserPermit(Approval):
 
     def internal_reissue(self, mooring_licence=None):
         ## now reissue approval
-        self.current_proposal.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
-        self.current_proposal.save()
+        if self.current_proposal.vessel_ownership and not self.current_proposal.vessel_ownership.end_date:
+            # When there is a current vessel
+            self.current_proposal.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
+            self.current_proposal.save()
         self.reissued=True
         self.save()
         # Create a log entry for the proposal and approval
