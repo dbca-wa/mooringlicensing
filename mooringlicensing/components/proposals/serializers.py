@@ -443,7 +443,7 @@ class ListProposalSerializer(BaseProposalSerializer):
                 )
 
     def get_invoice_links(self, proposal):
-        if is_internal(self.request) and proposal.application_fees.count():
+        if self.context('request') and is_internal(self.context('request')) and proposal.application_fees.count():
             # pdf
             links = ""
             for invoice in proposal.invoices_display():
