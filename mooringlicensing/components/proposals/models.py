@@ -1975,7 +1975,8 @@ class WaitingListApplication(Proposal):
             attachment = ('invoice#{}.pdf'.format(self.invoice.reference), invoice_bytes, 'application/pdf')
             attachments.append(attachment)
         ret_value = send_confirmation_email_upon_submit(request, self, True, attachments)
-        send_notification_email_upon_submit_to_assessor(request, self, attachments)
+        if not self.auto_approve:
+            send_notification_email_upon_submit_to_assessor(request, self, attachments)
         return ret_value
 
     @property
@@ -2167,7 +2168,8 @@ class AnnualAdmissionApplication(Proposal):
             attachment = ('invoice#{}.pdf'.format(self.invoice.reference), invoice_bytes, 'application/pdf')
             attachments.append(attachment)
         ret_value = send_confirmation_email_upon_submit(request, self, True, attachments)
-        send_notification_email_upon_submit_to_assessor(request, self, attachments)
+        if not self.auto_approve:
+            send_notification_email_upon_submit_to_assessor(request, self, attachments)
         return ret_value
 
     def process_after_approval(self, request=None, total_amount=0):
@@ -2381,7 +2383,8 @@ class AuthorisedUserApplication(Proposal):
             self.customer_status = Proposal.CUSTOMER_STATUS_WITH_ASSESSOR
             self.save()
             send_confirmation_email_upon_submit(request, self, False)
-            send_notification_email_upon_submit_to_assessor(request, self)
+            if not self.auto_approve:
+                send_notification_email_upon_submit_to_assessor(request, self)
 
     def update_or_create_approval(self, current_datetime, request=None):
         # This function is called after payment success for new/amendment/renewal application
