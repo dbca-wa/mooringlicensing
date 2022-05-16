@@ -2544,7 +2544,8 @@ class AuthorisedUserApplication(Proposal):
 
         # Write approval history
         if self.approval and self.approval.reissued:
-            approval.write_approval_history('Reissue via application {}'.format(self.lodgement_number))
+            if request:
+                approval.write_approval_history('Reissue via application {}'.format(self.lodgement_number))
         elif self.proposal_type == ProposalType.objects.get(code=PROPOSAL_TYPE_RENEWAL):
             approval.write_approval_history('Renewal application {}'.format(self.lodgement_number))
         elif self.proposal_type == ProposalType.objects.get(code=PROPOSAL_TYPE_AMENDMENT):
