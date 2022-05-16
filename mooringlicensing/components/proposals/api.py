@@ -74,7 +74,7 @@ from mooringlicensing.components.proposals.serializers import (
     ListMooringSerializer, SearchKeywordSerializer, SearchReferenceSerializer,
 )
 from mooringlicensing.components.approvals.models import Approval, DcvVessel, WaitingListAllocation, Sticker, \
-    DcvOrganisation, AnnualAdmissionPermit, AuthorisedUserPermit, MooringLicence
+    DcvOrganisation, AnnualAdmissionPermit, AuthorisedUserPermit, MooringLicence, VesselOwnershipOnApproval
 from mooringlicensing.components.approvals.email import send_reissue_ml_after_sale_recorded_email, send_reissue_wla_after_sale_recorded_email, \
     send_reissue_aap_after_sale_recorded_email, send_reissue_aup_after_sale_recorded_email
 from mooringlicensing.components.approvals.serializers import (
@@ -979,7 +979,7 @@ class ProposalViewSet(viewsets.ModelViewSet):
         #serializer_class = self.internal_serializer_class()
         #serializer = serializer_class(instance,context={'request':request})
         #return Response(serializer.data)
-        return Response({"proposal_id":instance.id})
+        return Response({"id":instance.id})
 
     @detail_route(methods=['POST',])
     @basic_exception_handler
@@ -1389,23 +1389,16 @@ class VesselOwnershipViewSet(viewsets.ModelViewSet):
 
                 ## collect impacted Approvals
                 approval_list = []
-                for prop in instance.proposal_set.all():
-                    if (
-                            prop.approval and 
-                            prop.approval.status == 'current'
-                            ):
-                        if prop.approval.code in [WaitingListAllocation.code, AnnualAdmissionPermit.code, AuthorisedUserPermit.code]:
-                            # When WLA, AAP or AUP
-                            if prop.approval.current_proposal.vessel_ownership == instance:
-                                # When the vessel of the approval is the same vessel, which was sold
-                                if prop.approval not in approval_list:
-                                    approval_list.append(prop.approval)
-                        elif prop.approval.code in [MooringLicence.code,]:
-                            # ML
-                            if instance in prop.approval.child_obj.vessel_ownership_list:
-                                # When the vessel sold is one of the vessels of ML
-                                if prop.approval not in approval_list:
-                                    approval_list.append(prop.approval)
+                for prop in instance.proposal_set.filter(
+                        approval__status='current').filter(
+                                approval__code__in=[WaitingListAllocation.code, AnnualAdmissionPermit.code, AuthorisedUserPermit.code]
+                                ):
+                            if prop.approval not in approval_list:
+                                approval_list.append(prop.approval)
+                ## collect ML
+                for voa in VesselOwnershipOnApproval.objects.filter(vessel_ownership=instance):
+                    if voa.approval not in approval_list:
+                        approval_list.append(voa.approval)
 
                 ## change Sticker status
                 stickers_to_be_returned = []
