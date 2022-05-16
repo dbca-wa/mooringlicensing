@@ -474,7 +474,6 @@ export default {
                     res = await this.$http.post(url);
                 } 
                 const proposal = res.body;
-                console.log(proposal)
                 this.$router.push({
                     name:"draft_proposal",
                     params:{proposal_id:proposal.id}
