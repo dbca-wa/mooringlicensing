@@ -1402,7 +1402,7 @@ class VesselOwnershipViewSet(viewsets.ModelViewSet):
                                     approval_list.append(prop.approval)
                         elif prop.approval.code in [MooringLicence.code,]:
                             # ML
-                            if instance in prop.approval.vessel_ownership_list:
+                            if instance in prop.approval.child_obj.vessel_ownership_list:
                                 # When the vessel sold is one of the vessels of ML
                                 if prop.approval not in approval_list:
                                     approval_list.append(prop.approval)
