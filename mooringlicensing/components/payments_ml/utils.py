@@ -132,7 +132,7 @@ def create_fee_lines(instance, invoice_text=None, vouchers=[], internal=False):
 
     # Retrieve FeeItem object from FeeConstructor object
     if isinstance(instance, Proposal):
-        fee_constructor = FeeConstructor.get_current_fee_constructor_by_application_type_and_date(application_type, target_date)
+        fee_constructor = FeeConstructor.get_fee_constructor_by_application_type_and_date(application_type, target_date)
         if not fee_constructor:
             # Fees have not been configured for this application type and date
             raise Exception('FeeConstructor object for the ApplicationType: {} not found for the date: {}'.format(application_type, target_date))
