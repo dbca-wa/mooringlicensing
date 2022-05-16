@@ -285,7 +285,10 @@ class VesselSizeCategory(RevisionedMixin):
         if self.null_vessel:
             return self.name
         else:
-            return '{} (>{}m)'.format(self.name, self.start_size)
+            if self.include_start_size:
+                return '{} (>={}m)'.format(self.name, self.start_size)
+            else:
+                return '{} (>{}m)'.format(self.name, self.start_size)
 
     class Meta:
         verbose_name_plural = "Vessel Size Categories"
