@@ -698,7 +698,21 @@ from '@/utils/hooks'
                 const url = api_endpoints.lookupVessel(id);
                 await this.fetchReadonlyVesselCommon(url);
             },
-
+            fetchDraftData: function() {
+                this.vessel.rego_no = this.proposal.rego_no;
+                this.vessel.id = this.proposal.vessel_id;
+                let vessel_details = {};
+                vessel_details.vessel_type = this.proposal.vessel_type;
+                vessel_details.vessel_name = this.proposal.vessel_name;
+                vessel_details.vessel_length = this.proposal.vessel_length;
+                vessel_details.vessel_draft = this.proposal.vessel_draft;
+                vessel_details.vessel_beam = this.proposal.vessel_beam;
+                vessel_details.vessel_weight = this.proposal.vessel_weight;
+                vessel_details.berth_mooring = this.proposal.berth_mooring;
+                this.vessel.vessel_details = Object.assign({}, vessel_details);
+                this.readOwnershipFromProposal();
+            },
+            /*
             fetchVessel: async function() {
                 if (this.proposal.processing_status === 'Draft' && (!this.readonly || this.is_internal)) {
                     // read in draft proposal data pre-submit
@@ -729,6 +743,7 @@ from '@/utils/hooks'
                     await this.fetchReadonlyVesselCommon(url);
                 }
             },
+            */
             readOwnershipFromProposal: function() {
                 let vessel_ownership = {};
                 vessel_ownership.percentage = this.proposal.percentage;
@@ -772,7 +787,8 @@ from '@/utils/hooks'
                 await this.fetchVesselTypes();
                 if (this.proposal && this.keep_current_vessel) {
                     // fetches vessel data from proposal (saved as draft)
-                    await this.fetchVessel();
+                    //await this.fetchVessel();
+                    await this.fetchDraftData();
                 //} else if (!this.proposal && !this.creatingVessel) {
                 } else if (!this.proposal) {
                     // route.params.vessel_id in this case is a vesselownership id
@@ -785,7 +801,8 @@ from '@/utils/hooks'
                 // read in Renewal/Amendment vessel details
                 //if (!this.keep_current_vessel && this.proposal.proposal_type.code !=='new' && this.proposal.application_type_code === 'mla') {
                 if (!this.keep_current_vessel && this.proposal && this.proposal.proposal_type.code !=='new') {
-                    await this.fetchVessel();
+                    //await this.fetchVessel();
+                    await this.fetchDraftData();
                 } else if (!this.keep_current_vessel) {
                     // pass
                 } else if (this.proposal && this.proposal.pending_amendment_request) {
