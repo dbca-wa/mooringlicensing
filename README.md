@@ -17,11 +17,11 @@ Root of the Vue Js folder has package.json, which has the list of packages to be
 
 In the root folder, install packages with `npm install`.
 
-Then, run `npm run build` to build the software and move the output files to `leaseslicensing/static/leaseslicensing_vue`.
+Then, run `npm run build` to build the software and move the output files to `mooringlicensing/static/mooringlicensing_vue`.
 
 The build files are made available to the Django app by running `python manage.py collectstatic --no-input`.
 
-If the `DEV_APP_BUILD_URL` is not set, the Django app will serve static Javascript from `staticfiles_ml/leaseslicensing_vue/js.app.js`, 
+If the `DEV_APP_BUILD_URL` is not set, the Django app will serve static Javascript from `staticfiles_ml/mooringlicensing_vue/js.app.js`, 
 else the Vue app will be served from the url provided.  Start the dev server with `npm start`.
 
 # Environment variables
