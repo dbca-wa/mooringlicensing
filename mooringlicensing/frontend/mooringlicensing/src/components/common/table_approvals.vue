@@ -1130,7 +1130,7 @@ export default {
                 .then((response) => {
                     vm.$router.push({
                         name:"draft_proposal",
-                        params:{proposal_id: response.body.proposal_id}
+                        params:{proposal_id: response.body.id}
                    });
 
                 }, (error) => {
@@ -1163,7 +1163,7 @@ export default {
                 .then((response) => {
                    vm.$router.push({
                         name:"draft_proposal",
-                        params:{proposal_id: response.body.proposal_id}
+                        params:{proposal_id: response.body.id}
                    });
 
                 }, (error) => {
