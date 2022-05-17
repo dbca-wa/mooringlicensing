@@ -1433,7 +1433,10 @@ class AuthorisedUserPermit(Approval):
         for moa_to_be_on_new_sticker in moas_to_be_on_new_sticker:
             if not new_sticker or new_sticker.mooringonapproval_set.count() % 4 == 0:
                 # There is no stickers to fill, or there is a sticker but already be filled with 4 moas, create a new sticker
-                if proposal.proposal_type.code == PROPOSAL_TYPE_AMENDMENT and proposal.vessel_ownership != proposal.previous_application.vessel_ownership:
+                stickers_to_be_returned = Sticker.objects.filter(approval=self, status__in=[Sticker.STICKER_STATUS_TO_BE_RETURNED,])
+                # if proposal.proposal_type.code == PROPOSAL_TYPE_AMENDMENT and proposal.vessel_ownership != proposal.previous_application.vessel_ownership:
+                if stickers_to_be_returned.count():
+                    # We don't want to print a new sticker if there is a sticker with 'to_be_returned' status for this permit
                     new_status = Sticker.STICKER_STATUS_NOT_READY_YET  # This sticker gets 'ready' status once the sticker with 'to be returned' status is returned.
                 else:
                     new_status = Sticker.STICKER_STATUS_READY
