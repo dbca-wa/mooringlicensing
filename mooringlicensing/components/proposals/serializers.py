@@ -1091,7 +1091,7 @@ class InternalProposalSerializer(BaseProposalSerializer):
         vessels = []
         vessel_details = []
         if type(obj.child_obj) == MooringLicenceApplication and obj.approval:
-            for vooa in obj.approval.vesselownershiponapproval_set.all():
+            for vooa in obj.approval.vesselownershiponapproval_set.filter(vessel_ownership__end_date__isnull=True):
                 vessel = vooa.vessel_ownership.vessel
                 vessels.append(vessel)
                 status = 'Current' if not vooa.end_date else 'Historical'
