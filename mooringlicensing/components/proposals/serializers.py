@@ -587,23 +587,23 @@ class ListProposalSerializer(BaseProposalSerializer):
                 )
 
     def get_invoice_links(self, proposal):
+        links = ""
+        # pdf
+        for invoice in proposal.invoices_display():
+            links += "<div><a href='/payments/invoice-pdf/{}.pdf' target='_blank'><i style='color:red;' class='fa fa-file-pdf-o'></i> #{}</a></div>".format(
+                    invoice.reference, invoice.reference)
         if self.context.get('request') and is_internal(self.context.get('request')) and proposal.application_fees.count():
-            # pdf
-            links = ""
-            for invoice in proposal.invoices_display():
-                links += "<div><a href='/payments/invoice-pdf/{}.pdf' target='_blank'><i style='color:red;' class='fa fa-file-pdf-o'></i> #{}</a></div>".format(
-                        invoice.reference, invoice.reference)
-            # invoices url
+            # paid invoices url
             invoices_str=''
             for inv in proposal.invoices_display():
-                invoices_str += 'invoice={}&'.format(inv.reference)
-            invoices_str = invoices_str[:-1]
-            links += "<div><a href='/ledger/payments/invoice/payment?{}' target='_blank'>View Payment</a></div>".format(invoices_str)
-            # refund url
-            links += "<div><a href='/proposal-payment-history-refund/{}' target='_blank'>Refund Payment</a></div>".format(proposal.id)
-            return links
-        else:
-            return ''
+                if inv.payment_status == 'paid':
+                    invoices_str += 'invoice={}&'.format(inv.reference)
+            if invoices_str:
+                invoices_str = invoices_str[:-1]
+                links += "<div><a href='/ledger/payments/invoice/payment?{}' target='_blank'>View Payment</a></div>".format(invoices_str)
+                # refund url
+                links += "<div><a href='/proposal-payment-history-refund/{}' target='_blank'>Refund Payment</a></div>".format(proposal.id)
+        return links
 
     def get_can_view_payment_details(self, proposal):
         if 'request' in self.context:
