@@ -74,7 +74,8 @@ from mooringlicensing.components.proposals.serializers import (
     ListMooringSerializer, SearchKeywordSerializer, SearchReferenceSerializer,
 )
 from mooringlicensing.components.approvals.models import Approval, DcvVessel, WaitingListAllocation, Sticker, \
-    DcvOrganisation, AnnualAdmissionPermit, AuthorisedUserPermit, MooringLicence, VesselOwnershipOnApproval
+    DcvOrganisation, AnnualAdmissionPermit, AuthorisedUserPermit, MooringLicence, VesselOwnershipOnApproval, \
+    MooringOnApproval
 from mooringlicensing.components.approvals.email import send_reissue_ml_after_sale_recorded_email, send_reissue_wla_after_sale_recorded_email, \
     send_reissue_aap_after_sale_recorded_email, send_reissue_aup_after_sale_recorded_email
 from mooringlicensing.components.approvals.serializers import (
@@ -1405,14 +1406,23 @@ class VesselOwnershipViewSet(viewsets.ModelViewSet):
                     approval.generate_doc(False)
 
                     # Update sticker status
+                    stickers_updated = []
                     for a_sticker in instance.sticker_set.filter(status__in=[Sticker.STICKER_STATUS_CURRENT, Sticker.STICKER_STATUS_AWAITING_PRINTING]):
                         a_sticker.status = Sticker.STICKER_STATUS_TO_BE_RETURNED
                         a_sticker.save()
                         stickers_to_be_returned.append(a_sticker)
-                    for a_sticker in instance.sticker_set.filter(status=Sticker.STICKER_STATUS_READY):
+                        stickers_updated.append(a_sticker)
+                    for a_sticker in instance.sticker_set.filter(status__in=[Sticker.STICKER_STATUS_READY, Sticker.STICKER_STATUS_NOT_READY_YET]):
                         # vessel sold before the sticker is picked up by cron for export (very rarely happens)
                         a_sticker.status = Sticker.STICKER_STATUS_CANCELLED
                         a_sticker.save()
+                        stickers_updated.append(a_sticker)
+
+                    # Update MooringOnApproval
+                    moas = MooringOnApproval.objects.filter(sticker__in=stickers_updated)
+                    for moa in moas:
+                        moa.sticker = None
+                        moa.save()
 
                     # write approval history
                     approval.write_approval_history('Vessel sold by owner')
