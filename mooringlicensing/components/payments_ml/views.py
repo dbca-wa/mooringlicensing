@@ -635,7 +635,8 @@ class ApplicationFeeSuccessView(TemplateView):
                 # This is used for AU/ML's auto renewal
                 for item in db_operations:
                     fee_item = FeeItem.objects.get(id=item['fee_item_id'])
-                    vessel_details = VesselDetails.objects.get(id=item['vessel_details_id'])
+                    vessel_details_id = item['vessel_details_id']  # This could be '' when null vessel application
+                    vessel_details = VesselDetails.objects.get(id=vessel_details_id) if vessel_details_id else None
                     FeeItemApplicationFee.objects.create(
                         fee_item=fee_item,
                         application_fee=application_fee,
