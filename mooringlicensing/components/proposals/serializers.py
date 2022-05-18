@@ -434,8 +434,7 @@ class BaseProposalSerializer(serializers.ModelSerializer):
                             else:
                                 max_length = float(larger_category.start_size)
                     else:
-                        if not max_length:
-                            max_length = None
+                        max_length = None
                 else:
                     # The amount to pay is now more than the max amount paid
                     # Assuming larger vessel is more expensive, the all the fee_items left are more expensive than max_amount_paid

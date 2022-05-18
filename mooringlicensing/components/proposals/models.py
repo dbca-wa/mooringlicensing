@@ -2556,8 +2556,8 @@ class AuthorisedUserApplication(Proposal):
         #####
         awaiting_printing = False
         if self.approval:
-            stickers = self.approval.stickers.filter(status__in=[Sticker.STICKER_STATUS_NOT_READY_YET, Sticker.STICKER_STATUS_READY, Sticker.STICKER_STATUS_AWAITING_PRINTING,])
-            if stickers.count() > 0:
+            stickers_to_be_printed = self.approval.stickers.filter(status__in=[Sticker.STICKER_STATUS_NOT_READY_YET, Sticker.STICKER_STATUS_READY, Sticker.STICKER_STATUS_AWAITING_PRINTING,])
+            if stickers_to_be_printed.count() > 0:
                 awaiting_printing = True
         if awaiting_printing:
             if self.proposal_type.code == PROPOSAL_TYPE_AMENDMENT and len(stickers_to_be_returned) and self.vessel_ownership != self.previous_application.vessel_ownership:
