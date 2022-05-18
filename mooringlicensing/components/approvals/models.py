@@ -651,8 +651,8 @@ class Approval(RevisionedMixin):
                 document._file.save(filename, ContentFile(contents_as_bytes), save=True)
 
                 self.authorised_user_summary_document = document  # Update to the latest doc
-                self.save(version_comment='Created Authorised User Summary PDF: {}'.format(self.licence_document.name))
-                self.current_proposal.save(version_comment='Created Authorised User Summary PDF: {}'.format(self.licence_document.name))
+                self.save(version_comment='Created Authorised User Summary PDF: {}'.format(self.authorised_user_summary_document.name))
+                self.current_proposal.save(version_comment='Created Authorised User Summary PDF: {}'.format(self.authorised_user_summary_document.name))
 
     def generate_renewal_doc(self):
         self.renewal_document = create_renewal_doc(self, self.current_proposal)
@@ -933,7 +933,7 @@ class WaitingListAllocation(Approval):
             # v_details = self.current_proposal.vessel_details
             v_details = self.current_proposal.latest_vessel_details
             v_ownership = self.current_proposal.vessel_ownership
-            if not v_ownership.end_date:
+            if v_details and not v_ownership.end_date:
                 vessel_rego_no = v_details.vessel.rego_no
                 vessel_name = v_details.vessel_name
                 vessel_length = v_details.vessel_applicable_length
@@ -1017,7 +1017,7 @@ class AnnualAdmissionPermit(Approval):
             # Return context for the licence/permit document
             v_details = self.current_proposal.latest_vessel_details
             v_ownership = self.current_proposal.vessel_ownership
-            if not v_ownership.end_date:
+            if v_details and not v_ownership.end_date:
                 vessel_rego_no = v_details.vessel.rego_no
                 vessel_name = v_details.vessel_name
                 vessel_length = v_details.vessel_applicable_length
@@ -1189,7 +1189,7 @@ class AuthorisedUserPermit(Approval):
 
             v_details = self.current_proposal.latest_vessel_details
             v_ownership = self.current_proposal.vessel_ownership
-            if not v_ownership.end_date:
+            if v_details and not v_ownership.end_date:
                 vessel_rego_no = v_details.vessel.rego_no
                 vessel_name = v_details.vessel_name
                 vessel_length = v_details.vessel_applicable_length
