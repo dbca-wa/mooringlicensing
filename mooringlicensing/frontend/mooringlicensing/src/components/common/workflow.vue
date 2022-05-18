@@ -235,7 +235,7 @@ export default {
         display_action_request_amendment: function(){
             let display = false
             try {
-                if(this.proposal.processing_status === constants.WITH_ASSESSOR){
+                if(this.proposal.processing_status === constants.WITH_ASSESSOR && !this.proposal.reissued){
                     display = true
                 }
             } catch(err) {}
