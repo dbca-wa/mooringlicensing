@@ -1399,6 +1399,11 @@ class AuthorisedUserPermit(Approval):
         self._assign_to_new_stickers(moas_to_be_reallocated, proposal, stickers_to_be_replaced_for_renewal)
         self._handle_stickers_to_be_removed(stickers_to_be_returned, stickers_to_be_replaced_for_renewal)
 
+        # There may be sticker(s) to be returned by record-sale
+        stickers_return = proposal.approval.stickers.filter(status__in=[Sticker.STICKER_STATUS_TO_BE_RETURNED,])
+        for sticker in stickers_return:
+            stickers_to_be_returned.append(sticker)
+
         return moas_to_be_reallocated, stickers_to_be_returned
 
     def handle_vessel_changes(self, moas_to_be_reallocated, stickers_to_be_replaced):
