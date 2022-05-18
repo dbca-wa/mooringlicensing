@@ -3815,7 +3815,7 @@ def clone_proposal_with_status_reset(original_proposal):
             proposal.processing_status = 'draft'
             proposal.previous_application = original_proposal
             proposal.approval = original_proposal.approval
-            proposal.null_vessel_on_create = not original_proposal.vessel_on_proposal
+            proposal.null_vessel_on_create = not original_proposal.vessel_on_proposal()
 
             proposal.save(no_revision=True)
             return proposal
