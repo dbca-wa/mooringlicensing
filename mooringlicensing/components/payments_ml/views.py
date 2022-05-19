@@ -150,14 +150,22 @@ class ApplicationFeeExistingView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         proposal = self.get_object()
-        application_fee = proposal.application_fees.first()
+        application_fee = proposal.get_main_application_fee()
 
         try:
             with transaction.atomic():
                 set_session_application_invoice(request.session, application_fee)
                 invoice = Invoice.objects.get(reference=application_fee.invoice_reference)
 
-                request.session['db_processes'] = {'payment_for_existing_invoice': True}
+                db_processes = {
+                    'for_existing_invoice': True,
+                    'fee_item_application_fee_ids': [],
+                }
+                fee_item_application_fees = FeeItemApplicationFee.objects.filter(application_fee=application_fee)
+                for fee_item_application_fee in fee_item_application_fees:
+                    db_processes['fee_item_application_fee_ids'].append(fee_item_application_fee.id)
+                request.session['db_processes'] = db_processes
+
                 checkout_response = checkout_existing_invoice(
                     request,
                     invoice,
@@ -618,30 +626,42 @@ class ApplicationFeeSuccessView(TemplateView):
             if 'fee_item_id' in db_operations:
                 fee_items = FeeItem.objects.filter(id=db_operations['fee_item_id'])
                 if fee_items:
+                    amount_paid = None
+                    if 'fee_amount_adjusted' in db_operations:
+                        # Because of business rules, fee_item.amount is not always the same as the actual amount paid.
+                        # Therefore we want to store the amount paid too as well as fee_item.
+                        fee_amount_adjusted = db_operations['fee_amount_adjusted']
+                        amount_to_be_paid = Decimal(fee_amount_adjusted)
+                        amount_paid = amount_to_be_paid
                     FeeItemApplicationFee.objects.create(
                         fee_item=fee_items.first(),
                         application_fee=application_fee,
                         vessel_details=proposal.vessel_details,
-                    )
-            if 'fee_item_additional_id' in db_operations:
-                fee_item_additionals = FeeItem.objects.filter(id=db_operations['fee_item_additional_id'])
-                if fee_item_additionals:
-                    FeeItemApplicationFee.objects.create(
-                        fee_item=fee_item_additionals.first(),
-                        application_fee=application_fee,
-                        vessel_details=proposal.vessel_details,
+                        amount_to_be_paid=amount_to_be_paid,
+                        amount_paid=amount_paid,
                     )
             if isinstance(db_operations, list):
                 # This is used for AU/ML's auto renewal
                 for item in db_operations:
                     fee_item = FeeItem.objects.get(id=item['fee_item_id'])
+                    fee_amount_adjusted = item['fee_amount_adjusted']
+                    amount_to_be_paid = Decimal(fee_amount_adjusted)
+                    amount_paid = amount_to_be_paid
                     vessel_details_id = item['vessel_details_id']  # This could be '' when null vessel application
                     vessel_details = VesselDetails.objects.get(id=vessel_details_id) if vessel_details_id else None
                     FeeItemApplicationFee.objects.create(
                         fee_item=fee_item,
                         application_fee=application_fee,
                         vessel_details=vessel_details,
+                        amount_to_be_paid=amount_to_be_paid,
+                        amount_paid=amount_paid,
                     )
+
+            if 'for_existing_invoice' in db_operations:
+                for idx in db_operations['fee_item_application_fee_ids']:
+                    fee_item_application_fee = FeeItemApplicationFee.objects.get(id=int(idx))
+                    fee_item_application_fee.amount_paid = fee_item_application_fee.amount_to_be_paid
+                    fee_item_application_fee.save()
 
             application_fee.invoice_reference = invoice_ref
             application_fee.save()

@@ -170,6 +170,7 @@ class FeeItemApplicationFee(models.Model):
     fee_item = models.ForeignKey('FeeItem',)
     application_fee = models.ForeignKey('ApplicationFee',)
     vessel_details = models.ForeignKey(VesselDetails, null=True, blank=True)
+    amount_to_be_paid = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True, default=None)
     amount_paid = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True, default=None)
 
     class Meta:

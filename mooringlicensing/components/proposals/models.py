@@ -473,43 +473,29 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
         if type(self) == Proposal:
             self.child_obj.refresh_from_db()
 
-    @property
-    def fee_constructor(self):
-        fee_constructor = None
+    def get_main_application_fee(self):
+        main_af = None
         for af in self.application_fees.all():
             if af.fee_constructor:
-                fee_constructor = af.fee_constructor
-        return fee_constructor
+                main_af = af
+                break
+        return main_af
 
-        # if self.application_fees.count() < 1:
-        #     return None
-        # elif self.application_fees.count() == 1:
-        #     application_fee = self.application_fees.first()
-        #     return application_fee.fee_constructor
-        # else:
-        #     msg = 'Proposal: {} has {} ApplicationFees.  There should be 0 or 1.'.format(self, self.application_fees.count())
-        #     logger.error(msg)
-        #     raise ValidationError(msg)
+    @property
+    def fee_constructor(self):
+        application_fee = self.get_main_application_fee()
+        if application_fee:
+            return application_fee.fee_constructor
+        else:
+            return None
 
     @property
     def invoice(self):
         invoice = None
-        for af in self.application_fees.all():
-            if af.fee_constructor and af.invoice_reference:
-                # This invoice should not be for refund because relating to a fee_constructor
-                invoice = Invoice.objects.get(reference=af.invoice_reference)
+        application_fee = self.get_main_application_fee()
+        if application_fee:
+            invoice = Invoice.objects.get(reference=application_fee.invoice_reference)
         return invoice
-
-        # if self.application_fees.count() < 1:
-        #     return None
-        # elif self.application_fees.count() == 1:
-        #     application_fee = self.application_fees.first()
-        #     invoice = Invoice.objects.get(reference=application_fee.invoice_reference)
-        #     return invoice
-        # else:
-        #     msg = 'Proposal: {} has {} ApplicationFees.  There should be 0 or 1.'.format(self, self.application_fees.count())
-        #     logger.error(msg)
-        #     raise ValidationError(msg)
 
     @property
     def start_date(self):
@@ -517,23 +503,10 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
             return datetime.datetime(2020,9,1).date()
 
         start_date = None
-        for af in self.application_fees.all():
-            if af.fee_constructor:
-                start_date = af.fee_constructor.start_date
+        application_fee = self.get_main_application_fee()
+        if application_fee:
+            start_date = application_fee.fee_constructor.start_date
         return start_date
-
-        # if self.application_fees.count() < 1:
-        #     return None
-        # elif self.application_fees.count() == 1:
-        #     application_fee = self.application_fees.first()
-        #     if application_fee.fee_constructor:
-        #         return application_fee.fee_constructor.start_date
-        #     else:
-        #         return None
-        # else:
-        #     msg = 'Proposal: {} has {} ApplicationFees.  There should be 0 or 1.'.format(self, self.application_fees.count())
-        #     logger.error(msg)
-        #     raise ValidationError(msg)
 
     @property
     def end_date(self):
@@ -541,25 +514,10 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
             return datetime.datetime(2021,11,30).date()
 
         end_date = None
-        for af in self.application_fees.all():
-            if af.fee_constructor:
-                end_date = af.fee_constructor.end_date
+        application_fee = self.get_main_application_fee()
+        if application_fee:
+            end_date = application_fee.fee_constructor.end_date
         return end_date
-
-        # if self.application_fees.count() < 1:
-        #     if self.fee_season:
-        #         return self.fee_season.end_date
-        #     raise ValidationError('proposals/models.py ln 455. End date set to null.')
-        # elif self.application_fees.count() == 1:
-        #     application_fee = self.application_fees.first()
-        #     if application_fee.fee_constructor:
-        #         return application_fee.fee_constructor.end_date
-        #     else:
-        #         raise ValidationError('proposals/models.py ln 461. End date set to null.')
-        # else:
-        #     msg = 'Proposal: {} has {} ApplicationFees.  There should be 0 or 1.'.format(self, self.application_fees.count())
-        #     logger.error(msg)
-        #     raise ValidationError(msg)
 
     @property
     def editable_vessel_details(self):
@@ -1408,10 +1366,12 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                                 fee_item = FeeItem.objects.get(id=item['fee_item_id'])
                                 vessel_details_id = item['vessel_details_id']  # This could be '' when null vessel application
                                 vessel_details = VesselDetails.objects.get(id=vessel_details_id) if vessel_details_id else None
+                                amount_to_be_paid = item['fee_amount_adjusted']
                                 FeeItemApplicationFee.objects.create(
                                     fee_item=fee_item,
                                     application_fee=application_fee,
                                     vessel_details=vessel_details,
+                                    amount_to_be_paid=amount_to_be_paid,
                                 )
 
                             send_application_approved_or_declined_email(self, 'approved', request)
@@ -1936,8 +1896,8 @@ class WaitingListApplication(Proposal):
         db_processes_after_success['season_start_date'] = fee_constructor.fee_season.start_date.__str__()
         db_processes_after_success['season_end_date'] = fee_constructor.fee_season.end_date.__str__()
         db_processes_after_success['datetime_for_calculating_fee'] = current_datetime_str
-        # db_processes_after_success['fee_item_id'] = fee_item_for_amendment_calculation.id if fee_item_for_amendment_calculation else 0
         db_processes_after_success['fee_item_id'] = fee_item.id if fee_item else 0
+        db_processes_after_success['fee_amount_adjusted'] = str(fee_amount_adjusted)
 
         line_items = []
         line_items.append(
@@ -2131,8 +2091,8 @@ class AnnualAdmissionApplication(Proposal):
         db_processes_after_success['season_start_date'] = fee_constructor.fee_season.start_date.__str__()
         db_processes_after_success['season_end_date'] = fee_constructor.fee_season.end_date.__str__()
         db_processes_after_success['datetime_for_calculating_fee'] = current_datetime_str
-        # db_processes_after_success['fee_item_id'] = fee_item_for_amendment_calculation.id if fee_item_for_amendment_calculation else 0
         db_processes_after_success['fee_item_id'] = fee_item.id if fee_item else 0
+        db_processes_after_success['fee_amount_adjusted'] = str(fee_amount_adjusted)
 
         line_items = []
         line_items.append(generate_line_item(self.application_type, fee_amount_adjusted, fee_constructor, self, current_datetime))
@@ -2319,14 +2279,22 @@ class AuthorisedUserApplication(Proposal):
 
         fee_item = fee_constructor.get_fee_item(vessel_length, self.proposal_type, target_date, accept_null_vessel=accept_null_vessel)
         fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length)
-        fee_items_to_store.append({'fee_item_id': fee_item.id, 'vessel_details_id': self.vessel_details.id if self.vessel_details else ''})
+        fee_items_to_store.append({
+            'fee_item_id': fee_item.id,
+            'vessel_details_id': self.vessel_details.id if self.vessel_details else '',
+            'fee_amount_adjusted': str(fee_amount_adjusted),
+        })
         line_items.append(generate_line_item(self.application_type, fee_amount_adjusted, fee_constructor, self, current_datetime))
 
         if application_has_vessel and not aap_exists_for_this_vessel:
             # This application has a vessel but AAP component for this vessel doesn't exist
             fee_item_for_aa = fee_constructor_for_aa.get_fee_item(vessel_length, self.proposal_type, target_date) if fee_constructor_for_aa else None
             fee_amount_adjusted_additional = self.get_fee_amount_adjusted(fee_item_for_aa, vessel_length) if fee_item_for_aa else None
-            fee_items_to_store.append({'fee_item_id': fee_item_for_aa.id, 'vessel_details_id': self.vessel_details.id if self.vessel_details else ''})
+            fee_items_to_store.append({
+                'fee_item_id': fee_item_for_aa.id,
+                'vessel_details_id': self.vessel_details.id if self.vessel_details else '',
+                'fee_amount_adjusted': fee_amount_adjusted_additional,
+            })
             line_items.append(generate_line_item(annual_admission_type, fee_amount_adjusted_additional, fee_constructor_for_aa, self, current_datetime))
 
         logger.info('{}'.format(line_items))
@@ -2699,8 +2667,12 @@ class MooringLicenceApplication(Proposal):
                 raise Exception(msg)
 
         fee_item = fee_constructor_for_ml.get_fee_item(vessel_length, self.proposal_type, target_date, accept_null_vessel=accept_null_vessel)
-        fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length)
-        fee_items_to_store.append({'fee_item_id': fee_item.id, 'vessel_details_id': vessel_details_largest.id if vessel_details_largest else ''})
+        fee_amount_adjusted = self.get_fee_amountted(fee_item, vessel_length)
+        fee_items_to_store.append({
+            'fee_item_id': fee_item.id,
+            'vessel_details_id': vessel_details_largest.id if vessel_details_largest else '',
+            'fee_amount_adjusted': str(fee_amount_adjusted),
+        })
         line_items.append(generate_line_item(self.application_type, fee_amount_adjusted, fee_constructor_for_ml, self, current_datetime))
 
         # For Annual Admission component
@@ -2718,7 +2690,11 @@ class MooringLicenceApplication(Proposal):
                 # For annual admission component
                 fee_item_for_aa = fee_constructor_for_aa.get_fee_item(vessel_length, self.proposal_type, target_date)
                 fee_amount_adjusted_additional = self.get_fee_amount_adjusted(fee_item_for_aa, vessel_length)
-                fee_items_to_store.append({'fee_item_id': fee_item_for_aa.id, 'vessel_details_id': vessel_details.id if vessel_details else ''})
+                fee_items_to_store.append({
+                    'fee_item_id': fee_item_for_aa.id,
+                    'vessel_details_id': vessel_details.id if vessel_details else '',
+                    'fee_amount_adjusted': fee_amount_adjusted_additional,
+                })
                 line_items.append(generate_line_item(annual_admission_type, fee_amount_adjusted_additional, fee_constructor_for_aa, self, current_datetime, vessel_details.vessel.rego_no))
 
         logger.info('{}'.format(line_items))

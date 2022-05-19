@@ -718,7 +718,7 @@ def send_application_approved_or_declined_email(proposal, decision, request, sti
         elif proposal.proposal_type.code == PROPOSAL_TYPE_AMENDMENT:
             payment_required = False
             if proposal.application_fees.count():
-                application_fee = proposal.application_fees.first()
+                application_fee = proposal.get_main_application_fee()
                 invoice = Invoice.objects.get(reference=application_fee.invoice_reference)
                 if invoice.payment_status not in ('paid', 'over_paid'):
                     payment_required = True
@@ -737,7 +737,7 @@ def send_application_approved_or_declined_email(proposal, decision, request, sti
         elif proposal.proposal_type.code == PROPOSAL_TYPE_AMENDMENT:
             payment_required = False
             if proposal.application_fees.count():
-                application_fee = proposal.application_fees.first()
+                application_fee = proposal.get_main_application_fee()
                 invoice = Invoice.objects.get(reference=application_fee.invoice_reference)
                 if invoice.payment_status not in ('paid', 'over_paid'):
                     payment_required = True
@@ -907,7 +907,7 @@ def send_aua_approved_or_declined_email_new_renewal(proposal, decision, request,
 
         # Generate payment_url if needed
         if proposal.application_fees.count():
-            application_fee = proposal.application_fees.first()
+            application_fee = proposal.get_main_application_fee()
             invoice = Invoice.objects.get(reference=application_fee.invoice_reference)
             if invoice.payment_status not in ('paid', 'over_paid'):
                 # Payment required
@@ -1046,7 +1046,7 @@ def send_aua_approved_or_declined_email_amendment_payment_required(proposal, dec
 
         # Generate payment_url if needed
         if proposal.application_fees.count():
-            application_fee = proposal.application_fees.first()
+            application_fee = proposal.get_main_application_fee()
             invoice = Invoice.objects.get(reference=application_fee.invoice_reference)
             if invoice.payment_status not in ('paid', 'over_paid'):
                 # Payment required
@@ -1204,7 +1204,7 @@ def send_mla_approved_or_declined_email_new_renewal(proposal, decision, request,
 
         # Generate payment_url if needed
         if proposal.application_fees.count():
-            application_fee = proposal.application_fees.first()
+            application_fee = proposal.get_main_application_fee()
             invoice = Invoice.objects.get(reference=application_fee.invoice_reference)
             if invoice.payment_status not in ('paid', 'over_paid'):
                 # Payment required
@@ -1348,7 +1348,7 @@ def send_mla_approved_or_declined_email_amendment_payment_required(proposal, dec
 
         # Generate payment_url if needed
         if proposal.application_fees.count():
-            application_fee = proposal.application_fees.first()
+            application_fee = proposal.get_main_application_fee()
             invoice = Invoice.objects.get(reference=application_fee.invoice_reference)
             if invoice.payment_status not in ('paid', 'over_paid'):
                 # Payment required
