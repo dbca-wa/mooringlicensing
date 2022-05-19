@@ -2272,11 +2272,6 @@ class AuthorisedUserApplication(Proposal):
         fee_items_to_store = []
         line_items = []
 
-        # f_items = []
-        # for af in self.application_fees.all():
-        #     for fee_item in af.fee_items.all():
-        #         f_items.append(fee_item)
-
         fee_item = fee_constructor.get_fee_item(vessel_length, self.proposal_type, target_date, accept_null_vessel=accept_null_vessel)
         fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length)
         fee_items_to_store.append({
@@ -2588,7 +2583,7 @@ class AuthorisedUserApplication(Proposal):
 
     @property
     def does_accept_null_vessel(self):
-        if self.proposal_type.code in (PROPOSAL_TYPE_AMENDMENT, PROPOSAL_TYPE_RENEWAL,):
+        if self.proposal_type.code in (PROPOSAL_TYPE_RENEWAL,):
             return True
         return False
 
