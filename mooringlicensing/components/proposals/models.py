@@ -318,9 +318,12 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
         return str(self.lodgement_number)
 
     def get_max_amount_paid_in_this_season(self):
+        """
+        Return max amount paid per application_type
+        """
         prev_application = self.previous_application
 
-        max_amount_paid = 0
+        max_amount_paid = {}
         max_count = 50  # To avoid infinite loop, set max number of iterations
         loop_count = 0
 
@@ -329,11 +332,9 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
             if prev_application:
                 for application_fee in prev_application.application_fees.all():
                     for fee_item_application_fee in application_fee.feeitemapplicationfee_set.all():
-                        fee_item = fee_item_application_fee.fee_item
-                        vessel_length = fee_item_application_fee.vessel_details.vessel_applicable_length
-                        amount_paid = float(fee_item.get_absolute_amount(vessel_length))
-                        if not max_amount_paid or max_amount_paid < amount_paid:
-                            max_amount_paid = amount_paid
+                        amount_paid = fee_item_application_fee.amount_paid
+                        if fee_item_application_fee.application_type not in max_amount_paid or max_amount_paid[fee_item_application_fee.application_type] < amount_paid:
+                            max_amount_paid[fee_item_application_fee.application_type] = amount_paid
                 if prev_application.proposal_type.code in [PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL,]:
                     # 'prev_application' is the very first application of this season
                     # We are not interested in any older applications
@@ -2288,7 +2289,7 @@ class AuthorisedUserApplication(Proposal):
             fee_items_to_store.append({
                 'fee_item_id': fee_item_for_aa.id,
                 'vessel_details_id': self.vessel_details.id if self.vessel_details else '',
-                'fee_amount_adjusted': fee_amount_adjusted_additional,
+                'fee_amount_adjusted': str(fee_amount_adjusted_additional),
             })
             line_items.append(generate_line_item(annual_admission_type, fee_amount_adjusted_additional, fee_constructor_for_aa, self, current_datetime))
 
@@ -2688,7 +2689,7 @@ class MooringLicenceApplication(Proposal):
                 fee_items_to_store.append({
                     'fee_item_id': fee_item_for_aa.id,
                     'vessel_details_id': vessel_details.id if vessel_details else '',
-                    'fee_amount_adjusted': fee_amount_adjusted_additional,
+                    'fee_amount_adjusted': str(fee_amount_adjusted_additional),
                 })
                 line_items.append(generate_line_item(annual_admission_type, fee_amount_adjusted_additional, fee_constructor_for_aa, self, current_datetime, vessel_details.vessel.rego_no))
 
