@@ -330,7 +330,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
         if self.vessel_details:
             annual_admission_type = ApplicationType.objects.get(code=AnnualAdmissionApplication.code)
             max_amount_paid_for_aap = 0
-            current_approvals = self.vessel_details.vessel.get_current_approvals(target_date)
+            current_approvals = self.vessel_details.vessel.get_current_aaps(target_date)
 
             for approval in current_approvals:
                 # Current approval exists
@@ -1938,17 +1938,12 @@ class WaitingListApplication(Proposal):
                     self.lodgement_number, fee_item_being_applied, vessel_length
                 ))
 
-                if self.approval:  # This should be True
-                    # max_fee_item = self.approval.get_max_fee_item(fee_item_being_applied.fee_period.fee_season)
-                    # if max_fee_item:  # This should be True
-                    #     fee_amount_adjusted = fee_amount_adjusted - max_fee_item.get_absolute_amount()
-                    #     logger.info('Deduct {} from {}'.format(fee_item_being_applied, max_fee_item))
-                    max_amounts_paid = self.get_max_amount_paid_in_this_season(target_date)
-                    max_amount_paid = max_amounts_paid[fee_item_being_applied.application_type]
+                max_amounts_paid = self.get_max_amount_paid_in_this_season(target_date)
+                max_amount_paid = max_amounts_paid[fee_item_being_applied.application_type]
 
-                    if max_amount_paid:  # This should be True
-                        fee_amount_adjusted = fee_amount_adjusted - max_amount_paid
-                        logger.info('Deduct {} from {}'.format(fee_item_being_applied, max_amount_paid))
+                if max_amount_paid:  # This should be True
+                    fee_amount_adjusted = fee_amount_adjusted - max_amount_paid
+                    logger.info('Deduct {} from {}'.format(fee_item_being_applied, max_amount_paid))
 
                 fee_amount_adjusted = 0 if fee_amount_adjusted <= 0 else fee_amount_adjusted
         else:
@@ -2129,28 +2124,19 @@ class AnnualAdmissionApplication(Proposal):
         if fee_item_being_applied:
             fee_amount_adjusted = fee_item_being_applied.get_absolute_amount(vessel_length)
 
-            if self.proposal_type.code in (PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL):
-                # When new/renewal, no need to adjust the amount
-                pass
-            else:
-                # When amendment, amount needs to be adjusted
-                logger.info('Adjusting the fee amount for proposal: {}, fee_item: {}, vessel_length: {}'.format(
-                    self.lodgement_number, fee_item_being_applied, vessel_length
-                ))
+            # When amendment, amount needs to be adjusted
+            logger.info('Adjusting the fee amount for proposal: {}, fee_item: {}, vessel_length: {}'.format(
+                self.lodgement_number, fee_item_being_applied, vessel_length
+            ))
 
-                if self.approval:  # This should be True
-                    # max_fee_item = self.approval.get_max_fee_item(fee_item_being_applied.fee_period.fee_season)
-                    # if max_fee_item:  # This should be True
-                    #     fee_amount_adjusted = fee_amount_adjusted - max_fee_item.get_absolute_amount()
-                    #     logger.info('Deduct {} from {}'.format(fee_item_being_applied, max_fee_item))
-                    max_amounts_paid = self.get_max_amount_paid_in_this_season(target_date)
-                    max_amount_paid = max_amounts_paid[fee_item_being_applied.application_type]
+            max_amounts_paid = self.get_max_amount_paid_in_this_season(target_date)
+            max_amount_paid = max_amounts_paid[fee_item_being_applied.application_type]
 
-                    if max_amount_paid:  # This should be True
-                        fee_amount_adjusted = fee_amount_adjusted - max_amount_paid
-                        logger.info('Deduct {} from {}'.format(fee_item_being_applied, max_amount_paid))
+            if max_amount_paid:  # This should be True
+                fee_amount_adjusted = fee_amount_adjusted - max_amount_paid
+                logger.info('Deduct {} from {}'.format(fee_item_being_applied, max_amount_paid))
 
-                fee_amount_adjusted = 0 if fee_amount_adjusted <= 0 else fee_amount_adjusted
+            fee_amount_adjusted = 0 if fee_amount_adjusted <= 0 else fee_amount_adjusted
         else:
             if self.does_accept_null_vessel:
                 # TODO: We don't charge for this application but when new replacement vessel details are provided,calculate fee and charge it
@@ -2308,7 +2294,8 @@ class AuthorisedUserApplication(Proposal):
         })
         line_items.append(generate_line_item(self.application_type, fee_amount_adjusted, fee_constructor, self, current_datetime))
 
-        if application_has_vessel and not aap_exists_for_this_vessel:
+        # if application_has_vessel and not aap_exists_for_this_vessel:
+        if application_has_vessel:
             # This application has a vessel but AAP component for this vessel doesn't exist
             fee_item_for_aa = fee_constructor_for_aa.get_fee_item(vessel_length, self.proposal_type, target_date) if fee_constructor_for_aa else None
             fee_amount_adjusted_additional = self.get_fee_amount_adjusted(fee_item_for_aa, vessel_length, target_date) if fee_item_for_aa else None
@@ -2330,21 +2317,20 @@ class AuthorisedUserApplication(Proposal):
         if fee_item_being_applied:
             fee_amount_adjusted = fee_item_being_applied.get_absolute_amount(vessel_length)
 
-            if self.proposal_type.code in (PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL):
+            annual_admission_type = ApplicationType.objects.get(code=AnnualAdmissionApplication.code)
+            if self.proposal_type.code in (PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL) and not fee_item_being_applied.application_type == annual_admission_type:
                 # When new/renewal, no need to adjust the amount
                 pass
             else:
                 # When amendment, amount needs to be adjusted
                 logger.info('Adjusting the fee amount for proposal: {}, fee_item: {}, vessel_length: {}'.format(self.lodgement_number, fee_item_being_applied, vessel_length))
 
-                if self.approval:  # This should be True
-                    # max_fee_item = self.approval.get_max_fee_item(fee_item_being_applied.fee_period.fee_season)
-                    max_amounts_paid = self.get_max_amount_paid_in_this_season(target_date)
-                    max_amount_paid = max_amounts_paid[fee_item_being_applied.application_type]
+                max_amounts_paid = self.get_max_amount_paid_in_this_season(target_date)
+                max_amount_paid = max_amounts_paid[fee_item_being_applied.application_type]
 
-                    if max_amount_paid:  # This should be True
-                        fee_amount_adjusted = fee_amount_adjusted - max_amount_paid
-                        logger.info('Deduct {} from {}'.format(fee_item_being_applied, max_amount_paid))
+                if max_amount_paid:  # This should be True
+                    fee_amount_adjusted = fee_amount_adjusted - max_amount_paid
+                    logger.info('Deduct {} from {}'.format(fee_item_being_applied, max_amount_paid))
 
                 fee_amount_adjusted = 0 if fee_amount_adjusted <= 0 else fee_amount_adjusted
         else:
@@ -2689,7 +2675,7 @@ class MooringLicenceApplication(Proposal):
                 raise Exception(msg)
 
         fee_item = fee_constructor_for_ml.get_fee_item(vessel_length, self.proposal_type, target_date, accept_null_vessel=accept_null_vessel)
-        fee_amount_adjusted = self.get_fee_amountted(fee_item, vessel_length)
+        fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length, target_date)
         fee_items_to_store.append({
             'fee_item_id': fee_item.id,
             'vessel_details_id': vessel_details_largest.id if vessel_details_largest else '',
@@ -2702,22 +2688,14 @@ class MooringLicenceApplication(Proposal):
             vessel_length = vessel_details.vessel_applicable_length
 
             # Check if there is already an AA component paid for this vessel
-            current_approvals_dict = vessel_details.vessel.get_current_approvals(target_date)
-            aap_exists_for_this_vessel = False
-            for key, approvals in current_approvals_dict.items():
-                if approvals.count():
-                    aap_exists_for_this_vessel = True
-
-            if not aap_exists_for_this_vessel:
-                # For annual admission component
-                fee_item_for_aa = fee_constructor_for_aa.get_fee_item(vessel_length, self.proposal_type, target_date)
-                fee_amount_adjusted_additional = self.get_fee_amount_adjusted(fee_item_for_aa, vessel_length, target_date)
-                fee_items_to_store.append({
-                    'fee_item_id': fee_item_for_aa.id,
-                    'vessel_details_id': vessel_details.id if vessel_details else '',
-                    'fee_amount_adjusted': str(fee_amount_adjusted_additional),
-                })
-                line_items.append(generate_line_item(annual_admission_type, fee_amount_adjusted_additional, fee_constructor_for_aa, self, current_datetime, vessel_details.vessel.rego_no))
+            fee_item_for_aa = fee_constructor_for_aa.get_fee_item(vessel_length, self.proposal_type, target_date)
+            fee_amount_adjusted_additional = self.get_fee_amount_adjusted(fee_item_for_aa, vessel_length, target_date)
+            fee_items_to_store.append({
+                'fee_item_id': fee_item_for_aa.id,
+                'vessel_details_id': vessel_details.id if vessel_details else '',
+                'fee_amount_adjusted': str(fee_amount_adjusted_additional),
+            })
+            line_items.append(generate_line_item(annual_admission_type, fee_amount_adjusted_additional, fee_constructor_for_aa, self, current_datetime, vessel_details.vessel.rego_no))
 
         logger.info('{}'.format(line_items))
 
@@ -2731,27 +2709,21 @@ class MooringLicenceApplication(Proposal):
             fee_amount_adjusted = fee_item_being_applied.get_absolute_amount(vessel_length)
             target_fee_season = fee_item_being_applied.fee_period.fee_season
             for_annual_admission_component = True if target_fee_season.application_type.code == AnnualAdmissionApplication.code else False
+            annual_admission_type = ApplicationType.objects.get(code=AnnualAdmissionApplication.code)
 
-            if self.proposal_type.code in (PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL):
+            if self.proposal_type.code in (PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL) and not fee_item_being_applied.application_type == annual_admission_type:
                 # When new/renewal, no need to adjust the amount
                 pass
             else:
                 # When amendment, amount needs to be adjusted
                 logger.info('Adjusting the fee amount for proposal: {}, fee_item: {}, vessel_length: {}'.format(self.lodgement_number, fee_item_being_applied, vessel_length))
 
-                if self.approval:  # This should be True
-                    if for_annual_admission_component:
-                        # For annual admission component, we mind the vessel
-                        max_fee_item = self.approval.get_max_fee_item(fee_item_being_applied.fee_period.fee_season, self.vessel_details)
-                        max_amount_paid = max_fee_item.get_absolute_amount()
-                    else:
-                        # max_fee_item = self.approval.get_max_fee_item(fee_item_being_applied.fee_period.fee_season)
-                        max_amounts_paid = self.get_max_amount_paid_in_this_season(target_date)
-                        max_amount_paid = max_amounts_paid[fee_item_being_applied.application_type]
+                max_amounts_paid = self.get_max_amount_paid_in_this_season(target_date)
+                max_amount_paid = max_amounts_paid[fee_item_being_applied.application_type]
 
-                    if max_amount_paid:  # This should be True
-                        logger.info('Deduct {} from {} (absolute amount: {})'.format(max_amount_paid, fee_item_being_applied, fee_amount_adjusted))
-                        fee_amount_adjusted = fee_amount_adjusted - max_amount_paid
+                if max_amount_paid:  # This should be True
+                    fee_amount_adjusted = fee_amount_adjusted - max_amount_paid
+                    logger.info('Deduct {} from {}'.format(fee_item_being_applied, max_amount_paid))
 
                 fee_amount_adjusted = 0 if fee_amount_adjusted <= 0 else fee_amount_adjusted
         else:
