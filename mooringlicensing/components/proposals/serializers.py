@@ -364,6 +364,8 @@ class BaseProposalSerializer(serializers.ModelSerializer):
     def get_max_vessel_length_with_no_payment(self, proposal):
         # Find out minimum max_vessel_length, which doesn't require payments.
         max_length = 0  # Store minimum Max length which doesn't require payment
+        now_date = datetime.now(pytz.timezone(TIME_ZONE)).date()
+        target_date = proposal.get_target_date(now_date)
 
         if proposal.proposal_type.code in [PROPOSAL_TYPE_RENEWAL, PROPOSAL_TYPE_NEW,]:
             # New/Renewal means starting a new season, nothing paid for any vessel.  Return 0[m]
@@ -371,31 +373,35 @@ class BaseProposalSerializer(serializers.ModelSerializer):
         else:
             # Amendment
             # Max amount paid for this season
-            max_amount_paid = proposal.get_max_amount_paid_in_this_season()
+            max_amount_paid = proposal.get_max_amounts_paid_in_this_season(target_date)
 
             # FeeConstructor to use
-            fee_constructor = FeeConstructor.get_fee_constructor_by_application_type_and_date(proposal.application_type, datetime.now(pytz.timezone(TIME_ZONE)).date())
+            fee_constructor = FeeConstructor.get_fee_constructor_by_application_type_and_date(proposal.application_type, now_date)
 
-            # All the amendment FeeItems interested
-            # Ordered by 'start_size' ascending order, which means the cheapest fee_item first.
-            fee_items_interested = fee_constructor.feeitem_set.filter(proposal_type=ProposalType.objects.get(code=PROPOSAL_TYPE_AMENDMENT))
+            max_length = self._calculate_max_length(fee_constructor, max_amount_paid[fee_constructor.application_type])
 
             if proposal.application_type.code in [MooringLicenceApplication.code, AuthorisedUserApplication.code,]:
-                # When AU/ML, we have to take account for AA component, too
+                # When AU/ML, we have to take account into AA component, too
                 application_type_aa = ApplicationType.objects.get(code=AnnualAdmissionApplication.code)
-                fee_constructor = FeeConstructor.get_fee_constructor_by_application_type_and_date(application_type_aa, datetime.now(pytz.timezone(TIME_ZONE)).date())
-                fee_items_interested_aa = fee_constructor.feeitem_set.filter(proposal_type=ProposalType.objects.get(code=PROPOSAL_TYPE_AMENDMENT))
-                fee_items_interested = fee_items_interested | fee_items_interested_aa
+                fee_constructor = FeeConstructor.get_fee_constructor_by_application_type_and_date(application_type_aa, now_date)
+                max_length_aa = self._calculate_max_length(fee_constructor, max_amount_paid[application_type_aa])
+                max_length = max_length if max_length < max_length_aa else max_length_aa  # Note: we are trying to find MINIMUM max length, which don't require payment.
 
-            fee_items_interested.order_by('vessel_size_category__start_size')
-
-            max_length = self.calculate_minimum_max_length(fee_items_interested, max_amount_paid)
-
+        logger.info('Minimum max length with no payments is {} [m]'.format(max_length))
         return max_length
 
-    def calculate_minimum_max_length(self, fee_items_interested, max_amount_paid):
+    def _calculate_max_length(self, fee_constructor, max_amount_paid):
+        # All the amendment FeeItems interested
+        # Ordered by 'start_size' ascending order, which means the cheapest fee_item first.
+        fee_items_interested = fee_constructor.feeitem_set.filter(
+            proposal_type=ProposalType.objects.get(code=PROPOSAL_TYPE_AMENDMENT)
+            ).order_by('vessel_size_category__start_size')
+        max_length = self._calculate_minimum_max_length(fee_items_interested, max_amount_paid)
+        return max_length
+
+    def _calculate_minimum_max_length(self, fee_items_interested, max_amount_paid):
         """
-        Find out minimum max-length from fee_items_interested by max_amount_paid
+        Find out MINIMUM max-length from fee_items_interested by max_amount_paid
         """
         max_length = 0
         for fee_item in fee_items_interested:

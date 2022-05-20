@@ -170,10 +170,15 @@ class FeeItemApplicationFee(models.Model):
     fee_item = models.ForeignKey('FeeItem',)
     application_fee = models.ForeignKey('ApplicationFee',)
     vessel_details = models.ForeignKey(VesselDetails, null=True, blank=True)
+    amount_to_be_paid = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True, default=None)
     amount_paid = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True, default=None)
 
     class Meta:
         app_label = 'mooringlicensing'
+
+    @property
+    def application_type(self):
+        return self.fee_item.application_type
 
 
 class ApplicationFee(Payment):
@@ -535,6 +540,10 @@ class FeeItem(models.Model):
 
     def __str__(self):
         return '${}: {}, {}, {}, {}'.format(self.amount, self.fee_constructor.application_type, self.fee_period, self.vessel_size_category, self.proposal_type)
+
+    @property
+    def application_type(self):
+        return self.fee_constructor.application_type
 
     def get_corresponding_fee_item(self, proposal_type):
         fee_item = self.fee_constructor.feeitem_set.filter(
