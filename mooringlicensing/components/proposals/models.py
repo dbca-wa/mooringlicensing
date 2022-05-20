@@ -317,7 +317,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
     def __str__(self):
         return str(self.lodgement_number)
 
-    def get_max_amount_paid_in_this_season(self, target_date):
+    def get_max_amounts_paid_in_this_season(self, target_date, for_aa_component=False):
         """
         Return max amount paid per application_type
         """
@@ -327,14 +327,14 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
         max_amounts_paid = self.get_max_amounts_paid(prev_application)
 
         # For AAP component, we also have to search all the AAP components paid for this vessel in this season.
-        if self.vessel_details:
+        if for_aa_component and self.vessel_details:
             annual_admission_type = ApplicationType.objects.get(code=AnnualAdmissionApplication.code)
             max_amount_paid_for_aap = 0
             current_approvals = self.vessel_details.vessel.get_current_aaps(target_date)
 
             for approval in current_approvals:
                 # Current approval exists
-                max_amounts_paid2 = self.get_max_amounts_paid(approval.current_proposal)
+                max_amounts_paid2 = self.get_max_amounts_paid(approval.current_proposal, True)
                 if annual_admission_type in max_amounts_paid2:
                     # When there is an AAP component
                     if max_amount_paid_for_aap < max_amounts_paid2[annual_admission_type]:
@@ -349,7 +349,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
 
         return max_amounts_paid
 
-    def get_max_amounts_paid(self, proposal):
+    def get_max_amounts_paid(self, proposal, for_annual_admission_component=False):
         max_amount_paid = {}
         max_count = 50  # To avoid infinite loop, set max number of iterations
         loop_count = 0
@@ -358,10 +358,13 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
             if proposal:
                 for application_fee in proposal.application_fees.all():
                     for fee_item_application_fee in application_fee.feeitemapplicationfee_set.all():
-                        amount_paid = fee_item_application_fee.amount_paid
-                        if fee_item_application_fee.application_type not in max_amount_paid or max_amount_paid[
-                            fee_item_application_fee.application_type] < amount_paid:
-                            max_amount_paid[fee_item_application_fee.application_type] = amount_paid
+                        if not for_annual_admission_component or fee_item_application_fee.vessel_details.vessel == self.vessel_details.vessel:
+                            # When not for AAP component
+                            # or for AAP component and fee_item paid is for this vessel
+                            amount_paid = fee_item_application_fee.amount_paid
+                            if fee_item_application_fee.application_type not in max_amount_paid or max_amount_paid[fee_item_application_fee.application_type] < amount_paid:
+                                # The amount paid found is larger than the one stored, update it.
+                                max_amount_paid[fee_item_application_fee.application_type] = amount_paid
                 if proposal.proposal_type.code in [PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL, ]:
                     # Now, 'prev_application' is the very first application for this season
                     # We are not interested in any older applications
@@ -1938,7 +1941,7 @@ class WaitingListApplication(Proposal):
                     self.lodgement_number, fee_item_being_applied, vessel_length
                 ))
 
-                max_amounts_paid = self.get_max_amount_paid_in_this_season(target_date)
+                max_amounts_paid = self.get_max_amounts_paid_in_this_season(target_date, False)
                 max_amount_paid = max_amounts_paid[fee_item_being_applied.application_type]
 
                 if max_amount_paid:  # This should be True
@@ -2129,7 +2132,7 @@ class AnnualAdmissionApplication(Proposal):
                 self.lodgement_number, fee_item_being_applied, vessel_length
             ))
 
-            max_amounts_paid = self.get_max_amount_paid_in_this_season(target_date)
+            max_amounts_paid = self.get_max_amounts_paid_in_this_season(target_date, True)
             max_amount_paid = max_amounts_paid[fee_item_being_applied.application_type]
 
             if max_amount_paid:  # This should be True
@@ -2259,7 +2262,6 @@ class AuthorisedUserApplication(Proposal):
         fee_constructor_for_aa = FeeConstructor.get_fee_constructor_by_application_type_and_date(annual_admission_type, target_date)
 
         # There is also annual admission fee component for the AUA/MLA if needed.
-        aap_exists_for_this_vessel = False
         ml_exists_for_this_vessel = False
         application_has_vessel = True if self.vessel_details else False
 
@@ -2269,8 +2271,6 @@ class AuthorisedUserApplication(Proposal):
             for key, approvals in current_approvals_dict.items():
                 if key == 'mls' and approvals.count():
                     ml_exists_for_this_vessel = True
-                elif key == 'aaps' and approvals.count():
-                    aap_exists_for_this_vessel = True
 
             if ml_exists_for_this_vessel:
                 # When there is 'current' ML, no charge for the AUP
@@ -2294,9 +2294,8 @@ class AuthorisedUserApplication(Proposal):
         })
         line_items.append(generate_line_item(self.application_type, fee_amount_adjusted, fee_constructor, self, current_datetime))
 
-        # if application_has_vessel and not aap_exists_for_this_vessel:
         if application_has_vessel:
-            # This application has a vessel but AAP component for this vessel doesn't exist
+            # This application has a vessel.  We have to check AAP component already paid for this vessel
             fee_item_for_aa = fee_constructor_for_aa.get_fee_item(vessel_length, self.proposal_type, target_date) if fee_constructor_for_aa else None
             fee_amount_adjusted_additional = self.get_fee_amount_adjusted(fee_item_for_aa, vessel_length, target_date) if fee_item_for_aa else None
             fee_items_to_store.append({
@@ -2325,7 +2324,8 @@ class AuthorisedUserApplication(Proposal):
                 # When amendment, amount needs to be adjusted
                 logger.info('Adjusting the fee amount for proposal: {}, fee_item: {}, vessel_length: {}'.format(self.lodgement_number, fee_item_being_applied, vessel_length))
 
-                max_amounts_paid = self.get_max_amount_paid_in_this_season(target_date)
+                for_aa_component = True if fee_item_being_applied.application_type == annual_admission_type else False
+                max_amounts_paid = self.get_max_amounts_paid_in_this_season(target_date, for_aa_component)
                 max_amount_paid = max_amounts_paid[fee_item_being_applied.application_type]
 
                 if max_amount_paid:  # This should be True
@@ -2718,7 +2718,8 @@ class MooringLicenceApplication(Proposal):
                 # When amendment, amount needs to be adjusted
                 logger.info('Adjusting the fee amount for proposal: {}, fee_item: {}, vessel_length: {}'.format(self.lodgement_number, fee_item_being_applied, vessel_length))
 
-                max_amounts_paid = self.get_max_amount_paid_in_this_season(target_date)
+                for_aa_component = True if fee_item_being_applied.application_type == annual_admission_type else False
+                max_amounts_paid = self.get_max_amounts_paid_in_this_season(target_date, for_aa_component)
                 max_amount_paid = max_amounts_paid[fee_item_being_applied.application_type]
 
                 if max_amount_paid:  # This should be True

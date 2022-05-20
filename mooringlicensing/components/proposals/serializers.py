@@ -365,6 +365,7 @@ class BaseProposalSerializer(serializers.ModelSerializer):
         # Find out minimum max_vessel_length, which doesn't require payments.
         max_length = 0  # Store minimum Max length which doesn't require payment
         now_date = datetime.now(pytz.timezone(TIME_ZONE)).date()
+        target_date = proposal.get_target_date(now_date)
 
         if proposal.proposal_type.code in [PROPOSAL_TYPE_RENEWAL, PROPOSAL_TYPE_NEW,]:
             # New/Renewal means starting a new season, nothing paid for any vessel.  Return 0[m]
@@ -372,7 +373,7 @@ class BaseProposalSerializer(serializers.ModelSerializer):
         else:
             # Amendment
             # Max amount paid for this season
-            max_amount_paid = proposal.get_max_amount_paid_in_this_season()
+            max_amount_paid = proposal.get_max_amounts_paid_in_this_season(target_date)
 
             # FeeConstructor to use
             fee_constructor = FeeConstructor.get_fee_constructor_by_application_type_and_date(proposal.application_type, now_date)
