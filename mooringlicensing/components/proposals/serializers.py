@@ -377,20 +377,21 @@ class BaseProposalSerializer(serializers.ModelSerializer):
             # FeeConstructor to use
             fee_constructor = FeeConstructor.get_fee_constructor_by_application_type_and_date(proposal.application_type, now_date)
 
-            # All the amendment FeeItems interested
-            # Ordered by 'start_size' ascending order, which means the cheapest fee_item first.
             max_length = self._calculate_max_length(fee_constructor, max_amount_paid[fee_constructor.application_type])
 
             if proposal.application_type.code in [MooringLicenceApplication.code, AuthorisedUserApplication.code,]:
-                # When AU/ML, we have to take account for AA component, too
+                # When AU/ML, we have to take account into AA component, too
                 application_type_aa = ApplicationType.objects.get(code=AnnualAdmissionApplication.code)
                 fee_constructor = FeeConstructor.get_fee_constructor_by_application_type_and_date(application_type_aa, now_date)
                 max_length_aa = self._calculate_max_length(fee_constructor, max_amount_paid[application_type_aa])
                 max_length = max_length if max_length < max_length_aa else max_length_aa  # Note: we are trying to find MINIMUM max length, which don't require payment.
 
+        logger.info('Minimum max length with no payments is {} [m]'.format(max_length))
         return max_length
 
     def _calculate_max_length(self, fee_constructor, max_amount_paid):
+        # All the amendment FeeItems interested
+        # Ordered by 'start_size' ascending order, which means the cheapest fee_item first.
         fee_items_interested = fee_constructor.feeitem_set.filter(
             proposal_type=ProposalType.objects.get(code=PROPOSAL_TYPE_AMENDMENT)
             ).order_by('vessel_size_category__start_size')

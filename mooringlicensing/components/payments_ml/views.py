@@ -634,6 +634,7 @@ class ApplicationFeeSuccessView(TemplateView):
                     fee_items = FeeItem.objects.filter(id=db_operations['fee_item_id'])
                     if fee_items:
                         amount_paid = None
+                        amount_to_be_paid = None
                         if 'fee_amount_adjusted' in db_operations:
                             # Because of business rules, fee_item.amount is not always the same as the actual amount paid.
                             # Therefore we want to store the amount paid too as well as fee_item.
