@@ -81,6 +81,7 @@
                   @updateVesselLength="updateVesselLength"
                   @vesselChanged="vesselChanged"
                   @noVessel="noVessel"
+                  @updateMaxVesselLengthWithNoPayments=updateMaxVesselLength
                   />
               </div>
               <div class="tab-pane fade" id="pills-mooring" role="tabpanel" aria-labelledby="pills-mooring-tab">
@@ -172,6 +173,7 @@
                 //vesselLength: null,
                 showPaymentTab: true,
                 higherVesselCategory: false,
+                max_vessel_length_with_no_payment: 0,
             }
         },
         components: {
@@ -209,6 +211,10 @@
             },
         },
         methods:{
+            updateMaxVesselLength: function(length) {
+                console.log('updateMaxVesselLength: ' + length + '[m]')
+                this.max_vessel_length_with_no_payment = length
+            },
             noVessel: async function(noVessel) {
                 await this.$emit("noVessel", noVessel);
             },
@@ -222,8 +228,10 @@
             },
             updateVesselLength: function(length) {
                 if (this.is_external && this.proposal) {
-                    if (this.proposal.max_vessel_length_with_no_payment !== null &&
-                        this.proposal.max_vessel_length_with_no_payment <= length) {
+                    //if (this.proposal.max_vessel_length_with_no_payment !== null &&
+                    //    this.proposal.max_vessel_length_with_no_payment <= length) {
+                    if (this.max_vessel_length_with_no_payment !== null &&
+                        this.max_vessel_length_with_no_payment <= length) {
                         // vessel length is in higher category
                         this.higherVesselCategory = true;
                     } else {
