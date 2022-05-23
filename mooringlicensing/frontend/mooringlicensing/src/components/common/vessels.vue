@@ -1,5 +1,6 @@
 <template lang="html">
     <div id="vessels">
+        vessels.vue
         <FormSection label="Registration Details" Index="registration_details">
             <div class="row form-group">
                 <label for="vessel_search" class="col-sm-3 control-label">Vessel registration number</label>
@@ -567,7 +568,7 @@ from '@/utils/hooks'
                     },
                 }).
                 on("select2:select", function (e) {
-                    //console.log("select2:select");
+                    console.log("select2:select");
                     if (!e.params.data.selected) {
                         e.preventDefault();
                         e.stopPropagation();
@@ -577,15 +578,20 @@ from '@/utils/hooks'
                     //console.log("Process select2");
                     let data = e.params.data;
                     vm.$nextTick(async () => {
+                        let max_length = 0
                         if (!data.tag) {
-                            //console.log("fetch existing vessel");
+                            console.log("fetch existing vessel");
                             // fetch draft/approved vessel
                             await vm.lookupVessel(data.id);
                             // retrieve list of Vessel Owners
                             const res = await vm.$http.get(`${api_endpoints.vessel}${data.id}/lookup_vessel_ownership`);
                             await vm.parseVesselOwnershipList(res);
+
+                            // Get minimum Max vessel length which doesn't require payments
+                            const res_for_length = await vm.$http.get(`${api_endpoints.proposal}${vm.proposal.id}/get_max_vessel_length_with_no_payments?vid=${data.id}`);
+                            max_length = res_for_length.body.max_length
                         } else {
-                            //console.log("new vessel");
+                            console.log("new vessel");
                             const validatedRego = vm.validateRegoNo(data.id);
 
                             vm.vessel = Object.assign({},
@@ -599,7 +605,10 @@ from '@/utils/hooks'
                                         }
                                     }
                                 });
+                            const res_for_length = await vm.$http.get(`${api_endpoints.proposal}${vm.proposal.id}/get_max_vessel_length_with_no_payments`);
+                            max_length = res_for_length.body.max_length
                         }
+                        vm.$emit("updateMaxVesselLengthWithNoPayments", max_length)
                     });
                 }).
                 on("select2:unselect",function (e) {

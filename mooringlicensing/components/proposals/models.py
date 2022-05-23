@@ -3,7 +3,7 @@ from dateutil.relativedelta import relativedelta
 
 import json
 import datetime
-from _pydecimal import Decimal
+from decimal import Decimal
 import traceback
 
 import pytz
@@ -317,24 +317,86 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
     def __str__(self):
         return str(self.lodgement_number)
 
-    def get_max_amounts_paid_in_this_season(self, target_date, for_aa_component=False):
+    def get_fee_amount_adjusted(self, fee_item_being_applied, vessel_length, max_amount_paid):
+        """
+        Retrieve all the fee_items for this vessel
+        """
+        fee_amount_adjusted = fee_item_being_applied.get_absolute_amount(vessel_length)
+
+        annual_admission_type = ApplicationType.objects.get(code=AnnualAdmissionApplication.code)
+        if self.proposal_type.code in (PROPOSAL_TYPE_AMENDMENT,) or fee_item_being_applied.application_type == annual_admission_type:
+            # When amendment or adjusting an AA component, amount needs to be adjusted
+            fee_amount_adjusted = fee_amount_adjusted - max_amount_paid
+            logger.info('Deduct {} from {}'.format(fee_item_being_applied, max_amount_paid))
+            fee_amount_adjusted = Decimal('0.00') if fee_amount_adjusted <= 0 else fee_amount_adjusted
+
+            logger.info('Adjusting the fee amount for proposal: {}, fee_item: {}, vessel_length: {}'.format(self.lodgement_number, fee_item_being_applied, vessel_length))
+        else:
+            pass
+
+        return fee_amount_adjusted
+
+    #    def get_max_amounts_paid_in_this_season(self, target_date, for_aa_component=False):
+#        """
+#        Return max amount paid per application_type
+#        """
+#        prev_application = self.previous_application
+#
+#        # Search through the history of proposals of the self.approval
+#        max_amounts_paid = self.get_max_amounts_paid(prev_application)
+#
+#        # For AAP component, we also have to search all the AAP components paid for this vessel in this season.
+#        if for_aa_component and self.vessel_details:
+#            # We need to search for the AA component, and this is not null vessel application
+#            annual_admission_type = ApplicationType.objects.get(code=AnnualAdmissionApplication.code)
+#            max_amount_paid_for_aap = 0
+#            current_approvals = self.vessel_details.vessel.get_current_aaps(target_date)
+#
+#            for approval in current_approvals:
+#                # Current approval exists
+#                max_amounts_paid2 = self.get_max_amounts_paid(approval.current_proposal, True)
+#                if annual_admission_type in max_amounts_paid2:
+#                    # When there is an AAP component
+#                    if max_amount_paid_for_aap < max_amounts_paid2[annual_admission_type]:
+#                        # Update variable
+#                        max_amount_paid_for_aap = max_amounts_paid2[annual_admission_type]
+#
+#            if not annual_admission_type in max_amounts_paid:
+#                max_amounts_paid[annual_admission_type] = max_amount_paid_for_aap
+#            else:
+#                if max_amounts_paid[annual_admission_type] < max_amount_paid_for_aap:
+#                    max_amounts_paid[annual_admission_type] = max_amount_paid_for_aap
+#
+#        return max_amounts_paid
+
+    def get_max_amounts_paid_in_this_season(self, target_date, vessel=None):  # Notes: Used by ajax, too
         """
         Return max amount paid per application_type
         """
+
+        # Note:
+        # self.vessel_details.vessel is used for calculate main component
+        # parameter vessel is used for additional AA component
+
         prev_application = self.previous_application
 
         # Search through the history of proposals of the self.approval
-        max_amounts_paid = self.get_max_amounts_paid(prev_application)
+        max_amounts_paid = self.get_max_amounts_paid(prev_application, None)  # None: we don't mind vessel for main component
 
         # For AAP component, we also have to search all the AAP components paid for this vessel in this season.
-        if for_aa_component and self.vessel_details:
+        if not vessel and self.vessel_details:
+            # When vessel not specified, but vessel is set to this proposal
+            vessel = self.vessel_details.vessel
+
+        if vessel:
+            # We need to search for the AA component, and this is not null vessel application
             annual_admission_type = ApplicationType.objects.get(code=AnnualAdmissionApplication.code)
             max_amount_paid_for_aap = 0
-            current_approvals = self.vessel_details.vessel.get_current_aaps(target_date)
+            current_approvals = vessel.get_current_aaps(target_date)
 
             for approval in current_approvals:
                 # Current approval exists
-                max_amounts_paid2 = self.get_max_amounts_paid(approval.current_proposal, True)
+                max_amounts_paid2 = self.get_max_amounts_paid(approval.current_proposal, vessel)  # We mind vessel for AA component
                 if annual_admission_type in max_amounts_paid2:
                     # When there is an AAP component
                     if max_amount_paid_for_aap < max_amounts_paid2[annual_admission_type]:
@@ -349,8 +411,13 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
 
         return max_amounts_paid
 
-    def get_max_amounts_paid(self, proposal, for_annual_admission_component=False):
-        max_amount_paid = {}
+    def get_max_amounts_paid(self, proposal, vessel=None):
+        max_amount_paid = {
+            ApplicationType.objects.get(code=WaitingListApplication.code): Decimal('0.0'),
+            ApplicationType.objects.get(code=AnnualAdmissionApplication.code): Decimal('0.0'),
+            ApplicationType.objects.get(code=AuthorisedUserApplication.code): Decimal('0.0'),
+            ApplicationType.objects.get(code=MooringLicenceApplication.code): Decimal('0.0'),
+        }
         max_count = 50  # To avoid infinite loop, set max number of iterations
         loop_count = 0
         while loop_count <= max_count:
@@ -358,7 +425,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
             if proposal:
                 for application_fee in proposal.application_fees.all():
                     for fee_item_application_fee in application_fee.feeitemapplicationfee_set.all():
-                        if not for_annual_admission_component or fee_item_application_fee.vessel_details.vessel == self.vessel_details.vessel:
+                        if not vessel or fee_item_application_fee.vessel_details.vessel == vessel:
                             # When not for AAP component
                             # or for AAP component and fee_item paid is for this vessel
                             amount_paid = fee_item_application_fee.amount_paid
@@ -1900,8 +1967,12 @@ class WaitingListApplication(Proposal):
             logger.error(msg)
             raise Exception(msg)
 
+        # Retrieve amounts paid
+        max_amounts_paid = self.get_max_amounts_paid_in_this_season(target_date)
+
         fee_item = fee_constructor.get_fee_item(vessel_length, self.proposal_type, target_date, accept_null_vessel=accept_null_vessel)
-        fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length, target_date)
+        # fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length, target_date)
+        fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length, max_amounts_paid[self.application_type])
 
         if fee_item.proposal_type.code == PROPOSAL_TYPE_AMENDMENT:
             # This application is 'Amendment' application.  fee_item is already for 'Amendment'
@@ -1925,39 +1996,39 @@ class WaitingListApplication(Proposal):
 
         return line_items, db_processes_after_success
 
-    def get_fee_amount_adjusted(self, fee_item_being_applied, vessel_length, target_date):
-        """
-        Retrieve all the fee_items for this vessel
-        """
-        if fee_item_being_applied:
-            fee_amount_adjusted = fee_item_being_applied.get_absolute_amount(vessel_length)
-
-            if self.proposal_type.code in (PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL):
-                # When new/renewal, no need to adjust the amount
-                pass
-            else:
-                # When amendment, amount needs to be adjusted
-                logger.info('Adjusting the fee amount for proposal: {}, fee_item: {}, vessel_length: {}'.format(
-                    self.lodgement_number, fee_item_being_applied, vessel_length
-                ))
-
-                max_amounts_paid = self.get_max_amounts_paid_in_this_season(target_date, False)
-                max_amount_paid = max_amounts_paid[fee_item_being_applied.application_type]
-
-                if max_amount_paid:  # This should be True
-                    fee_amount_adjusted = fee_amount_adjusted - max_amount_paid
-                    logger.info('Deduct {} from {}'.format(fee_item_being_applied, max_amount_paid))
-
-                fee_amount_adjusted = 0 if fee_amount_adjusted <= 0 else fee_amount_adjusted
-        else:
-            if self.does_accept_null_vessel:
-                # TODO: We don't charge for this application but when new replacement vessel details are provided,calculate fee and charge it
-                fee_amount_adjusted = 0
-            else:
-                msg = 'The application fee admin data might have not been set up correctly.  Please contact the Rottnest Island Authority.'
-                raise Exception(msg)
-
-        return fee_amount_adjusted
+#    def get_fee_amount_adjusted(self, fee_item_being_applied, vessel_length, target_date):
+#        """
+#        Retrieve all the fee_items for this vessel
+#        """
+#        if fee_item_being_applied:
+#            fee_amount_adjusted = fee_item_being_applied.get_absolute_amount(vessel_length)
+#
+#            if self.proposal_type.code in (PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL):
+#                # When new/renewal, no need to adjust the amount
+#                pass
+#            else:
+#                # When amendment, amount needs to be adjusted
+#                logger.info('Adjusting the fee amount for proposal: {}, fee_item: {}, vessel_length: {}'.format(
+#                    self.lodgement_number, fee_item_being_applied, vessel_length
+#                ))
+#
+#                max_amounts_paid = self.get_max_amounts_paid_in_this_season(target_date, False)
+#                max_amount_paid = max_amounts_paid[fee_item_being_applied.application_type]
+#
+#                if max_amount_paid:  # This should be True
+#                    fee_amount_adjusted = fee_amount_adjusted - max_amount_paid
+#                    logger.info('Deduct {} from {}'.format(fee_item_being_applied, max_amount_paid))
+#
+#                fee_amount_adjusted = 0 if fee_amount_adjusted <= 0 else fee_amount_adjusted
+#        else:
+#            if self.does_accept_null_vessel:
+#                # TODO: We don't charge for this application but when new replacement vessel details are provided,calculate fee and charge it
+#                fee_amount_adjusted = 0
+#            else:
+#                msg = 'The application fee admin data might have not been set up correctly.  Please contact the Rottnest Island Authority.'
+#                raise Exception(msg)
+#
+#        return fee_amount_adjusted
 
     @property
     def assessor_group(self):
@@ -2096,16 +2167,19 @@ class AnnualAdmissionApplication(Proposal):
             logger.error(msg)
             raise Exception(msg)
 
-        fee_item = fee_constructor.get_fee_item(vessel_length, self.proposal_type, target_date, accept_null_vessel=accept_null_vessel)
-        fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length, target_date)
+        # Retrieve amounts paid
+        max_amounts_paid = self.get_max_amounts_paid_in_this_season(target_date)
 
-        if fee_item.proposal_type.code == PROPOSAL_TYPE_AMENDMENT:
-            # This application is 'Amendment' application.  fee_item is already for 'Amendment'
-            fee_item_for_amendment_calculation = fee_item
-        else:
-            # We want to store the fee_item considered to be paid in order to calculate the amount for the amendment application
-            proposal_type_amendment = ProposalType.objects.get(code=PROPOSAL_TYPE_AMENDMENT)
-            fee_item_for_amendment_calculation = fee_constructor.get_fee_item(vessel_length, proposal_type_amendment, target_date, accept_null_vessel=accept_null_vessel)
+        fee_item = fee_constructor.get_fee_item(vessel_length, self.proposal_type, target_date, accept_null_vessel=accept_null_vessel)
+        fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length, max_amounts_paid[self.application_type])
+
+#        if fee_item.proposal_type.code == PROPOSAL_TYPE_AMENDMENT:
+#            # This application is 'Amendment' application.  fee_item is already for 'Amendment'
+#            fee_item_for_amendment_calculation = fee_item
+#        else:
+#            # We want to store the fee_item considered to be paid in order to calculate the amount for the amendment application
+#            proposal_type_amendment = ProposalType.objects.get(code=PROPOSAL_TYPE_AMENDMENT)
+#            fee_item_for_amendment_calculation = fee_constructor.get_fee_item(vessel_length, proposal_type_amendment, target_date, accept_null_vessel=accept_null_vessel)
 
         db_processes_after_success['season_start_date'] = fee_constructor.fee_season.start_date.__str__()
         db_processes_after_success['season_end_date'] = fee_constructor.fee_season.end_date.__str__()
@@ -2120,35 +2194,35 @@ class AnnualAdmissionApplication(Proposal):
 
         return line_items, db_processes_after_success
 
-    def get_fee_amount_adjusted(self, fee_item_being_applied, vessel_length, target_date):
-        """
-        Retrieve all the fee_items for this vessel
-        """
-        if fee_item_being_applied:
-            fee_amount_adjusted = fee_item_being_applied.get_absolute_amount(vessel_length)
-
-            # When amendment, amount needs to be adjusted
-            logger.info('Adjusting the fee amount for proposal: {}, fee_item: {}, vessel_length: {}'.format(
-                self.lodgement_number, fee_item_being_applied, vessel_length
-            ))
-
-            max_amounts_paid = self.get_max_amounts_paid_in_this_season(target_date, True)
-            max_amount_paid = max_amounts_paid[fee_item_being_applied.application_type]
-
-            if max_amount_paid:  # This should be True
-                fee_amount_adjusted = fee_amount_adjusted - max_amount_paid
-                logger.info('Deduct {} from {}'.format(fee_item_being_applied, max_amount_paid))
-
-            fee_amount_adjusted = 0 if fee_amount_adjusted <= 0 else fee_amount_adjusted
-        else:
-            if self.does_accept_null_vessel:
-                # TODO: We don't charge for this application but when new replacement vessel details are provided,calculate fee and charge it
-                fee_amount_adjusted = 0
-            else:
-                msg = 'The application fee admin data might have not been set up correctly.  Please contact the Rottnest Island Authority.'
-                raise Exception(msg)
-
-        return fee_amount_adjusted
+#    def get_fee_amount_adjusted(self, fee_item_being_applied, vessel_length, target_date):
+#        """
+#        Retrieve all the fee_items for this vessel
+#        """
+#        if fee_item_being_applied:
+#            fee_amount_adjusted = fee_item_being_applied.get_absolute_amount(vessel_length)
+#
+#            # When amendment, amount needs to be adjusted
+#            logger.info('Adjusting the fee amount for proposal: {}, fee_item: {}, vessel_length: {}'.format(
+#                self.lodgement_number, fee_item_being_applied, vessel_length
+#            ))
+#
+#            max_amounts_paid = self.get_max_amounts_paid_in_this_season(target_date, True)
+#            max_amount_paid = max_amounts_paid[fee_item_being_applied.application_type]
+#
+#            if max_amount_paid:  # This should be True
+#                fee_amount_adjusted = fee_amount_adjusted - max_amount_paid
+#                logger.info('Deduct {} from {}'.format(fee_item_being_applied, max_amount_paid))
+#
+#            fee_amount_adjusted = 0 if fee_amount_adjusted <= 0 else fee_amount_adjusted
+#        else:
+#            if self.does_accept_null_vessel:
+#                # TODO: We don't charge for this application but when new replacement vessel details are provided,calculate fee and charge it
+#                fee_amount_adjusted = 0
+#            else:
+#                msg = 'The application fee admin data might have not been set up correctly.  Please contact the Rottnest Island Authority.'
+#                raise Exception(msg)
+#
+#        return fee_amount_adjusted
 
     @property
     def assessor_group(self):
@@ -2285,8 +2359,12 @@ class AuthorisedUserApplication(Proposal):
         fee_items_to_store = []
         line_items = []
 
+        # Retrieve amounts paid
+        max_amounts_paid = self.get_max_amounts_paid_in_this_season(target_date)
+
         fee_item = fee_constructor.get_fee_item(vessel_length, self.proposal_type, target_date, accept_null_vessel=accept_null_vessel)
-        fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length, target_date)
+        # fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length, target_date)
+        fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length, max_amounts_paid[self.application_type])
         fee_items_to_store.append({
             'fee_item_id': fee_item.id,
             'vessel_details_id': self.vessel_details.id if self.vessel_details else '',
@@ -2295,9 +2373,10 @@ class AuthorisedUserApplication(Proposal):
         line_items.append(generate_line_item(self.application_type, fee_amount_adjusted, fee_constructor, self, current_datetime))
 
         if application_has_vessel:
-            # This application has a vessel.  We have to check AAP component already paid for this vessel
+            # When the application has a vessel, user have to pay for the AA component, too.
             fee_item_for_aa = fee_constructor_for_aa.get_fee_item(vessel_length, self.proposal_type, target_date) if fee_constructor_for_aa else None
-            fee_amount_adjusted_additional = self.get_fee_amount_adjusted(fee_item_for_aa, vessel_length, target_date) if fee_item_for_aa else None
+            # fee_amount_adjusted_additional = self.get_fee_amount_adjusted(fee_item_for_aa, vessel_length, target_date) if fee_item_for_aa else None
+            fee_amount_adjusted_additional = self.get_fee_amount_adjusted(fee_item_for_aa, vessel_length, max_amounts_paid[annual_admission_type])
             fee_items_to_store.append({
                 'fee_item_id': fee_item_for_aa.id,
                 'vessel_details_id': self.vessel_details.id if self.vessel_details else '',
@@ -2309,39 +2388,39 @@ class AuthorisedUserApplication(Proposal):
 
         return line_items, fee_items_to_store
 
-    def get_fee_amount_adjusted(self, fee_item_being_applied, vessel_length, target_date):
-        """
-        Retrieve all the fee_items for this vessel
-        """
-        if fee_item_being_applied:
-            fee_amount_adjusted = fee_item_being_applied.get_absolute_amount(vessel_length)
-
-            annual_admission_type = ApplicationType.objects.get(code=AnnualAdmissionApplication.code)
-            if self.proposal_type.code in (PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL) and not fee_item_being_applied.application_type == annual_admission_type:
-                # When new/renewal, no need to adjust the amount
-                pass
-            else:
-                # When amendment, amount needs to be adjusted
-                logger.info('Adjusting the fee amount for proposal: {}, fee_item: {}, vessel_length: {}'.format(self.lodgement_number, fee_item_being_applied, vessel_length))
-
-                for_aa_component = True if fee_item_being_applied.application_type == annual_admission_type else False
-                max_amounts_paid = self.get_max_amounts_paid_in_this_season(target_date, for_aa_component)
-                max_amount_paid = max_amounts_paid[fee_item_being_applied.application_type]
-
-                if max_amount_paid:  # This should be True
-                    fee_amount_adjusted = fee_amount_adjusted - max_amount_paid
-                    logger.info('Deduct {} from {}'.format(fee_item_being_applied, max_amount_paid))
-
-                fee_amount_adjusted = 0 if fee_amount_adjusted <= 0 else fee_amount_adjusted
-        else:
-            if self.does_accept_null_vessel:
-                # TODO: We don't charge for this application but when new replacement vessel details are provided,calculate fee and charge it
-                fee_amount_adjusted = 0
-            else:
-                msg = 'The application fee admin data might have not been set up correctly.  Please contact the Rottnest Island Authority.'
-                raise Exception(msg)
-
-        return fee_amount_adjusted
+#    def get_fee_amount_adjusted(self, fee_item_being_applied, vessel_length, target_date):
+#        """
+#        Retrieve all the fee_items for this vessel
+#        """
+#        if fee_item_being_applied:
+#            fee_amount_adjusted = fee_item_being_applied.get_absolute_amount(vessel_length)
+#
+#            annual_admission_type = ApplicationType.objects.get(code=AnnualAdmissionApplication.code)
+#            if self.proposal_type.code in (PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL) and not fee_item_being_applied.application_type == annual_admission_type:
+#                # When new/renewal, no need to adjust the amount
+#                pass
+#            else:
+#                # When amendment, amount needs to be adjusted
+#                logger.info('Adjusting the fee amount for proposal: {}, fee_item: {}, vessel_length: {}'.format(self.lodgement_number, fee_item_being_applied, vessel_length))
+#
+#                for_aa_component = True if fee_item_being_applied.application_type == annual_admission_type else False
+#                max_amounts_paid = self.get_max_amounts_paid_in_this_season(target_date, for_aa_component)
+#                max_amount_paid = max_amounts_paid[fee_item_being_applied.application_type]
+#
+#                if max_amount_paid:  # This should be True
+#                    fee_amount_adjusted = fee_amount_adjusted - max_amount_paid
+#                    logger.info('Deduct {} from {}'.format(fee_item_being_applied, max_amount_paid))
+#
+#                fee_amount_adjusted = 0 if fee_amount_adjusted <= 0 else fee_amount_adjusted
+#        else:
+#            if self.does_accept_null_vessel:
+#                # TODO: We don't charge for this application but when new replacement vessel details are provided,calculate fee and charge it
+#                fee_amount_adjusted = 0
+#            else:
+#                msg = 'The application fee admin data might have not been set up correctly.  Please contact the Rottnest Island Authority.'
+#                raise Exception(msg)
+#
+#        return fee_amount_adjusted
 
     def get_due_date_for_endorsement_by_target_date(self, target_date=timezone.localtime(timezone.now()).date()):
         days_type = NumberOfDaysType.objects.get(code=CODE_DAYS_FOR_ENDORSER_AUA)
@@ -2674,8 +2753,12 @@ class MooringLicenceApplication(Proposal):
                 logger.error(msg)
                 raise Exception(msg)
 
+        # Retrieve amounts paid
+        max_amounts_paid = self.get_max_amounts_paid_in_this_season(target_date)
+
         fee_item = fee_constructor_for_ml.get_fee_item(vessel_length, self.proposal_type, target_date, accept_null_vessel=accept_null_vessel)
-        fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length, target_date)
+        # fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length, target_date)
+        fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length, max_amounts_paid[self.application_type])
         fee_items_to_store.append({
             'fee_item_id': fee_item.id,
             'vessel_details_id': vessel_details_largest.id if vessel_details_largest else '',
@@ -2689,7 +2772,8 @@ class MooringLicenceApplication(Proposal):
 
             # Check if there is already an AA component paid for this vessel
             fee_item_for_aa = fee_constructor_for_aa.get_fee_item(vessel_length, self.proposal_type, target_date)
-            fee_amount_adjusted_additional = self.get_fee_amount_adjusted(fee_item_for_aa, vessel_length, target_date)
+            # fee_amount_adjusted_additional = self.get_fee_amount_adjusted(fee_item_for_aa, vessel_length, target_date)
+            fee_amount_adjusted_additional = self.get_fee_amount_adjusted(fee_item, vessel_length, max_amounts_paid[annual_admission_type])
             fee_items_to_store.append({
                 'fee_item_id': fee_item_for_aa.id,
                 'vessel_details_id': vessel_details.id if vessel_details else '',
@@ -2701,42 +2785,42 @@ class MooringLicenceApplication(Proposal):
 
         return line_items, fee_items_to_store
 
-    def get_fee_amount_adjusted(self, fee_item_being_applied, vessel_length, target_date):
-        """
-        Retrieve all the fee_items for this vessel
-        """
-        if fee_item_being_applied:
-            fee_amount_adjusted = fee_item_being_applied.get_absolute_amount(vessel_length)
-            target_fee_season = fee_item_being_applied.fee_period.fee_season
-            for_annual_admission_component = True if target_fee_season.application_type.code == AnnualAdmissionApplication.code else False
-            annual_admission_type = ApplicationType.objects.get(code=AnnualAdmissionApplication.code)
-
-            if self.proposal_type.code in (PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL) and not fee_item_being_applied.application_type == annual_admission_type:
-                # When new/renewal, no need to adjust the amount
-                pass
-            else:
-                # When amendment, amount needs to be adjusted
-                logger.info('Adjusting the fee amount for proposal: {}, fee_item: {}, vessel_length: {}'.format(self.lodgement_number, fee_item_being_applied, vessel_length))
-
-                for_aa_component = True if fee_item_being_applied.application_type == annual_admission_type else False
-                max_amounts_paid = self.get_max_amounts_paid_in_this_season(target_date, for_aa_component)
-                max_amount_paid = max_amounts_paid[fee_item_being_applied.application_type]
-
-                if max_amount_paid:  # This should be True
-                    fee_amount_adjusted = fee_amount_adjusted - max_amount_paid
-                    logger.info('Deduct {} from {}'.format(fee_item_being_applied, max_amount_paid))
-
-                fee_amount_adjusted = 0 if fee_amount_adjusted <= 0 else fee_amount_adjusted
-        else:
-            if self.does_accept_null_vessel:
-                # TODO: We don't charge for this application but when new replacement vessel details are provided,calculate fee and charge it
-                fee_amount_adjusted = 0
-            else:
-                msg = 'The application fee admin data might have not been set up correctly.  Please contact the Rottnest Island Authority.'
-                raise Exception(msg)
-
-        logger.info('Adjusted amount: {}'.format(fee_amount_adjusted))
-        return fee_amount_adjusted
+#    def get_fee_amount_adjusted(self, fee_item_being_applied, vessel_length, target_date):
+#        """
+#        Retrieve all the fee_items for this vessel
+#        """
+#        if fee_item_being_applied:
+#            fee_amount_adjusted = fee_item_being_applied.get_absolute_amount(vessel_length)
+#            target_fee_season = fee_item_being_applied.fee_period.fee_season
+#            for_annual_admission_component = True if target_fee_season.application_type.code == AnnualAdmissionApplication.code else False
+#            annual_admission_type = ApplicationType.objects.get(code=AnnualAdmissionApplication.code)
+#
+#            if self.proposal_type.code in (PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL) and not fee_item_being_applied.application_type == annual_admission_type:
+#                # When new/renewal, no need to adjust the amount
+#                pass
+#            else:
+#                # When amendment, amount needs to be adjusted
+#                logger.info('Adjusting the fee amount for proposal: {}, fee_item: {}, vessel_length: {}'.format(self.lodgement_number, fee_item_being_applied, vessel_length))
+#
+#                for_aa_component = True if fee_item_being_applied.application_type == annual_admission_type else False
+#                max_amounts_paid = self.get_max_amounts_paid_in_this_season(target_date, for_aa_component)
+#                max_amount_paid = max_amounts_paid[fee_item_being_applied.application_type]
+#
+#                if max_amount_paid:  # This should be True
+#                    fee_amount_adjusted = fee_amount_adjusted - max_amount_paid
+#                    logger.info('Deduct {} from {}'.format(fee_item_being_applied, max_amount_paid))
+#
+#                fee_amount_adjusted = 0 if fee_amount_adjusted <= 0 else fee_amount_adjusted
+#        else:
+#            if self.does_accept_null_vessel:
+#                # TODO: We don't charge for this application but when new replacement vessel details are provided,calculate fee and charge it
+#                fee_amount_adjusted = 0
+#            else:
+#                msg = 'The application fee admin data might have not been set up correctly.  Please contact the Rottnest Island Authority.'
+#                raise Exception(msg)
+#
+#        logger.info('Adjusted amount: {}'.format(fee_amount_adjusted))
+#        return fee_amount_adjusted
 
     def get_document_upload_url(self, request):
         document_upload_url = request.build_absolute_uri(reverse('mla-documents-upload', kwargs={'uuid_str': self.uuid}))
