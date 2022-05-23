@@ -223,9 +223,9 @@
                 this.uuid++
                 this.updateAmendmentRenewalProperties();
             },
-            updateMaxVesselLength: function(length) {
-                console.log('updateMaxVesselLength: ' + length + '[m]')
-                this.max_vessel_length_with_no_payment = length
+            updateMaxVesselLength: function(max_length) {
+                console.log('updateMaxVesselLength: ' + max_length + '[m]')
+                this.max_vessel_length_with_no_payment = max_length
             },
             updateAmendmentRenewalProperties: async function() {
                 console.log('updateAmendmentRenewalProperties in form_aaa.vue')

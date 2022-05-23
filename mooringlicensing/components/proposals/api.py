@@ -1068,8 +1068,8 @@ class ProposalViewSet(viewsets.ModelViewSet):
             proposal = self.get_object()
 
             # Retrieve vessel
-            vid = request.GET.get('vid')
-            vessel = Vessel.objects.get(id=int(vid))
+            vid = request.GET.get('vid', None)
+            vessel = Vessel.objects.get(id=int(vid)) if vid else None
 
             current_datetime = datetime.now(pytz.timezone(TIME_ZONE))
             target_date = proposal.get_target_date(current_datetime.date())

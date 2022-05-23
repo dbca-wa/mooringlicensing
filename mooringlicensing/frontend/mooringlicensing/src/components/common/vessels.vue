@@ -605,6 +605,8 @@ from '@/utils/hooks'
                                         }
                                     }
                                 });
+                            const res_for_length = await vm.$http.get(`${api_endpoints.proposal}${vm.proposal.id}/get_max_vessel_length_with_no_payments`);
+                            max_length = res_for_length.body.max_length
                         }
                         vm.$emit("updateMaxVesselLengthWithNoPayments", max_length)
                     });
