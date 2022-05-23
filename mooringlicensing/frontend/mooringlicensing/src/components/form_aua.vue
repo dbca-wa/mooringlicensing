@@ -81,6 +81,7 @@
                   @updateVesselLength="updateVesselLength"
                   @vesselChanged="vesselChanged"
                   @noVessel="noVessel"
+                  @updateMaxVesselLengthWithNoPayments=updateMaxVesselLength
                   />
               </div>
               <div class="tab-pane fade" id="pills-insurance" role="tabpanel" aria-labelledby="pills-insurance-tab">
@@ -251,6 +252,9 @@
             */
         },
         methods:{
+            updateMaxVesselLength: function(length) {
+                console.log('updateMaxVesselLength: ' + length + '[m]')
+            },
             noVessel: async function(noVessel) {
                 await this.$emit("noVessel", noVessel);
             },

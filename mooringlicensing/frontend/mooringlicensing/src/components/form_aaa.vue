@@ -77,6 +77,7 @@
                   @updateVesselLength="updateVesselLength"
                   @vesselChanged="vesselChanged"
                   @noVessel="noVessel"
+                  @updateMaxVesselLengthWithNoPayments=updateMaxVesselLength
                   />
               </div>
               <div class="tab-pane fade" id="pills-insurance" role="tabpanel" aria-labelledby="pills-insurance-tab">
@@ -218,6 +219,9 @@
                 this.keepCurrentVessel = keep;
                 this.uuid++
                 this.updateAmendmentRenewalProperties();
+            },
+            updateMaxVesselLength: function(length) {
+                console.log('updateMaxVesselLength: ' + length + '[m]')
             },
             updateAmendmentRenewalProperties: async function() {
                 console.log('updateAmendmentRenewalProperties in form_aaa.vue')

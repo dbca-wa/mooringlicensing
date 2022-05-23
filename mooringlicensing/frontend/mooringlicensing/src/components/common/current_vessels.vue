@@ -1,5 +1,6 @@
 <template lang="html">
     <div id="current_vessels" v-if="vesselExists">
+        current_vessels.vue
         <FormSection v-if="mooringLicenceCurrentVesselDisplayText || currentVesselDisplayText" label="Current Vessel" Index="current_vessel">
             <div v-if="mooringLicenceCurrentVesselDisplayText" class="row form-group">
                 <div class="col-sm-9">

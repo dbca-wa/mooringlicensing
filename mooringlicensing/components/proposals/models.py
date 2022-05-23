@@ -369,19 +369,19 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
 #
 #        return max_amounts_paid
 
-    def get_max_amounts_paid_in_this_season(self, target_date, vessel=False):  # Notes: Used by ajax, too
+    def get_max_amounts_paid_in_this_season(self, target_date, vessel=None):  # Notes: Used by ajax, too
         """
         Return max amount paid per application_type
         """
         prev_application = self.previous_application
 
-        # Search through the history of proposals of the self.approval
-        max_amounts_paid = self.get_max_amounts_paid(prev_application)
-
         # For AAP component, we also have to search all the AAP components paid for this vessel in this season.
         if not vessel and self.vessel_details:
             # When vessel not specified, but vessel is set to this proposal
             vessel = self.vessel_details.vessel
+
+        # Search through the history of proposals of the self.approval
+        max_amounts_paid = self.get_max_amounts_paid(prev_application, vessel)
 
         if vessel:
             # We need to search for the AA component, and this is not null vessel application
@@ -391,7 +391,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
 
             for approval in current_approvals:
                 # Current approval exists
-                max_amounts_paid2 = self.get_max_amounts_paid(approval.current_proposal, True)
+                max_amounts_paid2 = self.get_max_amounts_paid(approval.current_proposal, vessel, True)
                 if annual_admission_type in max_amounts_paid2:
                     # When there is an AAP component
                     if max_amount_paid_for_aap < max_amounts_paid2[annual_admission_type]:
@@ -406,7 +406,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
 
         return max_amounts_paid
 
-    def get_max_amounts_paid(self, proposal, for_annual_admission_component=False):
+    def get_max_amounts_paid(self, proposal, vessel, for_annual_admission_component=False):
         max_amount_paid = {
             ApplicationType.objects.get(code=WaitingListApplication.code): Decimal('0.0'),
             ApplicationType.objects.get(code=AnnualAdmissionApplication.code): Decimal('0.0'),
@@ -420,7 +420,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
             if proposal:
                 for application_fee in proposal.application_fees.all():
                     for fee_item_application_fee in application_fee.feeitemapplicationfee_set.all():
-                        if not for_annual_admission_component or fee_item_application_fee.vessel_details.vessel == self.vessel_details.vessel:
+                        if not for_annual_admission_component or fee_item_application_fee.vessel_details.vessel == vessel:
                             # When not for AAP component
                             # or for AAP component and fee_item paid is for this vessel
                             amount_paid = fee_item_application_fee.amount_paid
