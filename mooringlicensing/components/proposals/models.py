@@ -370,15 +370,16 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
 #        return max_amounts_paid
 
     def get_max_amount_paid_for_main_component(self):
-        prev_application = self.previous_application
         max_amount_paid_for_main_component = 0
 
-        max_amounts_paid = self.get_max_amounts_paid(prev_application, None)  # None: we don't mind vessel for main component
-        if self.application_type in max_amounts_paid:
-            # When there is an AAP component
-            if max_amount_paid_for_main_component < max_amounts_paid[self.application_type]:
-                # Update variable
-                max_amount_paid_for_main_component = max_amounts_paid[self.application_type]
+        if self.proposal_type.code not in [PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL]:
+            prev_application = self.previous_application
+            max_amounts_paid = self.get_max_amounts_paid(prev_application, None)  # None: we don't mind vessel for main component
+            if self.application_type in max_amounts_paid:
+                # When there is an AAP component
+                if max_amount_paid_for_main_component < max_amounts_paid[self.application_type]:
+                    # Update variable
+                    max_amount_paid_for_main_component = max_amounts_paid[self.application_type]
 
         return max_amount_paid_for_main_component
 
