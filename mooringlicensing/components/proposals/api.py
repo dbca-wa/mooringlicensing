@@ -1071,7 +1071,7 @@ class ProposalViewSet(viewsets.ModelViewSet):
                 current_datetime = datetime.now(pytz.timezone(TIME_ZONE))
                 target_date = proposal.get_target_date(current_datetime.date())
 
-                max_amount_paid = proposal.get_max_amount_paid_for_main_component(target_date)
+                max_amount_paid = proposal.get_max_amount_paid_for_main_component()
 
                 # FeeConstructor to use
                 fee_constructor = FeeConstructor.get_fee_constructor_by_application_type_and_date(proposal.application_type, target_date)

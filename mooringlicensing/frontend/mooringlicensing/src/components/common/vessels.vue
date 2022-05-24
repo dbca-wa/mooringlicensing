@@ -600,8 +600,7 @@ from '@/utils/hooks'
                             await vm.parseVesselOwnershipList(res);
 
                             const res_for_length = await vm.$http.get(`${api_endpoints.proposal}${vm.proposal.id}/get_max_vessel_length_for_aa_component?vid=${data.id}`);
-                            this.max_vessel_length_for_aa_component = res_for_length.body.max_length
-
+                            vm.max_vessel_length_for_aa_component = res_for_length.body.max_length
                         } else {
                             console.log("new vessel");
                             const validatedRego = vm.validateRegoNo(data.id);
@@ -618,7 +617,7 @@ from '@/utils/hooks'
                                     }
                                 });
                             // Get minimum Max vessel length which doesn't require payments
-                            this.max_vessel_length_for_aa_component = 0
+                            vm.max_vessel_length_for_aa_component = 0
                         }
                     });
                 }).
