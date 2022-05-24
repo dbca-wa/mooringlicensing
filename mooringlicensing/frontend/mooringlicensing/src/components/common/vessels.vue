@@ -220,6 +220,8 @@ from '@/utils/hooks'
                 vesselRegoNos: [],
                 selectedRego: null,
                 temporary_document_collection_id: null,
+                max_vessel_length_for_main_component: -1,
+                max_vessel_length_for_aa_component: -1,
             }
         },
         components:{
@@ -253,6 +255,16 @@ from '@/utils/hooks'
                     await this.vesselChanged();
                 },
                 deep: true
+            },
+            max_vessel_length_for_main_component: {
+                handler: function(){
+                    this.$emit("updateMaxVesselLengthForMainComponent", this.max_vessel_length_for_main_component)
+                }
+            },
+            max_vessel_length_for_aa_component: {
+                handler: function(){
+                    this.$emit("updateMaxVesselLengthForAAComponent", this.max_vessel_length_for_aa_component)
+                }
             },
         },
         computed: {
@@ -587,9 +599,9 @@ from '@/utils/hooks'
                             const res = await vm.$http.get(`${api_endpoints.vessel}${data.id}/lookup_vessel_ownership`);
                             await vm.parseVesselOwnershipList(res);
 
-                            // Get minimum Max vessel length which doesn't require payments
-                            const res_for_length = await vm.$http.get(`${api_endpoints.proposal}${vm.proposal.id}/get_max_vessel_length_with_no_payments?vid=${data.id}`);
-                            max_length = res_for_length.body.max_length
+                            const res_for_length = await vm.$http.get(`${api_endpoints.proposal}${vm.proposal.id}/get_max_vessel_length_for_aa_component?vid=${data.id}`);
+                            this.max_vessel_length_for_aa_component = res_for_length.body.max_length
+
                         } else {
                             console.log("new vessel");
                             const validatedRego = vm.validateRegoNo(data.id);
@@ -605,10 +617,9 @@ from '@/utils/hooks'
                                         }
                                     }
                                 });
-                            const res_for_length = await vm.$http.get(`${api_endpoints.proposal}${vm.proposal.id}/get_max_vessel_length_with_no_payments`);
-                            max_length = res_for_length.body.max_length
+                            // Get minimum Max vessel length which doesn't require payments
+                            this.max_vessel_length_for_aa_component = 0
                         }
-                        vm.$emit("updateMaxVesselLengthWithNoPayments", max_length)
                     });
                 }).
                 on("select2:unselect",function (e) {
@@ -869,7 +880,9 @@ from '@/utils/hooks'
                 }
             });
         },
-        created: function() {
+        created: async function() {
+            let res = await this.$http.get(`${api_endpoints.proposal}${this.proposal.id}/get_max_vessel_length_for_main_component`);
+            this.max_vessel_length_for_main_component = res.body.max_length
         },
     }
 </script>

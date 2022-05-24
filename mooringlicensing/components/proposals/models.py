@@ -369,6 +369,35 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
 #
 #        return max_amounts_paid
 
+    def get_max_amount_paid_for_main_component(self, target_date):
+        prev_application = self.previous_application
+        max_amount_paid_for_main_component = 0
+
+        max_amounts_paid = self.get_max_amounts_paid(prev_application, None)  # None: we don't mind vessel for main component
+        if self.application_type in max_amounts_paid:
+            # When there is an AAP component
+            if max_amount_paid_for_main_component < max_amounts_paid[self.application_type]:
+                # Update variable
+                max_amount_paid_for_main_component = max_amounts_paid[self.application_type]
+
+        return max_amount_paid_for_main_component
+
+    def get_max_amount_paid_for_aa_component(self, target_date, vessel):
+        annual_admission_type = ApplicationType.objects.get(code=AnnualAdmissionApplication.code)
+        max_amount_paid_for_aa_component = 0
+        current_approvals = vessel.get_current_aaps(target_date)
+
+        for approval in current_approvals:
+            # Current approval exists
+            max_amounts_paid = self.get_max_amounts_paid(approval.current_proposal, vessel)  # We mind vessel for AA component
+            if annual_admission_type in max_amounts_paid:
+                # When there is an AAP component
+                if max_amount_paid_for_aa_component < max_amounts_paid[annual_admission_type]:
+                    # Update variable
+                    max_amount_paid_for_aa_component = max_amounts_paid[annual_admission_type]
+
+        return max_amount_paid_for_aa_component
+
     def get_max_amounts_paid_in_this_season(self, target_date, vessel=None):  # Notes: Used by ajax, too
         """
         Return max amount paid per application_type
@@ -412,7 +441,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
         return max_amounts_paid
 
     def get_max_amounts_paid(self, proposal, vessel=None):
-        max_amount_paid = {
+        max_amounts_paid = {
             ApplicationType.objects.get(code=WaitingListApplication.code): Decimal('0.0'),
             ApplicationType.objects.get(code=AnnualAdmissionApplication.code): Decimal('0.0'),
             ApplicationType.objects.get(code=AuthorisedUserApplication.code): Decimal('0.0'),
@@ -429,9 +458,9 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                             # When not for AAP component
                             # or for AAP component and fee_item paid is for this vessel
                             amount_paid = fee_item_application_fee.amount_paid
-                            if fee_item_application_fee.application_type not in max_amount_paid or max_amount_paid[fee_item_application_fee.application_type] < amount_paid:
+                            if max_amounts_paid[fee_item_application_fee.application_type] < amount_paid:
                                 # The amount paid found is larger than the one stored, update it.
-                                max_amount_paid[fee_item_application_fee.application_type] = amount_paid
+                                max_amounts_paid[fee_item_application_fee.application_type] = amount_paid
                 if proposal.proposal_type.code in [PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL, ]:
                     # Now, 'prev_application' is the very first application for this season
                     # We are not interested in any older applications
@@ -441,7 +470,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                     proposal = proposal.previous_application
             else:
                 break
-        return max_amount_paid
+        return max_amounts_paid
 
     @property
     def latest_vessel_details(self):
