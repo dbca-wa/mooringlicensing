@@ -1329,7 +1329,11 @@ class AuthorisedUserPermit(Approval):
         new_moas = MooringOnApproval.objects.filter(approval=self, sticker__isnull=True)  # New moa doesn't have stickers.
         for moa in new_moas:
             if moa not in moas_to_be_reallocated:
-                moas_to_be_reallocated.append(moa)
+                if moa.approval and moa.approval.current_proposal and moa.approval.current_proposal.vessel_details:
+                    moas_to_be_reallocated.append(moa)
+                else:
+                    # Null vessel
+                    pass
 
         # 2. Find all the moas to be removed
         # 3. Fild all the stickers to be replaced by the moas found at the #2, then find all the moas to be replaced
@@ -1497,10 +1501,10 @@ class MooringLicence(Approval):
 
                 authorised_person['full_name'] = aup.submitter.get_full_name()
                 authorised_person['vessel'] = {
-                    'rego_no': aup.current_proposal.vessel_details.vessel.rego_no,
-                    'vessel_name': aup.current_proposal.vessel_details.vessel_name,
-                    'length': aup.current_proposal.vessel_details.vessel_applicable_length,
-                    'draft': aup.current_proposal.vessel_details.vessel_draft,
+                    'rego_no': aup.current_proposal.vessel_details.vessel.rego_no if aup.current_proposal.vessel_details else '',
+                    'vessel_name': aup.current_proposal.vessel_details.vessel_name if aup.current_proposal.vessel_details else '',
+                    'length': aup.current_proposal.vessel_details.vessel_applicable_length if aup.current_proposal.vessel_details else '',
+                    'draft': aup.current_proposal.vessel_details.vessel_draft if aup.current_proposal.vessel_details else '',
                 }
                 authorised_person['authorised_date'] = aup.issue_date.strftime('%d/%m/%Y')
                 authorised_person['authorised_by'] = authorised_by

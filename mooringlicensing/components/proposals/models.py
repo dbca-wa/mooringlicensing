@@ -2648,21 +2648,19 @@ class AuthorisedUserApplication(Proposal):
         #####
         # Set proposal status after manage _stickers
         #####
-        awaiting_printing = False
+        stickers_to_be_printed = []
         if self.approval:
             stickers_to_be_printed = self.approval.stickers.filter(status__in=[Sticker.STICKER_STATUS_NOT_READY_YET, Sticker.STICKER_STATUS_READY, Sticker.STICKER_STATUS_AWAITING_PRINTING,])
-            if stickers_to_be_printed.count() > 0:
-                awaiting_printing = True
-        if awaiting_printing:
-            if self.proposal_type.code == PROPOSAL_TYPE_AMENDMENT and len(stickers_to_be_returned) and self.vessel_ownership != self.previous_application.vessel_ownership:
-                # When amendment and there is a sticker to be returned, application status gets 'Sticker to be Returned' status
-                self.processing_status = Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED
-                self.customer_status = Proposal.CUSTOMER_STATUS_STICKER_TO_BE_RETURNED
-                self.log_user_action(ProposalUserAction.ACTION_STICKER_TO_BE_RETURNED.format(self.id), request)
-            else:
-                self.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
-                self.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
-                self.log_user_action(ProposalUserAction.ACTION_PRINTING_STICKER.format(self.id),)
+
+        if len(stickers_to_be_returned):
+            # there is a sticker to be returned, application status gets 'Sticker to be Returned' status
+            self.processing_status = Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED
+            self.customer_status = Proposal.CUSTOMER_STATUS_STICKER_TO_BE_RETURNED
+            self.log_user_action(ProposalUserAction.ACTION_STICKER_TO_BE_RETURNED.format(self.id), request)
+        elif stickers_to_be_printed:
+            self.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
+            self.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
+            self.log_user_action(ProposalUserAction.ACTION_PRINTING_STICKER.format(self.id),)
         elif self.auto_approve:
             self.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
             self.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
