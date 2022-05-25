@@ -81,7 +81,8 @@
                   @updateVesselLength="updateVesselLength"
                   @vesselChanged="vesselChanged"
                   @noVessel="noVessel"
-                  @updateMaxVesselLengthWithNoPayments=updateMaxVesselLength
+                  @updateMaxVesselLengthForAAComponent=updateMaxVesselLengthForAAComponent
+                  @updateMaxVesselLengthForMainComponent=updateMaxVesselLengthForMainComponent
                   />
               </div>
               <div class="tab-pane fade" id="pills-insurance" role="tabpanel" aria-labelledby="pills-insurance-tab">
@@ -196,6 +197,8 @@
                 showInsuranceTab: true,
                 higherVesselCategory: false,
                 max_vessel_length_with_no_payment: 0,
+                max_vessel_length_for_main_component: 0,
+                max_vessel_length_for_aa_component: 0,
             }
         },
         watch: {
@@ -253,9 +256,42 @@
             */
         },
         methods:{
-            updateMaxVesselLength: function(length) {
-                console.log('updateMaxVesselLength: ' + length + '[m]')
-                this.max_vessel_length_with_no_payment = length
+            updateMaxVesselLength: function(max_length) {
+                console.log('updateMaxVesselLength')
+                //this.max_vessel_length_with_no_payment = max_length
+                let combined_length = 0
+                if (this.max_vessel_length_for_main_component == null && this.max_vessel_length_for_aa_component == null){
+                    combined_length = null
+                } else {
+                    if (this.max_vessel_length_for_main_component == null){
+                        // aa component has a value
+                        combined_length = this.max_vessel_length_for_aa_component
+                    } else if (this.max_vessel_length_for_aa_component == null){
+                        // main component has a value
+                        combined_length = this.max_vessel_length_for_main_component
+                    } else {
+                        // both have a value
+                        if (this.max_vessel_length_for_aa_component < this.max_vessel_length_for_main_component){
+                            combined_length = this.max_vessel_length_for_aa_component
+                        } else {
+                            combined_length = this.max_vessel_length_for_main_component
+                        }
+                    }
+                }
+                if (combined_length < 0){  // This can be -1, which is set as a defautl value at the vessels.vue
+                    combined_length = 0
+                }
+                this.max_vessel_length_with_no_payment = combined_length
+            },
+            updateMaxVesselLengthForAAComponent: function(length){
+                console.log('updateMaxVesselLengthForAAComponent')
+                this.max_vessel_length_for_aa_component = length
+                this.updateMaxVesselLength()
+            },
+            updateMaxVesselLengthForMainComponent: function(length){
+                console.log('updateMaxVesselLengthForMainComponent')
+                this.max_vessel_length_for_main_component = length
+                this.updateMaxVesselLength()
             },
             noVessel: async function(noVessel) {
                 await this.$emit("noVessel", noVessel);
