@@ -3266,11 +3266,12 @@ class Mooring(RevisionedMixin):
                     status = 'Licence Application'
         return status if status else 'Unlicensed'
 
-    def suitable_vessel(self, vessel_details=None):
+    #def suitable_vessel(self, vessel_details=None):
+    def suitable_vessel(self, vessel_details):
         suitable = True
-        if not vessel_details:
-            suitable = ''
-        elif vessel_details.vessel_applicable_length > self.vessel_size_limit or vessel_details.vessel_draft > self.vessel_draft_limit:
+        #if not vessel_details:
+         #   suitable = ''
+        if vessel_details.vessel_applicable_length > self.vessel_size_limit or vessel_details.vessel_draft > self.vessel_draft_limit:
             suitable = False
         return suitable
 
