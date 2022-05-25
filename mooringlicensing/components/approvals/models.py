@@ -1078,15 +1078,20 @@ class AnnualAdmissionPermit(Approval):
     def manage_stickers(self, proposal):
         # When new
         if proposal.proposal_type.code == PROPOSAL_TYPE_NEW:
-            # New sticker created with status Ready
-            new_sticker = self._create_new_sticker_by_proposal(proposal)
+            if proposal.approval and proposal.approval.reissued:
+                proposal.processing_status = Proposal.PROCESSING_STATUS_APPROVED
+                proposal.customer_status = Proposal.CUSTOMER_STATUS_APPROVED
+                proposal.save()
+            else:
+                # New sticker created with status Ready
+                new_sticker = self._create_new_sticker_by_proposal(proposal)
 
-            # Application goes to status Printing Sticker
-            proposal.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
-            proposal.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
-            proposal.save()
+                # Application goes to status Printing Sticker
+                proposal.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
+                proposal.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
+                proposal.save()
 
-            return [], []
+                return [], []
         elif proposal.proposal_type.code == PROPOSAL_TYPE_AMENDMENT:
             if proposal.vessel_ownership == proposal.previous_application.vessel_ownership:
                 return [], []
@@ -1628,56 +1633,6 @@ class MooringLicence(Approval):
         return current_stickers
 
     def manage_stickers(self, proposal):
-#        # Retrieve all the stickers regardless of the status
-#        stickers_present = list(self.stickers.all())
-#
-#        stickers_required = []  # Store all the stickers we want to keep
-#
-#        # Loop through all the current vessels
-#        for vessel_ownership in self.vessel_ownership_list:
-#            # Look for the sticker for the vessel
-#            sticker = self.stickers.filter(
-#                status__in=(
-#                    Sticker.STICKER_STATUS_CURRENT,
-#                    Sticker.STICKER_STATUS_AWAITING_PRINTING,
-#                    Sticker.STICKER_STATUS_TO_BE_RETURNED,),
-#                vessel_ownership=vessel_ownership,
-#            )
-#            if sticker:
-#                sticker = sticker.first()
-#            else:
-#                # Sticker not found --> Create it
-#                sticker = Sticker.objects.create(
-#                    approval=self,
-#                    vessel_ownership=proposal.vessel_ownership,
-#                    fee_constructor=proposal.fee_constructor,
-#                    proposal_initiated=proposal,
-#                    fee_season=self.latest_applied_season,
-#                )
-#            stickers_required.append(sticker)
-#
-#        if proposal.proposal_type.code == PROPOSAL_TYPE_RENEWAL:
-#            for sticker_to_be_replaced in stickers_required:
-#                new_sticker = Sticker.objects.create(
-#                    approval=self,
-#                    vessel_ownership=sticker_to_be_replaced.vessel_ownership,
-#                    fee_constructor=proposal.fee_constructor if proposal.fee_constructor else sticker_to_be_replaced.fee_constructor if sticker_to_be_replaced else None,
-#                    proposal_initiated=proposal,
-#                    fee_season=self.latest_applied_season,
-#                )
-#                new_sticker.sticker_to_replace = sticker_to_be_replaced
-#                new_sticker.save()
-#            return [], []  # Is this correct?
-#
-#        else:
-#            # Calculate the stickers which are no longer needed.  Some stickers could be in the 'awaiting_printing'/'to_be_returned' status.
-#            stickers_to_be_returned = [sticker for sticker in stickers_present if sticker not in stickers_required]
-#
-#            # Update sticker status
-#            self._handle_stickers_to_be_removed(stickers_to_be_returned)
-#
-#            return [], stickers_to_be_returned
-
         if proposal.proposal_type.code == PROPOSAL_TYPE_NEW:
             # New sticker created with status Ready
             new_sticker = self._create_new_sticker_by_proposal(proposal)
