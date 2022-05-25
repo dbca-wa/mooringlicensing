@@ -1071,7 +1071,10 @@ class InternalProposalSerializer(BaseProposalSerializer):
         moorings = []
         if type(obj.child_obj) == AuthorisedUserApplication and obj.approval:
             for moa in obj.approval.mooringonapproval_set.all():
-                suitable_for_mooring = moa.mooring.suitable_vessel(obj.vessel_details)
+                suitable_for_mooring = True
+                # only do check if vessel details exist
+                if obj.vessel_details:
+                    suitable_for_mooring = moa.mooring.suitable_vessel(obj.vessel_details)
                 color = '#000000' if suitable_for_mooring else '#FF0000'
                 moorings.append({
                     "id": moa.id,
