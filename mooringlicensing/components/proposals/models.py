@@ -1063,7 +1063,8 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
         with transaction.atomic():
             vessels = []
             if type(self.child_obj) == MooringLicenceApplication:
-                vessels.append([vo.vessel for vo in self.listed_vessels])
+                # vessels.append([vo.vessel for vo in self.listed_vessels.all()])
+                vessels.extend([vo.vessel for vo in self.listed_vessels.all()])
             else:
                 vessels.append(self.vessel_details.vessel)
             # Non MLA
