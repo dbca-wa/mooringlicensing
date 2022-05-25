@@ -456,12 +456,10 @@ def calculate_minimum_max_length(fee_items_interested, max_amount_paid):
         return max_length
 
 
-def calculate_max_length(fee_constructor, max_amount_paid):
+def calculate_max_length(fee_constructor, max_amount_paid, proposal_type):
     # All the amendment FeeItems interested
     # Ordered by 'start_size' ascending order, which means the cheapest fee_item first.
-    fee_items_interested = fee_constructor.feeitem_set.filter(
-        proposal_type=ProposalType.objects.get(code=settings.PROPOSAL_TYPE_AMENDMENT)
-    ).order_by('vessel_size_category__start_size')
+    fee_items_interested = fee_constructor.feeitem_set.filter(proposal_type=proposal_type).order_by('vessel_size_category__start_size')
     max_length = calculate_minimum_max_length(fee_items_interested, max_amount_paid)
     return max_length
 

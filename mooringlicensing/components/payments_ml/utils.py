@@ -183,6 +183,9 @@ def generate_line_item(application_type, fee_amount_adjusted, fee_constructor, i
     vessel_rego_no = v_rego_no
     if not vessel_rego_no and instance.vessel_details and instance.vessel_details.vessel:
         vessel_rego_no = instance.vessel_details.vessel.rego_no
+    if not vessel_rego_no:
+        # We want to show something rather than empty string
+        vessel_rego_no = 'no vessel'
 
     proposal_type_text = '{}'.format(instance.proposal_type.description) if hasattr(instance, 'proposal_type') else ''
     return {
