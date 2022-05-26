@@ -977,7 +977,6 @@ class WaitingListAllocation(Approval):
     def manage_stickers(self, proposal):
         # No stickers for WL
         proposal.processing_status = Proposal.PROCESSING_STATUS_APPROVED
-        proposal.customer_status = Proposal.CUSTOMER_STATUS_APPROVED
         proposal.save()
         return [], []
 
@@ -1080,7 +1079,6 @@ class AnnualAdmissionPermit(Approval):
         if proposal.proposal_type.code == PROPOSAL_TYPE_NEW:
             if proposal.approval and proposal.approval.reissued:
                 proposal.processing_status = Proposal.PROCESSING_STATUS_APPROVED
-                proposal.customer_status = Proposal.CUSTOMER_STATUS_APPROVED
                 proposal.save()
             else:
                 # New sticker created with status Ready
@@ -1088,7 +1086,6 @@ class AnnualAdmissionPermit(Approval):
 
                 # Application goes to status Printing Sticker
                 proposal.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
-                proposal.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
                 proposal.save()
 
                 return [], []
@@ -1110,7 +1107,6 @@ class AnnualAdmissionPermit(Approval):
                         # When the application does not change to new vessel,
                         # it gets 'printing_sticker' status
                         proposal.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
-                        proposal.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
                         proposal.save()
                     else:
                         # When the application changes to new vessel
@@ -1118,12 +1114,10 @@ class AnnualAdmissionPermit(Approval):
                         new_sticker.status = Sticker.STICKER_STATUS_NOT_READY_YET
                         new_sticker.save()
                         proposal.processing_status = Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED
-                        proposal.customer_status = Proposal.CUSTOMER_STATUS_STICKER_TO_BE_RETURNED
                         proposal.save()
                 else:
                     # Even when 'amendment' application, there might be no current stickers because of sticker-lost, etc
                     proposal.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
-                    proposal.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
                     proposal.save()
 
                 return [], list(current_stickers)
@@ -1147,7 +1141,6 @@ class AnnualAdmissionPermit(Approval):
 
                 # Application goes to status Printing Sticker
                 proposal.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
-                proposal.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
                 proposal.save()
 
                 return [], []
@@ -1639,7 +1632,6 @@ class MooringLicence(Approval):
 
             # Application goes to status Printing Sticker
             proposal.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
-            proposal.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
             proposal.save()
 
             return [], []
@@ -1680,10 +1672,8 @@ class MooringLicence(Approval):
 
             if new_sticker_created:
                 proposal.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
-                proposal.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
             else:
                 proposal.processing_status = Proposal.PROCESSING_STATUS_APPROVED
-                proposal.customer_status = Proposal.CUSTOMER_STATUS_APPROVED
             proposal.save()
 
             return [], stickers_to_be_returned
@@ -1722,7 +1712,6 @@ class MooringLicence(Approval):
 
             if len(stickers_required):
                 proposal.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
-                proposal.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
                 proposal.save()
 
             return [], []  # Is this correct?
@@ -2413,28 +2402,27 @@ class Sticker(models.Model):
         self.update_other_stickers()
 
     def update_other_stickers(self):
-        stickers_not_ready_yet = self.approval.stickers.filter(status=Sticker.STICKER_STATUS_NOT_READY_YET)
         stickers_to_be_returned = self.approval.stickers.filter(status=Sticker.STICKER_STATUS_TO_BE_RETURNED)
         proposals_initiated = []
 
         if stickers_to_be_returned:
             # There is still a sticker to be returned
-            # Make sure current proposal with 'sticker_to_be_returned'?  It should be already with 'sticker_to_be_returned' status set at the final approval.
-            pass
+            # Make sure current proposal with 'sticker_to_be_returned'. However, it should be already with 'sticker_to_be_returned' status set at the final approval.
+            self.approval.current_proposal.processing_status = Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED
+            self.approval.current_proposal.save()
         else:
             # There are no stickers to be returned
-            # change 'Not ready yet' stickers to 'Ready' so that it is picked up for exporting.
+            stickers_not_ready_yet = self.approval.stickers.filter(status=Sticker.STICKER_STATUS_NOT_READY_YET)
             for sticker in stickers_not_ready_yet:
+                # change 'Not ready yet' stickers to 'Ready' so that it is picked up for exporting.
                 sticker.status = Sticker.STICKER_STATUS_READY
                 sticker.save()
-                if sticker.proposal_initiated and sticker.proposal_initiated not in proposals_initiated:
-                    proposals_initiated.append(sticker.proposal_initiated)
+                proposals_initiated.append(sticker.proposal_initiated)
+                proposals_initiated = list(set(proposals_initiated))
 
-            stickers_being_printed = self.approval.stickers.filter(
-                status__in=[
-                    Sticker.STICKER_STATUS_READY,
-                    Sticker.STICKER_STATUS_AWAITING_PRINTING,
-                ]
+            stickers_being_printed = self.approval.stickers.filter(status__in=[
+                Sticker.STICKER_STATUS_READY,
+                Sticker.STICKER_STATUS_AWAITING_PRINTING,]
             )
 
             # Update current proposal's status if needed
@@ -2442,25 +2430,22 @@ class Sticker(models.Model):
                 # There is a sticker being printed
                 if self.approval.current_proposal.processing_status in [Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED,]:
                     self.approval.current_proposal.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
-                    self.approval.current_proposal.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
                     self.approval.current_proposal.save()
             else:
                 # There are not stickers to be printed
                 if self.approval.current_proposal.processing_status in [Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED,]:
                     self.approval.current_proposal.processing_status = Proposal.PROCESSING_STATUS_APPROVED
-                    self.approval.current_proposal.customer_status = Proposal.CUSTOMER_STATUS_APPROVED
                     self.approval.current_proposal.save()
 
-        # Update initiated proposal's status if needed.  initiated proposal may not be the current proposal now.
-        for proposal in proposals_initiated:
-            if proposal.processing_status == Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED:
-                stickers_to_be_returned = Sticker.objects.filter(status=Sticker.STICKER_STATUS_TO_BE_RETURNED, proposal_initiated=proposal)
-                if not stickers_to_be_returned.count():
-                    # If proposal is in 'Sticker to be Returned' status and there are no stickers with 'To be returned' status,
-                    # this proposal should get the status 'Printing Sticker'
-                    proposal.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
-                    proposal.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
-                    proposal.save()
+            # Update initiated proposal's status if needed.  initiated proposal may not be the current proposal now.
+#            for proposal in proposals_initiated:
+#                if proposal.processing_status == Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED:
+#                    stickers_to_be_returned = Sticker.objects.filter(status=Sticker.STICKER_STATUS_TO_BE_RETURNED, proposal_initiated=proposal)
+#                    if not stickers_to_be_returned.count():
+#                        # If proposal is in 'Sticker to be Returned' status and there are no stickers with 'To be returned' status,
+#                        # this proposal should get the status 'Printing Sticker'
+#                        proposal.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
+#                        proposal.save()
 
     def request_replacement(self, new_status):
         self.status = new_status

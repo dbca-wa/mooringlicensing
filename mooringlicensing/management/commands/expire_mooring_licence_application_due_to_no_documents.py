@@ -62,7 +62,6 @@ class Command(BaseCommand):
         for a in MooringLicenceApplication.objects.filter(queries):
             try:
                 a.processing_status = Proposal.PROCESSING_STATUS_EXPIRED
-                a.customer_status = Proposal.CUSTOMER_STATUS_EXPIRED
                 a.save()
                 # update WLA internal_status and queue date
                 a.waiting_list_allocation.internal_status = 'waiting'
