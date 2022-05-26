@@ -703,7 +703,6 @@ class ApplicationFeeSuccessView(TemplateView):
                             proposal.save()
 
                         proposal.processing_status = Proposal.PROCESSING_STATUS_WITH_ASSESSOR
-                        # proposal.customer_status = Proposal.CUSTOMER_STATUS_WITH_ASSESSOR
                         proposal.save()
 
                 else:

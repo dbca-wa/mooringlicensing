@@ -640,13 +640,11 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
         return final_status
 
     def endorse_approved(self, request):
-        # self.customer_status = Proposal.CUSTOMER_STATUS_WITH_ASSESSOR
         self.processing_status = Proposal.PROCESSING_STATUS_WITH_ASSESSOR
 
         self.save()
 
     def endorse_declined(self, request):
-        # self.customer_status = Proposal.CUSTOMER_STATUS_DECLINED
         self.processing_status = Proposal.PROCESSING_STATUS_DECLINED
 
         self.save()
@@ -1090,7 +1088,6 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
 
         if self.processing_status != status:
             if self.processing_status == Proposal.PROCESSING_STATUS_WITH_APPROVER:
-                # self.customer_status = Proposal.CUSTOMER_STATUS_WITH_APPROVER
                 self.approver_comment = ''
                 if approver_comment:
                     self.approver_comment = approver_comment
@@ -1144,7 +1141,6 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                 self.berth_mooring = vessel_details.berth_mooring if vessel_details else ''
 
                 self.processing_status = Proposal.PROCESSING_STATUS_WITH_ASSESSOR
-                # self.customer_status = Proposal.CUSTOMER_STATUS_WITH_ASSESSOR
                 self.proposed_issuance_approval = {}
                 self.save()
                 self.approval.reissued=True
@@ -1209,7 +1205,6 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                 )
                 self.proposed_decline_status = True
                 self.processing_status = Proposal.PROCESSING_STATUS_DECLINED
-                # self.customer_status = Proposal.CUSTOMER_STATUS_DECLINED
                 self.save()
                 # Log proposal action
                 self.log_user_action(ProposalUserAction.ACTION_DECLINE.format(self.id),request)
@@ -1440,7 +1435,6 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
 
                 # set proposal status to approved - can change later after manage_stickers
                 self.processing_status = Proposal.PROCESSING_STATUS_APPROVED
-                # self.customer_status = Proposal.CUSTOMER_STATUS_APPROVED
                 self.save()
 
                 # Update stickers
@@ -1529,7 +1523,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                 if not request or (request and self.approval and self.approval.reissued):
                     # system reissue or admin reissue
                     approval, created = self.child_obj.update_or_create_approval(datetime.datetime.now(pytz.timezone(TIME_ZONE)), request)
-                    # self.refresh_from_db()
+                    self.refresh_from_db()  # Reflect child_ojb's attributes, such as processing_status, to this proposal object.
                     self.approval = approval.approval
                     self.save()
                 else:
@@ -1546,10 +1540,10 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                         # Call a function where mooringonapprovals and stickers are handled, because when total_amount == 0,
                         # Ledger skips the payment step, which calling the function below
                         approval, created = self.child_obj.update_or_create_approval(datetime.datetime.now(pytz.timezone(TIME_ZONE)), request=request)
+                        self.refresh_from_db()  # Reflect child_ojb's attributes, such as processing_status, to this proposal object.
                     else:
                         # proposal type must be awaiting payment
                         self.processing_status = Proposal.PROCESSING_STATUS_AWAITING_PAYMENT
-                        # self.customer_status = Proposal.CUSTOMER_STATUS_AWAITING_PAYMENT
                         self.save()
 
                         from mooringlicensing.components.payments_ml.models import FeeItem
@@ -2612,14 +2606,12 @@ class AuthorisedUserApplication(Proposal):
         if mooring_preference.lower() != 'ria':
             # When this application is AUA, and the mooring authorisation preference is not RIA
             self.processing_status = Proposal.PROCESSING_STATUS_AWAITING_ENDORSEMENT
-            # self.customer_status = Proposal.CUSTOMER_STATUS_AWAITING_ENDORSEMENT
             self.save()
             # Email to endorser
             send_endorsement_of_authorised_user_application_email(request, self)
             send_confirmation_email_upon_submit(request, self, False)
         else:
             self.processing_status = Proposal.PROCESSING_STATUS_WITH_ASSESSOR
-            # self.customer_status = Proposal.CUSTOMER_STATUS_WITH_ASSESSOR
             self.save()
             send_confirmation_email_upon_submit(request, self, False)
             if not self.auto_approve:
@@ -2724,7 +2716,6 @@ class AuthorisedUserApplication(Proposal):
 
         # set proposal status to approved - can change later after manage_stickers
         self.processing_status = Proposal.PROCESSING_STATUS_APPROVED
-        # self.customer_status = Proposal.CUSTOMER_STATUS_APPROVED
         self.save()
 
         # Retrieve newely added moorings, and send authorised user summary doc to the licence holder
@@ -2747,19 +2738,15 @@ class AuthorisedUserApplication(Proposal):
         if len(stickers_to_be_returned):
             # there is a sticker to be returned, application status gets 'Sticker to be Returned' status
             self.processing_status = Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED
-            # self.customer_status = Proposal.CUSTOMER_STATUS_STICKER_TO_BE_RETURNED
             self.log_user_action(ProposalUserAction.ACTION_STICKER_TO_BE_RETURNED.format(self.id), request)
         elif stickers_to_be_printed:
             self.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
-            # self.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
             self.log_user_action(ProposalUserAction.ACTION_PRINTING_STICKER.format(self.id),)
         elif self.auto_approve:
             self.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
-            # self.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
             self.log_user_action(ProposalUserAction.ACTION_PRINTING_STICKER.format(self.id),)
         else:
             self.processing_status = Proposal.PROCESSING_STATUS_APPROVED
-            # self.customer_status = Proposal.CUSTOMER_STATUS_APPROVED
         self.save()
         self.refresh_from_db()
 
@@ -2993,7 +2980,6 @@ class MooringLicenceApplication(Proposal):
     def process_after_submit_other_documents(self, request):
         # Somehow in this function, followings update parent too as we expected as polymorphism
         self.processing_status = Proposal.PROCESSING_STATUS_WITH_ASSESSOR
-        # self.customer_status = Proposal.CUSTOMER_STATUS_WITH_ASSESSOR
         if self.waiting_list_allocation:
             self.waiting_list_allocation.internal_status = 'submitted'
             self.waiting_list_allocation.save()
@@ -3016,11 +3002,9 @@ class MooringLicenceApplication(Proposal):
         self.log_user_action(ProposalUserAction.ACTION_LODGE_APPLICATION.format(self.id), request)
         if self.proposal_type in (ProposalType.objects.filter(code__in=(PROPOSAL_TYPE_RENEWAL, PROPOSAL_TYPE_AMENDMENT))):
             self.processing_status = Proposal.PROCESSING_STATUS_WITH_ASSESSOR
-            # self.customer_status = Proposal.CUSTOMER_STATUS_WITH_ASSESSOR
             self.save()
         else:
             self.processing_status = Proposal.PROCESSING_STATUS_AWAITING_DOCUMENTS
-            # self.customer_status = Proposal.CUSTOMER_STATUS_AWAITING_DOCUMENTS
             self.save()
             send_documents_upload_for_mooring_licence_application_email(request, self)
 
@@ -3133,7 +3117,6 @@ class MooringLicenceApplication(Proposal):
 
             # set proposal status to approved - can change later after manage_stickers
             self.processing_status = Proposal.PROCESSING_STATUS_APPROVED
-            # self.customer_status = Proposal.CUSTOMER_STATUS_APPROVED
             self.save()
 
             # manage stickers
@@ -3821,7 +3804,6 @@ class AmendmentRequest(ProposalRequest):
                     proposal = self.proposal
                     if proposal.processing_status != 'draft':
                         proposal.processing_status = 'draft'
-                        # proposal.customer_status = 'draft'
                         proposal.save()
                     # Create a log entry for the proposal
                     proposal.log_user_action(ProposalUserAction.ACTION_ID_REQUEST_AMENDMENTS, request)
@@ -4019,7 +4001,6 @@ def clone_proposal_with_status_reset(original_proposal):
     with transaction.atomic():
         try:
             proposal = type(original_proposal.child_obj).objects.create()
-            # proposal.customer_status = 'draft'
             proposal.processing_status = 'draft'
             proposal.previous_application = original_proposal
             proposal.approval = original_proposal.approval

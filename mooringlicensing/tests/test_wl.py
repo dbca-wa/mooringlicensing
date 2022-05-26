@@ -297,6 +297,5 @@ class WaitingListTests(APITestSetup):
         proposal = Proposal.objects.get(id=proposal_id)
         proposal.lodgement_date = datetime.now(pytz.timezone(TIME_ZONE))
         proposal.processing_status = 'with_assessor'
-        # proposal.customer_status = 'with_assessor'
         proposal.save()
 

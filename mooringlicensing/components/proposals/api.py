@@ -1197,7 +1197,6 @@ class ProposalViewSet(viewsets.ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         instance.processing_status = Proposal.PROCESSING_STATUS_DISCARDED
-        # instance.customer_status = Proposal.CUSTOMER_STATUS_DISCARDED
         instance.previous_application = None
         instance.save()
         ## ML
