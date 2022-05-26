@@ -378,7 +378,7 @@ def save_proponent_data_aaa(instance, request, viewset):
             # Probably this is the case that assessor put back this application to external and then external submit this.
             logger.info('Proposal {} has been submitted but already paid.  Update the status of it to {}'.format(instance.lodgement_number, Proposal.PROCESSING_STATUS_WITH_ASSESSOR))
             instance.processing_status = Proposal.PROCESSING_STATUS_WITH_ASSESSOR
-            instance.customer_status = Proposal.CUSTOMER_STATUS_WITH_ASSESSOR
+            # instance.customer_status = Proposal.CUSTOMER_STATUS_WITH_ASSESSOR
             instance.save()
 
 
@@ -409,7 +409,7 @@ def save_proponent_data_wla(instance, request, viewset):
             # Probably this is the case that assessor put back this application to external and then external submit this.
             logger.info('Proposal {} has been submitted but already paid.  Update the status of it to {}'.format(instance.lodgement_number, Proposal.PROCESSING_STATUS_WITH_ASSESSOR))
             instance.processing_status = Proposal.PROCESSING_STATUS_WITH_ASSESSOR
-            instance.customer_status = Proposal.CUSTOMER_STATUS_WITH_ASSESSOR
+            # instance.customer_status = Proposal.CUSTOMER_STATUS_WITH_ASSESSOR
             instance.save()
 
 

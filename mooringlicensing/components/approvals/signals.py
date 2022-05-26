@@ -28,7 +28,7 @@ class StickerListener(object):
             if not stickers_being_printed:
                 # When a sticker gets 'current' status and there are no stickers with being-printed statuses, update related proposal.status
                 sticker_saved.proposal_initiated.processing_status = Proposal.PROCESSING_STATUS_APPROVED
-                sticker_saved.proposal_initiated.customer_status = Proposal.CUSTOMER_STATUS_APPROVED
+                # sticker_saved.proposal_initiated.customer_status = Proposal.CUSTOMER_STATUS_APPROVED
                 sticker_saved.proposal_initiated.save()
 
         # Update the latest approval history for the approval this sticker is for

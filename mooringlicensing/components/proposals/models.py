@@ -148,6 +148,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
 
     CUSTOMER_STATUS_DRAFT = 'draft'
     CUSTOMER_STATUS_WITH_ASSESSOR = 'with_assessor'
+    CUSTOMER_STATUS_WITH_APPROVER = 'with_approver'
     CUSTOMER_STATUS_AWAITING_ENDORSEMENT = 'awaiting_endorsement'
     CUSTOMER_STATUS_AWAITING_DOCUMENTS = 'awaiting_documents'
     CUSTOMER_STATUS_STICKER_TO_BE_RETURNED = 'sticker_to_be_returned'
@@ -160,6 +161,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
     CUSTOMER_STATUS_CHOICES = (
         (CUSTOMER_STATUS_DRAFT, 'Draft'),
         (CUSTOMER_STATUS_WITH_ASSESSOR, 'Under Review'),
+        (CUSTOMER_STATUS_WITH_APPROVER, 'Under Review'),
         (CUSTOMER_STATUS_AWAITING_ENDORSEMENT, 'Awaiting Endorsement'),
         (CUSTOMER_STATUS_AWAITING_DOCUMENTS, 'Awaiting Documents'),
         (CUSTOMER_STATUS_STICKER_TO_BE_RETURNED, 'Sticker to be Returned'),
@@ -638,21 +640,40 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
         return final_status
 
     def endorse_approved(self, request):
-        self.customer_status = Proposal.CUSTOMER_STATUS_WITH_ASSESSOR
+        # self.customer_status = Proposal.CUSTOMER_STATUS_WITH_ASSESSOR
         self.processing_status = Proposal.PROCESSING_STATUS_WITH_ASSESSOR
 
         self.save()
 
     def endorse_declined(self, request):
-        self.customer_status = Proposal.CUSTOMER_STATUS_DECLINED
+        # self.customer_status = Proposal.CUSTOMER_STATUS_DECLINED
         self.processing_status = Proposal.PROCESSING_STATUS_DECLINED
 
         self.save()
-    
+
+    def update_customer_status(self):
+        matrix = {
+            Proposal.PROCESSING_STATUS_DRAFT: Proposal.CUSTOMER_STATUS_DRAFT,
+            Proposal.PROCESSING_STATUS_WITH_ASSESSOR: Proposal.CUSTOMER_STATUS_WITH_ASSESSOR,
+            Proposal.PROCESSING_STATUS_WITH_ASSESSOR_REQUIREMENTS: Proposal.CUSTOMER_STATUS_WITH_ASSESSOR,
+            Proposal.PROCESSING_STATUS_WITH_APPROVER: Proposal.CUSTOMER_STATUS_WITH_APPROVER,
+            Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED: Proposal.CUSTOMER_STATUS_STICKER_TO_BE_RETURNED,
+            Proposal.PROCESSING_STATUS_PRINTING_STICKER: Proposal.CUSTOMER_STATUS_PRINTING_STICKER,
+            Proposal.PROCESSING_STATUS_AWAITING_ENDORSEMENT: Proposal.CUSTOMER_STATUS_AWAITING_ENDORSEMENT,
+            Proposal.PROCESSING_STATUS_AWAITING_DOCUMENTS: Proposal.CUSTOMER_STATUS_AWAITING_DOCUMENTS,
+            Proposal.PROCESSING_STATUS_APPROVED: Proposal.CUSTOMER_STATUS_APPROVED,
+            Proposal.PROCESSING_STATUS_DECLINED: Proposal.CUSTOMER_STATUS_DECLINED,
+            Proposal.PROCESSING_STATUS_DISCARDED: Proposal.CUSTOMER_STATUS_DISCARDED,
+            Proposal.PROCESSING_STATUS_AWAITING_PAYMENT: Proposal.CUSTOMER_STATUS_AWAITING_PAYMENT,
+            Proposal.PROCESSING_STATUS_EXPIRED: Proposal.CUSTOMER_STATUS_EXPIRED,
+        }
+        self.customer_status = matrix[self.processing_status]
+
     def save(self, *args, **kwargs):
         kwargs.pop('version_user', None)
         kwargs.pop('version_comment', None)
         kwargs['no_revision'] = True
+        self.update_customer_status()
         super(Proposal, self).save(*args,**kwargs)
         if type(self) == Proposal:
             self.child_obj.refresh_from_db()
@@ -1069,6 +1090,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
 
         if self.processing_status != status:
             if self.processing_status == Proposal.PROCESSING_STATUS_WITH_APPROVER:
+                # self.customer_status = Proposal.CUSTOMER_STATUS_WITH_APPROVER
                 self.approver_comment = ''
                 if approver_comment:
                     self.approver_comment = approver_comment
@@ -1085,7 +1107,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
             elif self.processing_status == self.PROCESSING_STATUS_WITH_ASSESSOR_REQUIREMENTS:
                 self.log_user_action(ProposalUserAction.ACTION_ENTER_REQUIREMENTS.format(self.id), request)
 
-    def reissue_approval(self, request, status):
+    def reissue_approval(self, request):
         with transaction.atomic():
             vessels = []
             if type(self.child_obj) == MooringLicenceApplication:
@@ -1121,7 +1143,8 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                 self.vessel_weight = vessel_details.vessel_weight if vessel_details else 0.00
                 self.berth_mooring = vessel_details.berth_mooring if vessel_details else ''
 
-                self.processing_status = status
+                self.processing_status = Proposal.PROCESSING_STATUS_WITH_ASSESSOR
+                # self.customer_status = Proposal.CUSTOMER_STATUS_WITH_ASSESSOR
                 self.proposed_issuance_approval = {}
                 self.save()
                 self.approval.reissued=True
@@ -1186,7 +1209,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                 )
                 self.proposed_decline_status = True
                 self.processing_status = Proposal.PROCESSING_STATUS_DECLINED
-                self.customer_status = Proposal.CUSTOMER_STATUS_DECLINED
+                # self.customer_status = Proposal.CUSTOMER_STATUS_DECLINED
                 self.save()
                 # Log proposal action
                 self.log_user_action(ProposalUserAction.ACTION_DECLINE.format(self.id),request)
@@ -1417,7 +1440,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
 
                 # set proposal status to approved - can change later after manage_stickers
                 self.processing_status = Proposal.PROCESSING_STATUS_APPROVED
-                self.customer_status = Proposal.CUSTOMER_STATUS_APPROVED
+                # self.customer_status = Proposal.CUSTOMER_STATUS_APPROVED
                 self.save()
 
                 # Update stickers
@@ -1526,7 +1549,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                     else:
                         # proposal type must be awaiting payment
                         self.processing_status = Proposal.PROCESSING_STATUS_AWAITING_PAYMENT
-                        self.customer_status = Proposal.CUSTOMER_STATUS_AWAITING_PAYMENT
+                        # self.customer_status = Proposal.CUSTOMER_STATUS_AWAITING_PAYMENT
                         self.save()
 
                         from mooringlicensing.components.payments_ml.models import FeeItem
@@ -2589,14 +2612,14 @@ class AuthorisedUserApplication(Proposal):
         if mooring_preference.lower() != 'ria':
             # When this application is AUA, and the mooring authorisation preference is not RIA
             self.processing_status = Proposal.PROCESSING_STATUS_AWAITING_ENDORSEMENT
-            self.customer_status = Proposal.CUSTOMER_STATUS_AWAITING_ENDORSEMENT
+            # self.customer_status = Proposal.CUSTOMER_STATUS_AWAITING_ENDORSEMENT
             self.save()
             # Email to endorser
             send_endorsement_of_authorised_user_application_email(request, self)
             send_confirmation_email_upon_submit(request, self, False)
         else:
             self.processing_status = Proposal.PROCESSING_STATUS_WITH_ASSESSOR
-            self.customer_status = Proposal.CUSTOMER_STATUS_WITH_ASSESSOR
+            # self.customer_status = Proposal.CUSTOMER_STATUS_WITH_ASSESSOR
             self.save()
             send_confirmation_email_upon_submit(request, self, False)
             if not self.auto_approve:
@@ -2701,7 +2724,7 @@ class AuthorisedUserApplication(Proposal):
 
         # set proposal status to approved - can change later after manage_stickers
         self.processing_status = Proposal.PROCESSING_STATUS_APPROVED
-        self.customer_status = Proposal.CUSTOMER_STATUS_APPROVED
+        # self.customer_status = Proposal.CUSTOMER_STATUS_APPROVED
         self.save()
 
         # Retrieve newely added moorings, and send authorised user summary doc to the licence holder
@@ -2724,19 +2747,19 @@ class AuthorisedUserApplication(Proposal):
         if len(stickers_to_be_returned):
             # there is a sticker to be returned, application status gets 'Sticker to be Returned' status
             self.processing_status = Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED
-            self.customer_status = Proposal.CUSTOMER_STATUS_STICKER_TO_BE_RETURNED
+            # self.customer_status = Proposal.CUSTOMER_STATUS_STICKER_TO_BE_RETURNED
             self.log_user_action(ProposalUserAction.ACTION_STICKER_TO_BE_RETURNED.format(self.id), request)
         elif stickers_to_be_printed:
             self.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
-            self.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
+            # self.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
             self.log_user_action(ProposalUserAction.ACTION_PRINTING_STICKER.format(self.id),)
         elif self.auto_approve:
             self.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
-            self.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
+            # self.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
             self.log_user_action(ProposalUserAction.ACTION_PRINTING_STICKER.format(self.id),)
         else:
             self.processing_status = Proposal.PROCESSING_STATUS_APPROVED
-            self.customer_status = Proposal.CUSTOMER_STATUS_APPROVED
+            # self.customer_status = Proposal.CUSTOMER_STATUS_APPROVED
         self.save()
         self.refresh_from_db()
 
@@ -2970,7 +2993,7 @@ class MooringLicenceApplication(Proposal):
     def process_after_submit_other_documents(self, request):
         # Somehow in this function, followings update parent too as we expected as polymorphism
         self.processing_status = Proposal.PROCESSING_STATUS_WITH_ASSESSOR
-        self.customer_status = Proposal.CUSTOMER_STATUS_WITH_ASSESSOR
+        # self.customer_status = Proposal.CUSTOMER_STATUS_WITH_ASSESSOR
         if self.waiting_list_allocation:
             self.waiting_list_allocation.internal_status = 'submitted'
             self.waiting_list_allocation.save()
@@ -2993,11 +3016,11 @@ class MooringLicenceApplication(Proposal):
         self.log_user_action(ProposalUserAction.ACTION_LODGE_APPLICATION.format(self.id), request)
         if self.proposal_type in (ProposalType.objects.filter(code__in=(PROPOSAL_TYPE_RENEWAL, PROPOSAL_TYPE_AMENDMENT))):
             self.processing_status = Proposal.PROCESSING_STATUS_WITH_ASSESSOR
-            self.customer_status = Proposal.CUSTOMER_STATUS_WITH_ASSESSOR
+            # self.customer_status = Proposal.CUSTOMER_STATUS_WITH_ASSESSOR
             self.save()
         else:
             self.processing_status = Proposal.PROCESSING_STATUS_AWAITING_DOCUMENTS
-            self.customer_status = Proposal.CUSTOMER_STATUS_AWAITING_DOCUMENTS
+            # self.customer_status = Proposal.CUSTOMER_STATUS_AWAITING_DOCUMENTS
             self.save()
             send_documents_upload_for_mooring_licence_application_email(request, self)
 
@@ -3110,7 +3133,7 @@ class MooringLicenceApplication(Proposal):
 
             # set proposal status to approved - can change later after manage_stickers
             self.processing_status = Proposal.PROCESSING_STATUS_APPROVED
-            self.customer_status = Proposal.CUSTOMER_STATUS_APPROVED
+            # self.customer_status = Proposal.CUSTOMER_STATUS_APPROVED
             self.save()
 
             # manage stickers
@@ -3798,7 +3821,7 @@ class AmendmentRequest(ProposalRequest):
                     proposal = self.proposal
                     if proposal.processing_status != 'draft':
                         proposal.processing_status = 'draft'
-                        proposal.customer_status = 'draft'
+                        # proposal.customer_status = 'draft'
                         proposal.save()
                     # Create a log entry for the proposal
                     proposal.log_user_action(ProposalUserAction.ACTION_ID_REQUEST_AMENDMENTS, request)
@@ -3996,7 +4019,7 @@ def clone_proposal_with_status_reset(original_proposal):
     with transaction.atomic():
         try:
             proposal = type(original_proposal.child_obj).objects.create()
-            proposal.customer_status = 'draft'
+            # proposal.customer_status = 'draft'
             proposal.processing_status = 'draft'
             proposal.previous_application = original_proposal
             proposal.approval = original_proposal.approval
