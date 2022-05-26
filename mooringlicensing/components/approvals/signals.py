@@ -65,15 +65,15 @@ class StickerListener(object):
                         sticker_saved.approval.current_proposal.processing_status = Proposal.PROCESSING_STATUS_APPROVED
                         sticker_saved.approval.current_proposal.save()
 
-            # Update initiated proposal's status if needed.  initiated proposal may not be the current proposal now.
-            for proposal in proposals_initiated:
-                if proposal.processing_status == Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED:
-                    stickers_to_be_returned = Sticker.objects.filter(status=Sticker.STICKER_STATUS_TO_BE_RETURNED, proposal_initiated=proposal)
-                    if not stickers_to_be_returned.count():
-                        # If proposal is in 'Sticker to be Returned' status and there are no stickers with 'To be returned' status,
-                        # this proposal should get the status 'Printing Sticker'
-                        proposal.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
-                        proposal.save()
+                # Update initiated proposal's status if needed.  initiated proposal may not be the current proposal now.
+                for proposal in proposals_initiated:
+                    if proposal.processing_status == Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED:
+                        stickers_to_be_returned = Sticker.objects.filter(status=Sticker.STICKER_STATUS_TO_BE_RETURNED, proposal_initiated=proposal)
+                        if not stickers_to_be_returned.count() and stickers_being_printed:
+                            # If proposal is in 'Sticker to be Returned' status and there are no stickers with 'To be returned' status,
+                            # this proposal should get the status 'Printing Sticker'
+                            proposal.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
+                            proposal.save()
 
         # Update the latest approval history for the approval this sticker is for
         latest_approval_history = ApprovalHistory.objects.filter(approval=sticker_saved.approval, end_date__isnull=True).order_by('-start_date')
