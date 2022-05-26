@@ -466,6 +466,9 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                             # We are interested only in the AnnualAdmission component
                             target_vessel = fee_item_application_fee.vessel_details.vessel
                             current_approvals = target_vessel.get_current_approvals(target_date)
+                            for key, qs in current_approvals.items():
+                                # We want to exclude the approval being amended(modified)
+                                current_approvals[key] = qs.exclude(id=self.approval.id)
                             if not current_approvals['aaps'] and not current_approvals['aups'] and not current_approvals['mls']:
                                 # This is paid for AA component for a target_vessel, but that vessel is no longer on any permit/licence
                                 # In this case, we can transfer this amount
@@ -2975,7 +2978,6 @@ class MooringLicenceApplication(Proposal):
             self.lodgement_number = new_lodgment_id
             self.save()
         self.proposal.refresh_from_db()
-        print('refresh_from_db1')
 
     def process_after_submit_other_documents(self, request):
         # Somehow in this function, followings update parent too as we expected as polymorphism
