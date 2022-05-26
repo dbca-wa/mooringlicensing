@@ -941,7 +941,7 @@ class ProposalViewSet(viewsets.ModelViewSet):
         else:
             if not status in [Proposal.PROCESSING_STATUS_WITH_ASSESSOR,]:
                 raise serializers.ValidationError('The status provided is not allowed')
-        instance.reissue_approval(request, status)
+        instance.reissue_approval(request)
         serializer_class = self.internal_serializer_class()
         serializer = serializer_class(instance,context={'request':request})
         return Response(serializer.data)
@@ -1197,7 +1197,6 @@ class ProposalViewSet(viewsets.ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         instance.processing_status = Proposal.PROCESSING_STATUS_DISCARDED
-        instance.customer_status = Proposal.CUSTOMER_STATUS_DISCARDED
         instance.previous_application = None
         instance.save()
         ## ML
