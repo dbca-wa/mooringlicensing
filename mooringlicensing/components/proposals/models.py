@@ -181,7 +181,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
     # List of statuses from above that allow a customer to view an application (read-only)
     CUSTOMER_VIEWABLE_STATE = [
         CUSTOMER_STATUS_WITH_ASSESSOR,
-        CUSTOMER_STATUS_WITH_ASSESSOR,
+        CUSTOMER_STATUS_WITH_APPROVER,
         CUSTOMER_STATUS_AWAITING_PAYMENT,
         CUSTOMER_STATUS_STICKER_TO_BE_RETURNED,
         CUSTOMER_STATUS_PRINTING_STICKER,
@@ -376,7 +376,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
 
         if self.proposal_type.code not in [PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL]:
             prev_application = self.previous_application
-            max_amounts_paid = self.get_max_amounts_paid(prev_application, None)  # None: we don't mind vessel for main component
+            max_amounts_paid = self.get_max_amounts_paid(prev_application)  # None: we don't mind vessel for main component
             if self.application_type in max_amounts_paid:
                 # When there is an AAP component
                 if max_amount_paid_for_main_component < max_amounts_paid[self.application_type]:
