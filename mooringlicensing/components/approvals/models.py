@@ -1079,18 +1079,19 @@ class AnnualAdmissionPermit(Approval):
         return current_stickers
 
     def manage_stickers(self, proposal):
-        # When new
-        if proposal.proposal_type.code == PROPOSAL_TYPE_NEW:
-            if proposal.approval and proposal.approval.reissued:
-                proposal.processing_status = Proposal.PROCESSING_STATUS_APPROVED
-                proposal.save()
-            else:
-                # New sticker created with status Ready
-                new_sticker = self._create_new_sticker_by_proposal(proposal)
+        if proposal.approval and proposal.approval.reissued:
+            # Can only change the conditions, so goes to Approved
+            proposal.processing_status = Proposal.PROCESSING_STATUS_APPROVED
+            proposal.save()
+            return [], []
 
-                # Application goes to status Printing Sticker
-                proposal.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
-                proposal.save()
+        if proposal.proposal_type.code == PROPOSAL_TYPE_NEW:
+            # New sticker created with status Ready
+            new_sticker = self._create_new_sticker_by_proposal(proposal)
+
+            # Application goes to status Printing Sticker
+            proposal.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
+            proposal.save()
 
             return [], []
         elif proposal.proposal_type.code == PROPOSAL_TYPE_AMENDMENT:
@@ -1677,17 +1678,24 @@ class MooringLicence(Approval):
         return current_stickers
 
     def manage_stickers(self, proposal):
+        if proposal.approval and proposal.approval.reissued:
+            # Can only change the conditions, so goes to Approved
+            proposal.processing_status = Proposal.PROCESSING_STATUS_APPROVED
+            proposal.save()
+            return [], []
+
         if proposal.proposal_type.code == PROPOSAL_TYPE_NEW:
+            # New
             # New sticker created with status Ready
             new_sticker = self._create_new_sticker_by_proposal(proposal)
 
             # Application goes to status Printing Sticker
             proposal.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
             proposal.save()
-
             return [], []
 
         elif proposal.proposal_type.code == PROPOSAL_TYPE_AMENDMENT:
+            # Amendment (vessel(s) may be changed)
             current_stickers = self._get_current_stickers()
             stickers_required = []  # Store all the stickers we want to keep
             new_sticker_created = False
@@ -1730,6 +1738,7 @@ class MooringLicence(Approval):
             return [], stickers_to_be_returned
 
         elif proposal.proposal_type.code == PROPOSAL_TYPE_RENEWAL:
+            # Renewal (vessel changed, null vessel)
             stickers_required = []
             stickers_to_be_replaced = []
 
