@@ -2089,21 +2089,10 @@ class WaitingListApplication(Proposal):
             raise Exception(msg)
 
         # Retrieve amounts paid
-        # max_amounts_paid = self.get_max_amounts_paid_in_this_season(target_date)
         max_amount_paid = self.get_max_amount_paid_for_main_component()
 
         fee_item = fee_constructor.get_fee_item(vessel_length, self.proposal_type, target_date, accept_null_vessel=accept_null_vessel)
-        # fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length, target_date)
-        # fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length, max_amounts_paid[self.application_type])
         fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length, max_amount_paid)
-
-        if fee_item.proposal_type.code == PROPOSAL_TYPE_AMENDMENT:
-            # This application is 'Amendment' application.  fee_item is already for 'Amendment'
-            fee_item_for_amendment_calculation = fee_item
-        else:
-            # We want to store the fee_item considered to be paid in order to calculate the amount for the amendment application
-            proposal_type_amendment = ProposalType.objects.get(code=PROPOSAL_TYPE_AMENDMENT)
-            fee_item_for_amendment_calculation = fee_constructor.get_fee_item(vessel_length, proposal_type_amendment, target_date, accept_null_vessel=accept_null_vessel)
 
         db_processes_after_success['season_start_date'] = fee_constructor.fee_season.start_date.__str__()
         db_processes_after_success['season_end_date'] = fee_constructor.fee_season.end_date.__str__()
@@ -2291,20 +2280,10 @@ class AnnualAdmissionApplication(Proposal):
             raise Exception(msg)
 
         # Retrieve amounts paid
-        # max_amounts_paid = self.get_max_amounts_paid_in_this_season(target_date)
         max_amount_paid = self.get_max_amount_paid_for_main_component()
 
         fee_item = fee_constructor.get_fee_item(vessel_length, self.proposal_type, target_date, accept_null_vessel=accept_null_vessel)
-        # fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length, max_amounts_paid[self.application_type])
         fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length, max_amount_paid)
-
-#        if fee_item.proposal_type.code == PROPOSAL_TYPE_AMENDMENT:
-#            # This application is 'Amendment' application.  fee_item is already for 'Amendment'
-#            fee_item_for_amendment_calculation = fee_item
-#        else:
-#            # We want to store the fee_item considered to be paid in order to calculate the amount for the amendment application
-#            proposal_type_amendment = ProposalType.objects.get(code=PROPOSAL_TYPE_AMENDMENT)
-#            fee_item_for_amendment_calculation = fee_constructor.get_fee_item(vessel_length, proposal_type_amendment, target_date, accept_null_vessel=accept_null_vessel)
 
         db_processes_after_success['season_start_date'] = fee_constructor.fee_season.start_date.__str__()
         db_processes_after_success['season_end_date'] = fee_constructor.fee_season.end_date.__str__()
@@ -2485,12 +2464,9 @@ class AuthorisedUserApplication(Proposal):
         line_items = []
 
         # Retrieve amounts paid
-        # max_amounts_paid = self.get_max_amounts_paid_in_this_season(target_date)
         max_amount_paid = self.get_max_amount_paid_for_main_component()
 
         fee_item = fee_constructor.get_fee_item(vessel_length, self.proposal_type, target_date, accept_null_vessel=accept_null_vessel)
-        # fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length, target_date)
-        # fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length, max_amounts_paid[self.application_type])
         fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length, max_amount_paid)
         fee_items_to_store.append({
             'fee_item_id': fee_item.id,
@@ -2503,8 +2479,6 @@ class AuthorisedUserApplication(Proposal):
             # When the application has a vessel, user have to pay for the AA component, too.
             max_amount_paid = self.get_max_amount_paid_for_aa_component(target_date, self.vessel_details.vessel)
             fee_item_for_aa = fee_constructor_for_aa.get_fee_item(vessel_length, self.proposal_type, target_date) if fee_constructor_for_aa else None
-            # fee_amount_adjusted_additional = self.get_fee_amount_adjusted(fee_item_for_aa, vessel_length, target_date) if fee_item_for_aa else None
-            # fee_amount_adjusted_additional = self.get_fee_amount_adjusted(fee_item_for_aa, vessel_length, max_amounts_paid[annual_admission_type])
             fee_amount_adjusted_additional = self.get_fee_amount_adjusted(fee_item_for_aa, vessel_length, max_amount_paid)
             fee_items_to_store.append({
                 'fee_item_id': fee_item_for_aa.id,
@@ -2884,12 +2858,9 @@ class MooringLicenceApplication(Proposal):
                 raise Exception(msg)
 
         # Retrieve amounts paid
-        # max_amounts_paid = self.get_max_amounts_paid_in_this_season(target_date)
         max_amount_paid = self.get_max_amount_paid_for_main_component()
 
         fee_item = fee_constructor_for_ml.get_fee_item(vessel_length, self.proposal_type, target_date, accept_null_vessel=accept_null_vessel)
-        # fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length, target_date)
-        # fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length, max_amounts_paid[self.application_type])
         fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length, max_amount_paid)
         fee_items_to_store.append({
             'fee_item_id': fee_item.id,
@@ -2905,9 +2876,7 @@ class MooringLicenceApplication(Proposal):
             max_amount_paid = self.get_max_amount_paid_for_aa_component(target_date, vessel_details.vessel)
             # Check if there is already an AA component paid for this vessel
             fee_item_for_aa = fee_constructor_for_aa.get_fee_item(vessel_length, self.proposal_type, target_date)
-            # fee_amount_adjusted_additional = self.get_fee_amount_adjusted(fee_item_for_aa, vessel_length, target_date)
-            # fee_amount_adjusted_additional = self.get_fee_amount_adjusted(fee_item, vessel_length, max_amounts_paid[annual_admission_type])
-            fee_amount_adjusted_additional = self.get_fee_amount_adjusted(fee_item, vessel_length, max_amount_paid)
+            fee_amount_adjusted_additional = self.get_fee_amount_adjusted(fee_item_for_aa, vessel_length, max_amount_paid)
             fee_items_to_store.append({
                 'fee_item_id': fee_item_for_aa.id,
                 'vessel_details_id': vessel_details.id if vessel_details else '',
