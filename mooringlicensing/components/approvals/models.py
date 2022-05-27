@@ -889,7 +889,7 @@ class Approval(RevisionedMixin):
 
         return latest_applied_season
 
-    def _handle_stickers_to_be_removed(self, stickers_to_be_removed, stickers_to_be_replaced_for_renewal=[]):
+    def _update_stickers_to_be_removed(self, stickers_to_be_removed, stickers_to_be_replaced_for_renewal=[]):
         for sticker in stickers_to_be_removed:
             if sticker.status in [Sticker.STICKER_STATUS_CURRENT, Sticker.STICKER_STATUS_AWAITING_PRINTING,]:
                 if sticker in stickers_to_be_replaced_for_renewal:
@@ -897,6 +897,7 @@ class Approval(RevisionedMixin):
                     # When new sticker gets 'current' status, old sticker gets 'expired' status
                     pass
                 else:
+                    logger.info('Sticker: {} status was changed to to_be_returned'.format(sticker))
                     sticker.status = Sticker.STICKER_STATUS_TO_BE_RETURNED
                     sticker.save()
                 # TODO: email to the permission holder to notify the existing sticker to be returned
@@ -904,6 +905,9 @@ class Approval(RevisionedMixin):
                 # Do nothing
                 pass
             elif sticker.status in [Sticker.STICKER_STATUS_READY, Sticker.STICKER_STATUS_NOT_READY_YET,]:
+                # These sticker objects were created, but not sent to the printing company
+                # So we just make it 'cancelled'
+                logger.info('Sticker: {} status was changed to cancelled internally'.format(sticker))
                 sticker.status = Sticker.STICKER_STATUS_CANCELLED
                 sticker.save()
             else:
@@ -1088,7 +1092,7 @@ class AnnualAdmissionPermit(Approval):
                 proposal.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
                 proposal.save()
 
-                return [], []
+            return [], []
         elif proposal.proposal_type.code == PROPOSAL_TYPE_AMENDMENT:
             if proposal.vessel_ownership == proposal.previous_application.vessel_ownership:
                 return [], []
@@ -1312,10 +1316,26 @@ class AuthorisedUserPermit(Approval):
     #    return moorings_str
 
     def _get_current_moas(self):
-        moas_current = self.mooringonapproval_set. \
-            filter(Q(end_date__isnull=True) | Q(mooring__mooring_licence__status=MooringLicence.APPROVAL_STATUS_CURRENT)). \
-            filter(sticker__status__in=[Sticker.STICKER_STATUS_CURRENT, Sticker.STICKER_STATUS_AWAITING_PRINTING])
-        return moas_current
+        moas = self.mooringonapproval_set. \
+            filter(Q(end_date__isnull=True) | Q(mooring__mooring_licence__status__in=[MooringLicence.APPROVAL_STATUS_CURRENT, MooringLicence.APPROVAL_STATUS_SUSPENDED])). \
+            filter(sticker__status__in=[
+                Sticker.STICKER_STATUS_CURRENT,
+                Sticker.STICKER_STATUS_AWAITING_PRINTING,
+                Sticker.STICKER_STATUS_READY,
+                Sticker.STICKER_STATUS_NOT_READY_YET]
+            )
+        return moas
+
+    def _get_moas_to_be_removed(self):
+        moas = self.mooringonapproval_set.\
+            filter(Q(end_date__isnull=False) | ~Q(mooring__mooring_licence__status__in=[MooringLicence.APPROVAL_STATUS_CURRENT, MooringLicence.APPROVAL_STATUS_SUSPENDED])).\
+            filter(sticker__status__in=[
+                Sticker.STICKER_STATUS_CURRENT,
+                Sticker.STICKER_STATUS_AWAITING_PRINTING,
+                Sticker.STICKER_STATUS_READY,
+                Sticker.STICKER_STATUS_NOT_READY_YET]
+            )
+        return moas
 
     def manage_stickers(self, proposal):
         moas_to_be_reallocated = []  # MooringOnApproval objects to be on the new stickers
@@ -1335,8 +1355,9 @@ class AuthorisedUserPermit(Approval):
 
         # 2. Find all the moas to be removed
         # 3. Fild all the stickers to be replaced by the moas found at the #2, then find all the moas to be replaced
-        moas_to_be_removed = []
+        moas_to_be_removed = self._get_moas_to_be_removed()
         if proposal.proposal_type.code == PROPOSAL_TYPE_RENEWAL:
+            # When Renewal/reissuedRenewal, (vessel changed, null vessel)
             # When renewal, all the current/awaiting_printing stickers to be replaced
             # All the sticker gets 'expired' status once payment made
             moas_current = self._get_current_moas()
@@ -1344,31 +1365,25 @@ class AuthorisedUserPermit(Approval):
                 if moa.sticker not in stickers_to_be_replaced:
                     stickers_to_be_replaced.append(moa.sticker)
                     stickers_to_be_replaced_for_renewal.append(moa.sticker)
-            moas_to_be_removed = self.mooringonapproval_set. \
-                filter(Q(end_date__isnull=False) | ~Q(mooring__mooring_licence__status=MooringLicence.APPROVAL_STATUS_CURRENT)). \
-                filter(sticker__status__in=[Sticker.STICKER_STATUS_CURRENT, Sticker.STICKER_STATUS_AWAITING_PRINTING])
         elif proposal.proposal_type.code == PROPOSAL_TYPE_AMENDMENT:
+            # When Amendment/reissuedAmendment (vessel changed)
             if proposal.vessel_ownership != proposal.previous_application.vessel_ownership:
                 # When amendment and vessel changed, all the current/awaiting_printing stickers to be replaced
                 moas_current = self._get_current_moas()
                 for moa in moas_current:
                     stickers_to_be_replaced.append(moa.sticker)
-                moas_to_be_removed = self.mooringonapproval_set. \
-                    filter(Q(end_date__isnull=False) | ~Q(mooring__mooring_licence__status=MooringLicence.APPROVAL_STATUS_CURRENT)). \
-                    filter(sticker__status__in=[Sticker.STICKER_STATUS_CURRENT, Sticker.STICKER_STATUS_AWAITING_PRINTING])
         else:
+            # When New/reissuedNew, (vessel changed)
             # MooringOnApprovals which has end_date OR related ML is not current status, but sticker is still in current/awaiting_printing status
-            moas_to_be_removed = self.mooringonapproval_set.\
-                filter(Q(end_date__isnull=False) | ~Q(mooring__mooring_licence__status=MooringLicence.APPROVAL_STATUS_CURRENT)).\
-                filter(sticker__status__in=[Sticker.STICKER_STATUS_CURRENT, Sticker.STICKER_STATUS_AWAITING_PRINTING])
             for moa in moas_to_be_removed:
                 stickers_to_be_replaced.append(moa.sticker)
 
-        # Remove duplication
-        stickers_to_be_replaced = list(set(stickers_to_be_replaced))
-
         # Handle vessel changes
         self.handle_vessel_changes(moas_to_be_reallocated, stickers_to_be_replaced)
+
+        # Remove duplication
+        moas_to_be_reallocated = list(set(moas_to_be_reallocated))
+        stickers_to_be_replaced = list(set(stickers_to_be_replaced))
 
         # Find moas on the stickers which are to be replaced
         for sticker in stickers_to_be_replaced:
@@ -1382,14 +1397,40 @@ class AuthorisedUserPermit(Approval):
         # Remove duplication
         moas_to_be_reallocated = list(set(moas_to_be_reallocated))
 
+        # We have to fill the existing unfilled sticker first.
+        self.check_unfilled_existing_sticker(moas_to_be_reallocated, stickers_to_be_returned)
+
+        # Remove duplication
+        stickers_to_be_returned = list(set(stickers_to_be_returned))
+        moas_to_be_reallocated = list(set(moas_to_be_reallocated))
+
+        # Finally, assign mooring(s) to new sticker(s)
+        self._assign_to_new_stickers(moas_to_be_reallocated, proposal, stickers_to_be_returned, stickers_to_be_replaced_for_renewal)
+        self._update_stickers_to_be_removed(stickers_to_be_returned, stickers_to_be_replaced_for_renewal)
+
+        # There may be sticker(s) to be returned by record-sale
+        stickers_return = proposal.approval.stickers.filter(status__in=[Sticker.STICKER_STATUS_TO_BE_RETURNED,])
+        for sticker in stickers_return:
+            stickers_to_be_returned.append(sticker)
+
+        # Remove duplication
+        stickers_to_be_returned = list(set(stickers_to_be_returned))
+        moas_to_be_reallocated = list(set(moas_to_be_reallocated))
+
+        return moas_to_be_reallocated, stickers_to_be_returned
+
+    def check_unfilled_existing_sticker(self, moas_to_be_reallocated, stickers_to_be_returned):
         if len(moas_to_be_reallocated) > 0:
             # There is at least one mooring to be allocated to a new sticker
             if len(moas_to_be_reallocated) % 4 != 0:
                 # The number of moorings to be allocated is not a multiple of 4, which requires existing non-filled sticker to be replaced, too
                 # Find sticker which doesn't have 4 moorings on it
                 stickers = self.stickers.filter(
-                    status__in=(Sticker.STICKER_STATUS_CURRENT, Sticker.STICKER_STATUS_AWAITING_PRINTING)).annotate(
-                    num_of_moorings=Count('mooringonapproval')).filter(num_of_moorings__lt=4)
+                    status__in=(Sticker.STICKER_STATUS_CURRENT, Sticker.STICKER_STATUS_AWAITING_PRINTING,
+                                Sticker.STICKER_STATUS_READY, Sticker.STICKER_STATUS_NOT_READY_YET)
+                ).annotate(
+                    num_of_moorings=Count('mooringonapproval')
+                ).filter(num_of_moorings__lt=4)
                 if stickers.count() == 1:
                     # There is one sticker found, which doesn't have 4 moorings
                     sticker = stickers.first()
@@ -1398,62 +1439,62 @@ class AuthorisedUserPermit(Approval):
                         moas_to_be_reallocated.append(moa)
                 elif stickers.count() > 1:
                     # Should not reach here
-                    raise ValueError('AUP: {} has more than one stickers without 4 moorings'.format(self.lodgement_number))
-
-        # Remove duplication
-        stickers_to_be_returned = list(set(stickers_to_be_returned))
-        moas_to_be_reallocated = list(set(moas_to_be_reallocated))
-
-        # Finally, assign mooring(s) to new sticker(s)
-        self._assign_to_new_stickers(moas_to_be_reallocated, proposal, stickers_to_be_returned, stickers_to_be_replaced_for_renewal)
-        self._handle_stickers_to_be_removed(stickers_to_be_returned, stickers_to_be_replaced_for_renewal)
-
-        # There may be sticker(s) to be returned by record-sale
-        stickers_return = proposal.approval.stickers.filter(status__in=[Sticker.STICKER_STATUS_TO_BE_RETURNED,])
-        for sticker in stickers_return:
-            stickers_to_be_returned.append(sticker)
-
-        return moas_to_be_reallocated, stickers_to_be_returned
+                    raise ValueError(
+                        'AUP: {} has more than one stickers without 4 moorings'.format(self.lodgement_number)
+                        )
+            else:
+                # Because the number of moorings to be on new stickers is a multiple of 4,
+                # We just assign all of them to new stickers rather than finding out an existing sticker which is not filled with 4 moorings
+                pass
 
     def handle_vessel_changes(self, moas_to_be_reallocated, stickers_to_be_replaced):
+        stickers = self.stickers.filter(status__in=[
+            Sticker.STICKER_STATUS_CURRENT,
+            Sticker.STICKER_STATUS_AWAITING_PRINTING,
+            Sticker.STICKER_STATUS_READY,
+            Sticker.STICKER_STATUS_NOT_READY_YET,
+        ])
+
         if self.approval.current_proposal.vessel_removed:
             # self.current_proposal.vessel_ownership.vessel_removed --> All the stickers to be returned
             # A vessel --> No vessels
-            stickers = self.stickers.filter(
-                status__in=[Sticker.STICKER_STATUS_CURRENT, Sticker.STICKER_STATUS_AWAITING_PRINTING])
             for sticker in stickers:
-                if sticker not in stickers_to_be_replaced:
-                    stickers_to_be_replaced.append(sticker)
+                stickers_to_be_replaced.append(sticker)
+
         if self.approval.current_proposal.vessel_swapped:
             # All the stickers to be removed and all the mooring on them to be reallocated
             # A vessel --> Another vessel
-            stickers = self.stickers.filter(
-                status__in=[Sticker.STICKER_STATUS_CURRENT, Sticker.STICKER_STATUS_AWAITING_PRINTING])
             for sticker in stickers:
-                if sticker not in stickers_to_be_replaced:
-                    stickers_to_be_replaced.append(sticker)
-        if self.approval.current_proposal.vessel_amend_new:
+                stickers_to_be_replaced.append(sticker)
+
+        if self.approval.current_proposal.vessel_null_to_new:
             # --> Create new sticker
             # No vessels --> New vessel
+            # All moas should be on new stickers
             moas_list = self.mooringonapproval_set. \
-                filter(
-                Q(end_date__isnull=True) & Q(mooring__mooring_licence__status=MooringLicence.APPROVAL_STATUS_CURRENT))
+                filter(Q(end_date__isnull=True) & Q(mooring__mooring_licence__status__in=[MooringLicence.APPROVAL_STATUS_CURRENT,MooringLicence.APPROVAL_STATUS_SUSPENDED]))
             for moa in moas_list:
-                if moa not in moas_to_be_reallocated:
-                    moas_to_be_reallocated.append(moa)
+                moas_to_be_reallocated.append(moa)
 
     def _assign_to_new_stickers(self, moas_to_be_on_new_sticker, proposal, stickers_to_be_returned, stickers_to_be_replaced_for_renewal=[]):
+        new_stickers = []
+
+        if len(stickers_to_be_returned):
+            a_sticker = stickers_to_be_returned[0]
+            if a_sticker.vessel_ownership.vessel.rego_no == proposal.vessel_ownership.vessel.rego_no:
+                new_status = Sticker.STICKER_STATUS_READY
+            else:
+                # We don't want to print a new sticker if there is a sticker with 'to_be_returned' status for this permit
+                new_status = Sticker.STICKER_STATUS_NOT_READY_YET  # This sticker gets 'ready' status once the sticker with 'to be returned' status is returned.
+        else:
+            new_status = Sticker.STICKER_STATUS_READY
+
         new_sticker = None
         for moa_to_be_on_new_sticker in moas_to_be_on_new_sticker:
             if not new_sticker or new_sticker.mooringonapproval_set.count() % 4 == 0:
                 # There is no stickers to fill, or there is a sticker but already be filled with 4 moas, create a new sticker
                 # stickers_to_be_returned = Sticker.objects.filter(approval=self, status__in=[Sticker.STICKER_STATUS_TO_BE_RETURNED,])
                 # if proposal.proposal_type.code == PROPOSAL_TYPE_AMENDMENT and proposal.vessel_ownership != proposal.previous_application.vessel_ownership:
-                if len(stickers_to_be_returned):
-                    # We don't want to print a new sticker if there is a sticker with 'to_be_returned' status for this permit
-                    new_status = Sticker.STICKER_STATUS_NOT_READY_YET  # This sticker gets 'ready' status once the sticker with 'to be returned' status is returned.
-                else:
-                    new_status = Sticker.STICKER_STATUS_READY
                 new_sticker = Sticker.objects.create(
                     approval=self,
                     vessel_ownership=moa_to_be_on_new_sticker.sticker.vessel_ownership if moa_to_be_on_new_sticker.sticker else proposal.vessel_ownership,
@@ -1462,6 +1503,7 @@ class AuthorisedUserPermit(Approval):
                     fee_season=self.latest_applied_season,
                     status=new_status
                 )
+                new_stickers.append(new_sticker)
             if moa_to_be_on_new_sticker.sticker in stickers_to_be_replaced_for_renewal:
                 # Store old sticker in the new sticker in order to set 'expired' status to it once the new sticker gets 'current' status
                 new_sticker.sticker_to_replace = moa_to_be_on_new_sticker.sticker
@@ -1469,6 +1511,8 @@ class AuthorisedUserPermit(Approval):
             # Update moa by a new sticker
             moa_to_be_on_new_sticker.sticker = new_sticker
             moa_to_be_on_new_sticker.save()
+
+        return new_stickers
 
 
 class MooringLicence(Approval):
@@ -1675,7 +1719,7 @@ class MooringLicence(Approval):
             stickers_to_be_returned = [sticker for sticker in current_stickers if sticker not in stickers_required]
 
             # Update sticker status
-            self._handle_stickers_to_be_removed(stickers_to_be_returned)
+            self._update_stickers_to_be_removed(stickers_to_be_returned)
 
             if new_sticker_created:
                 proposal.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER

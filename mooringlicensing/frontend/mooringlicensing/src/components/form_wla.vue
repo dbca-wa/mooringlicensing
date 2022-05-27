@@ -176,7 +176,7 @@
                 higherVesselCategory: false,
                 max_vessel_length_with_no_payment: 0,
                 max_vessel_length_for_main_component: 0,
-                max_vessel_length_for_aa_component: 0,
+                //max_vessel_length_for_aa_component: 0,
             }
         },
         components: {
@@ -217,33 +217,34 @@
             updateMaxVesselLength: function(max_length) {
                 console.log('updateMaxVesselLength')
                 //this.max_vessel_length_with_no_payment = max_length
-                let combined_length = 0
-                if (this.max_vessel_length_for_main_component == null && this.max_vessel_length_for_aa_component == null){
-                    combined_length = null
-                } else {
-                    if (this.max_vessel_length_for_main_component == null){
-                        // aa component has a value
-                        combined_length = this.max_vessel_length_for_aa_component
-                    } else if (this.max_vessel_length_for_aa_component == null){
-                        // main component has a value
-                        combined_length = this.max_vessel_length_for_main_component
-                    } else {
-                        // both have a value
-                        if (this.max_vessel_length_for_aa_component < this.max_vessel_length_for_main_component){
-                            combined_length = this.max_vessel_length_for_aa_component
-                        } else {
-                            combined_length = this.max_vessel_length_for_main_component
-                        }
-                    }
-                }
-                if (combined_length < 0){  // This can be -1, which is set as a defautl value at the vessels.vue
-                    combined_length = 0
-                }
-                this.max_vessel_length_with_no_payment = combined_length
+//                let combined_length = 0
+//                if (this.max_vessel_length_for_main_component == null && this.max_vessel_length_for_aa_component == null){
+//                    combined_length = null
+//                } else {
+//                    if (this.max_vessel_length_for_main_component == null){
+//                        // aa component has a value
+//                        combined_length = this.max_vessel_length_for_aa_component
+//                    } else if (this.max_vessel_length_for_aa_component == null){
+//                        // main component has a value
+//                        combined_length = this.max_vessel_length_for_main_component
+//                    } else {
+//                        // both have a value
+//                        if (this.max_vessel_length_for_aa_component < this.max_vessel_length_for_main_component){
+//                            combined_length = this.max_vessel_length_for_aa_component
+//                        } else {
+//                            combined_length = this.max_vessel_length_for_main_component
+//                        }
+//                    }
+//                }
+//                if (combined_length < 0){  // This can be -1, which is set as a defautl value at the vessels.vue
+//                    combined_length = 0
+//                }
+//                this.max_vessel_length_with_no_payment = combined_length
+                this.max_vessel_length_with_no_payment = this.max_vessel_length_for_main_component
             },
             updateMaxVesselLengthForAAComponent: function(length){
                 console.log('updateMaxVesselLengthForAAComponent')
-                this.max_vessel_length_for_aa_component = length
+                //this.max_vessel_length_for_aa_component = length
                 this.updateMaxVesselLength()
             },
             updateMaxVesselLengthForMainComponent: function(length){
