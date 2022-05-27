@@ -620,14 +620,12 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
         return changed
 
     @property
-    def vessel_amend_new(self):
-        # only for amendment
+    def vessel_null_to_new(self):
         # for AUP, AAP manage_stickers
         if type(self.child_obj) not in [AuthorisedUserApplication, AnnualAdmissionApplication]:
             raise ValidationError("Only for AUP, AAA")
         new = False
-        if (self.proposal_type is not ProposalType.objects.get(code='new') and self.vessel_ownership and
-                self.previous_application and not self.previous_application.vessel_ownership):
+        if self.vessel_ownership and self.previous_application and not self.previous_application.vessel_ownership:
             new = True
         return new
 
@@ -2739,9 +2737,19 @@ class AuthorisedUserApplication(Proposal):
             stickers_to_be_printed = self.approval.stickers.filter(status__in=[Sticker.STICKER_STATUS_NOT_READY_YET, Sticker.STICKER_STATUS_READY, Sticker.STICKER_STATUS_AWAITING_PRINTING,])
 
         if len(stickers_to_be_returned):
-            # there is a sticker to be returned, application status gets 'Sticker to be Returned' status
-            self.processing_status = Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED
-            self.log_user_action(ProposalUserAction.ACTION_STICKER_TO_BE_RETURNED.format(self.id), request)
+            a_sticker = stickers_to_be_returned[0]  # All the stickers to be returned should have the same vessel, so just pick the first one
+            if a_sticker.vessel_ownership.vessel.rego_no == self.vessel_ownership.vessel.rego_no:
+                # Same vessel
+                if stickers_to_be_printed:
+                    self.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
+                    self.log_user_action(ProposalUserAction.ACTION_PRINTING_STICKER.format(self.id), )
+                else:
+                    self.processing_status = Proposal.PROCESSING_STATUS_APPROVED
+            else:
+                # Vessel changed
+                # there is a sticker to be returned, application status gets 'Sticker to be Returned' status
+                self.processing_status = Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED
+                self.log_user_action(ProposalUserAction.ACTION_STICKER_TO_BE_RETURNED.format(self.id), request)
         elif stickers_to_be_printed:
             self.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
             self.log_user_action(ProposalUserAction.ACTION_PRINTING_STICKER.format(self.id),)

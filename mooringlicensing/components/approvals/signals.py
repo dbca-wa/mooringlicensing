@@ -43,7 +43,7 @@ class StickerListener(object):
                 for sticker in stickers_not_ready_yet:
                     # change 'Not ready yet' stickers to 'Ready' so that it is picked up for exporting.
                     sticker.status = Sticker.STICKER_STATUS_READY
-                    sticker.save()
+                    sticker.save()  # This could make infinite loop
                     proposals_initiated.append(sticker.proposal_initiated)
                     proposals_initiated = list(set(proposals_initiated))
 
