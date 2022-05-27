@@ -376,7 +376,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
 
         if self.proposal_type.code not in [PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL]:
             prev_application = self.previous_application
-            max_amounts_paid = self.get_max_amounts_paid(prev_application)  # None: we don't mind vessel for main component
+            max_amounts_paid = self.get_amounts_paid_so_far(prev_application)  # None: we don't mind vessel for main component
             if self.application_type in max_amounts_paid:
                 # When there is an AAP component
                 if max_amount_paid_for_main_component < max_amounts_paid[self.application_type]:
@@ -390,7 +390,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
         max_amount_paid_for_aa_component = 0
 
         # Get max amount for AA from this proposal history
-        max_amount_paid = self.get_max_amount_paid_for_aa_through_this_proposal(self.previous_application)
+        max_amount_paid = self.get_amount_paid_so_far_for_aa_through_this_proposal(self.previous_application)
         if max_amount_paid_for_aa_component < max_amount_paid:
             max_amount_paid_for_aa_component = max_amount_paid
 
@@ -398,7 +398,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
         current_approvals = vessel.get_current_aaps(target_date)
         for approval in current_approvals:
             # Current approval exists
-            max_amount_paid = self.get_max_amounts_paid_for_aa_through_other_approvals(approval.current_proposal, vessel)  # We mind vessel for AA component
+            max_amount_paid = self.get_amounts_paid_so_far_for_aa_through_other_approvals(approval.current_proposal, vessel)  # We mind vessel for AA component
             # if annual_admission_type in max_amounts_paid:
             # When there is an AAP component
             if max_amount_paid_for_aa_component < max_amount_paid:
@@ -449,7 +449,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
 #
 #        return max_amounts_paid
 
-    def get_max_amount_paid_for_aa_through_this_proposal(self, proposal):
+    def get_amount_paid_so_far_for_aa_through_this_proposal(self, proposal):
         target_datetime = datetime.datetime.now(pytz.timezone(TIME_ZONE))
         target_date = target_datetime.date()
         annual_admission_type = ApplicationType.objects.get(code=AnnualAdmissionApplication.code)
@@ -488,7 +488,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                 break
         return max_amount_paid
 
-    def get_max_amounts_paid(self, proposal):
+    def get_amounts_paid_so_far(self, proposal):
         max_amounts_paid = {
             ApplicationType.objects.get(code=WaitingListApplication.code): Decimal('0.0'),
             ApplicationType.objects.get(code=AnnualAdmissionApplication.code): Decimal('0.0'),
@@ -520,7 +520,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                 break
         return max_amounts_paid
 
-    def get_max_amounts_paid_for_aa_through_other_approvals(self, proposal, vessel):
+    def get_amounts_paid_so_far_for_aa_through_other_approvals(self, proposal, vessel):
         annual_admission_type = ApplicationType.objects.get(code=AnnualAdmissionApplication.code)
 
         max_amount_paid = 0
