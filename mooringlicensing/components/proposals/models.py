@@ -473,9 +473,10 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                                 # This is paid for AA component for a target_vessel, but that vessel is no longer on any permit/licence
                                 # In this case, we can transfer this amount
                                 amount_paid = fee_item_application_fee.amount_paid
-                                if max_amount_paid < amount_paid:
-                                    # The amount paid found is larger than the one stored, update it.
-                                    max_amount_paid = amount_paid
+#                                if max_amount_paid < amount_paid:
+#                                    # The amount paid found is larger than the one stored, update it.
+#                                    max_amount_paid = amount_paid
+                                max_amount_paid += amount_paid
                 if proposal.proposal_type.code in [PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL, ]:
                     # Now, 'prev_application' is the very first application for this season
                     # We are not interested in any older applications
@@ -504,9 +505,10 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                         # When not for AAP component
                         # or for AAP component and fee_item paid is for this vessel
                         amount_paid = fee_item_application_fee.amount_paid
-                        if max_amounts_paid[fee_item_application_fee.application_type] < amount_paid:
-                            # The amount paid found is larger than the one stored, update it.
-                            max_amounts_paid[fee_item_application_fee.application_type] = amount_paid
+#                        if max_amounts_paid[fee_item_application_fee.application_type] < amount_paid:
+#                            # The amount paid found is larger than the one stored, update it.
+#                            max_amounts_paid[fee_item_application_fee.application_type] = amount_paid
+                        max_amounts_paid[fee_item_application_fee.application_type] += amount_paid
                 if proposal.proposal_type.code in [PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL, ]:
                     # Now, 'prev_application' is the very first application for this season
                     # We are not interested in any older applications
@@ -533,9 +535,10 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                             # When not for AAP component
                             # or for AAP component and fee_item paid is for this vessel
                             amount_paid = fee_item_application_fee.amount_paid
-                            if max_amount_paid < amount_paid:
-                                # The amount paid found is larger than the one stored, update it.
-                                max_amount_paid = amount_paid
+#                            if max_amount_paid < amount_paid:
+#                                # The amount paid found is larger than the one stored, update it.
+#                                max_amount_paid = amount_paid
+                            max_amount_paid += amount_paid
                 if proposal.proposal_type.code in [PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL, ]:
                     # Now, 'prev_application' is the very first application for this season
                     # We are not interested in any older applications
