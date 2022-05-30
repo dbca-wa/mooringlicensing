@@ -437,9 +437,16 @@ class ProposalFilterBackend(DatatablesFilterBackend):
         getter = request.query_params.get
         fields = self.get_fields(getter)
         ordering = self.get_ordering(getter, fields)
-        queryset = queryset.order_by(*ordering)
+        #queryset = queryset.order_by(*ordering)
         if len(ordering):
+            #for num, item in enumerate(ordering):
+            #    if item == 'lodgement_number':
+            #        ordering[num] = 'id'
+            #    elif item == '-lodgement_number':
+            #        ordering[num] = '-id'
             queryset = queryset.order_by(*ordering)
+        else:
+            queryset = queryset.order_by('-id')
 
         try:
             queryset = super(ProposalFilterBackend, self).filter_queryset(request, queryset, view)
@@ -491,7 +498,8 @@ class ProposalPaginatedViewSet(viewsets.ModelViewSet):
         qs = self.filter_queryset(qs)
 
         self.paginator.page_size = qs.count()
-        result_page = self.paginator.paginate_queryset(qs.order_by('-id'), request)
+        #result_page = self.paginator.paginate_queryset(qs.order_by('-id'), request)
+        result_page = self.paginator.paginate_queryset(qs, request)
         serializer = ListProposalSerializer(result_page, context={'request': request}, many=True)
         return self.paginator.get_paginated_response(serializer.data)
 
