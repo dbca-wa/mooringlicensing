@@ -5,12 +5,6 @@
         <SearchVessel />
         <SearchMooring />
         <SearchSticker />
-
-        <FormSection :formCollapse="false" label="Search Reference Number" Index="search_reference_number">
-        </FormSection>
-
-        <FormSection :formCollapse="false" label="Search Keyword" Index="search_keyword">
-        </FormSection>
     </div>
 </template>
 
