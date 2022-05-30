@@ -244,6 +244,7 @@ export default {
                     'Vessel Registration',
                     'Vessel Name',
                     'Issue Date',
+                    'Start Date',
                     'Expiry Date',
                     'Action',
                     'Approval letter',
@@ -257,6 +258,7 @@ export default {
                     'Sticker mailed date',
                     'Status',
                     'Issue Date',
+                    'Start Date',
                     'Expiry Date',
                     'Vessel',
                     'Action',
@@ -276,6 +278,7 @@ export default {
                     'Allocation number in bay',
                     'Action',
                     'Issue Date',
+                    'Start Date',
                     'Expiry Date',
                     'Approval letter',
                     'Vessel length',
@@ -293,6 +296,7 @@ export default {
                     'Holder',
                     'Status',
                     'Issue Date',
+                    'Start Date',
                     'Expiry Date',
                     'Approval letter',
                     'Vessel Regos',
@@ -340,7 +344,8 @@ export default {
                         visible: true,
                         'render': function(row, type, full){
                             return full.current_proposal_number;
-                        }
+                        },
+                        name: "current_proposal__lodgement_number"
                     }
         },
         columnStatus: function() {
@@ -352,7 +357,8 @@ export default {
                         visible: true,
                         'render': function(row, type, full){
                             return full.status
-                        }
+                        },
+                        name: "status",
                     }
         },
         columnStatusInternal: function() {
@@ -364,7 +370,8 @@ export default {
                         visible: true,
                         'render': function(row, type, full){
                             return full.internal_status
-                        }
+                        },
+                        name: "internal_status",
                     }
         },
         columnVesselRegistration: function() {
@@ -376,7 +383,8 @@ export default {
                         visible: true,
                         'render': function(row, type, full){
                             return full.vessel_registration;
-                        }
+                        },
+                        name: "current_proposal__vessel_details__vessel__rego_no"
                     }
         },
         columnVesselName: function() {
@@ -388,7 +396,8 @@ export default {
                         visible: true,
                         'render': function(row, type, full){
                             return full.vessel_name;
-                        }
+                        },
+                        name: "current_proposal__vessel_details__vessel_name"
                     }
         },
         columnIssueDate: function() {
@@ -400,7 +409,20 @@ export default {
                         visible: true,
                         'render': function(row, type, full){
                             return full.issue_date_str;
-                        }
+                        },
+                        name: "issue_date",
+                    }
+        },
+        columnStartDate: function() {
+            return {
+                        data: "id",
+                        orderable: true,
+                        searchable: false,
+                        visible: true,
+                        'render': function(row, type, full){
+                            return full.start_date_str;
+                        },
+                        name: "start_date",
                     }
         },
         columnExpiryDate: function() {
@@ -412,7 +434,8 @@ export default {
                         visible: true,
                         'render': function(row, type, full){
                             return full.expiry_date_str;
-                        }
+                        },
+                        name: "expiry_date",
                     }
         },
         columnAction: function() {
@@ -420,7 +443,7 @@ export default {
             return {
                         // 10. Action
                         data: "id",
-                        orderable: true,
+                        orderable: false,
                         searchable: false,
                         visible: true,
                         'render': function(row, type, full){
@@ -488,7 +511,7 @@ export default {
             return {
                         // 10. Action
                         data: "id",
-                        orderable: true,
+                        orderable: false,
                         searchable: false,
                         visible: true,
                         'render': function(row, type, full){
@@ -516,7 +539,8 @@ export default {
                         visible: true,
                         'render': function(row, type, full){
                             return full.preferred_mooring_bay;
-                        }
+                        },
+                        name: "current_proposal__preferred_bay__name"
                     }
         },
         columnAllocationNumberInBay: function() {
@@ -527,7 +551,8 @@ export default {
                         visible: true,
                         'render': function(row, type, full){
                             return full.wla_order;
-                        }
+                        },
+                        name: "wla_order",
                     }
         },
 
@@ -539,7 +564,8 @@ export default {
                         visible: true,
                         'render': function(row, type, full){
                             return full.vessel_length;
-                        }
+                        },
+                        name: "current_proposal__vessel_details__vessel_length"
                     }
         },
         columnVesselDraft: function() {
@@ -550,14 +576,15 @@ export default {
                         visible: true,
                         'render': function(row, type, full){
                             return full.vessel_draft;
-                        }
+                        },
+                        name: "current_proposal__vessel_details__vessel_draft"
                     }
         },
         columnApprovalType: function() {
             //let vm = this;
             return {
                         data: "id",
-                        orderable: true,
+                        orderable: false,
                         searchable: false,
                         visible: true,
                         'render': function(row, type, full){
@@ -573,8 +600,8 @@ export default {
         columnStickerNumber: function() {
             return {
                         data: "id",
-                        orderable: true,
-                        searchable: true,
+                        orderable: false,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             let ret_str = ''
@@ -589,7 +616,7 @@ export default {
         columnStickerMailedDate: function() {
             return {
                         data: "id",
-                        orderable: true,
+                        orderable: false,
                         searchable: false,
                         visible: true,
                         'render': function(row, type, full){
@@ -603,13 +630,13 @@ export default {
                                 }
                             }
                             return ret_str
-                        }
+                        },
                     }
         },
         columnApprovalLetter: function() {
             return {
                         data: "id",
-                        orderable: true,
+                        orderable: false,
                         searchable: false,
                         visible: true,
                         'render': function(row, type, full){
@@ -681,6 +708,7 @@ export default {
                     vm.columnVesselRegistration,
                     vm.columnVesselName,
                     vm.columnIssueDate,
+                    vm.columnStartDate,
                     vm.columnExpiryDate,
                     vm.columnAction,
                     vm.columnApprovalLetter,
@@ -694,6 +722,7 @@ export default {
                     vm.columnStickerMailedDate,
                     vm.columnStatus,
                     vm.columnIssueDate,
+                    vm.columnStartDate,
                     vm.columnExpiryDate,
                     vm.columnVesselRegistration,
                     vm.columnAction,
@@ -714,6 +743,7 @@ export default {
                     vm.columnAllocationNumberInBay,
                     vm.columnAction,
                     vm.columnIssueDate,
+                    vm.columnStartDate,
                     vm.columnExpiryDate,
                     vm.columnApprovalLetter,
                     vm.columnVesselLength,
@@ -731,6 +761,7 @@ export default {
                     vm.columnHolder,
                     vm.columnStatus,
                     vm.columnIssueDate,
+                    vm.columnStartDate,
                     vm.columnExpiryDate,
                     vm.columnApprovalLetter,
                     vm.columnVesselRegos,
@@ -766,6 +797,7 @@ export default {
                 },
                 responsive: true,
                 serverSide: true,
+                lengthMenu: [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ],
                 //searching: false,
                 searching: true,
                 ajax: {

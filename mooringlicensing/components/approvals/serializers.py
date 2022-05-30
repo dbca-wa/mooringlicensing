@@ -645,6 +645,7 @@ class ListApprovalSerializer(serializers.ModelSerializer):
     approval_type_dict = serializers.SerializerMethodField()
     holder = serializers.SerializerMethodField()
     issue_date_str = serializers.SerializerMethodField()
+    start_date_str = serializers.SerializerMethodField()
     expiry_date_str = serializers.SerializerMethodField()
     vessel_length = serializers.SerializerMethodField()
     vessel_draft = serializers.SerializerMethodField()
@@ -679,6 +680,7 @@ class ListApprovalSerializer(serializers.ModelSerializer):
             'issue_date',
             'holder',
             'issue_date_str',
+            'start_date_str',
             'expiry_date_str',
             'vessel_length',
             'vessel_draft',
@@ -718,6 +720,7 @@ class ListApprovalSerializer(serializers.ModelSerializer):
             'issue_date',
             'holder',
             'issue_date_str',
+            'start_date_str',
             'expiry_date_str',
             'vessel_length',
             'vessel_draft',
@@ -963,6 +966,12 @@ class ListApprovalSerializer(serializers.ModelSerializer):
         if obj.expiry_date:
             expiry_date = obj.expiry_date.strftime('%d/%m/%Y')
         return expiry_date
+
+    def get_start_date_str(self, obj):
+        start_date = ''
+        if obj.start_date:
+            start_date = obj.start_date.strftime('%d/%m/%Y')
+        return start_date
 
 
 class LookupApprovalSerializer(serializers.ModelSerializer):

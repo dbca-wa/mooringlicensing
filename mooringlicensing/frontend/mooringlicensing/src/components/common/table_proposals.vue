@@ -163,8 +163,8 @@ export default {
             return {
                 // 3. Type (This corresponds to the 'ApplicationType' at the backend)
                 data: "id",
-                orderable: true,
-                searchable: true,
+                orderable: false,
+                searchable: false,
                 visible: true,
                 'render': function(row, type, full){
                     if (full.application_type_dict){
@@ -206,7 +206,8 @@ export default {
                         return full.processing_status
                     }
                     return full.customer_status
-                }
+                },
+                name: "processing_status",
             }
         },
         column_lodged_on: function(){
@@ -221,7 +222,8 @@ export default {
                         return moment(full.lodgement_date).format('DD/MM/YYYY')
                     }
                     return ''
-                }
+                },
+                name: "lodgement_date",
             }
         },
         /*
@@ -260,8 +262,8 @@ export default {
             return {
                 // 7. Invoice
                 data: "id",
-                orderable: true,
-                searchable: true,
+                orderable: false,
+                searchable: false,
                 visible: true,
                 'render': function(row, type, full){
                     return full.invoice_links
@@ -274,8 +276,8 @@ export default {
             return {
                 // 8. Action
                 data: "id",
-                orderable: true,
-                searchable: true,
+                orderable: false,
+                searchable: false,
                 visible: true,
                 'render': function(row, type, full){
                     let links = '';
@@ -424,6 +426,7 @@ export default {
                 },
                 responsive: true,
                 serverSide: true,
+                lengthMenu: [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ],
                 searching: search,
                 ajax: {
                     "url": api_endpoints.proposals_paginated_list + '?format=datatables&target_email_user_id=' + vm.target_email_user_id,
