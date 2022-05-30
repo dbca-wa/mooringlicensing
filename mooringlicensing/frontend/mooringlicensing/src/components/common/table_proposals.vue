@@ -424,6 +424,7 @@ export default {
                 },
                 responsive: true,
                 serverSide: true,
+                lengthMenu: [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ],
                 searching: search,
                 ajax: {
                     "url": api_endpoints.proposals_paginated_list + '?format=datatables&target_email_user_id=' + vm.target_email_user_id,
