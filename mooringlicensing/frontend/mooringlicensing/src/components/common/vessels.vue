@@ -1,5 +1,6 @@
 <template lang="html">
     <div id="vessels">
+        vessels.vue
         <FormSection label="Registration Details" Index="registration_details">
             <div class="row form-group">
                 <label for="vessel_search" class="col-sm-3 control-label">Vessel registration number</label>
@@ -219,6 +220,8 @@ from '@/utils/hooks'
                 vesselRegoNos: [],
                 selectedRego: null,
                 temporary_document_collection_id: null,
+                max_vessel_length_for_main_component: -1,
+                max_vessel_length_for_aa_component: -1,
             }
         },
         components:{
@@ -252,6 +255,16 @@ from '@/utils/hooks'
                     await this.vesselChanged();
                 },
                 deep: true
+            },
+            max_vessel_length_for_main_component: {
+                handler: function(){
+                    this.$emit("updateMaxVesselLengthForMainComponent", this.max_vessel_length_for_main_component)
+                }
+            },
+            max_vessel_length_for_aa_component: {
+                handler: function(){
+                    this.$emit("updateMaxVesselLengthForAAComponent", this.max_vessel_length_for_aa_component)
+                }
             },
         },
         computed: {
@@ -567,7 +580,7 @@ from '@/utils/hooks'
                     },
                 }).
                 on("select2:select", function (e) {
-                    //console.log("select2:select");
+                    console.log("select2:select");
                     if (!e.params.data.selected) {
                         e.preventDefault();
                         e.stopPropagation();
@@ -577,15 +590,19 @@ from '@/utils/hooks'
                     //console.log("Process select2");
                     let data = e.params.data;
                     vm.$nextTick(async () => {
+                        let max_length = 0
                         if (!data.tag) {
-                            //console.log("fetch existing vessel");
+                            console.log("fetch existing vessel");
                             // fetch draft/approved vessel
                             await vm.lookupVessel(data.id);
                             // retrieve list of Vessel Owners
                             const res = await vm.$http.get(`${api_endpoints.vessel}${data.id}/lookup_vessel_ownership`);
                             await vm.parseVesselOwnershipList(res);
+
+                            const res_for_length = await vm.$http.get(`${api_endpoints.proposal}${vm.proposal.id}/get_max_vessel_length_for_aa_component?vid=${data.id}`);
+                            vm.max_vessel_length_for_aa_component = res_for_length.body.max_length
                         } else {
-                            //console.log("new vessel");
+                            console.log("new vessel");
                             const validatedRego = vm.validateRegoNo(data.id);
 
                             vm.vessel = Object.assign({},
@@ -599,6 +616,8 @@ from '@/utils/hooks'
                                         }
                                     }
                                 });
+                            // Get minimum Max vessel length which doesn't require payments
+                            vm.max_vessel_length_for_aa_component = 0
                         }
                     });
                 }).
@@ -860,7 +879,9 @@ from '@/utils/hooks'
                 }
             });
         },
-        created: function() {
+        created: async function() {
+            let res = await this.$http.get(`${api_endpoints.proposal}${this.proposal.id}/get_max_vessel_length_for_main_component`);
+            this.max_vessel_length_for_main_component = res.body.max_length
         },
     }
 </script>

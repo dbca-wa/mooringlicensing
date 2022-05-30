@@ -3,7 +3,7 @@ from dateutil.relativedelta import relativedelta
 
 import json
 import datetime
-from _pydecimal import Decimal
+from decimal import Decimal
 import traceback
 
 import pytz
@@ -148,6 +148,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
 
     CUSTOMER_STATUS_DRAFT = 'draft'
     CUSTOMER_STATUS_WITH_ASSESSOR = 'with_assessor'
+    CUSTOMER_STATUS_WITH_APPROVER = 'with_approver'
     CUSTOMER_STATUS_AWAITING_ENDORSEMENT = 'awaiting_endorsement'
     CUSTOMER_STATUS_AWAITING_DOCUMENTS = 'awaiting_documents'
     CUSTOMER_STATUS_STICKER_TO_BE_RETURNED = 'sticker_to_be_returned'
@@ -160,6 +161,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
     CUSTOMER_STATUS_CHOICES = (
         (CUSTOMER_STATUS_DRAFT, 'Draft'),
         (CUSTOMER_STATUS_WITH_ASSESSOR, 'Under Review'),
+        (CUSTOMER_STATUS_WITH_APPROVER, 'Under Review'),
         (CUSTOMER_STATUS_AWAITING_ENDORSEMENT, 'Awaiting Endorsement'),
         (CUSTOMER_STATUS_AWAITING_DOCUMENTS, 'Awaiting Documents'),
         (CUSTOMER_STATUS_STICKER_TO_BE_RETURNED, 'Sticker to be Returned'),
@@ -179,7 +181,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
     # List of statuses from above that allow a customer to view an application (read-only)
     CUSTOMER_VIEWABLE_STATE = [
         CUSTOMER_STATUS_WITH_ASSESSOR,
-        CUSTOMER_STATUS_WITH_ASSESSOR,
+        CUSTOMER_STATUS_WITH_APPROVER,
         CUSTOMER_STATUS_AWAITING_PAYMENT,
         CUSTOMER_STATUS_STICKER_TO_BE_RETURNED,
         CUSTOMER_STATUS_PRINTING_STICKER,
@@ -317,50 +319,243 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
     def __str__(self):
         return str(self.lodgement_number)
 
-    def get_max_amount_paid_in_this_season(self):
-        prev_application = self.previous_application
+    def get_fee_amount_adjusted(self, fee_item_being_applied, vessel_length, max_amount_paid):
+        """
+        Retrieve all the fee_items for this vessel
+        """
+        fee_amount_adjusted = fee_item_being_applied.get_absolute_amount(vessel_length)
+
+        annual_admission_type = ApplicationType.objects.get(code=AnnualAdmissionApplication.code)
+        if self.proposal_type.code in (PROPOSAL_TYPE_AMENDMENT,) or fee_item_being_applied.application_type == annual_admission_type:
+            # When amendment or adjusting an AA component, amount needs to be adjusted
+            fee_amount_adjusted = fee_amount_adjusted - max_amount_paid
+            logger.info('Deduct {} from {}'.format(fee_item_being_applied, max_amount_paid))
+            fee_amount_adjusted = Decimal('0.00') if fee_amount_adjusted <= 0 else fee_amount_adjusted
+
+            logger.info('Adjusting the fee amount for proposal: {}, fee_item: {}, vessel_length: {}'.format(self.lodgement_number, fee_item_being_applied, vessel_length))
+        else:
+            pass
+
+        return fee_amount_adjusted
+
+    #    def get_max_amounts_paid_in_this_season(self, target_date, for_aa_component=False):
+#        """
+#        Return max amount paid per application_type
+#        """
+#        prev_application = self.previous_application
+#
+#        # Search through the history of proposals of the self.approval
+#        max_amounts_paid = self.get_max_amounts_paid(prev_application)
+#
+#        # For AAP component, we also have to search all the AAP components paid for this vessel in this season.
+#        if for_aa_component and self.vessel_details:
+#            # We need to search for the AA component, and this is not null vessel application
+#            annual_admission_type = ApplicationType.objects.get(code=AnnualAdmissionApplication.code)
+#            max_amount_paid_for_aap = 0
+#            current_approvals = self.vessel_details.vessel.get_current_aaps(target_date)
+#
+#            for approval in current_approvals:
+#                # Current approval exists
+#                max_amounts_paid2 = self.get_max_amounts_paid(approval.current_proposal, True)
+#                if annual_admission_type in max_amounts_paid2:
+#                    # When there is an AAP component
+#                    if max_amount_paid_for_aap < max_amounts_paid2[annual_admission_type]:
+#                        # Update variable
+#                        max_amount_paid_for_aap = max_amounts_paid2[annual_admission_type]
+#
+#            if not annual_admission_type in max_amounts_paid:
+#                max_amounts_paid[annual_admission_type] = max_amount_paid_for_aap
+#            else:
+#                if max_amounts_paid[annual_admission_type] < max_amount_paid_for_aap:
+#                    max_amounts_paid[annual_admission_type] = max_amount_paid_for_aap
+#
+#        return max_amounts_paid
+
+    def get_max_amount_paid_for_main_component(self):
+        max_amount_paid_for_main_component = 0
+
+        if self.proposal_type.code not in [PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL]:
+            prev_application = self.previous_application
+            max_amounts_paid = self.get_amounts_paid_so_far(prev_application)  # None: we don't mind vessel for main component
+            if self.application_type in max_amounts_paid:
+                # When there is an AAP component
+                if max_amount_paid_for_main_component < max_amounts_paid[self.application_type]:
+                    # Update variable
+                    max_amount_paid_for_main_component = max_amounts_paid[self.application_type]
+
+        return max_amount_paid_for_main_component
+
+    def get_max_amount_paid_for_aa_component(self, target_date, vessel):
+        annual_admission_type = ApplicationType.objects.get(code=AnnualAdmissionApplication.code)
+        max_amount_paid_for_aa_component = 0
+
+        # Get max amount for AA from this proposal history
+        max_amount_paid = self.get_amount_paid_so_far_for_aa_through_this_proposal(self.previous_application)
+        if max_amount_paid_for_aa_component < max_amount_paid:
+            max_amount_paid_for_aa_component = max_amount_paid
+
+        # Get max amount for this vessel from other current/suspended approvals
+        current_approvals = vessel.get_current_aaps(target_date)
+        for approval in current_approvals:
+            # Current approval exists
+            max_amount_paid = self.get_amounts_paid_so_far_for_aa_through_other_approvals(approval.current_proposal, vessel)  # We mind vessel for AA component
+            # if annual_admission_type in max_amounts_paid:
+            # When there is an AAP component
+            if max_amount_paid_for_aa_component < max_amount_paid:
+                # Update variable
+                max_amount_paid_for_aa_component = max_amount_paid
+
+        return max_amount_paid_for_aa_component
+
+#    def get_max_amounts_paid_in_this_season(self, target_date, vessel=None):
+#        """
+#        Return max amount paid per application_type
+#        """
+#
+#        # Note:
+#        # self.vessel_details.vessel is used for calculate main component
+#        # parameter vessel is used for additional AA component
+#
+#        prev_application = self.previous_application
+#
+#        # Search through the history of proposals of the self.approval
+#        max_amounts_paid = self.get_max_amounts_paid(prev_application, None)  # None: we don't mind vessel for main component
+#
+#        # For AAP component, we also have to search all the AAP components paid for this vessel in this season.
+#        if not vessel and self.vessel_details:
+#            # When vessel not specified, but vessel is set to this proposal
+#            vessel = self.vessel_details.vessel
+#
+#        if vessel:
+#            # We need to search for the AA component, and this is not null vessel application
+#            annual_admission_type = ApplicationType.objects.get(code=AnnualAdmissionApplication.code)
+#            max_amount_paid_for_aap = 0
+#            current_approvals = vessel.get_current_aaps(target_date)
+#
+#            for approval in current_approvals:
+#                # Current approval exists
+#                max_amounts_paid2 = self.get_max_amounts_paid(approval.current_proposal, vessel)  # We mind vessel for AA component
+#                if annual_admission_type in max_amounts_paid2:
+#                    # When there is an AAP component
+#                    if max_amount_paid_for_aap < max_amounts_paid2[annual_admission_type]:
+#                        # Update variable
+#                        max_amount_paid_for_aap = max_amounts_paid2[annual_admission_type]
+#
+#            if not annual_admission_type in max_amounts_paid:
+#                max_amounts_paid[annual_admission_type] = max_amount_paid_for_aap
+#            else:
+#                if max_amounts_paid[annual_admission_type] < max_amount_paid_for_aap:
+#                    max_amounts_paid[annual_admission_type] = max_amount_paid_for_aap
+#
+#        return max_amounts_paid
+
+    def get_amount_paid_so_far_for_aa_through_this_proposal(self, proposal):
+        target_datetime = datetime.datetime.now(pytz.timezone(TIME_ZONE))
+        target_date = target_datetime.date()
+        annual_admission_type = ApplicationType.objects.get(code=AnnualAdmissionApplication.code)
 
         max_amount_paid = 0
         max_count = 50  # To avoid infinite loop, set max number of iterations
         loop_count = 0
-
         while loop_count <= max_count:
             loop_count += 1
-            if prev_application:
-                for application_fee in prev_application.application_fees.all():
+            if proposal:
+                for application_fee in proposal.application_fees.all():
                     for fee_item_application_fee in application_fee.feeitemapplicationfee_set.all():
-                        fee_item = fee_item_application_fee.fee_item
-                        vessel_length = fee_item_application_fee.vessel_details.vessel_applicable_length
-                        amount_paid = float(fee_item.get_absolute_amount(vessel_length))
-                        if not max_amount_paid or max_amount_paid < amount_paid:
-                            max_amount_paid = amount_paid
-                if prev_application.proposal_type.code in [PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL,]:
-                    # 'prev_application' is the very first application of this season
+                        if fee_item_application_fee.application_type == annual_admission_type:
+                            # We are interested only in the AnnualAdmission component
+                            target_vessel = fee_item_application_fee.vessel_details.vessel
+                            current_approvals = target_vessel.get_current_approvals(target_date)
+                            for key, qs in current_approvals.items():
+                                # We want to exclude the approval being amended(modified)
+                                current_approvals[key] = qs.exclude(id=self.approval.id)
+                            if not current_approvals['aaps'] and not current_approvals['aups'] and not current_approvals['mls']:
+                                # This is paid for AA component for a target_vessel, but that vessel is no longer on any permit/licence
+                                # In this case, we can transfer this amount
+                                amount_paid = fee_item_application_fee.amount_paid
+#                                if max_amount_paid < amount_paid:
+#                                    # The amount paid found is larger than the one stored, update it.
+#                                    max_amount_paid = amount_paid
+                                max_amount_paid += amount_paid
+                if proposal.proposal_type.code in [PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL, ]:
+                    # Now, 'prev_application' is the very first application for this season
                     # We are not interested in any older applications
                     break
                 else:
-                    # Assign the previous application, then do above again
-                    prev_application = prev_application.previous_application
+                    # Assign the previous application, then perform checking above again
+                    proposal = proposal.previous_application
             else:
                 break
-
         return max_amount_paid
 
-#            if prev_application.proposal_type.code in [PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL,]:
-#                # 'prev_application' is the very first application of this season
-#                # We are not interested in any older applications
-#                break
-#            else:
-#                prev_application = prev_application.previous_application  # Assign the previous application, then do above again
-#
-#        if loop_count >= max_count:
-#            logger.warning('Proposal: {} has more than {} previous proposals in this season.').format(self, max_count)
-#
-#        return fee_items_interested
+    def get_amounts_paid_so_far(self, proposal):
+        max_amounts_paid = {
+            ApplicationType.objects.get(code=WaitingListApplication.code): Decimal('0.0'),
+            ApplicationType.objects.get(code=AnnualAdmissionApplication.code): Decimal('0.0'),
+            ApplicationType.objects.get(code=AuthorisedUserApplication.code): Decimal('0.0'),
+            ApplicationType.objects.get(code=MooringLicenceApplication.code): Decimal('0.0'),
+        }
+        max_count = 50  # To avoid infinite loop, set max number of iterations
+        loop_count = 0
+        while loop_count <= max_count:
+            loop_count += 1
+            if proposal:
+                for application_fee in proposal.application_fees.all():
+                    for fee_item_application_fee in application_fee.feeitemapplicationfee_set.all():
+                        # When not for AAP component
+                        # or for AAP component and fee_item paid is for this vessel
+                        amount_paid = fee_item_application_fee.amount_paid
+#                        if max_amounts_paid[fee_item_application_fee.application_type] < amount_paid:
+#                            # The amount paid found is larger than the one stored, update it.
+#                            max_amounts_paid[fee_item_application_fee.application_type] = amount_paid
+                        max_amounts_paid[fee_item_application_fee.application_type] += amount_paid
+                if proposal.proposal_type.code in [PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL, ]:
+                    # Now, 'prev_application' is the very first application for this season
+                    # We are not interested in any older applications
+                    break
+                else:
+                    # Assign the previous application, then perform checking above again
+                    proposal = proposal.previous_application
+            else:
+                break
+        return max_amounts_paid
+
+    def get_amounts_paid_so_far_for_aa_through_other_approvals(self, proposal, vessel):
+        annual_admission_type = ApplicationType.objects.get(code=AnnualAdmissionApplication.code)
+
+        max_amount_paid = 0
+        max_count = 50  # To avoid infinite loop, set max number of iterations
+        loop_count = 0
+        while loop_count <= max_count:
+            loop_count += 1
+            if proposal:
+                for application_fee in proposal.application_fees.all():
+                    for fee_item_application_fee in application_fee.feeitemapplicationfee_set.all():
+                        if fee_item_application_fee.application_type == annual_admission_type and fee_item_application_fee.vessel_details.vessel == vessel:
+                            # When not for AAP component
+                            # or for AAP component and fee_item paid is for this vessel
+                            amount_paid = fee_item_application_fee.amount_paid
+#                            if max_amount_paid < amount_paid:
+#                                # The amount paid found is larger than the one stored, update it.
+#                                max_amount_paid = amount_paid
+                            max_amount_paid += amount_paid
+                if proposal.proposal_type.code in [PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL, ]:
+                    # Now, 'prev_application' is the very first application for this season
+                    # We are not interested in any older applications
+                    break
+                else:
+                    # Assign the previous application, then perform checking above again
+                    proposal = proposal.previous_application
+            else:
+                break
+        return max_amount_paid
 
     @property
     def latest_vessel_details(self):
-        return self.vessel_ownership.vessel.latest_vessel_details
+        if self.vessel_ownership:
+            return self.vessel_ownership.vessel.latest_vessel_details
+        else:
+            return None
 
     def invoices_display(self):
         ret_list = []
@@ -428,14 +623,12 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
         return changed
 
     @property
-    def vessel_amend_new(self):
-        # only for amendment
+    def vessel_null_to_new(self):
         # for AUP, AAP manage_stickers
         if type(self.child_obj) not in [AuthorisedUserApplication, AnnualAdmissionApplication]:
             raise ValidationError("Only for AUP, AAA")
         new = False
-        if (self.proposal_type is not ProposalType.objects.get(code='new') and self.vessel_ownership and
-                self.previous_application and not self.previous_application.vessel_ownership):
+        if self.vessel_ownership and self.previous_application and not self.previous_application.vessel_ownership:
             new = True
         return new
 
@@ -451,62 +644,65 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
         return final_status
 
     def endorse_approved(self, request):
-        self.customer_status = Proposal.CUSTOMER_STATUS_WITH_ASSESSOR
         self.processing_status = Proposal.PROCESSING_STATUS_WITH_ASSESSOR
 
         self.save()
 
     def endorse_declined(self, request):
-        self.customer_status = Proposal.CUSTOMER_STATUS_DECLINED
         self.processing_status = Proposal.PROCESSING_STATUS_DECLINED
 
         self.save()
-    
+
+    def update_customer_status(self):
+        matrix = {
+            Proposal.PROCESSING_STATUS_DRAFT: Proposal.CUSTOMER_STATUS_DRAFT,
+            Proposal.PROCESSING_STATUS_WITH_ASSESSOR: Proposal.CUSTOMER_STATUS_WITH_ASSESSOR,
+            Proposal.PROCESSING_STATUS_WITH_ASSESSOR_REQUIREMENTS: Proposal.CUSTOMER_STATUS_WITH_ASSESSOR,
+            Proposal.PROCESSING_STATUS_WITH_APPROVER: Proposal.CUSTOMER_STATUS_WITH_APPROVER,
+            Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED: Proposal.CUSTOMER_STATUS_STICKER_TO_BE_RETURNED,
+            Proposal.PROCESSING_STATUS_PRINTING_STICKER: Proposal.CUSTOMER_STATUS_PRINTING_STICKER,
+            Proposal.PROCESSING_STATUS_AWAITING_ENDORSEMENT: Proposal.CUSTOMER_STATUS_AWAITING_ENDORSEMENT,
+            Proposal.PROCESSING_STATUS_AWAITING_DOCUMENTS: Proposal.CUSTOMER_STATUS_AWAITING_DOCUMENTS,
+            Proposal.PROCESSING_STATUS_APPROVED: Proposal.CUSTOMER_STATUS_APPROVED,
+            Proposal.PROCESSING_STATUS_DECLINED: Proposal.CUSTOMER_STATUS_DECLINED,
+            Proposal.PROCESSING_STATUS_DISCARDED: Proposal.CUSTOMER_STATUS_DISCARDED,
+            Proposal.PROCESSING_STATUS_AWAITING_PAYMENT: Proposal.CUSTOMER_STATUS_AWAITING_PAYMENT,
+            Proposal.PROCESSING_STATUS_EXPIRED: Proposal.CUSTOMER_STATUS_EXPIRED,
+        }
+        self.customer_status = matrix[self.processing_status]
+
     def save(self, *args, **kwargs):
         kwargs.pop('version_user', None)
         kwargs.pop('version_comment', None)
         kwargs['no_revision'] = True
+        self.update_customer_status()
         super(Proposal, self).save(*args,**kwargs)
         if type(self) == Proposal:
             self.child_obj.refresh_from_db()
 
-    @property
-    def fee_constructor(self):
-        fee_constructor = None
+    def get_main_application_fee(self):
+        main_af = None
         for af in self.application_fees.all():
             if af.fee_constructor:
-                fee_constructor = af.fee_constructor
-        return fee_constructor
+                main_af = af
+                break
+        return main_af
 
-        # if self.application_fees.count() < 1:
-        #     return None
-        # elif self.application_fees.count() == 1:
-        #     application_fee = self.application_fees.first()
-        #     return application_fee.fee_constructor
-        # else:
-        #     msg = 'Proposal: {} has {} ApplicationFees.  There should be 0 or 1.'.format(self, self.application_fees.count())
-        #     logger.error(msg)
-        #     raise ValidationError(msg)
+    @property
+    def fee_constructor(self):
+        application_fee = self.get_main_application_fee()
+        if application_fee:
+            return application_fee.fee_constructor
+        else:
+            return None
 
     @property
     def invoice(self):
         invoice = None
-        for af in self.application_fees.all():
-            if af.fee_constructor and af.invoice_reference:
-                # This invoice should not be for refund because relating to a fee_constructor
-                invoice = Invoice.objects.get(reference=af.invoice_reference)
+        application_fee = self.get_main_application_fee()
+        if application_fee:
+            invoice = Invoice.objects.get(reference=application_fee.invoice_reference)
         return invoice
-
-        # if self.application_fees.count() < 1:
-        #     return None
-        # elif self.application_fees.count() == 1:
-        #     application_fee = self.application_fees.first()
-        #     invoice = Invoice.objects.get(reference=application_fee.invoice_reference)
-        #     return invoice
-        # else:
-        #     msg = 'Proposal: {} has {} ApplicationFees.  There should be 0 or 1.'.format(self, self.application_fees.count())
-        #     logger.error(msg)
-        #     raise ValidationError(msg)
 
     @property
     def start_date(self):
@@ -514,23 +710,10 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
             return datetime.datetime(2020,9,1).date()
 
         start_date = None
-        for af in self.application_fees.all():
-            if af.fee_constructor:
-                start_date = af.fee_constructor.start_date
+        application_fee = self.get_main_application_fee()
+        if application_fee:
+            start_date = application_fee.fee_constructor.start_date
         return start_date
-
-        # if self.application_fees.count() < 1:
-        #     return None
-        # elif self.application_fees.count() == 1:
-        #     application_fee = self.application_fees.first()
-        #     if application_fee.fee_constructor:
-        #         return application_fee.fee_constructor.start_date
-        #     else:
-        #         return None
-        # else:
-        #     msg = 'Proposal: {} has {} ApplicationFees.  There should be 0 or 1.'.format(self, self.application_fees.count())
-        #     logger.error(msg)
-        #     raise ValidationError(msg)
 
     @property
     def end_date(self):
@@ -538,25 +721,10 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
             return datetime.datetime(2021,11,30).date()
 
         end_date = None
-        for af in self.application_fees.all():
-            if af.fee_constructor:
-                end_date = af.fee_constructor.end_date
+        application_fee = self.get_main_application_fee()
+        if application_fee:
+            end_date = application_fee.fee_constructor.end_date
         return end_date
-
-        # if self.application_fees.count() < 1:
-        #     if self.fee_season:
-        #         return self.fee_season.end_date
-        #     raise ValidationError('proposals/models.py ln 455. End date set to null.')
-        # elif self.application_fees.count() == 1:
-        #     application_fee = self.application_fees.first()
-        #     if application_fee.fee_constructor:
-        #         return application_fee.fee_constructor.end_date
-        #     else:
-        #         raise ValidationError('proposals/models.py ln 461. End date set to null.')
-        # else:
-        #     msg = 'Proposal: {} has {} ApplicationFees.  There should be 0 or 1.'.format(self, self.application_fees.count())
-        #     logger.error(msg)
-        #     raise ValidationError(msg)
 
     @property
     def editable_vessel_details(self):
@@ -940,11 +1108,12 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
             elif self.processing_status == self.PROCESSING_STATUS_WITH_ASSESSOR_REQUIREMENTS:
                 self.log_user_action(ProposalUserAction.ACTION_ENTER_REQUIREMENTS.format(self.id), request)
 
-    def reissue_approval(self, request, status):
+    def reissue_approval(self, request):
         with transaction.atomic():
             vessels = []
             if type(self.child_obj) == MooringLicenceApplication:
-                vessels.append([vo.vessel for vo in self.listed_vessels])
+                # vessels.append([vo.vessel for vo in self.listed_vessels.all()])
+                vessels.extend([vo.vessel for vo in self.listed_vessels.all()])
             else:
                 vessels.append(self.vessel_details.vessel)
             # Non MLA
@@ -967,15 +1136,15 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
             elif self.approval and self.approval.can_reissue and self.is_approver(request.user):
                 # update vessel details
                 vessel_details = self.vessel_details.vessel.latest_vessel_details
-                self.vessel_type = vessel_details.vessel_type
-                self.vessel_name = vessel_details.vessel_name
-                self.vessel_length = vessel_details.vessel_length
-                self.vessel_draft = vessel_details.vessel_draft
-                self.vessel_beam = vessel_details.vessel_beam
-                self.vessel_weight = vessel_details.vessel_weight
-                self.berth_mooring = vessel_details.berth_mooring
+                self.vessel_type = vessel_details.vessel_type if vessel_details else ''
+                self.vessel_name = vessel_details.vessel_name if vessel_details else ''
+                self.vessel_length = vessel_details.vessel_length if vessel_details else 0.00
+                self.vessel_draft = vessel_details.vessel_draft if vessel_details else 0.00
+                self.vessel_beam = vessel_details.vessel_beam if vessel_details else 0.00
+                self.vessel_weight = vessel_details.vessel_weight if vessel_details else 0.00
+                self.berth_mooring = vessel_details.berth_mooring if vessel_details else ''
 
-                self.processing_status = status
+                self.processing_status = Proposal.PROCESSING_STATUS_WITH_ASSESSOR
                 self.proposed_issuance_approval = {}
                 self.save()
                 self.approval.reissued=True
@@ -1040,7 +1209,6 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                 )
                 self.proposed_decline_status = True
                 self.processing_status = Proposal.PROCESSING_STATUS_DECLINED
-                self.customer_status = Proposal.CUSTOMER_STATUS_DECLINED
                 self.save()
                 # Log proposal action
                 self.log_user_action(ProposalUserAction.ACTION_DECLINE.format(self.id),request)
@@ -1271,7 +1439,6 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
 
                 # set proposal status to approved - can change later after manage_stickers
                 self.processing_status = Proposal.PROCESSING_STATUS_APPROVED
-                self.customer_status = Proposal.CUSTOMER_STATUS_APPROVED
                 self.save()
 
                 # Update stickers
@@ -1360,7 +1527,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                 if not request or (request and self.approval and self.approval.reissued):
                     # system reissue or admin reissue
                     approval, created = self.child_obj.update_or_create_approval(datetime.datetime.now(pytz.timezone(TIME_ZONE)), request)
-                    # self.refresh_from_db()
+                    self.refresh_from_db()  # Reflect child_ojb's attributes, such as processing_status, to this proposal object.
                     self.approval = approval.approval
                     self.save()
                 else:
@@ -1377,10 +1544,10 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                         # Call a function where mooringonapprovals and stickers are handled, because when total_amount == 0,
                         # Ledger skips the payment step, which calling the function below
                         approval, created = self.child_obj.update_or_create_approval(datetime.datetime.now(pytz.timezone(TIME_ZONE)), request=request)
+                        self.refresh_from_db()  # Reflect child_ojb's attributes, such as processing_status, to this proposal object.
                     else:
                         # proposal type must be awaiting payment
                         self.processing_status = Proposal.PROCESSING_STATUS_AWAITING_PAYMENT
-                        self.customer_status = Proposal.CUSTOMER_STATUS_AWAITING_PAYMENT
                         self.save()
 
                         from mooringlicensing.components.payments_ml.models import FeeItem
@@ -1403,12 +1570,14 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                             # Link between ApplicationFee and FeeItem(s)
                             for item in fee_items_to_store:
                                 fee_item = FeeItem.objects.get(id=item['fee_item_id'])
-                                vessel_details = VesselDetails.objects.get(id=item['vessel_details_id'])
-
+                                vessel_details_id = item['vessel_details_id']  # This could be '' when null vessel application
+                                vessel_details = VesselDetails.objects.get(id=vessel_details_id) if vessel_details_id else None
+                                amount_to_be_paid = item['fee_amount_adjusted']
                                 FeeItemApplicationFee.objects.create(
                                     fee_item=fee_item,
                                     application_fee=application_fee,
                                     vessel_details=vessel_details,
+                                    amount_to_be_paid=amount_to_be_paid,
                                 )
 
                             send_application_approved_or_declined_email(self, 'approved', request)
@@ -1919,22 +2088,17 @@ class WaitingListApplication(Proposal):
             logger.error(msg)
             raise Exception(msg)
 
-        fee_item = fee_constructor.get_fee_item(vessel_length, self.proposal_type, target_date, accept_null_vessel=accept_null_vessel)
-        fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length)
+        # Retrieve amounts paid
+        max_amount_paid = self.get_max_amount_paid_for_main_component()
 
-        if fee_item.proposal_type.code == PROPOSAL_TYPE_AMENDMENT:
-            # This application is 'Amendment' application.  fee_item is already for 'Amendment'
-            fee_item_for_amendment_calculation = fee_item
-        else:
-            # We want to store the fee_item considered to be paid in order to calculate the amount for the amendment application
-            proposal_type_amendment = ProposalType.objects.get(code=PROPOSAL_TYPE_AMENDMENT)
-            fee_item_for_amendment_calculation = fee_constructor.get_fee_item(vessel_length, proposal_type_amendment, target_date, accept_null_vessel=accept_null_vessel)
+        fee_item = fee_constructor.get_fee_item(vessel_length, self.proposal_type, target_date, accept_null_vessel=accept_null_vessel)
+        fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length, max_amount_paid)
 
         db_processes_after_success['season_start_date'] = fee_constructor.fee_season.start_date.__str__()
         db_processes_after_success['season_end_date'] = fee_constructor.fee_season.end_date.__str__()
         db_processes_after_success['datetime_for_calculating_fee'] = current_datetime_str
-        # db_processes_after_success['fee_item_id'] = fee_item_for_amendment_calculation.id if fee_item_for_amendment_calculation else 0
         db_processes_after_success['fee_item_id'] = fee_item.id if fee_item else 0
+        db_processes_after_success['fee_amount_adjusted'] = str(fee_amount_adjusted)
 
         line_items = []
         line_items.append(
@@ -1944,38 +2108,39 @@ class WaitingListApplication(Proposal):
 
         return line_items, db_processes_after_success
 
-    def get_fee_amount_adjusted(self, fee_item_being_applied, vessel_length):
-        """
-        Retrieve all the fee_items for this vessel
-        """
-        if fee_item_being_applied:
-            fee_amount_adjusted = fee_item_being_applied.get_absolute_amount(vessel_length)
-
-            if self.proposal_type.code in (PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL):
-                # When new/renewal, no need to adjust the amount
-                pass
-            else:
-                # When amendment, amount needs to be adjusted
-                logger.info('Adjusting the fee amount for proposal: {}, fee_item: {}, vessel_length: {}'.format(
-                    self.lodgement_number, fee_item_being_applied, vessel_length
-                ))
-
-                if self.approval:  # This should be True
-                    max_fee_item = self.approval.get_max_fee_item(fee_item_being_applied.fee_period.fee_season)
-                    if max_fee_item:  # This should be True
-                        fee_amount_adjusted = fee_amount_adjusted - max_fee_item.get_absolute_amount()
-                        logger.info('Deduct {} from {}'.format(fee_item_being_applied, max_fee_item))
-
-                fee_amount_adjusted = 0 if fee_amount_adjusted <= 0 else fee_amount_adjusted
-        else:
-            if self.does_accept_null_vessel:
-                # TODO: We don't charge for this application but when new replacement vessel details are provided,calculate fee and charge it
-                fee_amount_adjusted = 0
-            else:
-                msg = 'The application fee admin data might have not been set up correctly.  Please contact the Rottnest Island Authority.'
-                raise Exception(msg)
-
-        return fee_amount_adjusted
+#    def get_fee_amount_adjusted(self, fee_item_being_applied, vessel_length, target_date):
+#        """
+#        Retrieve all the fee_items for this vessel
+#        """
+#        if fee_item_being_applied:
+#            fee_amount_adjusted = fee_item_being_applied.get_absolute_amount(vessel_length)
+#
+#            if self.proposal_type.code in (PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL):
+#                # When new/renewal, no need to adjust the amount
+#                pass
+#            else:
+#                # When amendment, amount needs to be adjusted
+#                logger.info('Adjusting the fee amount for proposal: {}, fee_item: {}, vessel_length: {}'.format(
+#                    self.lodgement_number, fee_item_being_applied, vessel_length
+#                ))
+#
+#                max_amounts_paid = self.get_max_amounts_paid_in_this_season(target_date, False)
+#                max_amount_paid = max_amounts_paid[fee_item_being_applied.application_type]
+#
+#                if max_amount_paid:  # This should be True
+#                    fee_amount_adjusted = fee_amount_adjusted - max_amount_paid
+#                    logger.info('Deduct {} from {}'.format(fee_item_being_applied, max_amount_paid))
+#
+#                fee_amount_adjusted = 0 if fee_amount_adjusted <= 0 else fee_amount_adjusted
+#        else:
+#            if self.does_accept_null_vessel:
+#                # TODO: We don't charge for this application but when new replacement vessel details are provided,calculate fee and charge it
+#                fee_amount_adjusted = 0
+#            else:
+#                msg = 'The application fee admin data might have not been set up correctly.  Please contact the Rottnest Island Authority.'
+#                raise Exception(msg)
+#
+#        return fee_amount_adjusted
 
     @property
     def assessor_group(self):
@@ -2024,8 +2189,8 @@ class WaitingListApplication(Proposal):
 
     @property
     def does_accept_null_vessel(self):
-        if self.proposal_type.code in (PROPOSAL_TYPE_AMENDMENT,):
-            return True
+        # if self.proposal_type.code in (PROPOSAL_TYPE_AMENDMENT,):
+        #     return True
         return False
 
     def process_after_approval(self, request=None, total_amount=0):
@@ -2114,22 +2279,17 @@ class AnnualAdmissionApplication(Proposal):
             logger.error(msg)
             raise Exception(msg)
 
-        fee_item = fee_constructor.get_fee_item(vessel_length, self.proposal_type, target_date, accept_null_vessel=accept_null_vessel)
-        fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length)
+        # Retrieve amounts paid
+        max_amount_paid = self.get_max_amount_paid_for_main_component()
 
-        if fee_item.proposal_type.code == PROPOSAL_TYPE_AMENDMENT:
-            # This application is 'Amendment' application.  fee_item is already for 'Amendment'
-            fee_item_for_amendment_calculation = fee_item
-        else:
-            # We want to store the fee_item considered to be paid in order to calculate the amount for the amendment application
-            proposal_type_amendment = ProposalType.objects.get(code=PROPOSAL_TYPE_AMENDMENT)
-            fee_item_for_amendment_calculation = fee_constructor.get_fee_item(vessel_length, proposal_type_amendment, target_date, accept_null_vessel=accept_null_vessel)
+        fee_item = fee_constructor.get_fee_item(vessel_length, self.proposal_type, target_date, accept_null_vessel=accept_null_vessel)
+        fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length, max_amount_paid)
 
         db_processes_after_success['season_start_date'] = fee_constructor.fee_season.start_date.__str__()
         db_processes_after_success['season_end_date'] = fee_constructor.fee_season.end_date.__str__()
         db_processes_after_success['datetime_for_calculating_fee'] = current_datetime_str
-        # db_processes_after_success['fee_item_id'] = fee_item_for_amendment_calculation.id if fee_item_for_amendment_calculation else 0
         db_processes_after_success['fee_item_id'] = fee_item.id if fee_item else 0
+        db_processes_after_success['fee_amount_adjusted'] = str(fee_amount_adjusted)
 
         line_items = []
         line_items.append(generate_line_item(self.application_type, fee_amount_adjusted, fee_constructor, self, current_datetime))
@@ -2138,38 +2298,35 @@ class AnnualAdmissionApplication(Proposal):
 
         return line_items, db_processes_after_success
 
-    def get_fee_amount_adjusted(self, fee_item_being_applied, vessel_length):
-        """
-        Retrieve all the fee_items for this vessel
-        """
-        if fee_item_being_applied:
-            fee_amount_adjusted = fee_item_being_applied.get_absolute_amount(vessel_length)
-
-            if self.proposal_type.code in (PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL):
-                # When new/renewal, no need to adjust the amount
-                pass
-            else:
-                # When amendment, amount needs to be adjusted
-                logger.info('Adjusting the fee amount for proposal: {}, fee_item: {}, vessel_length: {}'.format(
-                    self.lodgement_number, fee_item_being_applied, vessel_length
-                ))
-
-                if self.approval:  # This should be True
-                    max_fee_item = self.approval.get_max_fee_item(fee_item_being_applied.fee_period.fee_season)
-                    if max_fee_item:  # This should be True
-                        fee_amount_adjusted = fee_amount_adjusted - max_fee_item.get_absolute_amount()
-                        logger.info('Deduct {} from {}'.format(fee_item_being_applied, max_fee_item))
-
-                fee_amount_adjusted = 0 if fee_amount_adjusted <= 0 else fee_amount_adjusted
-        else:
-            if self.does_accept_null_vessel:
-                # TODO: We don't charge for this application but when new replacement vessel details are provided,calculate fee and charge it
-                fee_amount_adjusted = 0
-            else:
-                msg = 'The application fee admin data might have not been set up correctly.  Please contact the Rottnest Island Authority.'
-                raise Exception(msg)
-
-        return fee_amount_adjusted
+#    def get_fee_amount_adjusted(self, fee_item_being_applied, vessel_length, target_date):
+#        """
+#        Retrieve all the fee_items for this vessel
+#        """
+#        if fee_item_being_applied:
+#            fee_amount_adjusted = fee_item_being_applied.get_absolute_amount(vessel_length)
+#
+#            # When amendment, amount needs to be adjusted
+#            logger.info('Adjusting the fee amount for proposal: {}, fee_item: {}, vessel_length: {}'.format(
+#                self.lodgement_number, fee_item_being_applied, vessel_length
+#            ))
+#
+#            max_amounts_paid = self.get_max_amounts_paid_in_this_season(target_date, True)
+#            max_amount_paid = max_amounts_paid[fee_item_being_applied.application_type]
+#
+#            if max_amount_paid:  # This should be True
+#                fee_amount_adjusted = fee_amount_adjusted - max_amount_paid
+#                logger.info('Deduct {} from {}'.format(fee_item_being_applied, max_amount_paid))
+#
+#            fee_amount_adjusted = 0 if fee_amount_adjusted <= 0 else fee_amount_adjusted
+#        else:
+#            if self.does_accept_null_vessel:
+#                # TODO: We don't charge for this application but when new replacement vessel details are provided,calculate fee and charge it
+#                fee_amount_adjusted = 0
+#            else:
+#                msg = 'The application fee admin data might have not been set up correctly.  Please contact the Rottnest Island Authority.'
+#                raise Exception(msg)
+#
+#        return fee_amount_adjusted
 
     @property
     def assessor_group(self):
@@ -2222,8 +2379,8 @@ class AnnualAdmissionApplication(Proposal):
 
     @property
     def does_accept_null_vessel(self):
-        if self.proposal_type.code in (PROPOSAL_TYPE_AMENDMENT,):
-            return True
+        # if self.proposal_type.code in (PROPOSAL_TYPE_AMENDMENT,):
+        #     return True
         return False
 
     def does_have_valid_associations(self):
@@ -2283,84 +2440,90 @@ class AuthorisedUserApplication(Proposal):
         fee_constructor_for_aa = FeeConstructor.get_fee_constructor_by_application_type_and_date(annual_admission_type, target_date)
 
         # There is also annual admission fee component for the AUA/MLA if needed.
-        current_approvals_dict = self.vessel_details.vessel.get_current_approvals(target_date)
-        aap_exists_for_this_vessel = False
         ml_exists_for_this_vessel = False
-        for key, approvals in current_approvals_dict.items():
-            if key == 'mls' and approvals.count():
-                ml_exists_for_this_vessel = True
-            elif key == 'aaps' and approvals.count():
-                aap_exists_for_this_vessel = True
+        application_has_vessel = True if self.vessel_details else False
 
-        if ml_exists_for_this_vessel:
-            # When there is 'current' ML, no charge for the AUP
-            # But before leave here, we just want to store the fee_season user is applying for.
-            self.fee_season = fee_constructor.fee_season
-            self.save()
-            return [], {}  # no line items, no db process
+        if application_has_vessel:
+            # When there is a vessel in this application
+            current_approvals_dict = self.vessel_details.vessel.get_current_approvals(target_date)
+            for key, approvals in current_approvals_dict.items():
+                if key == 'mls' and approvals.count():
+                    ml_exists_for_this_vessel = True
+
+            if ml_exists_for_this_vessel:
+                # When there is 'current' ML, no charge for the AUP
+                # But before leave here, we just want to store the fee_season user is applying for.
+                self.fee_season = fee_constructor.fee_season
+                self.save()
+                return [], {}  # no line items, no db process
+        else:
+            # Null vessel application
+            pass
 
         fee_items_to_store = []
         line_items = []
 
-        f_items = []
-        for af in self.application_fees.all():
-            for fee_item in af.fee_items.all():
-                f_items.append(fee_item)
+        # Retrieve amounts paid
+        max_amount_paid = self.get_max_amount_paid_for_main_component()
 
         fee_item = fee_constructor.get_fee_item(vessel_length, self.proposal_type, target_date, accept_null_vessel=accept_null_vessel)
-        fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length)
-        fee_item_amendment_calculation = self.get_corresponding_amendment_fee_item(accept_null_vessel, fee_constructor, fee_item, target_date, vessel_length)
-        # fee_items_to_store.append({'fee_item': fee_item_amendment_calculation, 'vessel_details': self.vessel_details})
-        # fee_items_to_store.append({'fee_item_id': fee_item_amendment_calculation.id, 'vessel_details_id': self.vessel_details.id})
-        fee_items_to_store.append({'fee_item_id': fee_item.id, 'vessel_details_id': self.vessel_details.id})
+        fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length, max_amount_paid)
+        fee_items_to_store.append({
+            'fee_item_id': fee_item.id,
+            'vessel_details_id': self.vessel_details.id if self.vessel_details else '',
+            'fee_amount_adjusted': str(fee_amount_adjusted),
+        })
         line_items.append(generate_line_item(self.application_type, fee_amount_adjusted, fee_constructor, self, current_datetime))
 
-        if not aap_exists_for_this_vessel:
+        if application_has_vessel:
+            # When the application has a vessel, user have to pay for the AA component, too.
+            max_amount_paid = self.get_max_amount_paid_for_aa_component(target_date, self.vessel_details.vessel)
             fee_item_for_aa = fee_constructor_for_aa.get_fee_item(vessel_length, self.proposal_type, target_date) if fee_constructor_for_aa else None
-            fee_amount_adjusted_additional = self.get_fee_amount_adjusted(fee_item_for_aa, vessel_length) if fee_item_for_aa else None
-            fee_item_for_aa_amendment_calculation = self.get_corresponding_amendment_fee_item(accept_null_vessel, fee_constructor_for_aa, fee_item_for_aa, target_date, vessel_length)
-            # fee_items_to_store.append({'fee_item': fee_item_for_aa_amendment_calculation, 'vessel_details': self.vessel_details})
-            # fee_items_to_store.append({'fee_item_id': fee_item_for_aa_amendment_calculation.id, 'vessel_details_id': self.vessel_details.id})
-            fee_items_to_store.append({'fee_item_id': fee_item_for_aa.id, 'vessel_details_id': self.vessel_details.id})
+            fee_amount_adjusted_additional = self.get_fee_amount_adjusted(fee_item_for_aa, vessel_length, max_amount_paid)
+            fee_items_to_store.append({
+                'fee_item_id': fee_item_for_aa.id,
+                'vessel_details_id': self.vessel_details.id if self.vessel_details else '',
+                'fee_amount_adjusted': str(fee_amount_adjusted_additional),
+            })
             line_items.append(generate_line_item(annual_admission_type, fee_amount_adjusted_additional, fee_constructor_for_aa, self, current_datetime))
 
         logger.info('{}'.format(line_items))
 
         return line_items, fee_items_to_store
 
-    def get_fee_amount_adjusted(self, fee_item_being_applied, vessel_length):
-        """
-        Retrieve all the fee_items for this vessel
-        """
-        if fee_item_being_applied:
-            fee_amount_adjusted = fee_item_being_applied.get_absolute_amount(vessel_length)
-            target_fee_season = fee_item_being_applied.fee_period.fee_season
-            # for_annual_admission_component = True if target_fee_season.application_type.code == AnnualAdmissionApplication.code else False
-
-            if self.proposal_type.code in (PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL):
-                # When new/renewal, no need to adjust the amount
-                pass
-            else:
-                # When amendment, amount needs to be adjusted
-                logger.info('Adjusting the fee amount for proposal: {}, fee_item: {}, vessel_length: {}'.format(self.lodgement_number, fee_item_being_applied, vessel_length))
-
-                if self.approval:  # This should be True
-                    max_fee_item = self.approval.get_max_fee_item(fee_item_being_applied.fee_period.fee_season)
-
-                    if max_fee_item:  # This should be True
-                        fee_amount_adjusted = fee_amount_adjusted - max_fee_item.get_absolute_amount()
-                        logger.info('Deduct {} from {}'.format(fee_item_being_applied, max_fee_item))
-
-                fee_amount_adjusted = 0 if fee_amount_adjusted <= 0 else fee_amount_adjusted
-        else:
-            if self.does_accept_null_vessel:
-                # TODO: We don't charge for this application but when new replacement vessel details are provided,calculate fee and charge it
-                fee_amount_adjusted = 0
-            else:
-                msg = 'The application fee admin data might have not been set up correctly.  Please contact the Rottnest Island Authority.'
-                raise Exception(msg)
-
-        return fee_amount_adjusted
+#    def get_fee_amount_adjusted(self, fee_item_being_applied, vessel_length, target_date):
+#        """
+#        Retrieve all the fee_items for this vessel
+#        """
+#        if fee_item_being_applied:
+#            fee_amount_adjusted = fee_item_being_applied.get_absolute_amount(vessel_length)
+#
+#            annual_admission_type = ApplicationType.objects.get(code=AnnualAdmissionApplication.code)
+#            if self.proposal_type.code in (PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL) and not fee_item_being_applied.application_type == annual_admission_type:
+#                # When new/renewal, no need to adjust the amount
+#                pass
+#            else:
+#                # When amendment, amount needs to be adjusted
+#                logger.info('Adjusting the fee amount for proposal: {}, fee_item: {}, vessel_length: {}'.format(self.lodgement_number, fee_item_being_applied, vessel_length))
+#
+#                for_aa_component = True if fee_item_being_applied.application_type == annual_admission_type else False
+#                max_amounts_paid = self.get_max_amounts_paid_in_this_season(target_date, for_aa_component)
+#                max_amount_paid = max_amounts_paid[fee_item_being_applied.application_type]
+#
+#                if max_amount_paid:  # This should be True
+#                    fee_amount_adjusted = fee_amount_adjusted - max_amount_paid
+#                    logger.info('Deduct {} from {}'.format(fee_item_being_applied, max_amount_paid))
+#
+#                fee_amount_adjusted = 0 if fee_amount_adjusted <= 0 else fee_amount_adjusted
+#        else:
+#            if self.does_accept_null_vessel:
+#                # TODO: We don't charge for this application but when new replacement vessel details are provided,calculate fee and charge it
+#                fee_amount_adjusted = 0
+#            else:
+#                msg = 'The application fee admin data might have not been set up correctly.  Please contact the Rottnest Island Authority.'
+#                raise Exception(msg)
+#
+#        return fee_amount_adjusted
 
     def get_due_date_for_endorsement_by_target_date(self, target_date=timezone.localtime(timezone.now()).date()):
         days_type = NumberOfDaysType.objects.get(code=CODE_DAYS_FOR_ENDORSER_AUA)
@@ -2421,14 +2584,12 @@ class AuthorisedUserApplication(Proposal):
         if mooring_preference.lower() != 'ria':
             # When this application is AUA, and the mooring authorisation preference is not RIA
             self.processing_status = Proposal.PROCESSING_STATUS_AWAITING_ENDORSEMENT
-            self.customer_status = Proposal.CUSTOMER_STATUS_AWAITING_ENDORSEMENT
             self.save()
             # Email to endorser
             send_endorsement_of_authorised_user_application_email(request, self)
             send_confirmation_email_upon_submit(request, self, False)
         else:
             self.processing_status = Proposal.PROCESSING_STATUS_WITH_ASSESSOR
-            self.customer_status = Proposal.CUSTOMER_STATUS_WITH_ASSESSOR
             self.save()
             send_confirmation_email_upon_submit(request, self, False)
             if not self.auto_approve:
@@ -2533,7 +2694,6 @@ class AuthorisedUserApplication(Proposal):
 
         # set proposal status to approved - can change later after manage_stickers
         self.processing_status = Proposal.PROCESSING_STATUS_APPROVED
-        self.customer_status = Proposal.CUSTOMER_STATUS_APPROVED
         self.save()
 
         # Retrieve newely added moorings, and send authorised user summary doc to the licence holder
@@ -2549,30 +2709,34 @@ class AuthorisedUserApplication(Proposal):
         #####
         # Set proposal status after manage _stickers
         #####
-        awaiting_printing = False
+        stickers_to_be_printed = []
         if self.approval:
-            stickers = self.approval.stickers.filter(status__in=[Sticker.STICKER_STATUS_NOT_READY_YET, Sticker.STICKER_STATUS_READY, Sticker.STICKER_STATUS_AWAITING_PRINTING,])
-            if stickers.count() > 0:
-                awaiting_printing = True
-        if awaiting_printing:
-            if self.proposal_type.code == PROPOSAL_TYPE_AMENDMENT and len(stickers_to_be_returned) and self.vessel_ownership != self.previous_application.vessel_ownership:
-                # When amendment and there is a sticker to be returned, application status gets 'Sticker to be Returned' status
-                self.processing_status = Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED
-                self.customer_status = Proposal.CUSTOMER_STATUS_STICKER_TO_BE_RETURNED
-                self.log_user_action(ProposalUserAction.ACTION_STICKER_TO_BE_RETURNED.format(self.id), request)
+            stickers_to_be_printed = self.approval.stickers.filter(status__in=[Sticker.STICKER_STATUS_NOT_READY_YET, Sticker.STICKER_STATUS_READY, Sticker.STICKER_STATUS_AWAITING_PRINTING,])
+
+        if len(stickers_to_be_returned):
+            a_sticker = stickers_to_be_returned[0]  # All the stickers to be returned should have the same vessel, so just pick the first one
+            if a_sticker.vessel_ownership.vessel.rego_no == self.vessel_ownership.vessel.rego_no:
+                # Same vessel
+                if stickers_to_be_printed:
+                    self.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
+                    self.log_user_action(ProposalUserAction.ACTION_PRINTING_STICKER.format(self.id), )
+                else:
+                    self.processing_status = Proposal.PROCESSING_STATUS_APPROVED
             else:
-                self.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
-                self.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
-                self.log_user_action(ProposalUserAction.ACTION_PRINTING_STICKER.format(self.id),)
+                # Vessel changed
+                # there is a sticker to be returned, application status gets 'Sticker to be Returned' status
+                self.processing_status = Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED
+                self.log_user_action(ProposalUserAction.ACTION_STICKER_TO_BE_RETURNED.format(self.id), request)
+        elif stickers_to_be_printed:
+            self.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
+            self.log_user_action(ProposalUserAction.ACTION_PRINTING_STICKER.format(self.id),)
         elif self.auto_approve:
             self.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
-            self.customer_status = Proposal.CUSTOMER_STATUS_PRINTING_STICKER
             self.log_user_action(ProposalUserAction.ACTION_PRINTING_STICKER.format(self.id),)
         else:
             self.processing_status = Proposal.PROCESSING_STATUS_APPROVED
-            self.customer_status = Proposal.CUSTOMER_STATUS_APPROVED
         self.save()
-        self.proposal.refresh_from_db()
+        self.refresh_from_db()
 
         approval.generate_doc()
 
@@ -2615,7 +2779,7 @@ class AuthorisedUserApplication(Proposal):
 
     @property
     def does_accept_null_vessel(self):
-        if self.proposal_type.code in (PROPOSAL_TYPE_AMENDMENT, PROPOSAL_TYPE_RENEWAL,):
+        if self.proposal_type.code in (PROPOSAL_TYPE_RENEWAL,):
             return True
         return False
 
@@ -2693,77 +2857,73 @@ class MooringLicenceApplication(Proposal):
                 logger.error(msg)
                 raise Exception(msg)
 
+        # Retrieve amounts paid
+        max_amount_paid = self.get_max_amount_paid_for_main_component()
+
         fee_item = fee_constructor_for_ml.get_fee_item(vessel_length, self.proposal_type, target_date, accept_null_vessel=accept_null_vessel)
-        fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length)
-        fee_item_amendment_calculation = self.get_corresponding_amendment_fee_item(accept_null_vessel, fee_constructor_for_ml, fee_item, target_date, vessel_length)
-        # fee_items_to_store.append({'fee_item': fee_item_amendment_calculation, 'vessel_details': vessel_details_largest})
-        # fee_items_to_store.append({'fee_item_id': fee_item_amendment_calculation.id, 'vessel_details_id': vessel_details_largest.id})
-        fee_items_to_store.append({'fee_item_id': fee_item.id, 'vessel_details_id': vessel_details_largest.id})
+        fee_amount_adjusted = self.get_fee_amount_adjusted(fee_item, vessel_length, max_amount_paid)
+        fee_items_to_store.append({
+            'fee_item_id': fee_item.id,
+            'vessel_details_id': vessel_details_largest.id if vessel_details_largest else '',
+            'fee_amount_adjusted': str(fee_amount_adjusted),
+        })
         line_items.append(generate_line_item(self.application_type, fee_amount_adjusted, fee_constructor_for_ml, self, current_datetime))
 
         # For Annual Admission component
         for vessel_details in vessel_detais_list_to_be_processed:
             vessel_length = vessel_details.vessel_applicable_length
 
+            max_amount_paid = self.get_max_amount_paid_for_aa_component(target_date, vessel_details.vessel)
             # Check if there is already an AA component paid for this vessel
-            current_approvals_dict = vessel_details.vessel.get_current_approvals(target_date)
-            aap_exists_for_this_vessel = False
-            for key, approvals in current_approvals_dict.items():
-                if approvals.count():
-                    aap_exists_for_this_vessel = True
-
-            if not aap_exists_for_this_vessel:
-                # For annual admission component
-                fee_item_for_aa = fee_constructor_for_aa.get_fee_item(vessel_length, self.proposal_type, target_date)
-                fee_amount_adjusted_additional = self.get_fee_amount_adjusted(fee_item_for_aa, vessel_length)
-                fee_item_for_aa_amendment_calculation = self.get_corresponding_amendment_fee_item(accept_null_vessel, fee_constructor_for_aa, fee_item_for_aa, target_date, vessel_length)
-                # fee_items_to_store.append({'fee_item': fee_item_for_aa_amendment_calculation, 'vessel_details': vessel_details})
-                # fee_items_to_store.append({'fee_item_id': fee_item_for_aa_amendment_calculation.id, 'vessel_details_id': vessel_details.id})
-                fee_items_to_store.append({'fee_item_id': fee_item_for_aa.id, 'vessel_details_id': vessel_details.id})
-                line_items.append(generate_line_item(annual_admission_type, fee_amount_adjusted_additional, fee_constructor_for_aa, self, current_datetime, vessel_details.vessel.rego_no))
+            fee_item_for_aa = fee_constructor_for_aa.get_fee_item(vessel_length, self.proposal_type, target_date)
+            fee_amount_adjusted_additional = self.get_fee_amount_adjusted(fee_item_for_aa, vessel_length, max_amount_paid)
+            fee_items_to_store.append({
+                'fee_item_id': fee_item_for_aa.id,
+                'vessel_details_id': vessel_details.id if vessel_details else '',
+                'fee_amount_adjusted': str(fee_amount_adjusted_additional),
+            })
+            line_items.append(generate_line_item(annual_admission_type, fee_amount_adjusted_additional, fee_constructor_for_aa, self, current_datetime, vessel_details.vessel.rego_no))
 
         logger.info('{}'.format(line_items))
 
         return line_items, fee_items_to_store
 
-    def get_fee_amount_adjusted(self, fee_item_being_applied, vessel_length):
-        """
-        Retrieve all the fee_items for this vessel
-        """
-        if fee_item_being_applied:
-            fee_amount_adjusted = fee_item_being_applied.get_absolute_amount(vessel_length)
-            target_fee_season = fee_item_being_applied.fee_period.fee_season
-            for_annual_admission_component = True if target_fee_season.application_type.code == AnnualAdmissionApplication.code else False
-
-            if self.proposal_type.code in (PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL):
-                # When new/renewal, no need to adjust the amount
-                pass
-            else:
-                # When amendment, amount needs to be adjusted
-                logger.info('Adjusting the fee amount for proposal: {}, fee_item: {}, vessel_length: {}'.format(self.lodgement_number, fee_item_being_applied, vessel_length))
-
-                if self.approval:  # This should be True
-                    if for_annual_admission_component:
-                        # For annual admission component, we mind the vessel
-                        max_fee_item = self.approval.get_max_fee_item(fee_item_being_applied.fee_period.fee_season, self.vessel_details)
-                    else:
-                        max_fee_item = self.approval.get_max_fee_item(fee_item_being_applied.fee_period.fee_season)
-
-                    if max_fee_item:  # This should be True
-                        logger.info('Deduct {} from {} (absolute amount: {})'.format(max_fee_item, fee_item_being_applied, fee_amount_adjusted))
-                        fee_amount_adjusted = fee_amount_adjusted - max_fee_item.get_absolute_amount()
-
-                fee_amount_adjusted = 0 if fee_amount_adjusted <= 0 else fee_amount_adjusted
-        else:
-            if self.does_accept_null_vessel:
-                # TODO: We don't charge for this application but when new replacement vessel details are provided,calculate fee and charge it
-                fee_amount_adjusted = 0
-            else:
-                msg = 'The application fee admin data might have not been set up correctly.  Please contact the Rottnest Island Authority.'
-                raise Exception(msg)
-
-        logger.info('Adjusted amount: {}'.format(fee_amount_adjusted))
-        return fee_amount_adjusted
+#    def get_fee_amount_adjusted(self, fee_item_being_applied, vessel_length, target_date):
+#        """
+#        Retrieve all the fee_items for this vessel
+#        """
+#        if fee_item_being_applied:
+#            fee_amount_adjusted = fee_item_being_applied.get_absolute_amount(vessel_length)
+#            target_fee_season = fee_item_being_applied.fee_period.fee_season
+#            for_annual_admission_component = True if target_fee_season.application_type.code == AnnualAdmissionApplication.code else False
+#            annual_admission_type = ApplicationType.objects.get(code=AnnualAdmissionApplication.code)
+#
+#            if self.proposal_type.code in (PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL) and not fee_item_being_applied.application_type == annual_admission_type:
+#                # When new/renewal, no need to adjust the amount
+#                pass
+#            else:
+#                # When amendment, amount needs to be adjusted
+#                logger.info('Adjusting the fee amount for proposal: {}, fee_item: {}, vessel_length: {}'.format(self.lodgement_number, fee_item_being_applied, vessel_length))
+#
+#                for_aa_component = True if fee_item_being_applied.application_type == annual_admission_type else False
+#                max_amounts_paid = self.get_max_amounts_paid_in_this_season(target_date, for_aa_component)
+#                max_amount_paid = max_amounts_paid[fee_item_being_applied.application_type]
+#
+#                if max_amount_paid:  # This should be True
+#                    fee_amount_adjusted = fee_amount_adjusted - max_amount_paid
+#                    logger.info('Deduct {} from {}'.format(fee_item_being_applied, max_amount_paid))
+#
+#                fee_amount_adjusted = 0 if fee_amount_adjusted <= 0 else fee_amount_adjusted
+#        else:
+#            if self.does_accept_null_vessel:
+#                # TODO: We don't charge for this application but when new replacement vessel details are provided,calculate fee and charge it
+#                fee_amount_adjusted = 0
+#            else:
+#                msg = 'The application fee admin data might have not been set up correctly.  Please contact the Rottnest Island Authority.'
+#                raise Exception(msg)
+#
+#        logger.info('Adjusted amount: {}'.format(fee_amount_adjusted))
+#        return fee_amount_adjusted
 
     def get_document_upload_url(self, request):
         document_upload_url = request.build_absolute_uri(reverse('mla-documents-upload', kwargs={'uuid_str': self.uuid}))
@@ -2798,12 +2958,10 @@ class MooringLicenceApplication(Proposal):
             self.lodgement_number = new_lodgment_id
             self.save()
         self.proposal.refresh_from_db()
-        print('refresh_from_db1')
 
     def process_after_submit_other_documents(self, request):
         # Somehow in this function, followings update parent too as we expected as polymorphism
         self.processing_status = Proposal.PROCESSING_STATUS_WITH_ASSESSOR
-        self.customer_status = Proposal.CUSTOMER_STATUS_WITH_ASSESSOR
         if self.waiting_list_allocation:
             self.waiting_list_allocation.internal_status = 'submitted'
             self.waiting_list_allocation.save()
@@ -2826,11 +2984,9 @@ class MooringLicenceApplication(Proposal):
         self.log_user_action(ProposalUserAction.ACTION_LODGE_APPLICATION.format(self.id), request)
         if self.proposal_type in (ProposalType.objects.filter(code__in=(PROPOSAL_TYPE_RENEWAL, PROPOSAL_TYPE_AMENDMENT))):
             self.processing_status = Proposal.PROCESSING_STATUS_WITH_ASSESSOR
-            self.customer_status = Proposal.CUSTOMER_STATUS_WITH_ASSESSOR
             self.save()
         else:
             self.processing_status = Proposal.PROCESSING_STATUS_AWAITING_DOCUMENTS
-            self.customer_status = Proposal.CUSTOMER_STATUS_AWAITING_DOCUMENTS
             self.save()
             send_documents_upload_for_mooring_licence_application_email(request, self)
 
@@ -2943,7 +3099,6 @@ class MooringLicenceApplication(Proposal):
 
             # set proposal status to approved - can change later after manage_stickers
             self.processing_status = Proposal.PROCESSING_STATUS_APPROVED
-            self.customer_status = Proposal.CUSTOMER_STATUS_APPROVED
             self.save()
 
             # manage stickers
@@ -2992,7 +3147,7 @@ class MooringLicenceApplication(Proposal):
 
     @property
     def does_accept_null_vessel(self):
-        if self.proposal_type.code in (PROPOSAL_TYPE_AMENDMENT, PROPOSAL_TYPE_RENEWAL):
+        if self.proposal_type.code in (PROPOSAL_TYPE_RENEWAL,):
             return True
         return False
 
@@ -3182,22 +3337,30 @@ class Vessel(RevisionedMixin):
     def __str__(self):
         return self.rego_no
 
-    def get_current_approvals(self, target_date):
-        # Return all the approvals where this vessel is on.
-        from mooringlicensing.components.approvals.models import Approval, AnnualAdmissionPermit, AuthorisedUserPermit, MooringLicence
-
+    def get_current_aaps(self, target_date):
+        from mooringlicensing.components.approvals.models import Approval, AnnualAdmissionPermit
         existing_aaps = AnnualAdmissionPermit.objects.filter(
             status__in=(Approval.APPROVAL_STATUS_CURRENT, Approval.APPROVAL_STATUS_SUSPENDED,),
             start_date__lte=target_date,
             expiry_date__gte=target_date,
             current_proposal__vessel_details__vessel=self,
+            current_proposal__vessel_ownership__end_date__isnull=True,
         ).distinct()
+        return existing_aaps
+
+    def get_current_aups(self, target_date):
+        from mooringlicensing.components.approvals.models import Approval, AuthorisedUserPermit
         existing_aups = AuthorisedUserPermit.objects.filter(
             status__in=(Approval.APPROVAL_STATUS_CURRENT, Approval.APPROVAL_STATUS_SUSPENDED,),
             start_date__lte=target_date,
             expiry_date__gte=target_date,
             current_proposal__vessel_details__vessel=self,
+            current_proposal__vessel_ownership__end_date__isnull=True,
         ).distinct()
+        return existing_aups
+
+    def get_current_mls(self, target_date):
+        from mooringlicensing.components.approvals.models import Approval, MooringLicence
         existing_mls = MooringLicence.objects.filter(
             status__in=(Approval.APPROVAL_STATUS_CURRENT, Approval.APPROVAL_STATUS_SUSPENDED,),
             start_date__lte=target_date,
@@ -3206,6 +3369,15 @@ class Vessel(RevisionedMixin):
             proposal__vessel_details__vessel=self,
             proposal__vessel_ownership__end_date__isnull=True,
         ).distinct()
+        return existing_mls
+
+    def get_current_approvals(self, target_date):
+        # Return all the approvals where this vessel is on.
+        from mooringlicensing.components.approvals.models import Approval, AnnualAdmissionPermit, AuthorisedUserPermit, MooringLicence
+
+        existing_aaps = self.get_current_aaps(target_date)
+        existing_aups = self.get_current_aups(target_date)
+        existing_mls = self.get_current_mls(target_date)
 
         return {
             'aaps': existing_aaps,
@@ -3614,7 +3786,6 @@ class AmendmentRequest(ProposalRequest):
                     proposal = self.proposal
                     if proposal.processing_status != 'draft':
                         proposal.processing_status = 'draft'
-                        proposal.customer_status = 'draft'
                         proposal.save()
                     # Create a log entry for the proposal
                     proposal.log_user_action(ProposalUserAction.ACTION_ID_REQUEST_AMENDMENTS, request)
@@ -3812,7 +3983,6 @@ def clone_proposal_with_status_reset(original_proposal):
     with transaction.atomic():
         try:
             proposal = type(original_proposal.child_obj).objects.create()
-            proposal.customer_status = 'draft'
             proposal.processing_status = 'draft'
             proposal.previous_application = original_proposal
             proposal.approval = original_proposal.approval
