@@ -244,6 +244,7 @@ export default {
                     'Vessel Registration',
                     'Vessel Name',
                     'Issue Date',
+                    'Start Date',
                     'Expiry Date',
                     'Action',
                     'Approval letter',
@@ -257,6 +258,7 @@ export default {
                     'Sticker mailed date',
                     'Status',
                     'Issue Date',
+                    'Start Date',
                     'Expiry Date',
                     'Vessel',
                     'Action',
@@ -276,6 +278,7 @@ export default {
                     'Allocation number in bay',
                     'Action',
                     'Issue Date',
+                    'Start Date',
                     'Expiry Date',
                     'Approval letter',
                     'Vessel length',
@@ -293,6 +296,7 @@ export default {
                     'Holder',
                     'Status',
                     'Issue Date',
+                    'Start Date',
                     'Expiry Date',
                     'Approval letter',
                     'Vessel Regos',
@@ -400,6 +404,18 @@ export default {
                         visible: true,
                         'render': function(row, type, full){
                             return full.issue_date_str;
+                        }
+                    }
+        },
+        columnStartDate: function() {
+            return {
+                        // 8. Issue Date
+                        data: "id",
+                        orderable: true,
+                        searchable: false,
+                        visible: true,
+                        'render': function(row, type, full){
+                            return full.start_date_str;
                         }
                     }
         },
@@ -681,6 +697,7 @@ export default {
                     vm.columnVesselRegistration,
                     vm.columnVesselName,
                     vm.columnIssueDate,
+                    vm.columnStartDate,
                     vm.columnExpiryDate,
                     vm.columnAction,
                     vm.columnApprovalLetter,
@@ -694,6 +711,7 @@ export default {
                     vm.columnStickerMailedDate,
                     vm.columnStatus,
                     vm.columnIssueDate,
+                    vm.columnStartDate,
                     vm.columnExpiryDate,
                     vm.columnVesselRegistration,
                     vm.columnAction,
@@ -714,6 +732,7 @@ export default {
                     vm.columnAllocationNumberInBay,
                     vm.columnAction,
                     vm.columnIssueDate,
+                    vm.columnStartDate,
                     vm.columnExpiryDate,
                     vm.columnApprovalLetter,
                     vm.columnVesselLength,
@@ -731,6 +750,7 @@ export default {
                     vm.columnHolder,
                     vm.columnStatus,
                     vm.columnIssueDate,
+                    vm.columnStartDate,
                     vm.columnExpiryDate,
                     vm.columnApprovalLetter,
                     vm.columnVesselRegos,
