@@ -275,6 +275,9 @@ class ApprovalFilterBackend(DatatablesFilterBackend):
         queryset = queryset.order_by(*ordering)
         if len(ordering):
             queryset = queryset.order_by(*ordering)
+        else:
+            queryset = queryset.order_by('-id')
+
         try:
             queryset = super(ApprovalFilterBackend, self).filter_queryset(request, queryset, view)
         except Exception as e:
@@ -323,7 +326,7 @@ class ApprovalPaginatedViewSet(viewsets.ModelViewSet):
         qs = self.filter_queryset(qs)
 
         self.paginator.page_size = qs.count()
-        result_page = self.paginator.paginate_queryset(qs.order_by('-id'), request)
+        result_page = self.paginator.paginate_queryset(qs, request)
         serializer = ListApprovalSerializer(result_page, context={'request': request}, many=True)
         return self.paginator.get_paginated_response(serializer.data)
 
