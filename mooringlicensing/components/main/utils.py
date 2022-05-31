@@ -233,6 +233,10 @@ def sticker_export():
             ])
             for sticker in stickers:
                 try:
+                    # Sticker is being printed.  We assign a new number here.
+                    sticker.number = '{0:07d}'.format(sticker.next_number)
+                    sticker.save()
+
                     moorings = sticker.get_moorings()
                     mooring_names = [mooring.name for mooring in moorings]
                     mooring_names = ', '.join(mooring_names)
@@ -298,7 +302,7 @@ def email_stickers_document():
                 stickers = Sticker.objects.filter(sticker_printing_batch=batch)
                 # stickers.update(status=Sticker.STICKER_STATUS_AWAITING_PRINTING)
                 for sticker in stickers:
-                    sticker.status=Sticker.STICKER_STATUS_AWAITING_PRINTING
+                    sticker.status = Sticker.STICKER_STATUS_AWAITING_PRINTING
                     sticker.save()
                     if sticker.sticker_to_replace:
                         # new sticker has the old sticker here if it's created for renewal

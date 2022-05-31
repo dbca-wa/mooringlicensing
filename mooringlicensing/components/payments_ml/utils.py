@@ -347,7 +347,8 @@ def checkout_existing_invoice(request, invoice, return_url_ns='public_booking_su
         application_fee = ApplicationFee.objects.filter(invoice_reference=invoice.reference)
         if application_fee:
             application_fee = application_fee[0]
-            checkout_params['basket_owner'] = application_fee.approval.relevant_applicant_email_user.id
+            # checkout_params['basket_owner'] = application_fee.approval.relevant_applicant_email_user.id
+            checkout_params['basket_owner'] = application_fee.proposal.applicant_id
         else:
             # Should not reach here
             # At the moment, there should be only the 'annual rental fee' invoices for anonymous user
