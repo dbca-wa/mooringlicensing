@@ -2411,7 +2411,7 @@ class Sticker(models.Model):
         {'length': 16, 'colour': 'blue'},
         {'length': 1000, 'colour': 'white'},  # This is returned whenever any of the previous doesn't fit the requirement.
     ]
-    number = models.CharField(max_length=9, blank=True, default='', unique=True)
+    number = models.CharField(max_length=9, blank=True, default='')
     status = models.CharField(max_length=40, choices=STATUS_CHOICES, default=STATUS_CHOICES[0][0])
     sticker_printing_batch = models.ForeignKey(StickerPrintingBatch, blank=True, null=True)  # When None, most probably 'awaiting_
     sticker_printing_response = models.ForeignKey(StickerPrintingResponse, blank=True, null=True)
