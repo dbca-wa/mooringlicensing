@@ -1171,10 +1171,13 @@ class ProposalUserActionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_who(self, obj):
+        ret_name = 'System'
         if obj.who:
-            return obj.who.get_full_name()
-        else:
-            return 'System'
+            name = obj.who.get_full_name()
+            name = name.strip()
+            if name:
+                ret_name = name
+        return ret_name
 
 
 class ProposalLogEntrySerializer(CommunicationLogEntrySerializer):
