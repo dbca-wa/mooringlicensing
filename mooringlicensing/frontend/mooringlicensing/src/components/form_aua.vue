@@ -367,7 +367,7 @@
                     });
                 } else if (this.proposal && this.proposal.proposal_type.code === 'renewal') {
                     this.$nextTick(() => {
-                        if (this.keepCurrentVessel && !this.higherVesselCategory && !this.changeMooring) {
+                        if (this.proposal.vessel_on_proposal && this.keepCurrentVessel && !this.higherVesselCategory && !this.changeMooring) {
                             this.showPaymentTab = true;
                             this.showInsuranceTab = false;
                             this.$emit("updateSubmitText", "Pay / Submit");
