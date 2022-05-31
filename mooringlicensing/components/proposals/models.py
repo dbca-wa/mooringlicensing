@@ -2715,7 +2715,7 @@ class AuthorisedUserApplication(Proposal):
 
         if len(stickers_to_be_returned):
             a_sticker = stickers_to_be_returned[0]  # All the stickers to be returned should have the same vessel, so just pick the first one
-            if a_sticker.vessel_ownership.vessel.rego_no == self.vessel_ownership.vessel.rego_no:
+            if self.vessel_ownership and a_sticker.vessel_ownership.vessel.rego_no == self.vessel_ownership.vessel.rego_no:
                 # Same vessel
                 if stickers_to_be_printed:
                     self.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
@@ -2723,7 +2723,7 @@ class AuthorisedUserApplication(Proposal):
                 else:
                     self.processing_status = Proposal.PROCESSING_STATUS_APPROVED
             else:
-                # Vessel changed
+                # Vessel changed OR null vessel
                 # there is a sticker to be returned, application status gets 'Sticker to be Returned' status
                 self.processing_status = Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED
                 self.log_user_action(ProposalUserAction.ACTION_STICKER_TO_BE_RETURNED.format(self.id), request)
