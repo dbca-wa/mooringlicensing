@@ -211,12 +211,12 @@ export default {
         approvalTypeColumn: function() {
             return {
                         data: "id",
-                        orderable: true,
-                        searchable: true,
+                        orderable: false,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             return full.approval_type;
-                        }
+                        },
                     }
         },
         lodgementNumberColumn: function() {
@@ -228,7 +228,8 @@ export default {
                         visible: true,
                         'render': function(row, type, full){
                             return full.lodgement_number
-                        }
+                        },
+                        name: "lodgement_number"
                     }
         },
         licenceNumberColumn: function() {
@@ -240,15 +241,16 @@ export default {
                         visible: true,
                         'render': function(row, type, full){
                             return full.approval_number
-                        }
+                        },
+                        name: "approval__lodgement_number",
                     }
         },
         conditionColumn: function() {
             return {
                         // 4. Condition
                         data: "id",
-                        orderable: true,
-                        searchable: true,
+                        orderable: false,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             let requirement = '';
@@ -274,7 +276,8 @@ export default {
                                 dueDate = full.due_date_display;
                             }
                             return dueDate;
-                        }
+                        },
+                        name: "due_date"
                     }
         },
         statusColumn: function() {
@@ -286,7 +289,8 @@ export default {
                         visible: true,
                         'render': function(row, type, full){
                             return full.status
-                        }
+                        },
+                        name: "processing_status"
                     }
         },
         actionColumn: function() {
@@ -294,8 +298,8 @@ export default {
             return {
                         // 7. Action
                         data: "id",
-                        orderable: true,
-                        searchable: true,
+                        orderable: false,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             //return 'not implemented'
@@ -333,7 +337,8 @@ export default {
                         visible: true,
                         'render': function(row, type, full){
                             return full.assigned_to_name;
-                        }
+                        },
+                        name: 'assigned_to__first_name, assigned_to__last_name',
                     }
         },
 
@@ -389,7 +394,11 @@ export default {
                 },
                 responsive: true,
                 serverSide: true,
+                lengthMenu: [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ],
                 searching: true,
+                order: [
+                    [0, 'desc']
+                    ],
 
                 ajax: {
                     "url": api_endpoints.compliances_paginated_external + '?format=datatables&target_email_user_id=' + vm.target_email_user_id,
