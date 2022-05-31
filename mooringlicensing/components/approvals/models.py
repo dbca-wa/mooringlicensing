@@ -1375,7 +1375,8 @@ class AuthorisedUserPermit(Approval):
                     stickers_to_be_replaced_for_renewal.append(moa.sticker)
         elif proposal.proposal_type.code == PROPOSAL_TYPE_AMENDMENT:
             # When Amendment/reissuedAmendment (vessel changed)
-            if proposal.vessel_ownership != proposal.previous_application.vessel_ownership:
+            # if proposal.vessel_ownership != proposal.previous_application.vessel_ownership:
+            if proposal.vessel_removed or proposal.vessel_swapped:
                 # When amendment and vessel changed, all the current/awaiting_printing stickers to be replaced
                 moas_current = self._get_current_moas()
                 for moa in moas_current:
