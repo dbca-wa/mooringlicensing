@@ -607,7 +607,9 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
         if type(self.child_obj) not in [AuthorisedUserApplication, AnnualAdmissionApplication]:
             raise ValidationError("Only for AUP, AAA")
         removed = False
-        if self.previous_application and self.previous_application.vessel_ownership and not self.vessel_ownership:
+        if (self.previous_application and
+                self.previous_application.vessel_ownership and not self.previous_application.vessel_ownership.end_date and  # There was a vessel in the previous application and not sold
+                not self.vessel_ownership):
             removed = True
         return removed
 
@@ -618,6 +620,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
             raise ValidationError("Only for AUP, AAA")
         changed = False
         if (self.vessel_ownership and self.previous_application and self.previous_application.vessel_ownership and
+                not self.previous_application.vessel_ownership.end_date and  # Not sold yet
                 self.vessel_ownership.vessel.rego_no != self.previous_application.vessel_ownership.vessel.rego_no):
             changed = True
         return changed
@@ -628,7 +631,10 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
         if type(self.child_obj) not in [AuthorisedUserApplication, AnnualAdmissionApplication]:
             raise ValidationError("Only for AUP, AAA")
         new = False
-        if self.vessel_ownership and self.previous_application and not self.previous_application.vessel_ownership:
+        if self.vessel_ownership and self.previous_application and (
+                not self.previous_application.vessel_ownership or
+                self.previous_application.vessel_ownership.end_date  # After record sale, this is true
+        ):
             new = True
         return new
 

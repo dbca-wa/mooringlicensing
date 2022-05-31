@@ -904,11 +904,18 @@ class Approval(RevisionedMixin):
             elif sticker.status == Sticker.STICKER_STATUS_TO_BE_RETURNED:
                 # Do nothing
                 pass
-            elif sticker.status in [Sticker.STICKER_STATUS_READY, Sticker.STICKER_STATUS_NOT_READY_YET,]:
+            elif sticker.status in [Sticker.STICKER_STATUS_READY,]:
                 # These sticker objects were created, but not sent to the printing company
                 # So we just make it 'cancelled'
-                logger.info('Sticker: {} status was changed to cancelled internally'.format(sticker))
-                sticker.status = Sticker.STICKER_STATUS_CANCELLED
+                if sticker.number:
+                    # Should not reach here.
+                    # But if this is the case, we assign 'cancelled' status so that it is shown in the sticker table.
+                    logger.info('Sticker: {} status was changed to cancelled internally'.format(sticker))
+                    sticker.status = Sticker.STICKER_STATUS_CANCELLED
+                else:
+                    logger.info('Sticker: {} status was changed to not_ready_yet internally'.format(sticker))
+                    sticker.status = Sticker.STICKER_STATUS_NOT_READY_YET  # This sticker object was created, but no longer needed before being printed.
+                                                                           # Therefore, assign not_ready_yet status not to be picked up for printing
                 sticker.save()
             else:
                 # Do nothing
@@ -1401,14 +1408,6 @@ class AuthorisedUserPermit(Approval):
         # We have to fill the existing unfilled sticker first.
         self.check_unfilled_existing_sticker(moas_to_be_reallocated, stickers_to_be_returned)
 
-        # Remove duplication
-        stickers_to_be_returned = list(set(stickers_to_be_returned))
-        moas_to_be_reallocated = list(set(moas_to_be_reallocated))
-
-        # Finally, assign mooring(s) to new sticker(s)
-        self._assign_to_new_stickers(moas_to_be_reallocated, proposal, stickers_to_be_returned, stickers_to_be_replaced_for_renewal)
-        self._update_stickers_to_be_removed(stickers_to_be_returned, stickers_to_be_replaced_for_renewal)
-
         # There may be sticker(s) to be returned by record-sale
         stickers_return = proposal.approval.stickers.filter(status__in=[Sticker.STICKER_STATUS_TO_BE_RETURNED,])
         for sticker in stickers_return:
@@ -1418,7 +1417,11 @@ class AuthorisedUserPermit(Approval):
         stickers_to_be_returned = list(set(stickers_to_be_returned))
         moas_to_be_reallocated = list(set(moas_to_be_reallocated))
 
-        return moas_to_be_reallocated, stickers_to_be_returned
+        # Finally, assign mooring(s) to new sticker(s)
+        self._assign_to_new_stickers(moas_to_be_reallocated, proposal, stickers_to_be_returned, stickers_to_be_replaced_for_renewal)
+        self._update_stickers_to_be_removed(stickers_to_be_returned, stickers_to_be_replaced_for_renewal)
+
+        return list(set(moas_to_be_reallocated)), list(set(stickers_to_be_returned))
 
     def check_unfilled_existing_sticker(self, moas_to_be_reallocated, stickers_to_be_returned):
         if len(moas_to_be_reallocated) > 0:
@@ -1481,12 +1484,17 @@ class AuthorisedUserPermit(Approval):
         new_stickers = []
 
         if len(stickers_to_be_returned):
-            a_sticker = stickers_to_be_returned[0]
-            if a_sticker.vessel_ownership.vessel.rego_no == proposal.vessel_ownership.vessel.rego_no:
-                new_status = Sticker.STICKER_STATUS_READY
-            else:
-                # We don't want to print a new sticker if there is a sticker with 'to_be_returned' status for this permit
-                new_status = Sticker.STICKER_STATUS_NOT_READY_YET  # This sticker gets 'ready' status once the sticker with 'to be returned' status is returned.
+            new_status = Sticker.STICKER_STATUS_READY
+            for a_sticker in stickers_to_be_returned:
+                if a_sticker.vessel_ownership.vessel.rego_no != proposal.vessel_ownership.vessel.rego_no:
+                    new_status = Sticker.STICKER_STATUS_NOT_READY_YET  # This sticker gets 'ready' status once the sticker with 'to be returned' status is returned.
+                    break
+            #a_sticker = stickers_to_be_returned[0]
+            #if a_sticker.vessel_ownership.vessel.rego_no == proposal.vessel_ownership.vessel.rego_no:
+            #    new_status = Sticker.STICKER_STATUS_READY
+            #else:
+            #    # We don't want to print a new sticker if there is a sticker with 'to_be_returned' status for this permit
+            #    new_status = Sticker.STICKER_STATUS_NOT_READY_YET  # This sticker gets 'ready' status once the sticker with 'to be returned' status is returned.
         else:
             new_status = Sticker.STICKER_STATUS_READY
 
@@ -2564,9 +2572,11 @@ class Sticker(models.Model):
 
     def save(self, *args, **kwargs):
         super(Sticker, self).save(*args, **kwargs)
-        if self.status not in [Sticker.STICKER_STATUS_NOT_READY_YET,]:
+        if self.status not in [Sticker.STICKER_STATUS_NOT_READY_YET, Sticker.STICKER_STATUS_READY,]:
             # We don't want to assign a number yet to not_ready_yet sticker.
             if self.number == '':
+                # Should not reach here, a new number is assigned to a sticker when exporting sticker data to the sticker company.
+                # Ref: export_and_email_sticker_data.py
                 self.number = '{0:07d}'.format(self.next_number)
                 self.save()
 
