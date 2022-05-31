@@ -2564,9 +2564,11 @@ class Sticker(models.Model):
 
     def save(self, *args, **kwargs):
         super(Sticker, self).save(*args, **kwargs)
-        if self.number == '':
-            self.number = '{0:07d}'.format(self.next_number)
-            self.save()
+        if self.status not in [Sticker.STICKER_STATUS_NOT_READY_YET,]:
+            # We don't want to assign a number yet to not_ready_yet sticker.
+            if self.number == '':
+                self.number = '{0:07d}'.format(self.next_number)
+                self.save()
 
     @property
     def first_name(self):
