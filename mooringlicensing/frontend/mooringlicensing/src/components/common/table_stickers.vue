@@ -328,13 +328,13 @@ export default {
                     {
                         extend: 'excel',
                         exportOptions: {
-                            columns: ':visible'
+                            //columns: ':visible'
                         }
                     },
                     {
                         extend: 'csv',
                         exportOptions: {
-                            columns: ':visible'
+                            //columns: ':visible'
                         }
                     },
                 ],
