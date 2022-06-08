@@ -1487,9 +1487,15 @@ class AuthorisedUserPermit(Approval):
         if len(stickers_to_be_returned):
             new_status = Sticker.STICKER_STATUS_READY
             for a_sticker in stickers_to_be_returned:
-                if a_sticker.vessel_ownership.vessel.rego_no != proposal.vessel_ownership.vessel.rego_no:
-                    new_status = Sticker.STICKER_STATUS_NOT_READY_YET  # This sticker gets 'ready' status once the sticker with 'to be returned' status is returned.
-                    break
+                if proposal.vessel_ownership:
+                    # Current proposal has a vessel
+                    if a_sticker.vessel_ownership.vessel.rego_no != proposal.vessel_ownership.vessel.rego_no:
+                        new_status = Sticker.STICKER_STATUS_NOT_READY_YET  # This sticker gets 'ready' status once the sticker with 'to be returned' status is returned.
+                        break
+                else:
+                    # Current proposal doesn't have a vessel
+                    pass
+
             #a_sticker = stickers_to_be_returned[0]
             #if a_sticker.vessel_ownership.vessel.rego_no == proposal.vessel_ownership.vessel.rego_no:
             #    new_status = Sticker.STICKER_STATUS_READY
