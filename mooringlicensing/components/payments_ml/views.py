@@ -152,6 +152,9 @@ class ApplicationFeeExistingView(TemplateView):
         proposal = self.get_object()
         application_fee = proposal.get_main_application_fee()
 
+        if application_fee.paid:
+            return redirect('application_fee_already_paid', proposal_pk=proposal.id)
+
         try:
             with transaction.atomic():
                 set_session_application_invoice(request.session, application_fee)
@@ -576,6 +579,23 @@ class DcvPermitFeeSuccessView(TemplateView):
         dcv_permit.end_date = datetime.datetime.strptime(db_operations['season_end_date'], '%Y-%m-%d').date()
         dcv_permit.lodgement_datetime = dateutil.parser.parse(db_operations['datetime_for_calculating_fee'])
         dcv_permit.save()
+
+
+class ApplicationFeeAlreadyPaid(TemplateView):
+    template_name = 'mooringlicensing/payments_ml/application_fee_already_paid.html'
+
+    def get(self, request, *args, **kwargs):
+        proposal = get_object_or_404(Proposal, id=self.kwargs['proposal_pk'])
+        application_fee = proposal.get_main_application_fee()
+        invoice = Invoice.objects.get(reference=application_fee.invoice_reference)
+
+        context = {
+            'proposal': proposal,
+            'submitter': proposal.submitter,
+            'application_fee': application_fee,
+            'invoice': invoice,
+        }
+        return render(request, self.template_name, context)
 
 
 class ApplicationFeeSuccessView(TemplateView):
