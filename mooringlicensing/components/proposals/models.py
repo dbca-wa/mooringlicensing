@@ -604,8 +604,12 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
     @property
     def vessel_removed(self):
         # for AUP, AAP manage_stickers
-        if type(self.child_obj) not in [AuthorisedUserApplication, AnnualAdmissionApplication]:
-            raise ValidationError("Only for AUP, AAA")
+        if type(self) is Proposal:
+            if type(self.child_obj) not in [AuthorisedUserApplication, AnnualAdmissionApplication]:
+                raise ValidationError("Only for AUP, AAA")
+        else:
+            if type(self) not in [AuthorisedUserApplication, AnnualAdmissionApplication]:
+                raise ValidationError("Only for AUP, AAA")
         removed = False
         if (self.previous_application and
                 self.previous_application.vessel_ownership and not self.previous_application.vessel_ownership.end_date and  # There was a vessel in the previous application and not sold
@@ -616,8 +620,14 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
     @property
     def vessel_swapped(self):
         # for AUP, AAP manage_stickers
-        if type(self.child_obj) not in [AuthorisedUserApplication, AnnualAdmissionApplication]:
-            raise ValidationError("Only for AUP, AAA")
+        if type(self) is Proposal:
+            if type(self.child_obj) not in [AuthorisedUserApplication, AnnualAdmissionApplication]:
+                raise ValidationError("Only for AUP, AAA")
+        else:
+            if type(self) not in [AuthorisedUserApplication, AnnualAdmissionApplication]:
+                raise ValidationError("Only for AUP, AAA")
+        # if type(self.child_obj) not in [AuthorisedUserApplication, AnnualAdmissionApplication]:
+        #     raise ValidationError("Only for AUP, AAA")
         changed = False
         if (self.vessel_ownership and self.previous_application and self.previous_application.vessel_ownership and
                 not self.previous_application.vessel_ownership.end_date and  # Not sold yet
@@ -628,8 +638,14 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
     @property
     def vessel_null_to_new(self):
         # for AUP, AAP manage_stickers
-        if type(self.child_obj) not in [AuthorisedUserApplication, AnnualAdmissionApplication]:
-            raise ValidationError("Only for AUP, AAA")
+        if type(self) is Proposal:
+            if type(self.child_obj) not in [AuthorisedUserApplication, AnnualAdmissionApplication]:
+                raise ValidationError("Only for AUP, AAA")
+        else:
+            if type(self) not in [AuthorisedUserApplication, AnnualAdmissionApplication]:
+                raise ValidationError("Only for AUP, AAA")
+        # if type(self.child_obj) not in [AuthorisedUserApplication, AnnualAdmissionApplication]:
+        #     raise ValidationError("Only for AUP, AAA")
         new = False
         if self.vessel_ownership and self.previous_application and (
                 not self.previous_application.vessel_ownership or
