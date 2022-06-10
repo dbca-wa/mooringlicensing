@@ -424,6 +424,7 @@ export default {
                 }
             ).draw();
         }
+        vm.$refs.moorings_datatable.vmDataTable.columns.adjust().responsive.recalc();
     },
     constructMLVesselsTable: function() {
         let vm = this;
@@ -441,13 +442,15 @@ export default {
                 }
             ).draw();
         }
+        vm.$refs.ml_vessels_datatable.vmDataTable.columns.adjust().responsive.recalc();
     },
     constructMLAuthorisedUsersTable: function() {
+        console.log("construct")
         let vm = this;
         this.$refs.ml_authorised_users_datatable.vmDataTable.clear().draw();
 
         for (let mlau of vm.approval.mooring_licence_authorised_users) {
-            if (this.showExpired || (!this.showExpired && ['current'].includes(mlau.status))) {
+            if (this.showExpired || (!this.showExpired && ['Current'].includes(mlau.status))) {
                 this.$refs.ml_authorised_users_datatable.vmDataTable.row.add(
                     {
                         'lodgement_number': mlau.lodgement_number,
@@ -460,6 +463,7 @@ export default {
                 ).draw();
             }
         }
+        vm.$refs.ml_authorised_users_datatable.vmDataTable.columns.adjust().responsive.recalc();
     },
 
     commaToNewline(s){

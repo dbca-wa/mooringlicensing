@@ -214,6 +214,7 @@ export default {
                 },
                 responsive: true,
                 serverSide: true,
+                lengthMenu: [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ],
                 searching: true,
 
                 ajax: {
@@ -235,13 +236,13 @@ export default {
                     {
                         extend: 'excel',
                         exportOptions: {
-                            columns: ':visible'
+                            //columns: ':visible'
                         }
                     },
                     {
                         extend: 'csv',
                         exportOptions: {
-                            columns: ':visible'
+                            //columns: ':visible'
                         }
                     },
                 ],

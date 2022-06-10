@@ -18,7 +18,8 @@ from mooringlicensing.components.emails.emails import TemplateEmailBase
 from datetime import datetime
 
 from mooringlicensing.components.main.models import NumberOfDaysType, NumberOfDaysSetting
-from mooringlicensing.components.emails.utils import get_user_as_email_user, make_url_for_internal, get_public_url
+from mooringlicensing.components.emails.utils import get_user_as_email_user, make_url_for_internal, get_public_url, \
+    make_url_for_external, make_http_https
 from mooringlicensing.settings import CODE_DAYS_FOR_SUBMIT_DOCUMENTS_MLA, CODE_DAYS_IN_PERIOD_MLA, \
     PROPOSAL_TYPE_AMENDMENT, PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL
 
@@ -173,7 +174,7 @@ def _log_user_email(email_message, target_email_user, customer, sender=None, att
     kwargs = {
         'subject': subject,
         'text': text,
-        'emailuser': target_email_user,
+        'emailuser': target_email_user if target_email_user else customer,
         'customer': customer,
         'staff': staff,
         'to': to,
@@ -267,7 +268,7 @@ def send_approver_approve_decline_email_notification(request, proposal):
 
     context = {
         'public_url': get_public_url(request),
-        'details': proposal.proposed_issuance_approval.get('details') if proposal.proposed_issuance_approval else '',
+        # 'details': proposal.proposed_issuance_approval.get('details') if proposal.proposed_issuance_approval else '',
         'proposal': proposal,
         'proposal_internal_url': url
     }
@@ -295,8 +296,9 @@ def send_amendment_email_notification(amendment_request, request, proposal):
         'public_url': get_public_url(request),
         'recipient': proposal.submitter,
         'proposal': proposal,
-        'details': reason,
-        'proposal_external_url': url
+        'reason': reason,
+        'text': amendment_request.text,
+        'proposal_external_url': make_url_for_external(url),
     }
 
     to = proposal.submitter.email
@@ -340,7 +342,7 @@ def send_create_mooring_licence_application_email_notification(request, waiting_
         'recipient': mooring_licence_application.submitter,
         'application_period': days_setting_application_period.number_of_days,
         'documents_period': days_setting_documents_period.number_of_days,
-        'proposal_external_url': url,
+        'proposal_external_url': make_url_for_external(url),
     }
     sender = settings.DEFAULT_FROM_EMAIL
     try:
@@ -384,8 +386,8 @@ def send_documents_upload_for_mooring_licence_application_email(request, proposa
         'public_url': get_public_url(request),
         'proposal': proposal,
         'recipient': proposal.submitter,
-        'documents_upload_url': document_upload_url,
-        'proposal_external_url': url,
+        'documents_upload_url': make_http_https(document_upload_url),
+        'proposal_external_url': make_http_https(url),
         'num_of_days_to_submit_documents': days_setting.number_of_days,
     }
     to_address = proposal.submitter.email
@@ -420,7 +422,7 @@ def send_comppliance_due_date_notification(approval, compliance,):
         'approval': approval,
         'compliance': compliance,
         'recipient': compliance.submitter,
-        'compliance_external_url': url,
+        'compliance_external_url': make_http_https(url),
     }
     to_address = compliance.submitter.email
     cc = []
@@ -453,7 +455,7 @@ def send_comliance_overdue_notification(request, approval, compliance,):
         'approval': approval,
         'compliance': compliance,
         'recipient': compliance.submitter,
-        'compliance_external_url': url,
+        'compliance_external_url': make_http_https(url),
     }
     to_address = compliance.submitter.email
     cc = []
@@ -488,7 +490,7 @@ def send_invitee_reminder_email(proposal, due_date, number_of_days, request=None
         'public_url': get_public_url(request),
         'proposal': proposal,
         'recipient': proposal.submitter,
-        'proposal_external_url': url,
+        'proposal_external_url': make_http_https(url),
         'due_date': due_date,
         'number_of_days': number_of_days,
     }
@@ -522,7 +524,7 @@ def send_expire_mooring_licence_application_email(proposal, reason, due_date,):
         'public_url': get_public_url(),
         'proposal': proposal,
         'recipient': proposal.submitter,
-        'dashboard_url': dashboard_url,
+        'dashboard_url': make_http_https(dashboard_url),
     }
     to_address = proposal.submitter.email
     cc = []
@@ -555,7 +557,7 @@ def send_expire_mooring_licence_by_no_documents_email(proposal, reason, due_date
         'public_url': get_public_url(),
         'proposal': proposal,
         'recipient': proposal.submitter,
-        'dashboard_url': dashboard_url,
+        'dashboard_url': make_http_https(dashboard_url),
     }
     to_address = proposal.submitter.email
     cc = []
@@ -629,9 +631,9 @@ def send_endorser_reminder_email(proposal, request=None):
         'recipient': proposal.submitter,
         'endorser': endorser,
         'applicant': proposal.submitter,
-        'endorse_url': endorse_url,
-        'decline_url': decline_url,
-        'proposal_url': proposal_url,
+        'endorse_url': make_http_https(endorse_url),
+        'decline_url': make_http_https(decline_url),
+        'proposal_url': make_http_https(proposal_url),
         'mooring_name': mooring_name,
         'due_date': due_date,
     }
@@ -669,7 +671,7 @@ def send_approval_renewal_email_notification(approval):
         'vessel_rego_no': proposal.vessel_details.vessel.rego_no,  # TODO
         'recipient': proposal.submitter,
         'expiry_date': approval.expiry_date,
-        'dashboard_external_url': url,
+        'dashboard_external_url': make_http_https(url),
     }
 
     sender = settings.DEFAULT_FROM_EMAIL
@@ -710,37 +712,41 @@ def send_application_approved_or_declined_email(proposal, decision, request, sti
         # 18, 19
         send_aaa_approved_or_declined_email(proposal, decision, request, stickers_to_be_returned)  # require_payment should be always False for AAA because it should be paid at this stage.
     elif proposal.application_type.code == AuthorisedUserApplication.code:
-        # 20, 21,22
         if proposal.proposal_type.code in [PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL]:
+            # 20
             send_aua_approved_or_declined_email_new_renewal(proposal, decision, request, stickers_to_be_returned)
         elif proposal.proposal_type.code == PROPOSAL_TYPE_AMENDMENT:
             payment_required = False
             if proposal.application_fees.count():
-                application_fee = proposal.application_fees.first()
+                application_fee = proposal.get_main_application_fee()
                 invoice = Invoice.objects.get(reference=application_fee.invoice_reference)
                 if invoice.payment_status not in ('paid', 'over_paid'):
                     payment_required = True
             if payment_required:
-                send_aua_approved_or_declined_email_amendment_yes_payment(proposal, decision, request, stickers_to_be_returned)
+                # 22 (22a, 22b, 22c)
+                send_aua_approved_or_declined_email_amendment_payment_required(proposal, decision, request, stickers_to_be_returned)
             else:
-                send_aua_approved_or_declined_email_amendment_no_payment(proposal, decision, request, stickers_to_be_returned)
+                # 21
+                send_aua_approved_or_declined_email_amendment_payment_not_required(proposal, decision, request, stickers_to_be_returned)
         else:
             pass
     elif proposal.application_type.code == MooringLicenceApplication.code:
-        # 23, 24, 25
         if proposal.proposal_type.code in [PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL]:
+            # 23
             send_mla_approved_or_declined_email_new_renewal(proposal, decision, request, stickers_to_be_returned)
         elif proposal.proposal_type.code == PROPOSAL_TYPE_AMENDMENT:
             payment_required = False
             if proposal.application_fees.count():
-                application_fee = proposal.application_fees.first()
+                application_fee = proposal.get_main_application_fee()
                 invoice = Invoice.objects.get(reference=application_fee.invoice_reference)
                 if invoice.payment_status not in ('paid', 'over_paid'):
                     payment_required = True
             if payment_required:
-                send_mla_approved_or_declined_email_amendment_yes_payment(proposal, decision, request, stickers_to_be_returned)
+                # 25
+                send_mla_approved_or_declined_email_amendment_payment_required(proposal, decision, request, stickers_to_be_returned)
             else:
-                send_mla_approved_or_declined_email_amendment_no_payment(proposal, decision, request, stickers_to_be_returned)
+                # 24
+                send_mla_approved_or_declined_email_amendment_payment_not_required(proposal, decision, request, stickers_to_be_returned)
         else:
             pass
 
@@ -897,11 +903,11 @@ def send_aua_approved_or_declined_email_new_renewal(proposal, decision, request,
         cc_list = proposal.proposed_issuance_approval.get('cc_email')
         if cc_list:
             all_ccs = cc_list.split(',')
-        attachments = get_attachments(True, True, proposal)
+        attachments = get_attachments(True, False, proposal)
 
         # Generate payment_url if needed
         if proposal.application_fees.count():
-            application_fee = proposal.application_fees.first()
+            application_fee = proposal.get_main_application_fee()
             invoice = Invoice.objects.get(reference=application_fee.invoice_reference)
             if invoice.payment_status not in ('paid', 'over_paid'):
                 # Payment required
@@ -954,7 +960,7 @@ def send_aua_approved_or_declined_email_new_renewal(proposal, decision, request,
     return msg
 
 
-def send_aua_approved_or_declined_email_amendment_no_payment(proposal, decision, request, stickers_to_be_returned):
+def send_aua_approved_or_declined_email_amendment_payment_not_required(proposal, decision, request, stickers_to_be_returned):
     #21
     # email to applicant when application is issued or declined (authorised user application, amendment where no payment is required)
     all_ccs = []
@@ -971,6 +977,13 @@ def send_aua_approved_or_declined_email_amendment_no_payment(proposal, decision,
         if cc_list:
             all_ccs = cc_list.split(',')
         attachments = get_attachments(False, True, proposal)
+    elif decision == 'approved_paid':
+        subject = 'Approved: Amendment Application for Rottnest Island Authorised User Permit'
+        details = proposal.proposed_issuance_approval.get('details')
+        cc_list = proposal.proposed_issuance_approval.get('cc_email')
+        if cc_list:
+            all_ccs = cc_list.split(',')
+        attachments = get_attachments(False, True, proposal)
     elif decision == 'declined':
         subject = 'Declined: Amendment Application for Rottnest Island Authorised User Permit'
         details = proposal.proposaldeclineddetails.reason
@@ -978,7 +991,7 @@ def send_aua_approved_or_declined_email_amendment_no_payment(proposal, decision,
         if cc_list:
             all_ccs = cc_list.split(',')
     else:
-        logger.warning('Decision is unclear when sending AAA approved/declined email for {}'.format(proposal.lodgement_number))
+        logger.warning('Decision is unclear when sending AUA approved/declined email for {}'.format(proposal.lodgement_number))
 
     email = TemplateEmailBase(
         subject=subject,
@@ -1005,7 +1018,7 @@ def send_aua_approved_or_declined_email_amendment_no_payment(proposal, decision,
     return msg
 
 
-def send_aua_approved_or_declined_email_amendment_yes_payment(proposal, decision, request, stickers_to_be_returned):
+def send_aua_approved_or_declined_email_amendment_payment_required(proposal, decision, request, stickers_to_be_returned):
     #22
     # email to applicant when application is issued or declined (authorised user application, amendment where payment is required)
     all_ccs = []
@@ -1029,11 +1042,11 @@ def send_aua_approved_or_declined_email_amendment_yes_payment(proposal, decision
         cc_list = proposal.proposed_issuance_approval.get('cc_email')
         if cc_list:
             all_ccs = cc_list.split(',')
-        attachments = get_attachments(True, True, proposal)
+        attachments = get_attachments(True, False, proposal)
 
         # Generate payment_url if needed
         if proposal.application_fees.count():
-            application_fee = proposal.application_fees.first()
+            application_fee = proposal.get_main_application_fee()
             invoice = Invoice.objects.get(reference=application_fee.invoice_reference)
             if invoice.payment_status not in ('paid', 'over_paid'):
                 # Payment required
@@ -1073,7 +1086,7 @@ def send_aua_approved_or_declined_email_amendment_yes_payment(proposal, decision
         'decision': decision,
         'details': details,
         'stickers_to_be_returned': stickers_to_be_returned,  # TODO: if existing sticker needs to be replaced, assign sticker object here.
-        'payment_url': payment_url,
+        'payment_url': make_http_https(payment_url),
     }
 
     to_address = proposal.submitter.email
@@ -1084,6 +1097,7 @@ def send_aua_approved_or_declined_email_amendment_yes_payment(proposal, decision
     sender = get_user_as_email_user(msg.from_email)
     log_proposal_email(msg, proposal, sender, attachments)
     return msg
+
 
 def get_attachments(attach_invoice, attach_licence_doc, proposal, attach_au_summary_doc=False):
     from mooringlicensing.components.payments_ml.invoice_pdf import create_invoice_pdf_bytes
@@ -1122,8 +1136,8 @@ def get_attachments(attach_invoice, attach_licence_doc, proposal, attach_au_summ
     return attachments
 
 
-def send_au_summary_to_ml_holder(approval, request):
-    subject = 'Authorised User Summary Updated'
+def send_au_summary_to_ml_holder(mooring_licence, request, au_proposal):
+    subject = 'Authorised User Summary for {} - Rottnest Island Authority'.format(mooring_licence.mooring.name)
     attachments = []
 
     email = TemplateEmailBase(
@@ -1132,27 +1146,33 @@ def send_au_summary_to_ml_holder(approval, request):
         txt_template='mooringlicensing/emails_2/au_summary.txt',
     )
 
-    if approval.authorised_user_summary_document:
-        au_summary_document = approval.authorised_user_summary_document._file
+    if mooring_licence.authorised_user_summary_document:
+        au_summary_document = mooring_licence.authorised_user_summary_document._file
         if au_summary_document is not None:
-            file_name = approval.authorised_user_summary_document.name
+            file_name = mooring_licence.authorised_user_summary_document.name
             attachment = (file_name, au_summary_document.file.read(), 'application/pdf')
             attachments.append(attachment)
 
-    proposal = approval.current_proposal
+    proposal = mooring_licence.current_proposal
     context = {
-        'approval': approval,
-        'recipient': proposal.submitter,
+        'authorised_user_full_name': au_proposal.applicant,
+        'mooring_number': mooring_licence.mooring.name,
+        'yourself_or_ria': 'ria' if au_proposal.mooring_authorisation_preference == 'RIA' else 'yourself',
+        'approval_date': au_proposal.approval.issue_date.strftime('%d/%m/%Y'),
+        'public_url': get_public_url(request),
+        # 'approval': approval,
+        'recipient': mooring_licence.applicant,
+        'url_for_au_dashboard_page': get_public_url(request),  # Do we have AU dashboard page for external???
     }
 
-    to_address = approval.submitter.email
+    to_address = mooring_licence.submitter.email
 
     # Send email
     msg = email.send(to_address, context=context, attachments=attachments, cc=[], bcc=[],)
 
     sender = get_user_as_email_user(msg.from_email)
     # log_proposal_email(msg, proposal, sender, attachments)
-    _log_approval_email(msg, approval, sender, attachments)
+    _log_approval_email(msg, mooring_licence, sender, attachments)
     return msg
 
 
@@ -1184,7 +1204,7 @@ def send_mla_approved_or_declined_email_new_renewal(proposal, decision, request,
 
         # Generate payment_url if needed
         if proposal.application_fees.count():
-            application_fee = proposal.application_fees.first()
+            application_fee = proposal.get_main_application_fee()
             invoice = Invoice.objects.get(reference=application_fee.invoice_reference)
             if invoice.payment_status not in ('paid', 'over_paid'):
                 # Payment required
@@ -1226,7 +1246,7 @@ def send_mla_approved_or_declined_email_new_renewal(proposal, decision, request,
         'decision': decision,
         'details': details,
         'stickers_to_be_returned': stickers_to_be_returned,  # TODO: if existing sticker needs to be replaced, assign sticker object here.
-        'payment_url': payment_url,
+        'payment_url': make_http_https(payment_url),
     }
 
     to_address = proposal.submitter.email
@@ -1239,7 +1259,7 @@ def send_mla_approved_or_declined_email_new_renewal(proposal, decision, request,
     return msg
 
 
-def send_mla_approved_or_declined_email_amendment_no_payment(proposal, decision, request, stickers_to_be_returned):
+def send_mla_approved_or_declined_email_amendment_payment_not_required(proposal, decision, request, stickers_to_be_returned):
     # 24 ML amendment(no payment), approval/decline
     # email to applicant when application is issued or declined (mooring licence application, amendment where no payment is required)
     all_ccs = []
@@ -1255,6 +1275,14 @@ def send_mla_approved_or_declined_email_amendment_no_payment(proposal, decision,
         subject = 'Approved: Amendment Application for Rottnest Island Mooring Site Licence'
         details = proposal.proposed_issuance_approval.get('details')
         cc_list = proposal.proposed_issuance_approval.get('cc_email')
+        if cc_list:
+            all_ccs = cc_list.split(',')
+        attach_au_summary_doc = True if proposal.proposal_type.code in [PROPOSAL_TYPE_AMENDMENT, PROPOSAL_TYPE_RENEWAL,] else False
+        attachments = get_attachments(False, True, proposal, attach_au_summary_doc)
+    elif decision == 'approved_paid':
+        subject = 'Approved: Amendment Application for Rottnest Island Mooring Site Licence'
+        details = proposal.proposed_issuance_approval.get('details') if proposal.proposed_issuance_approval else ''
+        cc_list = proposal.proposed_issuance_approval.get('cc_email') if proposal.proposed_issuance_approval else ''
         if cc_list:
             all_ccs = cc_list.split(',')
         attach_au_summary_doc = True if proposal.proposal_type.code in [PROPOSAL_TYPE_AMENDMENT, PROPOSAL_TYPE_RENEWAL,] else False
@@ -1293,7 +1321,7 @@ def send_mla_approved_or_declined_email_amendment_no_payment(proposal, decision,
     return msg
 
 
-def send_mla_approved_or_declined_email_amendment_yes_payment(proposal, decision, request, stickers_to_be_returned):
+def send_mla_approved_or_declined_email_amendment_payment_required(proposal, decision, request, stickers_to_be_returned):
     # 25 ML amendment(payment), approval/decline
     # email to applicant when application is issued or declined (mooring licence application, amendment where payment is required) 
     all_ccs = []
@@ -1316,11 +1344,11 @@ def send_mla_approved_or_declined_email_amendment_yes_payment(proposal, decision
         if cc_list:
             all_ccs = cc_list.split(',')
         attach_au_summary_doc = True if proposal.proposal_type.code in [PROPOSAL_TYPE_AMENDMENT, PROPOSAL_TYPE_RENEWAL,] else False
-        attachments = get_attachments(True, True, proposal, attach_au_summary_doc)
+        attachments = get_attachments(True, False, proposal, attach_au_summary_doc)
 
         # Generate payment_url if needed
         if proposal.application_fees.count():
-            application_fee = proposal.application_fees.first()
+            application_fee = proposal.get_main_application_fee()
             invoice = Invoice.objects.get(reference=application_fee.invoice_reference)
             if invoice.payment_status not in ('paid', 'over_paid'):
                 # Payment required
@@ -1363,7 +1391,7 @@ def send_mla_approved_or_declined_email_amendment_yes_payment(proposal, decision
         'decision': decision,
         'details': details,
         'stickers_to_be_returned': stickers_to_be_returned,  # TODO: if existing sticker needs to be replaced, assign sticker object here.
-        'payment_url': payment_url,
+        'payment_url': make_http_https(payment_url),
     }
 
     to_address = proposal.submitter.email
@@ -1423,7 +1451,6 @@ def extract_file_for_attachment(attachments, my_file):
         if mime:
             attachment = (my_file.name, my_file._file.read(), mime)
             attachments.append(attachment)
-
 
 
 def send_sticker_printing_batch_email(batches):
@@ -1492,9 +1519,9 @@ def send_endorsement_of_authorised_user_application_email(request, proposal):
         'recipient': proposal.submitter,
         'endorser': endorser,
         'applicant': proposal.submitter,
-        'endorse_url': endorse_url,
-        'decline_url': decline_url,
-        'proposal_url': proposal_url,
+        'endorse_url': make_http_https(endorse_url),
+        'decline_url': make_http_https(decline_url),
+        'proposal_url': make_http_https(proposal_url),
         'mooring_name': mooring_name,
         'due_date': due_date,
     }

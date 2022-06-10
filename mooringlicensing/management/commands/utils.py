@@ -15,3 +15,21 @@ def ml_meet_vessel_requirement(mooring_licence, boundary_date):
 
     # All the vessels have been sold more than X months ago
     return False
+
+
+def construct_email_message(cmd_name, errors, updates):
+    cmd_str = '<div>{} completed.</div>'.format(cmd_name)
+
+    if len(errors) > 0:
+        err_str = '<div><strong style="color: red;">Errors: {}</strong></div>'.format(len(errors))
+        err_str += '<ul>'
+        for error in errors:
+            err_str += '<li>{}</li>'.format(error)
+        err_str += '</ul>'
+    else:
+        err_str = '<div><strong style="color: green;">Errors: 0</strong></div>'
+
+    updates_str = '<div>IDs updated: {}</div>'.format(updates)
+
+    msg = '<div style="margin: 0 0 1em 0;">' + cmd_str + '<div style="margin:0 0 0 1em;">' + err_str + updates_str + '</div></div>'
+    return msg

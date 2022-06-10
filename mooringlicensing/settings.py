@@ -1,3 +1,5 @@
+import sys
+
 from django.core.exceptions import ImproperlyConfigured
 
 import os
@@ -194,7 +196,15 @@ APPLICATION_TYPES = [
     APPLICATION_TYPE_REPLACEMENT_STICKER,
     APPLICATION_TYPE_MOORING_SWAP,
 ]
+
+# Add a formatter for the contents of the cron email
+LOGGING['formatters']['msg_only'] = {
+    'format': '{message}',
+    'style': '{',
+}
+
 # Add a handler
+CRON_EMAIL_FILE_NAME = 'cron_email.log'
 LOGGING['handlers']['file_mooringlicensing'] = {
     'level': 'INFO',
     'class': 'logging.handlers.RotatingFileHandler',
@@ -202,11 +212,48 @@ LOGGING['handlers']['file_mooringlicensing'] = {
     'formatter': 'verbose',
     'maxBytes': 5242880
 }
-# define logger
-LOGGING['loggers']['mooringlicensing'] = {
-    'handlers': ['file_mooringlicensing'],
-    'level': 'INFO'
+# logs/run_cron_tasks.log file is temporarily used in cron_tasks.py, and it's cleared whenever cron runs.
+# Therefore we need persistent log files for cron job
+LOGGING['handlers']['file_cron_tasks'] = {
+    'level': 'INFO',
+    'class': 'logging.handlers.RotatingFileHandler',
+    'filename': os.path.join(BASE_DIR, 'logs', 'cron_tasks.log'),
+    'formatter': 'verbose',
+    'maxBytes': 5242880
 }
+# Contents of this log file is emailed nightly
+LOGGING['handlers']['file_cron_email'] = {
+    'level': 'INFO',
+    'class': 'logging.handlers.RotatingFileHandler',
+    'filename': os.path.join(BASE_DIR, 'logs', CRON_EMAIL_FILE_NAME),
+    'formatter': 'msg_only',
+    'maxBytes': 5242880
+}
+# LOGGING['handlers']['console'] = {
+#     'level': 'DEBUG',
+#     'class': 'logging.StreamHandler',
+#     'stream': sys.stdout,
+#     'formatter': 'verbose',
+# }
+
+# Define loggers
+LOGGING['loggers']['mooringlicensing'] = {
+    'handlers': ['file_mooringlicensing',],
+    'level': 'DEBUG',
+}
+LOGGING['loggers']['cron_tasks'] = {
+    'handlers': ['file_cron_tasks'],
+    'level': 'INFO',
+}
+LOGGING['loggers']['cron_email'] = {
+    'handlers': ['file_cron_email'],
+    'level': 'INFO',
+    'propagate': True,
+}
+
+# Logging all to mooringlicensing.log file
+LOGGING['loggers']['']['handlers'].append('file_mooringlicensing')
+
 GROUP_MOORING_LICENSING_ADMIN = 'Mooring Licensing - Admin'
 GROUP_MOORING_LICENSING_PAYMENT_OFFICER = 'Mooring Licensing - Payment Officers'
 GROUP_ASSESSOR_WAITING_LIST = 'Mooring Licensing - Assessors: Waiting List'
@@ -371,6 +418,7 @@ LOV_CACHE_TIMEOUT=10800
 CSRF_MIDDLEWARE_TOKEN=env('CSRF_MIDDLEWARE_TOKEN', '')
 EMAIL_INSTANCE = env('EMAIL_INSTANCE','DEV')
 os.environ['UPDATE_PAYMENT_ALLOCATION'] = 'True'
+UNALLOCATED_ORACLE_CODE = 'NNP449 GST'
 
 CRON_CLASSES = [
     'mooringlicensing.cron.OracleIntegrationCronJob',
@@ -380,3 +428,16 @@ CRON_CLASSES = [
 APPROVED_OPERATIONAL_STATUS = ['current', ]
 # Is licence/permit still approved?  Other than cancelled, expired or surrendered
 APPROVED_APPROVAL_STATUS = ['current', 'suspended', ]
+
+# Use git commit hash for purging cache in browser for deployment changes
+GIT_COMMIT_HASH = ''
+GIT_COMMIT_DATE = ''
+# not required
+#if  os.path.isdir(BASE_DIR+'/.git/') is True:
+#    GIT_COMMIT_DATE = os.popen('cd '+BASE_DIR+' ; git log -1 --format=%cd').read()
+#    GIT_COMMIT_HASH = os.popen('cd  '+BASE_DIR+' ; git log -1 --format=%H').read()
+#if len(GIT_COMMIT_HASH) == 0: 
+#    GIT_COMMIT_HASH = os.popen('cat /app/git_hash').read()
+#    if len(GIT_COMMIT_HASH) == 0:
+#       print ("ERROR: No git hash provided")
+

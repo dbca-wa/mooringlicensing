@@ -4,12 +4,17 @@ from ledger.checkout.utils import calculate_excl_gst
 import pytz
 import json
 from ledger.settings_base import TIME_ZONE
+from decimal import *
+from ledger.payments.bpoint.models import BpointTransaction, BpointToken
+from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from mooringlicensing.components.main.models import ApplicationType
 from mooringlicensing.components.payments_ml.invoice_pdf import create_invoice_pdf_bytes
+from rest_framework.response import Response
 
 import dateutil.parser
 from django.db import transaction
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
+from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
@@ -145,14 +150,25 @@ class ApplicationFeeExistingView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         proposal = self.get_object()
-        application_fee = proposal.application_fees.first()
+        application_fee = proposal.get_main_application_fee()
+
+        if application_fee.paid:
+            return redirect('application_fee_already_paid', proposal_pk=proposal.id)
 
         try:
             with transaction.atomic():
                 set_session_application_invoice(request.session, application_fee)
                 invoice = Invoice.objects.get(reference=application_fee.invoice_reference)
 
-                request.session['db_processes'] = {'payment_for_existing_invoice': True}
+                db_processes = {
+                    'for_existing_invoice': True,
+                    'fee_item_application_fee_ids': [],
+                }
+                fee_item_application_fees = FeeItemApplicationFee.objects.filter(application_fee=application_fee)
+                for fee_item_application_fee in fee_item_application_fees:
+                    db_processes['fee_item_application_fee_ids'].append(fee_item_application_fee.id)
+                request.session['db_processes'] = db_processes
+
                 checkout_response = checkout_existing_invoice(
                     request,
                     invoice,
@@ -242,9 +258,7 @@ class StickerReplacementFeeSuccessView(TemplateView):
     def get(self, request, *args, **kwargs):
 
         try:
-            print('1')
             sticker_action_fee = get_session_sticker_action_invoice(request.session)  # This raises an exception when accessed 2nd time?
-            print('2')
             sticker_action_details = sticker_action_fee.sticker_action_details
 
             if self.request.user.is_authenticated():
@@ -260,7 +274,6 @@ class StickerReplacementFeeSuccessView(TemplateView):
             sticker_action_fee.save()
 
             if sticker_action_fee.payment_type == StickerActionFee.PAYMENT_TYPE_TEMPORARY:
-                print('3')
                 try:
                     inv = Invoice.objects.get(reference=invoice.reference)
                     order = Order.objects.get(number=inv.order_number)
@@ -284,14 +297,15 @@ class StickerReplacementFeeSuccessView(TemplateView):
                 update_payments(invoice.reference)
 
                 for sticker_action_detail in sticker_action_details.all():
-                    new_sticker = sticker_action_detail.sticker.request_replacement(Sticker.STICKER_STATUS_LOST)
+                    old_sticker = sticker_action_detail.sticker
+                    new_sticker = old_sticker.request_replacement(Sticker.STICKER_STATUS_LOST)
 
                 sticker_action_fee.save()
                 request.session[self.LAST_STICKER_ACTION_FEE_ID] = sticker_action_fee.id
                 delete_session_sticker_action_invoice(request.session)  # This leads to raise an exception at the get_session_sticker_action_invoice() above
 
                 # Send email with the invoice
-                send_sticker_replacement_email(request, new_sticker, invoice)
+                send_sticker_replacement_email(request, old_sticker, new_sticker, invoice)
 
                 context = {
                     'submitter': owner,
@@ -321,18 +335,32 @@ class ApplicationFeeView(TemplateView):
     def get_object(self):
         return get_object_or_404(Proposal, id=self.kwargs['proposal_pk'])
 
+    def get(self, request, *args, **kwargs):
+        pass
+
     def post(self, request, *args, **kwargs):
         proposal = self.get_object()
         application_fee = ApplicationFee.objects.create(proposal=proposal, created_by=request.user, payment_type=ApplicationFee.PAYMENT_TYPE_TEMPORARY)
+        logger.info('ApplicationFee.id: {} has been created for the Proposal: {}'.format(application_fee.id, proposal))
 
         try:
             with transaction.atomic():
                 set_session_application_invoice(request.session, application_fee)
 
-                lines, db_processes_after_success = proposal.child_obj.create_fee_lines()  # Accessed by WL and AA
+                try:
+                    lines, db_processes_after_success = proposal.child_obj.create_fee_lines()  # Accessed by WL and AA
+                except Exception as e:
+                    # return HttpResponseRedirect(reverse('external-proposal-detail', kwargs={'proposal_pk': proposal.id}))
+                    # return HttpResponse({'error': e})
+
+                    self.template_name = 'mooringlicensing/payments_ml/fee_calculation_error.html'
+                    context = {
+                        'error_message': str(e),
+                    }
+                    return render(request, self.template_name, context)
 
                 request.session['db_processes'] = db_processes_after_success
-                request.session['auto_renew'] = request.POST.get('auto_renew', False)
+                #request.session['auto_approve'] = request.POST.get('auto_approve', False)
                 checkout_response = checkout(
                     request,
                     proposal.submitter,
@@ -419,6 +447,8 @@ class DcvAdmissionFeeSuccessView(TemplateView):
                     'dcv_admission': dcv_admission,
                     'submitter': submitter,
                     'fee_invoice': dcv_admission_fee,
+                    'invoice': invoice,
+                    'admission_urls': dcv_admission.get_admission_urls(),
                 }
                 return render(request, self.template_name, context)
 
@@ -431,10 +461,13 @@ class DcvAdmissionFeeSuccessView(TemplateView):
             else:
                 return redirect('home')
 
+        invoice = Invoice.objects.get(reference=dcv_admission_fee.invoice_reference)
         context = {
             'dcv_admission': dcv_admission,
             'submitter': submitter,
             'fee_invoice': dcv_admission_fee,
+            'invoice': invoice,
+            'admission_urls': dcv_admission.get_admission_urls(),
         }
         return render(request, self.template_name, context)
 
@@ -523,7 +556,7 @@ class DcvPermitFeeSuccessView(TemplateView):
                 return render(request, self.template_name, context)
 
         except Exception as e:
-            print('in ApplicationFeeSuccessView.get() Exception')
+            print('in DcvPermitFeeSuccessView.get() Exception')
             print(e)
             if (self.LAST_DCV_PERMIT_FEE_ID in request.session) and DcvPermitFee.objects.filter(id=request.session[self.LAST_DCV_PERMIT_FEE_ID]).exists():
                 dcv_permit_fee = DcvPermitFee.objects.get(id=request.session[self.LAST_DCV_PERMIT_FEE_ID])
@@ -548,6 +581,23 @@ class DcvPermitFeeSuccessView(TemplateView):
         dcv_permit.save()
 
 
+class ApplicationFeeAlreadyPaid(TemplateView):
+    template_name = 'mooringlicensing/payments_ml/application_fee_already_paid.html'
+
+    def get(self, request, *args, **kwargs):
+        proposal = get_object_or_404(Proposal, id=self.kwargs['proposal_pk'])
+        application_fee = proposal.get_main_application_fee()
+        invoice = Invoice.objects.get(reference=application_fee.invoice_reference)
+
+        context = {
+            'proposal': proposal,
+            'submitter': proposal.submitter,
+            'application_fee': application_fee,
+            'invoice': invoice,
+        }
+        return render(request, self.template_name, context)
+
+
 class ApplicationFeeSuccessView(TemplateView):
     template_name = 'mooringlicensing/payments_ml/success_application_fee.html'
     LAST_APPLICATION_FEE_ID = 'mooringlicensing_last_app_invoice'
@@ -565,53 +615,75 @@ class ApplicationFeeSuccessView(TemplateView):
             # Retrieve db processes stored when calculating the fee, and delete the session
             db_operations = request.session['db_processes']
             del request.session['db_processes']
-            # Retrieve auto_renew stored when calculating the fee, and delete
-            auto_renew = request.session.get('auto_renew')
-            if request.session.get('auto_renew'):
-                del request.session['auto_renew']
+            #print("request.session.keys()")
+            #print(request.session.keys())
+            # Retrieve auto_approve stored when calculating the fee, and delete
+            #auto_approve = request.session.get('auto_approve')
+            #if 'auto_approve' in request.session.keys():
+             #   del request.session['auto_approve']
 
             proposal = application_fee.proposal
             recipient = proposal.applicant_email
             submitter = proposal.submitter
 
-            if self.request.user.is_authenticated():
-                basket = Basket.objects.filter(status='Submitted', owner=request.user).order_by('-id')[:1]
-            else:
-                basket = Basket.objects.filter(status='Submitted', owner=proposal.submitter).order_by('-id')[:1]
+            try:
+                # For the existing invoice, invoice can be retrieved from the application_fee object
+                invoice = Invoice.objects.get(reference=application_fee.invoice_reference)
+            except Exception as e:
+                # For the non-existing invoice, invoice can be retrieved from the basket
+                if self.request.user.is_authenticated():
+                    basket = Basket.objects.filter(status='Submitted', owner=request.user).order_by('-id')[:1]
+                else:
+                    basket = Basket.objects.filter(status='Submitted', owner=proposal.submitter).order_by('-id')[:1]
+                order = Order.objects.get(basket=basket[0])
+                invoice = Invoice.objects.get(order_number=order.number)
 
-            order = Order.objects.get(basket=basket[0])
-            invoice = Invoice.objects.get(order_number=order.number)
             invoice_ref = invoice.reference
 
-            # Update the application_fee object
-            # For the AUA and MLA's new/amendment application, the application_fee already has relations to fee_item(s) created after creating lines.
-            # In that case, there are no 'fee_item_id' and/or 'fee_item_additional_id' keys in the db_operations
-            if 'fee_item_id' in db_operations:
-                fee_items = FeeItem.objects.filter(id=db_operations['fee_item_id'])
-                if fee_items:
-                    FeeItemApplicationFee.objects.create(
-                        fee_item=fee_items.first(),
-                        application_fee=application_fee,
-                        vessel_details=proposal.vessel_details,
-                    )
-            if 'fee_item_additional_id' in db_operations:
-                fee_item_additionals = FeeItem.objects.filter(id=db_operations['fee_item_additional_id'])
-                if fee_item_additionals:
-                    FeeItemApplicationFee.objects.create(
-                        fee_item=fee_item_additionals.first(),
-                        application_fee=application_fee,
-                        vessel_details=proposal.vessel_details,
-                    )
-            if isinstance(db_operations, list):
-                # This is used for AU/ML's auto renewal
-                for item in db_operations:
-                    fee_item = FeeItem.objects.get(id=item['fee_item_id'])
-                    vessel_details = VesselDetails.objects.get(id=item['vessel_details_id'])
-                    FeeItemApplicationFee.objects.create(
-                        fee_item=fee_item,
-                        application_fee=application_fee,
-                        vessel_details=vessel_details,
-                    )
+            if 'for_existing_invoice' in db_operations and db_operations['for_existing_invoice']:
+                # For existing invoices, fee_item_application_fee.amount_paid should be updated, once paid
+                for idx in db_operations['fee_item_application_fee_ids']:
+                    fee_item_application_fee = FeeItemApplicationFee.objects.get(id=int(idx))
+                    fee_item_application_fee.amount_paid = fee_item_application_fee.amount_to_be_paid
+                    fee_item_application_fee.save()
+            else:
+                # Update the application_fee object
+                # For the AUA and MLA's new/amendment application, the application_fee already has relations to fee_item(s) created after creating lines.
+                # In that case, there are no 'fee_item_id' and/or 'fee_item_additional_id' keys in the db_operations
+                if 'fee_item_id' in db_operations:
+                    fee_items = FeeItem.objects.filter(id=db_operations['fee_item_id'])
+                    if fee_items:
+                        amount_paid = None
+                        amount_to_be_paid = None
+                        if 'fee_amount_adjusted' in db_operations:
+                            # Because of business rules, fee_item.amount is not always the same as the actual amount paid.
+                            # Therefore we want to store the amount paid too as well as fee_item.
+                            fee_amount_adjusted = db_operations['fee_amount_adjusted']
+                            amount_to_be_paid = Decimal(fee_amount_adjusted)
+                            amount_paid = amount_to_be_paid
+                        FeeItemApplicationFee.objects.create(
+                            fee_item=fee_items.first(),
+                            application_fee=application_fee,
+                            vessel_details=proposal.vessel_details,
+                            amount_to_be_paid=amount_to_be_paid,
+                            amount_paid=amount_paid,
+                        )
+                if isinstance(db_operations, list):
+                    # This is used for AU/ML's auto renewal
+                    for item in db_operations:
+                        fee_item = FeeItem.objects.get(id=item['fee_item_id'])
+                        fee_amount_adjusted = item['fee_amount_adjusted']
+                        amount_to_be_paid = Decimal(fee_amount_adjusted)
+                        amount_paid = amount_to_be_paid
+                        vessel_details_id = item['vessel_details_id']  # This could be '' when null vessel application
+                        vessel_details = VesselDetails.objects.get(id=vessel_details_id) if vessel_details_id else None
+                        FeeItemApplicationFee.objects.create(
+                            fee_item=fee_item,
+                            application_fee=application_fee,
+                            vessel_details=vessel_details,
+                            amount_to_be_paid=amount_to_be_paid,
+                            amount_paid=amount_paid,
+                        )
 
             application_fee.invoice_reference = invoice_ref
             application_fee.save()
@@ -638,7 +710,7 @@ class ApplicationFeeSuccessView(TemplateView):
 
                     if proposal.application_type.code in (AuthorisedUserApplication.code, MooringLicenceApplication.code):
                         # For AUA or MLA, as payment has been done, create approval
-                        approval, created = proposal.child_obj.update_or_create_approval(datetime.datetime.now(pytz.timezone(TIME_ZONE)), request, auto_renew)
+                        approval, created = proposal.child_obj.update_or_create_approval(datetime.datetime.now(pytz.timezone(TIME_ZONE)), request)
                     else:
                         # When WLA / AAA
                         if proposal.application_type.code in [WaitingListApplication.code, AnnualAdmissionApplication.code]:
@@ -651,7 +723,6 @@ class ApplicationFeeSuccessView(TemplateView):
                             proposal.save()
 
                         proposal.processing_status = Proposal.PROCESSING_STATUS_WITH_ASSESSOR
-                        proposal.customer_status = Proposal.CUSTOMER_STATUS_WITH_ASSESSOR
                         proposal.save()
 
                 else:
@@ -669,6 +740,7 @@ class ApplicationFeeSuccessView(TemplateView):
                     'submitter': submitter,
                     'fee_invoice': application_fee,
                     'is_wla_or_aaa': wla_or_aaa,
+                    'invoice': invoice,
                 }
                 return render(request, self.template_name, context)
 
@@ -679,7 +751,9 @@ class ApplicationFeeSuccessView(TemplateView):
                     proposal = application_fee.proposal
                     submitter = proposal.submitter
                     if type(proposal.child_obj) in [WaitingListApplication, AnnualAdmissionApplication]:
-                        proposal.auto_approve(request)
+                        #proposal.auto_approve_check(request)
+                        if proposal.auto_approve:
+                            proposal.final_approval_for_WLA_AAA(request, details={})
                 else:
                     msg = 'ApplicationFee with id: {} does not exist in the database'.format(str(request.session[self.LAST_APPLICATION_FEE_ID]))
                     logger.error(msg)
@@ -695,11 +769,13 @@ class ApplicationFeeSuccessView(TemplateView):
             raise Exception(msg)
 
         wla_or_aaa = True if proposal.application_type.code in [WaitingListApplication.code, AnnualAdmissionApplication.code,] else False
+        invoice = Invoice.objects.get(reference=application_fee.invoice_reference)
         context = {
             'proposal': proposal,
             'submitter': submitter,
             'fee_invoice': application_fee,
-            'is_wla_or_aaa': wla_or_aaa
+            'is_wla_or_aaa': wla_or_aaa,
+            'invoice': invoice,
         }
         return render(request, self.template_name, context)
 
@@ -762,4 +838,173 @@ class InvoicePDFView(View):
 
     def get_object(self):
         return get_object_or_404(Invoice, reference=self.kwargs['reference'])
+
+
+class RefundProposalHistoryView(LoginRequiredMixin, TemplateView):
+#class RefundProposalHistory(LoginRequiredMixin, TemplateView):
+    template_name = 'mooringlicensing/payments_ml/proposal_refund_history.html'
+
+    def get(self, request, *args, **kwargs):
+        booking_id = kwargs['pk']
+        booking = None
+        print ("LOADED")
+        if request.user.is_superuser or request.user.groups.filter(name__in=['Mooring Licensing - Payment Officers']).exists():
+#            booking = Proposal.objects.get(customer=request.user, booking_type__in=(0, 1), is_canceled=False, pk=booking_id)
+             booking = Proposal.objects.get(pk=booking_id)
+             newest_booking = booking_id #self.get_newest_booking(booking_id)
+             booking_history = self.get_history(newest_booking, booking_array=[])
+             invoice_line_items = self.get_history_line_items(booking_history)
+             context = {
+                'booking_id': booking_id,
+                'booking': booking,
+                'newest_booking': newest_booking,
+                'booking_history' : booking_history,
+                'invoice_line_items' : invoice_line_items,
+                'oracle_code_refund_allocation_pool': settings.UNALLOCATED_ORACLE_CODE,
+                'GIT_COMMIT_DATE' : settings.GIT_COMMIT_DATE,
+                'GIT_COMMIT_HASH' : settings.GIT_COMMIT_HASH,
+                'API_URL' : '/api/refund_oracle',
+                'booking_class_type' : booking.__class__.__name__
+
+             }
+             return render(request, self.template_name,context)
+        else:
+             messages.error(self.request, 'Permission denied.')
+             return HttpResponseRedirect(reverse('home')) 
+
+    #def get_newest_booking(self, booking_id):
+    #    latest_id = booking_id
+    #    if Proposal.objects.filter(old_booking=booking_id).exclude(booking_type=3).count() > 0:
+    #        booking = Proposal.objects.filter(old_booking=booking_id)[0]
+    #        latest_id = self.get_newest_booking(booking.id)
+    #    return latest_id
+
+    def get_history_line_items(self, booking_history):
+
+        invoice_line_items = []
+        invoice_line_items_array = []
+        invoice_bpoint = []
+        rolling_total = Decimal('0.00')
+        bpoint_trans_totals = {}
+        unique_oracle_code_on_booking = {}
+        total_booking_allocation_pool = Decimal('0.00')
+        total_bpoint_amount_available = Decimal('0.00')
+        entry_count = 0
+        for bi in booking_history:
+            booking = Proposal.objects.get(pk=bi['booking'].id)
+            booking.invoices =()
+            #booking.invoices = ApplicationFee.objects.filter(booking=booking)
+
+            booking_invoices= ApplicationFee.objects.filter(proposal=booking)
+            for i in booking_invoices:
+                 bp = BpointTransaction.objects.filter(crn1=i.invoice_reference)
+                 for trans in bp:
+                     if trans.action == 'payment':
+                            if trans.txn_number not in bpoint_trans_totals:
+                                   bpoint_trans_totals[trans.txn_number] = {'crn1': '', 'amount': Decimal('0.00')}
+                             
+                            total_bpoint_amount_available = total_bpoint_amount_available + trans.amount
+                            bpoint_trans_totals[trans.txn_number]['amount'] = bpoint_trans_totals[trans.txn_number]['amount'] + trans.amount 
+                            bpoint_trans_totals[trans.txn_number]['crn1'] = trans.crn1
+                     if trans.action == 'refund':
+                            if trans.original_txn not in bpoint_trans_totals:
+                                   bpoint_trans_totals[trans.original_txn] = {'crn': '', 'amount': Decimal('0.00')}
+                            bpoint_trans_totals[trans.original_txn]['amount'] = bpoint_trans_totals[trans.original_txn]['amount'] - trans.amount
+                            total_bpoint_amount_available = total_bpoint_amount_available - trans.amount
+                     invoice_bpoint.append(trans)
+
+                 iv = Invoice.objects.filter(reference=i.invoice_reference)
+                 for b in iv:
+                    o = Order.objects.get(number=b.order_number)
+                    for ol in o.lines.all():
+                        if ol.oracle_code == settings.UNALLOCATED_ORACLE_CODE:
+                             total_booking_allocation_pool = total_booking_allocation_pool + ol.line_price_incl_tax
+                        #rolling_total = rolling_total + ol.line_price_incl_tax
+                        entry_count = entry_count + 1
+                        invoice_line_items_array.append({'line_id': ol.id, 'order_number': ol.order.number, 'title': ol.title.replace(':','\n',1), 'oracle_code': ol.oracle_code, 'line_price_incl_tax': ol.line_price_incl_tax, 'order_date_placed': ol.order.date_placed, 'rolling_total': '0.00' ,'entry_count': entry_count })
+                        invoice_line_items.append(ol)
+
+                        if ol.oracle_code == settings.UNALLOCATED_ORACLE_CODE:
+                             pass
+                        else:
+                             if ol.oracle_code not in unique_oracle_code_on_booking:
+                                 unique_oracle_code_on_booking[ol.oracle_code] = Decimal('0.00') 
+
+                             unique_oracle_code_on_booking[ol.oracle_code] = unique_oracle_code_on_booking[ol.oracle_code] + Decimal(ol.line_price_incl_tax)
+#                             unique_oracle_code_on_booking[ol.oracle_code] = float("%.2f".format(str(unique_oracle_code_on_booking[ol.oracle_code])))
+#                            unique_oracle_code_on_booking.append(ol.oracle_code)
+        for ocb in unique_oracle_code_on_booking:
+                unique_oracle_code_on_booking[ocb] = str(unique_oracle_code_on_booking[ocb])
+
+        for btt in bpoint_trans_totals:
+             bpoint_trans_totals[btt]['amount'] = str(bpoint_trans_totals[btt]['amount'])
+        #UNALLOCATED_ORACLE_CODE
+
+        invoice_line_items_array.sort(key=lambda item:item['order_date_placed'], reverse=False)
+       
+        for il in invoice_line_items_array:
+            rolling_total = Decimal(rolling_total) + Decimal(il['line_price_incl_tax'])
+            il['rolling_total'] = rolling_total
+        
+        booking_balance_issue = False
+        if rolling_total < 0:
+            booking_balance_issue = True
+
+        return {'invoice_line_items': invoice_line_items, 'invoice_line_items_array':  invoice_line_items_array, 'booking_balance_issue': booking_balance_issue,'total_booking_allocation_pool': total_booking_allocation_pool, 'invoice_bpoint': invoice_bpoint,'total_bpoint_amount_available': total_bpoint_amount_available, 'unique_oracle_code_on_booking': json.dumps(unique_oracle_code_on_booking),'bpoint_trans_totals': json.dumps(bpoint_trans_totals)}
+
+    def get_history(self, booking_id, booking_array=[]):
+        booking = Proposal.objects.get(pk=booking_id)
+        booking.invoices =()
+        booking_invoices= ApplicationFee.objects.filter(proposal=booking)
+        booking_array.append({'booking': booking, 'invoices': booking_invoices})
+ 
+        #if booking.old_booking:
+         #    self.get_history(booking.old_booking.id, booking_array)
+        return booking_array
+
+# include LoginRequiredMixin
+class ProposalPaymentHistoryView(LoginRequiredMixin, TemplateView):
+    template_name = 'mooringlicensing/payments_ml/proposal_payments_history.html'
+
+    def get(self, request, *args, **kwargs):
+        booking_id = kwargs['pk']
+        booking = None
+
+        if request.user.is_staff or request.user.is_superuser or Proposal.objects.filter(submitter=request.user,pk=booking_id).count() == 1:
+             booking = Proposal.objects.get(pk=booking_id)
+             #newest_booking = self.get_newest_booking(booking_id)
+             newest_booking = booking_id
+             booking_history = self.get_history(newest_booking, booking_array=[])
+             #print vars(booking_history['bookings'])
+
+        context = {
+           'booking_id': booking_id,
+           'booking': booking,
+           'booking_history' : booking_history,
+           'GIT_COMMIT_DATE' : settings.GIT_COMMIT_DATE,
+           'GIT_COMMIT_HASH' : settings.GIT_COMMIT_HASH,
+        }
+
+        return render(request, self.template_name,context)
+
+    #def get_newest_booking(self, booking_id):
+    #    latest_id = booking_id
+    #    if Booking.objects.filter(old_booking=booking_id).exclude(booking_type=3).count() > 0:
+    #        booking = Booking.objects.filter(old_booking=booking_id)[0]   
+    #        latest_id = self.get_newest_booking(booking.id)
+    #    return latest_id
+
+    def get_history(self, booking_id, booking_array=[]):
+        booking = Proposal.objects.get(pk=booking_id)
+        booking.invoices =()
+        #booking.invoices = BookingInvoice.objects.filter(booking=booking)
+        booking_invoices= ApplicationFee.objects.filter(proposal=booking) 
+#        for bi in booking_invoices:
+#            print bi
+#            booking.invoices.add(bi)
+
+        booking_array.append({'booking': booking, 'invoices': booking_invoices})
+        #if booking.old_booking:
+         #    self.get_history(booking.old_booking.id, booking_array)
+        return booking_array
 

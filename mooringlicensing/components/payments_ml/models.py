@@ -15,13 +15,13 @@ from ledger.settings_base import TIME_ZONE
 from mooringlicensing import settings
 from mooringlicensing.components.main.models import ApplicationType, VesselSizeCategoryGroup, VesselSizeCategory
 from mooringlicensing.components.proposals.models import ProposalType, AnnualAdmissionApplication, \
-    AuthorisedUserApplication, VesselDetails
+    AuthorisedUserApplication, VesselDetails, WaitingListApplication
 from smart_selects.db_fields import ChainedForeignKey
 
-logger = logging.getLogger('__name__')
+logger = logging.getLogger('mooringlicensing')
 
 
-class Payment(RevisionedMixin):
+class Payment(models.Model):
     send_invoice = models.BooleanField(default=False)
     confirmation_sent = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
@@ -166,16 +166,19 @@ class StickerActionFee(Payment):
         app_label = 'mooringlicensing'
 
 
-class FeeItemApplicationFee(RevisionedMixin):
-    """
-    This model is only used for the calculation of AnnualAdmission components
-    """
+class FeeItemApplicationFee(models.Model):
     fee_item = models.ForeignKey('FeeItem',)
     application_fee = models.ForeignKey('ApplicationFee',)
     vessel_details = models.ForeignKey(VesselDetails, null=True, blank=True)
+    amount_to_be_paid = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True, default=None)
+    amount_paid = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True, default=None)
 
     class Meta:
         app_label = 'mooringlicensing'
+
+    @property
+    def application_type(self):
+        return self.fee_item.application_type
 
 
 class ApplicationFee(Payment):
@@ -196,6 +199,7 @@ class ApplicationFee(Payment):
     created_by = models.ForeignKey(EmailUser,on_delete=models.PROTECT, blank=True, null=True,related_name='created_by_application_fee')
     invoice_reference = models.CharField(max_length=50, null=True, blank=True, default='')
     fee_items = models.ManyToManyField('FeeItem', related_name='application_fees', through='FeeItemApplicationFee')
+    system_invoice = models.BooleanField(default=False)
 
     def __str__(self):
         return 'Application {} : Invoice {}'.format(self.proposal, self.invoice_reference)
@@ -211,7 +215,7 @@ class ApplicationFee(Payment):
         app_label = 'mooringlicensing'
 
 
-class FeeSeason(RevisionedMixin):
+class FeeSeason(models.Model):
     application_type = models.ForeignKey(ApplicationType, null=True, blank=True, limit_choices_to={'fee_by_fee_constructor': True})
     name = models.CharField(max_length=50, null=False, blank=False)
 
@@ -252,7 +256,7 @@ class FeeSeason(RevisionedMixin):
         verbose_name = 'season'
 
 
-class FeePeriod(RevisionedMixin):
+class FeePeriod(models.Model):
     fee_season = models.ForeignKey(FeeSeason, null=True, blank=True, related_name='fee_periods')
     name = models.CharField(max_length=50, null=True, blank=True, default='')
     start_date = models.DateField(null=True, blank=True)
@@ -271,7 +275,7 @@ class FeePeriod(RevisionedMixin):
         ordering = ['start_date']
 
 
-class FeeConstructor(RevisionedMixin):
+class FeeConstructor(models.Model):
     application_type = models.ForeignKey(ApplicationType, null=False, blank=False, limit_choices_to={'fee_by_fee_constructor': True})
     fee_season = ChainedForeignKey(FeeSeason,
                                    chained_field='application_type',
@@ -472,11 +476,11 @@ class FeeConstructor(RevisionedMixin):
                     else:
                         for proposal_type in proposal_types:
                             if vessel_size_category.null_vessel and \
-                                    ((self.application_type.code in (AnnualAdmissionApplication.code, AuthorisedUserApplication.code) and proposal_type.code == settings.PROPOSAL_TYPE_RENEWAL) or
-                                     proposal_type.code == settings.PROPOSAL_TYPE_NEW):
-                                # When null vessel and AAA/AUA and renewal application
-                                # When null vessel and new application
-                                # ==> No fees
+                                    ((self.application_type.code in (WaitingListApplication.code, AnnualAdmissionApplication.code) and proposal_type.code == settings.PROPOSAL_TYPE_RENEWAL) or
+                                     proposal_type.code in [settings.PROPOSAL_TYPE_NEW, settings.PROPOSAL_TYPE_AMENDMENT,]):
+                                # When WLA/AAA and renewal application
+                                # When new/amendment application
+                                # No fee_items created
                                 continue
                             else:
                                 fee_item, created = FeeItem.objects.get_or_create(fee_constructor=self,
@@ -503,7 +507,7 @@ class FeeConstructor(RevisionedMixin):
         app_label = 'mooringlicensing'
 
 
-class FeeItemStickerReplacement(RevisionedMixin):
+class FeeItemStickerReplacement(models.Model):
     amount = models.DecimalField(max_digits=8, decimal_places=2, default='0.00', help_text='unit [$AU/Sticker]')
     date_of_enforcement = models.DateField(blank=True, null=True)
     enabled = models.BooleanField(default=True)
@@ -523,31 +527,52 @@ class FeeItemStickerReplacement(RevisionedMixin):
         verbose_name_plural = 'Fee (sticker replacement)'
 
 
-class FeeItem(RevisionedMixin):
+class FeeItem(models.Model):
     fee_constructor = models.ForeignKey(FeeConstructor, null=True, blank=True)
     fee_period = models.ForeignKey(FeePeriod, null=True, blank=True)
     vessel_size_category = models.ForeignKey(VesselSizeCategory, null=True, blank=True)
     proposal_type = models.ForeignKey('ProposalType', null=True, blank=True)
     amount = models.DecimalField(max_digits=8, decimal_places=2, default='0.00', help_text='$')
-    incremental_amount = models.BooleanField(default=False, help_text='When ticked, The amount will be the increase in the rate per meter')  # When True, the amount is the price for this item.  When False, self.amount is the price per meter.
+    incremental_amount = models.BooleanField(default=False, help_text='When ticked, The amount will be the increase in the rate per meter')  # When False, the 'amount' value is the price for this item.  When True, the 'amount' is the price per meter.
     # For DcvAdmission
     age_group = models.ForeignKey('AgeGroup', null=True, blank=True)
     admission_type = models.ForeignKey('AdmissionType', null=True, blank=True)
 
     def __str__(self):
-        return '${}: {}, {}, {}'.format(self.amount, self.fee_constructor.application_type, self.fee_period, self.vessel_size_category)
+        return '${}: {}, {}, {}, {}'.format(self.amount, self.fee_constructor.application_type, self.fee_period, self.vessel_size_category, self.proposal_type)
+
+    @property
+    def application_type(self):
+        return self.fee_constructor.application_type
+
+    def get_corresponding_fee_item(self, proposal_type):
+        fee_item = self.fee_constructor.feeitem_set.filter(
+            fee_period=self.fee_period,
+            vessel_size_category=self.vessel_size_category,
+            proposal_type=proposal_type,
+        )
+        if fee_item.count():
+            fee_item = fee_item.first()
+            return fee_item
+        else:
+            raise Exception('FeeItem for fee_period: {}, vessel_size_category: {}, proposal_type: {} not found.'.format(self.fee_period, self.vessel_size_category, self.proposal_type))
 
     def get_absolute_amount(self, vessel_size=None):
         if not self.incremental_amount or not vessel_size:
             return self.amount
         else:
             # This self.amount is the incremental amount.  Therefore the absolute amount must be calculated based on the fee_item of one smaller vessel size category
+            vessel_size = float(vessel_size)
             smaller_vessel_size_category = self.vessel_size_category.get_one_smaller_category()
             if smaller_vessel_size_category:
                 smaller_fee_item = self.fee_constructor.feeitem_set.filter(fee_period=self.fee_period, proposal_type=self.proposal_type, vessel_size_category=smaller_vessel_size_category)
                 if smaller_fee_item.count() == 1:
                     smaller_fee_item = smaller_fee_item.first()
-                    number_of_increment = ceil(vessel_size - self.vessel_size_category.start_size)
+                    diff = vessel_size - float(self.vessel_size_category.start_size)
+                    number_of_increment = ceil(diff)
+                    if diff.is_integer() and self.vessel_size_category.include_start_size:
+                        # In this case, 'vessel_size' is at the first step of this fee_item object.
+                        number_of_increment += 1
                     absolute_amount = smaller_fee_item.get_absolute_amount(self.vessel_size_category.start_size) + number_of_increment * self.amount
                     return absolute_amount
                 else:
@@ -555,7 +580,7 @@ class FeeItem(RevisionedMixin):
                     raise Exception('FeeItem object not found in the FeeConstructor: {} for {}, {} and {}'.format(self.fee_constructor, self.fee_period, self.proposal_type, smaller_vessel_size_category))
             else:
                 # This fee_item is for the smallest vessel size category and also incremental
-                number_of_increment = ceil(vessel_size - self.vessel_size_category.start_size)
+                number_of_increment = ceil(vessel_size - float(self.vessel_size_category.start_size))
                 absolute_amount = self.amount * number_of_increment
                 return absolute_amount
 
@@ -569,7 +594,7 @@ class FeeItem(RevisionedMixin):
         app_label = 'mooringlicensing'
 
 
-class OracleCodeItem(RevisionedMixin):
+class OracleCodeItem(models.Model):
     application_type = models.ForeignKey(ApplicationType, blank=True, null=True, related_name='oracle_code_items')
     value = models.CharField(max_length=50, null=True, blank=True, default='T1 EXEMPT')
     date_of_enforcement = models.DateField(blank=True, null=True)
@@ -579,15 +604,17 @@ class OracleCodeItem(RevisionedMixin):
 
 
 import reversion
-reversion.register(DcvAdmissionFee, follow=[])
-reversion.register(DcvPermitFee, follow=[])
-reversion.register(StickerActionFee, follow=['sticker_action_details'])
-reversion.register(FeeItemApplicationFee, follow=['fee_item', 'application_fee', 'vessel_details'])
-reversion.register(ApplicationFee, follow=['feeitemapplicationfee_set'])
-reversion.register(FeeSeason, follow=['fee_periods', 'fee_constructors', 'dcvadmissionarrival_set', 'dcv_permits', 'sticker_set'])
-reversion.register(FeePeriod, follow=['feeitem_set'])
-reversion.register(FeeConstructor, follow=['feeitem_set', 'dcv_admission_arrivals', 'sticker_set'])
-reversion.register(FeeItemStickerReplacement, follow=[])
-reversion.register(FeeItem, follow=['dcv_admission_fees', 'dcv_permit_fees', 'feeitemapplicationfee_set', 'application_fees'])
-reversion.register(OracleCodeItem, follow=[])
+#reversion.register(DcvAdmissionFee, follow=[])
+#reversion.register(DcvPermitFee, follow=[])
+#reversion.register(StickerActionFee, follow=['sticker_action_details'])
+#reversion.register(FeeItemApplicationFee, follow=['fee_item', 'application_fee', 'vessel_details'])
+#reversion.register(ApplicationFee, follow=['feeitemapplicationfee_set'])
+#reversion.register(ApplicationFee)
+#reversion.register(FeeSeason, follow=['fee_periods', 'fee_constructors', 'dcvadmissionarrival_set', 'dcv_permits', 'sticker_set'])
+#reversion.register(FeePeriod, follow=['feeitem_set'])
+#reversion.register(FeeConstructor, follow=['feeitem_set', 'dcv_admission_arrivals', 'sticker_set'])
+#reversion.register(FeeItemStickerReplacement, follow=[])
+#reversion.register(FeeItem, follow=['dcv_admission_fees', 'dcv_permit_fees', 'feeitemapplicationfee_set', 'application_fees'])
+#reversion.register(FeeItem, follow=['dcv_admission_fees', 'dcv_permit_fees', 'application_fees'])
+#reversion.register(OracleCodeItem, follow=[])
 

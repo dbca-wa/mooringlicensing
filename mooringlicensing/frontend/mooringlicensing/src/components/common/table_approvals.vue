@@ -99,7 +99,7 @@
         <ApprovalSuspension ref="approval_suspension"  @refreshFromResponse="refreshFromResponseApprovalModify"></ApprovalSuspension>
         <ApprovalSurrender ref="approval_surrender"  @refreshFromResponse="refreshFromResponseApprovalModify"></ApprovalSurrender>
         <div v-if="approvalHistoryId">
-            <ApprovalHistory 
+            <ApprovalHistory
                 ref="approval_history"
                 :key="approvalHistoryId"
                 :approvalId="approvalHistoryId"
@@ -244,6 +244,7 @@ export default {
                     'Vessel Registration',
                     'Vessel Name',
                     'Issue Date',
+                    'Start Date',
                     'Expiry Date',
                     'Action',
                     'Approval letter',
@@ -257,6 +258,7 @@ export default {
                     'Sticker mailed date',
                     'Status',
                     'Issue Date',
+                    'Start Date',
                     'Expiry Date',
                     'Vessel',
                     'Action',
@@ -276,6 +278,7 @@ export default {
                     'Allocation number in bay',
                     'Action',
                     'Issue Date',
+                    'Start Date',
                     'Expiry Date',
                     'Approval letter',
                     'Vessel length',
@@ -293,6 +296,7 @@ export default {
                     'Holder',
                     'Status',
                     'Issue Date',
+                    'Start Date',
                     'Expiry Date',
                     'Approval letter',
                     'Vessel Regos',
@@ -327,7 +331,8 @@ export default {
                             } else {
                                 return full.lodgement_number
                             }
-                        }
+                        },
+                        name: 'lodgement_number',
                     }
         },
         columnApplicationNumberInBay: function() {
@@ -335,11 +340,12 @@ export default {
                         // 4. Application number in Bay
                         data: "id",
                         orderable: true,
-                        searchable: true,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             return full.current_proposal_number;
-                        }
+                        },
+                        name: "current_proposal__lodgement_number"
                     }
         },
         columnStatus: function() {
@@ -347,11 +353,12 @@ export default {
                         // 5. Status
                         data: "id",
                         orderable: true,
-                        searchable: true,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             return full.status
-                        }
+                        },
+                        name: "status",
                     }
         },
         columnStatusInternal: function() {
@@ -359,11 +366,12 @@ export default {
                         // 5. Status
                         data: "id",
                         orderable: true,
-                        searchable: true,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             return full.internal_status
-                        }
+                        },
+                        name: "internal_status",
                     }
         },
         columnVesselRegistration: function() {
@@ -371,11 +379,12 @@ export default {
                         // 6. Vessel Registration
                         data: "id",
                         orderable: true,
-                        searchable: true,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             return full.vessel_registration;
-                        }
+                        },
+                        name: "current_proposal__vessel_details__vessel__rego_no"
                     }
         },
         columnVesselName: function() {
@@ -383,11 +392,12 @@ export default {
                         // 7. Vessel Name
                         data: "id",
                         orderable: true,
-                        searchable: true,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             return full.vessel_name;
-                        }
+                        },
+                        name: "current_proposal__vessel_details__vessel_name"
                     }
         },
         columnIssueDate: function() {
@@ -395,11 +405,24 @@ export default {
                         // 8. Issue Date
                         data: "id",
                         orderable: true,
-                        searchable: true,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             return full.issue_date_str;
-                        }
+                        },
+                        name: "issue_date",
+                    }
+        },
+        columnStartDate: function() {
+            return {
+                        data: "id",
+                        orderable: true,
+                        searchable: false,
+                        visible: true,
+                        'render': function(row, type, full){
+                            return full.start_date_str;
+                        },
+                        name: "start_date",
                     }
         },
         columnExpiryDate: function() {
@@ -407,11 +430,12 @@ export default {
                         // 9. Expiry Date
                         data: "id",
                         orderable: true,
-                        searchable: true,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             return full.expiry_date_str;
-                        }
+                        },
+                        name: "expiry_date",
                     }
         },
         columnAction: function() {
@@ -419,10 +443,11 @@ export default {
             return {
                         // 10. Action
                         data: "id",
-                        orderable: true,
-                        searchable: true,
+                        orderable: false,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
+                            console.log(full)
                             let links = '';
                             if(vm.debug){
                                 links +=  `<a href='#${full.id}' data-request-new-sticker='${full.id}'>Request New Sticker</a><br/>`;
@@ -436,7 +461,8 @@ export default {
                                 if(full.can_action || vm.debug){
                                     if(full.amend_or_renew === 'amend' || vm.debug){
                                        links +=  `<a href='#${full.id}' data-amend-approval='${full.current_proposal_id}'>Amend</a><br/>`;
-                                    } else if(full.amend_or_renew === 'renew' || vm.debug){
+                                    }
+                                    if(full.amend_or_renew === 'renew' || vm.debug){
                                         links +=  `<a href='#${full.id}' data-renew-approval='${full.current_proposal_id}'>Renew</a><br/>`;
                                     }
                                     links +=  `<a href='#${full.id}' data-surrender-approval='${full.id}'>Surrender</a><br/>`;
@@ -449,8 +475,8 @@ export default {
                             } else if (!vm.is_external){
                                 links +=  `<a href='/internal/approval/${full.id}'>View</a><br/>`;
                                 links +=  `<a href='#${full.id}' data-history-approval='${full.id}'>History</a><br/>`;
-                                if(full.can_reissue && full.current_proposal_id && full.is_approver && full.current_proposal_approved){
-                                        links +=  `<a href='#${full.id}' data-reissue-approval='${full.current_proposal_id}'>Reissue</a><br/>`;
+                                if(full.can_reissue && full.current_proposal_id && full.is_assessor && full.current_proposal_approved){
+                                    links +=  `<a href='#${full.id}' data-reissue-approval='${full.current_proposal_id}'>Reissue</a><br/>`;
                                 }
                                 if (vm.is_internal && vm.wlaDash) {
                                     links += full.offer_link;
@@ -485,8 +511,8 @@ export default {
             return {
                         // 10. Action
                         data: "id",
-                        orderable: true,
-                        searchable: true,
+                        orderable: false,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             return full.ria_generated_proposals;
@@ -501,29 +527,32 @@ export default {
                         visible: true,
                         'render': function(row, type, full){
                             return full.holder;
-                        }
+                        },
+                        name: 'submitter__first_name, submitter__last_name',
                     }
         },
         columnPreferredMooringBay: function() {
             return {
                         data: "id",
                         orderable: true,
-                        searchable: true,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             return full.preferred_mooring_bay;
-                        }
+                        },
+                        name: "current_proposal__preferred_bay__name"
                     }
         },
         columnAllocationNumberInBay: function() {
             return {
                         data: "id",
                         orderable: true,
-                        searchable: true,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             return full.wla_order;
-                        }
+                        },
+                        name: "wla_order",
                     }
         },
 
@@ -531,30 +560,32 @@ export default {
             return {
                         data: "id",
                         orderable: true,
-                        searchable: true,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             return full.vessel_length;
-                        }
+                        },
+                        name: "current_proposal__vessel_details__vessel_length"
                     }
         },
         columnVesselDraft: function() {
             return {
                         data: "id",
                         orderable: true,
-                        searchable: true,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             return full.vessel_draft;
-                        }
+                        },
+                        name: "current_proposal__vessel_details__vessel_draft"
                     }
         },
         columnApprovalType: function() {
             //let vm = this;
             return {
                         data: "id",
-                        orderable: true,
-                        searchable: true,
+                        orderable: false,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             //return full.vessel_draft;
@@ -569,8 +600,8 @@ export default {
         columnStickerNumber: function() {
             return {
                         data: "id",
-                        orderable: true,
-                        searchable: true,
+                        orderable: false,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             let ret_str = ''
@@ -578,14 +609,15 @@ export default {
                                 ret_str += sticker.number + '<br />'
                             }
                             return ret_str
-                        }
+                        },
+                        name: 'stickers__number',
                     }
         },
         columnStickerMailedDate: function() {
             return {
                         data: "id",
-                        orderable: true,
-                        searchable: true,
+                        orderable: false,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             let ret_str = ''
@@ -598,19 +630,27 @@ export default {
                                 }
                             }
                             return ret_str
-                        }
+                        },
                     }
         },
         columnApprovalLetter: function() {
             return {
                         data: "id",
-                        orderable: true,
-                        searchable: true,
+                        orderable: false,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
-                            let ret_elems = `<div><a href='${full.licence_document}' target='_blank'><i style='color:red;' class='fa fa-file-pdf-o'></i></a></div>`;
+                            let approval_letter_name = ''
+                            if (full.approval_type_dict.code === 'aup'){
+                                approval_letter_name = 'Authorised User Permit'
+                            } else if (full.approval_type_dict.code === 'aap'){
+                                approval_letter_name = 'Annual Admission Permit'
+                            } else if (full.approval_type_dict.code === 'ml'){
+                                approval_letter_name = 'Mooring Licence'
+                            }
+                            let ret_elems = `<div><a href='${full.licence_document}' target='_blank'><i style='color:red;' class='fa fa-file-pdf-o'></i> ${approval_letter_name}</a></div>`;
                             if (full.authorised_user_summary_document){
-                                ret_elems += `<div><a href='${full.authorised_user_summary_document}' target='_blank'><i style='color:red;' class='fa fa-file-pdf-o'></i></a></div>`;
+                                ret_elems += `<div><a href='${full.authorised_user_summary_document}' target='_blank'><i style='color:red;' class='fa fa-file-pdf-o'></i> List of Authorised Users</a></div>`;
                             }
 
                             return ret_elems
@@ -645,7 +685,7 @@ export default {
             return {
                         data: "id",
                         orderable: true,
-                        searchable: true,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             return full.vessel_regos;
@@ -668,6 +708,7 @@ export default {
                     vm.columnVesselRegistration,
                     vm.columnVesselName,
                     vm.columnIssueDate,
+                    vm.columnStartDate,
                     vm.columnExpiryDate,
                     vm.columnAction,
                     vm.columnApprovalLetter,
@@ -681,6 +722,7 @@ export default {
                     vm.columnStickerMailedDate,
                     vm.columnStatus,
                     vm.columnIssueDate,
+                    vm.columnStartDate,
                     vm.columnExpiryDate,
                     vm.columnVesselRegistration,
                     vm.columnAction,
@@ -701,6 +743,7 @@ export default {
                     vm.columnAllocationNumberInBay,
                     vm.columnAction,
                     vm.columnIssueDate,
+                    vm.columnStartDate,
                     vm.columnExpiryDate,
                     vm.columnApprovalLetter,
                     vm.columnVesselLength,
@@ -718,6 +761,7 @@ export default {
                     vm.columnHolder,
                     vm.columnStatus,
                     vm.columnIssueDate,
+                    vm.columnStartDate,
                     vm.columnExpiryDate,
                     vm.columnApprovalLetter,
                     vm.columnVesselRegos,
@@ -734,13 +778,13 @@ export default {
                     {
                         extend: 'excel',
                         exportOptions: {
-                            columns: ':visible'
+                            //columns: ':visible'
                         }
                     },
                     {
                         extend: 'csv',
                         exportOptions: {
-                            columns: ':visible'
+                            //columns: ':visible'
                         }
                     },
                 ]
@@ -753,6 +797,7 @@ export default {
                 },
                 responsive: true,
                 serverSide: true,
+                lengthMenu: [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ],
                 //searching: false,
                 searching: true,
                 ajax: {
@@ -792,6 +837,7 @@ export default {
     },
     methods: {
         sendData: function(params){
+            console.log(params)
             let vm = this
             vm.$http.post(helpers.add_endpoint_json(api_endpoints.approvals, params.approval_id + '/request_new_stickers'), params).then(
                 res => {
@@ -1002,8 +1048,8 @@ export default {
         },
         reissueApproval:function (proposal_id) {
             let vm = this;
-            let status= 'with_approver'
-            let data = {'status': status}
+            let new_status = 'with_assessor'
+            let data = {'status': new_status}
             swal({
                 title: "Reissue Approval",
                 text: "Are you sure you want to reissue this approval?",
@@ -1114,11 +1160,9 @@ export default {
 
                 })
                 .then((response) => {
-                   let proposal = {}
-                   proposal = response.body
-                   vm.$router.push({
-                    name:"draft_proposal",
-                    params:{proposal_id: proposal.id}
+                    vm.$router.push({
+                        name:"draft_proposal",
+                        params:{proposal_id: response.body.id}
                    });
 
                 }, (error) => {
@@ -1149,11 +1193,9 @@ export default {
 
                 })
                 .then((response) => {
-                   let proposal = {}
-                   proposal = response.body
                    vm.$router.push({
-                    name:"draft_proposal",
-                    params:{proposal_id: proposal.id}
+                        name:"draft_proposal",
+                        params:{proposal_id: response.body.id}
                    });
 
                 }, (error) => {

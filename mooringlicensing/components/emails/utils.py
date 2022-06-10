@@ -19,7 +19,23 @@ def make_url_for_internal(url):
             url = url.replace('-uat', '-uat-internal')
         else:
             url = url.replace('.dbca.wa.gov.au', '-internal.dbca.wa.gov.au')
+
+    url = make_http_https(url)
     return url
+
+
+def make_url_for_external(url):
+    # Public URL should not have 'internal' substring
+    if '-dev-internal' in url:
+        web_url = url.replace('-dev-internal', '-dev')
+    elif '-uat-internal' in url:
+        web_url = url.replace('-uat-internal', '-uat')
+    else:
+        web_url = url.replace('-internal', '')
+
+    web_url = make_http_https(web_url)
+
+    return web_url
 
 
 def get_public_url(request=None):
@@ -28,12 +44,15 @@ def get_public_url(request=None):
     else:
         web_url = settings.SITE_URL if settings.SITE_URL else ''
 
-    # Public URL should not have 'internal' substring
-    if '-dev-internal' in web_url:
-        web_url = web_url.replace('-dev-internal', '-dev')
-    elif '-dev-internal' in web_url:
-        web_url = web_url.replace('-uat-internal', '-uat')
-    else:
-        web_url = web_url.replace('-internal', '')
+    web_url = make_http_https(web_url)
 
+    # Public URL should not have 'internal' substring
+    web_url = make_url_for_external(web_url)
+
+    return web_url
+
+
+def make_http_https(web_url):
+    if web_url.startswith('http') and not web_url.startswith('https'):
+        web_url = web_url.replace('http', 'https', 1)
     return web_url

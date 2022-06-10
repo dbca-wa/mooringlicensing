@@ -278,7 +278,7 @@ from '@/utils/hooks'
                             searchable: true,
                             visible: true,
                             'render': function(row, type, full){
-                                return 'link to?';
+                                return `<a href='${full.action_link}'>View</a><br/>`;
                             }
                         },
                         ],
@@ -296,6 +296,11 @@ from '@/utils/hooks'
 
                 /* set Applicant tab Active */
                 $('#pills-tab a[href="#pills-vessel-details"]').tab('show');
+                // ensure datatables in tabs are responsive
+                $('#pills-owners-tab').on('shown.bs.tab', function (e) {
+                    vm.$refs.owners_datatable.vmDataTable.columns.adjust().responsive.recalc();
+                });
+
 
             },
 

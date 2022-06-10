@@ -122,9 +122,9 @@
                                 <template v-if="!proposal.proposed_decline_status">
                                     <template v-if="isFinalised">
                                         <p><strong>Decision: Issue</strong></p>
-                                        <p><strong>Start date: {{proposal.proposed_issuance_approval.start_date}}</strong></p>
-                                        <p><strong>Expiry date: {{proposal.proposed_issuance_approval.expiry_date}}</strong></p>
-                                        <p><strong>CC emails: {{proposal.proposed_issuance_approval.cc_email}}</strong></p>
+                                        <!--p><strong>Start date: {{proposal.proposed_issuance_approval.start_date}}</strong></p>
+                                        <p><strong>Expiry date: {{proposal.proposed_issuance_approval.expiry_date}}</strong></p-->
+                                        <p><strong>CC emails: {{ displayCCEmail }}</strong></p>
                                     </template>
                                     <template v-else>
                                         <p><strong>Proposed decision: Issue</strong></p>
@@ -132,7 +132,7 @@
                                         <p><strong>Proposed start date: {{proposal.proposed_issuance_approval.start_date}}</strong></p>
                                         <p><strong>Proposed expiry date: {{proposal.proposed_issuance_approval.expiry_date}}</strong></p>
 -->
-                                        <p><strong>Proposed cc emails: {{proposal.proposed_issuance_approval.cc_email}}</strong></p>
+                                        <p><strong>Proposed cc emails: {{ displayCCEmail }}</strong></p>
                                     </template>
                                 </template>
                                 <template v-else>
@@ -181,6 +181,13 @@ export default {
         //ComponentSiteSelection,
     },
     computed:{
+        displayCCEmail: function() {
+            let ccEmail = ''
+            if (this.proposal && this.proposal.proposed_issuance_approval) {
+                ccEmail = this.proposal.proposed_issuance_approval.cc_email;
+            }
+            return ccEmail;
+        },
         displayAwaitingPaymentMsg: function(){
             let display = false
             console.log(this.proposal.processing_status)

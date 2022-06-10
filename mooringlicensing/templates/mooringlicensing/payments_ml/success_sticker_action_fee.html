@@ -10,6 +10,16 @@
             <br/>
         </div>
 
+        {% if request.user == submitter or request.user.is_staff %}
+            {% if request.user.is_authenticated %}
+                <div class="row" style="margin-top:2em;">
+                    <div class="col-sm-6">
+                        <div><strong>Invoice</strong>: <a href="{% url 'invoice-pdf' fee_invoice.invoice_reference %}" target="_blank"><i style='color:red;' class='fa fa-file-pdf-o'></i> #{{ fee_invoice.invoice_reference }}</a></div>
+                    </div>
+                </div>
+            {% endif %}
+        {% endif %}
+
         <div class="row"><div class="col-sm-12" style="margin-top: 1em">
             {% if request.user == submitter or request.user.is_staff %}
                 {% if request.user.is_authenticated %}

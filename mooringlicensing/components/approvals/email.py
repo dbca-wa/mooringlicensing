@@ -11,7 +11,7 @@ from ledger.payments.pdf import create_invoice_pdf_bytes
 from mooringlicensing import settings
 from mooringlicensing.components.emails.emails import TemplateEmailBase, _extract_email_headers
 from ledger.accounts.models import EmailUser
-from mooringlicensing.components.emails.utils import get_user_as_email_user, get_public_url
+from mooringlicensing.components.emails.utils import get_user_as_email_user, get_public_url, make_http_https
 from mooringlicensing.components.organisations.models import OrganisationLogEntry, Organisation
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
@@ -80,10 +80,11 @@ def send_auth_user_no_moorings_notification(approval):
         url = ''.join(url.split('-internal'))
 
     context = {
+        'recipient': approval.submitter,
         'public_url': get_public_url(),
         'approval': approval,
         'proposal': proposal,
-        'url': url
+        'url': make_http_https(url),
     }
     all_ccs = []
     if proposal.org_applicant and proposal.org_applicant.email:
@@ -118,11 +119,12 @@ def send_auth_user_mooring_removed_notification(approval, mooring_licence):
         url = ''.join(url.split('-internal'))
 
     context = {
+        'recipient': approval.submitter,
         'public_url': get_public_url(),
         'approval': approval,
         'proposal': proposal,
         'mooring_licence': mooring_licence,
-        'url': url
+        'url': make_http_https(url),
     }
     all_ccs = []
     if proposal.org_applicant and proposal.org_applicant.email:
@@ -163,10 +165,11 @@ def send_approval_expire_email_notification(approval):
         url = ''.join(url.split('-internal'))
 
     context = {
+        'recipient': approval.submitter,
         'public_url': get_public_url(),
         'approval': approval,
         'proposal': proposal,
-        'url': url
+        'url': make_http_https(url),
     }
     all_ccs = []
     if proposal.org_applicant and proposal.org_applicant.email:
@@ -203,6 +206,7 @@ def send_approval_cancelled_due_to_no_vessels_nominated_mail(approval, request=N
         due_date = approval.current_proposal.vessel_ownership.end_date + relativedelta(months=+6)
 
     context = {
+        'recipient': approval.submitter,
         'public_url': get_public_url(request),
         'approval': approval,
         'due_date': due_date,
@@ -246,10 +250,11 @@ def send_vessel_nomination_reminder_mail(approval, request=None):
     proposal = approval.current_proposal
 
     context = {
+        'recipient': approval.submitter,
         'public_url': get_public_url(request),
         'approval': approval,
         'date_to_nominate_new_vessel': approval.current_proposal.vessel_ownership.end_date + relativedelta(months=+6),
-        'dashboard_external_url': url,
+        'dashboard_external_url': make_http_https(url),
     }
 
     sender = settings.DEFAULT_FROM_EMAIL
@@ -410,7 +415,7 @@ def _log_user_email(email_message, target_email_user, customer, sender=None, att
     kwargs = {
         'subject': subject,
         'text': text,
-        'emailuser': target_email_user,
+        'emailuser': target_email_user if target_email_user else customer,
         'customer': customer,
         'staff': staff,
         'to': to,
@@ -654,6 +659,7 @@ def send_approval_suspend_email_notification(approval, request=None):
         to_date = approval.suspension_details['to_date'] if 'to_date' in approval.suspension_details else ''
 
     context = {
+        'recipient': approval.submitter,
         'public_url': get_public_url(request),
         'approval': approval,
         'details': details,
@@ -947,10 +953,10 @@ def send_reissue_aap_after_sale_recorded_email(approval, request, vessel_ownersh
         _log_user_email(msg, approval.submitter, proposal.submitter, sender=sender)
 
 
-def send_sticker_replacement_email(request, sticker, invoice):
+def send_sticker_replacement_email(request, old_sticker, new_sticker, invoice):
     # 36
     # email to licence/permit holder when sticker replacement request has been submitted (with payment)
-    approval = sticker.approval
+    approval = new_sticker.approval
     proposal = approval.current_proposal
 
     email = TemplateEmailBase(
@@ -968,7 +974,7 @@ def send_sticker_replacement_email(request, sticker, invoice):
     context = {
         'public_url': get_public_url(request),
         'recipient': approval.submitter,
-        'sticker': sticker,
+        'sticker': old_sticker,
         'dashboard_external_url': get_public_url(request),
     }
 

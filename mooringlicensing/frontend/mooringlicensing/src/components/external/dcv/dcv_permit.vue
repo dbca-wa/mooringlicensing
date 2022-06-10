@@ -235,7 +235,6 @@ export default {
             }).then(
                 (res)=>{
                     vm.save_and_pay();
-                    this.paySubmitting = false
                 },
                 (res)=>{
                     this.paySubmitting = false
@@ -247,8 +246,10 @@ export default {
                 const res = await this.save(false, '/api/dcv_permit/')
                 this.dcv_permit.id = res.body.id
                 await helpers.post_and_redirect(this.dcv_permit_fee_url, {'csrfmiddlewaretoken' : this.csrf_token});
+                this.paySubmitting = false
             } catch(err) {
                 helpers.processError(err)
+                this.paySubmitting = false
             }
         },
         save: async function(withConfirm=true, url){

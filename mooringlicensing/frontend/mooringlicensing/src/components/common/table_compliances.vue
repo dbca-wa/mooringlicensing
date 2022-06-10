@@ -187,6 +187,9 @@ export default {
         is_external: function() {
             return this.level == 'external'
         },
+        is_internal: function() {
+            return this.level == 'internal'
+        },
         compliancesHeaders: function() {
             let headers = ['Number', 'Licence/Permit', 'Condition', 'Due Date', 'Status', 'Action'];
             if (this.level === 'internal') {
@@ -208,12 +211,12 @@ export default {
         approvalTypeColumn: function() {
             return {
                         data: "id",
-                        orderable: true,
-                        searchable: true,
+                        orderable: false,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             return full.approval_type;
-                        }
+                        },
                     }
         },
         lodgementNumberColumn: function() {
@@ -225,7 +228,8 @@ export default {
                         visible: true,
                         'render': function(row, type, full){
                             return full.lodgement_number
-                        }
+                        },
+                        name: "lodgement_number"
                     }
         },
         licenceNumberColumn: function() {
@@ -237,15 +241,16 @@ export default {
                         visible: true,
                         'render': function(row, type, full){
                             return full.approval_number
-                        }
+                        },
+                        name: "approval__lodgement_number",
                     }
         },
         conditionColumn: function() {
             return {
                         // 4. Condition
                         data: "id",
-                        orderable: true,
-                        searchable: true,
+                        orderable: false,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             let requirement = '';
@@ -264,12 +269,15 @@ export default {
                         searchable: true,
                         visible: true,
                         'render': function(row, type, full){
+                            console.log(full)
                             let dueDate = '';
-                            if (full.requirement) {
-                                dueDate = full.requirement.read_due_date;
+                            if (full.due_date_display) {
+                                //dueDate = full.requirement.read_due_date;
+                                dueDate = full.due_date_display;
                             }
                             return dueDate;
-                        }
+                        },
+                        name: "due_date"
                     }
         },
         statusColumn: function() {
@@ -281,7 +289,8 @@ export default {
                         visible: true,
                         'render': function(row, type, full){
                             return full.status
-                        }
+                        },
+                        name: "processing_status"
                     }
         },
         actionColumn: function() {
@@ -289,15 +298,15 @@ export default {
             return {
                         // 7. Action
                         data: "id",
-                        orderable: true,
-                        searchable: true,
+                        orderable: false,
+                        searchable: false,
                         visible: true,
                         'render': function(row, type, full){
                             //return 'not implemented'
                             let links = '';
                             if (!vm.is_external){
                                 //if (full.processing_status=='With Assessor' && vm.check_assessor(full)) {
-                                if (full.can_process) {
+                                if (full.can_process && full.status !== 'Approved') {
                                     links +=  `<a href='/internal/compliance/${full.id}'>Process</a><br/>`;
 
                                 }
@@ -328,7 +337,8 @@ export default {
                         visible: true,
                         'render': function(row, type, full){
                             return full.assigned_to_name;
-                        }
+                        },
+                        name: 'assigned_to__first_name, assigned_to__last_name',
                     }
         },
 
@@ -364,13 +374,13 @@ export default {
                     {
                         extend: 'excel',
                         exportOptions: {
-                            columns: ':visible'
+                            //columns: ':visible'
                         }
                     },
                     {
                         extend: 'csv',
                         exportOptions: {
-                            columns: ':visible'
+                            //columns: ':visible'
                         }
                     },
                 ]
@@ -384,7 +394,11 @@ export default {
                 },
                 responsive: true,
                 serverSide: true,
+                lengthMenu: [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ],
                 searching: true,
+                order: [
+                    [0, 'desc']
+                    ],
 
                 ajax: {
                     "url": api_endpoints.compliances_paginated_external + '?format=datatables&target_email_user_id=' + vm.target_email_user_id,
@@ -394,6 +408,7 @@ export default {
                     "data": function ( d ) {
                         // Add filters selected
                         d.filter_compliance_status = vm.filterComplianceStatus;
+                        d.level = vm.level;
                     }
                 },
                 dom: 'lBfrtip',
@@ -421,13 +436,23 @@ export default {
     methods: {
         fetchFilterLists: function(){
             let vm = this;
-
+            // Compliance Statuses
+            vm.$http.get(api_endpoints.compliance_statuses_dict).then((response) => {
+                if (vm.is_internal){
+                    vm.compliance_statuses = response.body.internal_statuses
+                } else {
+                    vm.compliance_statuses = response.body.external_statuses
+                }
+            },(error) => {
+            })
+            /*
             // Statuses
             vm.$http.get(api_endpoints.compliance_statuses_dict).then((response) => {
                 vm.compliance_statuses = response.body
             },(error) => {
                 console.log(error);
             })
+            */
         },
     },
     created: function(){

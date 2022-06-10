@@ -12,6 +12,15 @@
             </div>
             <div class="col-md-3">
                 <div class="form-group">
+                    <label for="">Status</label>
+                    <select class="form-control" v-model="filterStickerStatus">
+                        <option value="All">All</option>
+                        <option v-for="sticker_status in sticker_statuses" :value="sticker_status.id">{{ sticker_status.display }}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
                     <label for="">Season</label>
                     <select class="form-control" v-model="filterYear">
                         <option value="All">All</option>
@@ -59,10 +68,13 @@ export default {
             // selected values for filtering
             filterApprovalType: null,
             filterYear: null,
+            filterStickerStatus: null,
 
             // filtering options
             approval_types: [],
             fee_seasons: [],
+            sticker_statuses: [],
+
 
             sticker_details_tr_class_name: 'sticker_details',
 
@@ -75,17 +87,13 @@ export default {
     },
     watch: {
         filterYear: function() {
-            let vm = this;
-            vm.$refs.stickers_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
-            //if (vm.filterApplicationStatus != 'All') {
-            //    vm.$refs.stickers_datatable.vmDataTable.column('status:name').search('').draw();
-            //} else {
-            //    vm.$refs.stickers_datatable.vmDataTable.column('status:name').search(vm.filterApplicationStatus).draw();
-            //}
+            this.$refs.stickers_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
         },
         filterApprovalType: function() {
-            let vm = this;
-            vm.$refs.stickers_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
+            this.$refs.stickers_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
+        },
+        filterStickerStatus: function(){
+            this.$refs.stickers_datatable.vmDataTable.draw();  // This calls ajax() backend call.  This line is enough to search?  Do we need following lines...?
         },
     },
     computed: {
@@ -298,6 +306,7 @@ export default {
                 //responsive: true,
                 responsive: true,
                 serverSide: true,
+                lengthMenu: [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ],
                 searching: search,
                 ordering: true,
                 order: [[1, 'desc']],  // Default order [[column_index, 'asc/desc'], ...]
@@ -309,6 +318,7 @@ export default {
                     "data": function ( d ) {
                         d.filter_approval_type = vm.filterApprovalType
                         d.filter_year = vm.filterYear
+                        d.filter_sticker_status = vm.filterStickerStatus
                         d.level = vm.level
                     }
                 },
@@ -318,13 +328,13 @@ export default {
                     {
                         extend: 'excel',
                         exportOptions: {
-                            columns: ':visible'
+                            //columns: ':visible'
                         }
                     },
                     {
                         extend: 'csv',
                         exportOptions: {
-                            columns: ':visible'
+                            //columns: ':visible'
                         }
                     },
                 ],
@@ -448,6 +458,12 @@ export default {
                 console.log(error);
             })
 
+            // Sticker statuses
+            vm.$http.get(api_endpoints.sticker_status_dict+'?include_codes=' + include_codes).then((response) => {
+                vm.sticker_statuses = response.body
+            },(error) => {
+                console.log(error);
+            })
         },
         updateActionCell: function(sticker){
             let elem = $('#action_cell_contents_id_' + sticker.id)

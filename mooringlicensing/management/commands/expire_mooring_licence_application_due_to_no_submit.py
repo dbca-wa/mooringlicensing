@@ -13,9 +13,11 @@ from mooringlicensing.components.proposals.email import send_expire_mooring_lice
     send_expire_mla_notification_to_assessor
 from mooringlicensing.components.main.models import NumberOfDaysType, NumberOfDaysSetting
 from mooringlicensing.components.proposals.models import Proposal, MooringLicenceApplication
+from mooringlicensing.management.commands.utils import construct_email_message
 from mooringlicensing.settings import CODE_DAYS_IN_PERIOD_MLA
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('cron_tasks')
+cron_email = logging.getLogger('cron_email')
 
 
 class Command(BaseCommand):
@@ -57,7 +59,6 @@ class Command(BaseCommand):
         for a in MooringLicenceApplication.objects.filter(queries):
             try:
                 a.processing_status = Proposal.PROCESSING_STATUS_EXPIRED
-                a.customer_status = Proposal.CUSTOMER_STATUS_EXPIRED
                 a.save()
                 # update WLA internal_status and queue date
                 a.waiting_list_allocation.internal_status = 'waiting'
@@ -77,7 +78,8 @@ class Command(BaseCommand):
                 errors.append(err_msg)
 
         cmd_name = __name__.split('.')[-1].replace('_', ' ').upper()
-        err_str = '<strong style="color: red;">Errors: {}</strong>'.format(len(errors)) if len(errors) > 0 else '<strong style="color: green;">Errors: 0</strong>'
-        msg = '<p>{} completed. {}. IDs updated: {}.</p>'.format(cmd_name, err_str, updates)
+        # err_str = '<strong style="color: red;">Errors: {}</strong>'.format(len(errors)) if len(errors) > 0 else '<strong style="color: green;">Errors: 0</strong>'
+        # msg = '<p>{} completed. {}. IDs updated: {}.</p>'.format(cmd_name, err_str, updates)
+        msg = construct_email_message(cmd_name, errors, updates)
         logger.info(msg)
-        print(msg)  # will redirect to cron_tasks.log file, by the parent script
+        cron_email.info(msg)

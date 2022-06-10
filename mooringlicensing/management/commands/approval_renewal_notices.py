@@ -9,7 +9,7 @@ from mooringlicensing.components.approvals.models import (
     AnnualAdmissionPermit,
     AuthorisedUserPermit,
     MooringLicence,
-    DcvPermit,
+    DcvPermit, ApprovalUserAction,
 )
 from ledger.accounts.models import EmailUser
 from datetime import timedelta
@@ -18,6 +18,7 @@ from mooringlicensing.components.proposals.email import send_approval_renewal_em
 import logging
 
 from mooringlicensing.components.main.models import NumberOfDaysType, NumberOfDaysSetting
+from mooringlicensing.management.commands.utils import construct_email_message
 from mooringlicensing.settings import (
     CODE_DAYS_FOR_RENEWAL_WLA,
     CODE_DAYS_FOR_RENEWAL_AAP,
@@ -26,7 +27,8 @@ from mooringlicensing.settings import (
     CODE_DAYS_FOR_RENEWAL_DCVP,
 )
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('cron_tasks')
+cron_email = logging.getLogger('cron_email')
 
 
 class Command(BaseCommand):
@@ -39,8 +41,10 @@ class Command(BaseCommand):
         days_type = NumberOfDaysType.objects.get(code=number_of_days_code)
         days_setting = NumberOfDaysSetting.get_setting_by_date(days_type, today)
         if not days_setting:
+            err_msg = "NumberOfDays: {} is not defined for the date: {}".format(days_type.name, today)
             # No number of days found
-            raise ImproperlyConfigured("NumberOfDays: {} is not defined for the date: {}".format(days_type.name, today))
+            errors.append(err_msg)
+            raise ImproperlyConfigured(err_msg)
 
         expiry_notification_date = today + timedelta(days=days_setting.number_of_days)
 
@@ -68,7 +72,8 @@ class Command(BaseCommand):
                 send_approval_renewal_email_notification(a)
                 a.renewal_sent = True
                 a.save()
-                logger.info('Renewal notice sent for Approval {}'.format(a.id))
+                a.log_user_action(ApprovalUserAction.ACTION_RENEWAL_NOTICE_SENT_FOR_APPROVAL.format(a.id),)
+                logger.info(ApprovalUserAction.ACTION_RENEWAL_NOTICE_SENT_FOR_APPROVAL.format(a.id))
                 updates.append(a.lodgement_number)
             except Exception as e:
                 err_msg = 'Error sending renewal notice for Approval {}'.format(a.lodgement_number)
@@ -89,8 +94,8 @@ class Command(BaseCommand):
         self.perform_per_type(CODE_DAYS_FOR_RENEWAL_ML, MooringLicence, updates, errors)
 
         cmd_name = __name__.split('.')[-1].replace('_', ' ').upper()
-        err_str = '<strong style="color: red;">Errors: {}</strong>'.format(len(errors)) if len(errors)>0 else '<strong style="color: green;">Errors: 0</strong>'
-        msg = '<p>{} completed. {}. IDs updated: {}.</p>'.format(cmd_name, err_str, updates)
+        # err_str = '<strong style="color: red;">Errors: {}</strong>'.format(len(errors)) if len(errors)>0 else '<strong style="color: green;">Errors: 0</strong>'
+        # msg = '<p>{} completed. {}. IDs updated: {}.</p>'.format(cmd_name, err_str, updates)
+        msg = construct_email_message(cmd_name, errors, updates)
         logger.info(msg)
-        print(msg) # will redirect to cron_tasks.log file, by the parent script
-
+        cron_email.info(msg)

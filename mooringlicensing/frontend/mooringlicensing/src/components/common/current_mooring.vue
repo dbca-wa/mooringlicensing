@@ -10,26 +10,26 @@
                             @change="resetCurrentMooring" 
                             :disabled="readonly" 
                             type="radio" 
-                            id="change_mooring_false" 
-                            name="change_mooring_false" 
+                            id="changeMooringFalse" 
+                            name="changeMooringFalse" 
                             :value="false" 
-                            v-model="change_mooring" 
+                            v-model="changeMooring" 
                             required
                             />
-                            <label for="change_mooring_false" class="control-label">No</label>
+                            <label for="changeMooringFalse" class="control-label">No</label>
                         </div>
                         <div class="col-sm-9">
                             <input 
                             @change="resetCurrentMooring" 
                             :disabled="readonly" 
                             type="radio" 
-                            id="change_mooring_true" 
-                            name="change_mooring_true" 
+                            id="changeMooringTrue" 
+                            name="changeMooringTrue" 
                             :value="true" 
-                            v-model="change_mooring" 
+                            v-model="changeMooring" 
                             required
                             />
-                            <label for="change_mooring_true" class="control-label">Yes</label>
+                            <label for="changeMooringTrue" class="control-label">Yes</label>
                         </div>
 
                 </div>
@@ -54,7 +54,7 @@ from '@/utils/hooks'
         name:'current_mooring',
         data:function () {
             return {
-                change_mooring: false,
+                changeMooring: false,
             }
         },
         components:{
@@ -89,7 +89,8 @@ from '@/utils/hooks'
                 let displayText = '';
                 if (this.proposal && this.proposal.authorised_user_moorings_str) {
                     displayText += `Your ${this.proposal.approval_type_text} ${this.proposal.approval_lodgement_number} 
-                    lists moorings ${this.proposal.authorised_user_moorings_str}. Do you want to apply for another mooring to be listed on the Authorised User Permit?`;
+                    lists moorings ${this.proposal.authorised_user_moorings_str}. 
+                        Do you want to apply to add another mooring to your Authorised User Permit?`;
                 }
                 /*
                 if (this.proposal && this.proposal.mooring_licence_vessels && this.proposal.mooring_licence_vessels.length) {
@@ -104,13 +105,17 @@ from '@/utils/hooks'
         methods:{
             resetCurrentMooring: function() {
                 this.$nextTick(() => {
-                    this.$emit("resetCurrentMooring", this.change_mooring)
+                    this.$emit("resetCurrentMooring", this.changeMooring)
                 });
             },
         },
         mounted: function () {
         },
         created: function() {
+            if (this.proposal && !this.proposal.keep_existing_mooring) {
+                this.changeMooring = true;
+                this.resetCurrentMooring();
+            }
         },
     }
 </script>

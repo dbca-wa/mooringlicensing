@@ -2,7 +2,7 @@
 
 {% block content_body %}
 {% include "mooringlicensing/emails_2/salutation.html" %}
-{% if decision == 'approved' %}
+{% if decision == 'approved' or decision == 'approved_paid' %}
 <p>Your application {{ proposal.lodgement_number }} for amendment to your mooring site licence has been approved. Please see attached document for more details.</p>
 <p>Your new sticker(s) for your vessel(s) will be mailed to you in the coming days.</p>
 <p>Entry to the Reserve and access to the Shared Mooring System (including use of your own mooring site) is NOT approved until your current sticker is clearly displayed on the port side of your vessel. Penalties apply.</p>

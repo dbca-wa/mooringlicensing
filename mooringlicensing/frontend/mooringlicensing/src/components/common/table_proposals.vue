@@ -163,8 +163,8 @@ export default {
             return {
                 // 3. Type (This corresponds to the 'ApplicationType' at the backend)
                 data: "id",
-                orderable: true,
-                searchable: true,
+                orderable: false,
+                searchable: false,
                 visible: true,
                 'render': function(row, type, full){
                     if (full.application_type_dict){
@@ -206,7 +206,8 @@ export default {
                         return full.processing_status
                     }
                     return full.customer_status
-                }
+                },
+                name: "processing_status",
             }
         },
         column_lodged_on: function(){
@@ -221,9 +222,11 @@ export default {
                         return moment(full.lodgement_date).format('DD/MM/YYYY')
                     }
                     return ''
-                }
+                },
+                name: "lodgement_date",
             }
         },
+        /*
         column_invoice: function(){
             let vm = this
             return {
@@ -241,6 +244,7 @@ export default {
                             if (vm.is_internal && full.can_view_payment_details){
                                 if (invoice.payment_status.toLowerCase() === 'paid'){
                                     links +=  `<div><a href='/ledger/payments/invoice/payment?invoice=${invoice.reference}' target='_blank'>View Payment</a></div>`;
+                                    links +=  `<div><a href='/proposal-payment-history-refund/${full.id}' target='_blank'>Refund Payment</a></div>`;
                                 } else {
                                     //links +=  `<div><a href='/ledger/payments/invoice/payment?invoice=${invoice.reference}' target='_blank'>Record Payment</a></div>`;
                                 }
@@ -252,13 +256,28 @@ export default {
                 }
             }
         },
+        */
+        column_invoice: function(){
+            let vm = this
+            return {
+                // 7. Invoice
+                data: "id",
+                orderable: false,
+                searchable: false,
+                visible: true,
+                'render': function(row, type, full){
+                    return full.invoice_links
+                }
+            }
+        },
+
         column_action: function(){
             let vm = this
             return {
                 // 8. Action
                 data: "id",
-                orderable: true,
-                searchable: true,
+                orderable: false,
+                searchable: false,
                 visible: true,
                 'render': function(row, type, full){
                     let links = '';
@@ -388,13 +407,13 @@ export default {
                     {
                         extend: 'excel',
                         exportOptions: {
-                            columns: ':visible'
+                            //columns: ':visible',
                         }
                     },
                     {
                         extend: 'csv',
                         exportOptions: {
-                            columns: ':visible'
+                            //columns: ':visible'
                         }
                     },
                 ]
@@ -407,6 +426,7 @@ export default {
                 },
                 responsive: true,
                 serverSide: true,
+                lengthMenu: [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ],
                 searching: search,
                 ajax: {
                     "url": api_endpoints.proposals_paginated_list + '?format=datatables&target_email_user_id=' + vm.target_email_user_id,

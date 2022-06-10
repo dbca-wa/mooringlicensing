@@ -28,10 +28,6 @@
     </div>
 </template>
 <script>
-import WaitingListApplication from '../form_wla.vue';
-import AnnualAdmissionApplication from '../form_aaa.vue';
-import AuthorisedUserApplication from '../form_aua.vue';
-import MooringLicenceApplication from '../form_mla.vue';
 import Vessel from '../common/vessels.vue';
 import Vue from 'vue' 
 import {

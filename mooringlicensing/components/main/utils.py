@@ -10,13 +10,13 @@ from django.conf import settings
 from django.db import connection, transaction
 
 from mooringlicensing.components.approvals.models import Sticker, AnnualAdmissionPermit, AuthorisedUserPermit, \
-    MooringLicence, Approval
+    MooringLicence, Approval, ApprovalHistory
 from mooringlicensing.components.approvals.serializers import ListApprovalSerializer
 from mooringlicensing.components.proposals.email import send_sticker_printing_batch_email
 from mooringlicensing.components.proposals.models import (
-        MooringBay, 
-        Mooring,
-        StickerPrintingBatch
+    MooringBay,
+    Mooring,
+    StickerPrintingBatch, ProposalType
 )
 from mooringlicensing.components.main.decorators import basic_exception_handler, query_debugger
 from rest_framework import serializers
@@ -192,17 +192,9 @@ def handle_validation_error(e):
         else:
             raise
 
-def handle_validation_error(e):
-    if hasattr(e, 'error_dict'):
-        raise serializers.ValidationError(repr(e.error_dict))
-    else:
-        if hasattr(e, 'message'):
-            raise serializers.ValidationError(e.message)
-        else:
-            raise
-
 
 def sticker_export():
+    logger = logging.getLogger('cron_tasks')
     # TODO: Implement below
     # Note: if the user wants to apply for e.g. three new authorisations,
     # then the user needs to submit three applications. The system will
@@ -241,6 +233,10 @@ def sticker_export():
             ])
             for sticker in stickers:
                 try:
+                    # Sticker is being printed.  We assign a new number here.
+                    sticker.number = '{0:07d}'.format(sticker.next_number)
+                    sticker.save()
+
                     moorings = sticker.get_moorings()
                     mooring_names = [mooring.name for mooring in moorings]
                     mooring_names = ', '.join(mooring_names)
@@ -289,6 +285,7 @@ def sticker_export():
 
 
 def email_stickers_document():
+    logger = logging.getLogger('cron_tasks')
     updates, errors = [], []
 
     try:
@@ -303,7 +300,19 @@ def email_stickers_document():
 
                 # Update sticker status
                 stickers = Sticker.objects.filter(sticker_printing_batch=batch)
-                stickers.update(status=Sticker.STICKER_STATUS_AWAITING_PRINTING)
+                # stickers.update(status=Sticker.STICKER_STATUS_AWAITING_PRINTING)
+                for sticker in stickers:
+                    sticker.status = Sticker.STICKER_STATUS_AWAITING_PRINTING
+                    sticker.save()
+                    if sticker.sticker_to_replace:
+                        # new sticker has the old sticker here if it's created for renewal
+                        # When this sticker is created for renewal, set 'expiry' status to the old sticker.
+                        sticker.sticker_to_replace.status = Sticker.STICKER_STATUS_EXPIRED
+                        sticker.sticker_to_replace.save()
+
+                    # Update approval history with this sticker
+                    # latest_approval_history = ApprovalHistory.objects.filter(approval=sticker.approval, end_data__isnull=True).order_by('-start_date').first()
+                    # latest_approval_history.stickers.add(sticker)
 
     except Exception as e:
         err_msg = 'Error sending the sticker printing batch spreadsheet file(s): {}'.format(', '.join([batch.name for batch in batches]))
@@ -311,6 +320,7 @@ def email_stickers_document():
         errors.append(err_msg)
 
     return updates, errors
+
 
 ## DoT vessel rego check
 def get_client_ip(request):
@@ -399,4 +409,61 @@ def test_list_approval_serializer(approval_id):
     approval = Approval.objects.get(id=approval_id)
     serializer = ListApprovalSerializer(approval)
     return serializer.data
+
+
+def calculate_minimum_max_length(fee_items_interested, max_amount_paid):
+        """
+        Find out MINIMUM max-length from fee_items_interested by max_amount_paid
+        """
+        max_length = 0
+        for fee_item in fee_items_interested:
+            if fee_item.incremental_amount:
+                smallest_vessel_size = float(fee_item.vessel_size_category.start_size)
+
+                larger_category = fee_item.vessel_size_category.vessel_size_category_group.get_one_larger_category(
+                    fee_item.vessel_size_category
+                )
+                if larger_category:
+                    max_number_of_increment = round(
+                        larger_category.start_size - fee_item.vessel_size_category.start_size
+                    )
+                else:
+                    max_number_of_increment = 1000  # We probably would like to cap the number of increments
+
+                increment = 0.0
+                while increment <= max_number_of_increment:
+                    test_vessel_size = smallest_vessel_size + increment
+                    fee_amount_to_pay = fee_item.get_absolute_amount(test_vessel_size)
+                    if fee_amount_to_pay <= max_amount_paid:
+                        if not max_length or test_vessel_size > max_length:
+                            max_length = test_vessel_size
+                    increment += 1
+            else:
+                fee_amount_to_pay = fee_item.get_absolute_amount()
+                if fee_amount_to_pay <= max_amount_paid:
+                    # Find out start size of one larger category
+                    larger_category = fee_item.vessel_size_category.vessel_size_category_group.get_one_larger_category(
+                        fee_item.vessel_size_category
+                    )
+                    if larger_category:
+                        if not max_length or larger_category.start_size > max_length:
+                            if larger_category.include_start_size:
+                                max_length = float(larger_category.start_size) - 0.00001
+                            else:
+                                max_length = float(larger_category.start_size)
+                    else:
+                        max_length = None
+                else:
+                    # The amount to pay is now more than the max amount paid
+                    # Assuming larger vessel is more expensive, the all the fee_items left are more expensive than max_amount_paid
+                    break
+        return max_length
+
+
+def calculate_max_length(fee_constructor, max_amount_paid, proposal_type):
+    # All the amendment FeeItems interested
+    # Ordered by 'start_size' ascending order, which means the cheapest fee_item first.
+    fee_items_interested = fee_constructor.feeitem_set.filter(proposal_type=proposal_type).order_by('vessel_size_category__start_size')
+    max_length = calculate_minimum_max_length(fee_items_interested, max_amount_paid)
+    return max_length
 

@@ -30,7 +30,7 @@
         <div class="row">
             <div class="col-lg-12">
                 <datatable
-                    ref="application_datatable"
+                    ref="dcv_permits_datatable"
                     :id="datatable_id"
                     :dtOptions="datatable_options"
                     :dtHeaders="datatable_headers"
@@ -83,11 +83,11 @@ export default {
     watch: {
         filterDcvOrganisation: function() {
             let vm = this;
-            vm.$refs.application_datatable.vmDataTable.draw();
+            vm.$refs.dcv_permits_datatable.vmDataTable.draw();
         },
         filterFeeSeason: function() {
             let vm = this;
-            vm.$refs.application_datatable.vmDataTable.draw();
+            vm.$refs.dcv_permits_datatable.vmDataTable.draw();
         },
     },
     computed: {
@@ -110,6 +110,7 @@ export default {
                 searchable: false,
                 visible: false,
                 'render': function(row, type, full){
+                    console.log(full)
                     return full.id
                 }
             }
@@ -136,7 +137,7 @@ export default {
 
             return {
                 data: "id",
-                orderable: true,
+                orderable: false,
                 searchable: true,
                 visible: true,
                 'render': function(row, type, full){
@@ -167,18 +168,20 @@ export default {
                 'render': function(row, type, full){
                     return full.dcv_organisation_name;
                     //return '';
-                }
+                },
+                name: 'dcv_organisation__name',
             }
         },
         column_status: function(){
             return {
                 data: "id",
-                orderable: true,
+                orderable: false,
                 searchable: true,
                 visible: true,
                 'render': function(row, type, full){
                     return full.status;
-                }
+                },
+                name: 'status',
             }
         },
         column_year: function(){
@@ -189,13 +192,15 @@ export default {
                 visible: true,
                 'render': function(row, type, full){
                     return full.fee_season;
-                }
+                },
+                name: 'fee_season__name',
+
             }
         },
         column_sticker: function(){
             return {
                 data: "id",
-                orderable: true,
+                orderable: false,
                 searchable: true,
                 visible: true,
                 'render': function(row, type, full){
@@ -204,7 +209,8 @@ export default {
                         ret_str += sticker.number + '<br />'
                     }
                     return ret_str
-                }
+                },
+                name: 'sticker_number',
             }
         },
         column_action: function(){
@@ -212,7 +218,7 @@ export default {
             return {
                 // 8. Action
                 data: "id",
-                orderable: true,
+                orderable: false,
                 searchable: true,
                 visible: true,
                 'render': function(row, type, full){
@@ -298,8 +304,22 @@ export default {
             let vm = this
             vm.$http.post('/api/dcv_permit/' + params.dcv_permit_id + '/create_new_sticker/', params).then(
                 res => {
-                    console.log('res.body')
-                    console.log(res.body)
+                    // Retrieve the element clicked on
+                    let elem_clicked = $("a[data-create-new-sticker='" + params.dcv_permit_id + "']")
+
+                    // Retrieve the row index clicked on
+                    let row_index_clicked = elem_clicked.closest('tr').index()
+
+                    // Retrieve whole data in the row
+                    let row_data = vm.$refs.dcv_permits_datatable.vmDataTable.row(row_index_clicked).data()
+
+                    // Update the row data
+                    row_data.stickers.push({'number': res.body.number})
+                    row_data.display_create_sticker_action = false
+
+                    // Apply the updated data to the row
+                    vm.$refs.dcv_permits_datatable.vmDataTable.row(row_index_clicked).data(row_data).invalidate()
+
                     vm.$refs.create_new_sticker_modal.isModalOpen = false
                 },
                 err => {
@@ -309,8 +329,7 @@ export default {
             )
         },
         createNewSticker: function(dcv_permit_id){
-            console.log('dcv_permit_id')
-            console.log(dcv_permit_id)
+            console.log('dcv_permit_id: ' + dcv_permit_id)
             this.$refs.create_new_sticker_modal.dcv_permit_id = dcv_permit_id
             this.$refs.create_new_sticker_modal.isModalOpen = true
         },
@@ -340,7 +359,7 @@ export default {
             let vm = this
 
             //External Request New Sticker listener
-            vm.$refs.application_datatable.vmDataTable.on('click', 'a[data-create-new-sticker]', function(e) {
+            vm.$refs.dcv_permits_datatable.vmDataTable.on('click', 'a[data-create-new-sticker]', function(e) {
                 e.preventDefault();
                 var id = $(this).attr('data-create-new-sticker');
                 vm.createNewSticker(id);

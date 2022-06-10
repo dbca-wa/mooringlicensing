@@ -46,11 +46,13 @@ logger = logging.getLogger(__name__)
 
 class Compliance(RevisionedMixin):
     PROCESSING_STATUS_DUE = 'due'
+    PROCESSING_STATUS_OVERDUE = 'overdue'
     PROCESSING_STATUS_FUTURE = 'future'
     PROCESSING_STATUS_WITH_ASSESSOR = 'with_assessor'
     PROCESSING_STATUS_APPROVED = 'approved'
     PROCESSING_STATUS_DISCARDED = 'discarded'
     PROCESSING_STATUS_CHOICES = ((PROCESSING_STATUS_DUE, 'Due'),
+                                 (PROCESSING_STATUS_OVERDUE, 'Overdue'),
                                  (PROCESSING_STATUS_FUTURE, 'Future'),
                                  (PROCESSING_STATUS_WITH_ASSESSOR, 'With Assessor'),
                                  (PROCESSING_STATUS_APPROVED, 'Approved'),
@@ -58,11 +60,13 @@ class Compliance(RevisionedMixin):
                                  )
 
     CUSTOMER_STATUS_DUE = 'due'
+    CUSTOMER_STATUS_OVERDUE = 'overdue'
     CUSTOMER_STATUS_FUTURE = 'future'
     CUSTOMER_STATUS_WITH_ASSESSOR = 'with_assessor'
     CUSTOMER_STATUS_APPROVED = 'approved'
     CUSTOMER_STATUS_DISCARDED = 'discarded'
     CUSTOMER_STATUS_CHOICES = ((CUSTOMER_STATUS_DUE, 'Due'),
+                               (CUSTOMER_STATUS_OVERDUE, 'Overdue'),
                                (CUSTOMER_STATUS_FUTURE, 'Future'),
                                (CUSTOMER_STATUS_WITH_ASSESSOR, 'Under Review'),
                                (CUSTOMER_STATUS_APPROVED, 'Approved'),
@@ -76,7 +80,7 @@ class Compliance(RevisionedMixin):
     text = models.TextField(blank=True)
     num_participants = models.SmallIntegerField('Number of participants', blank=True, null=True)
     processing_status = models.CharField(choices=PROCESSING_STATUS_CHOICES,max_length=20)
-    customer_status = models.CharField(choices=CUSTOMER_STATUS_CHOICES,max_length=20, default=CUSTOMER_STATUS_CHOICES[1][0])
+    customer_status = models.CharField(choices=CUSTOMER_STATUS_CHOICES,max_length=20)
     assigned_to = models.ForeignKey(EmailUser,related_name='mooringlicensing_compliance_assignments',null=True,blank=True)
     requirement = models.ForeignKey(ProposalRequirement, blank=True, null=True, related_name='compliance_requirement', on_delete=models.SET_NULL)
     lodgement_date = models.DateTimeField(blank=True, null=True)
@@ -218,27 +222,26 @@ class Compliance(RevisionedMixin):
 
     def send_reminder(self, user):
         with transaction.atomic():
-            today = timezone.localtime(timezone.now()).date()
-            days_type = NumberOfDaysType.objects.get(code=CODE_DAYS_BEFORE_DUE_COMPLIANCE)
-            days_setting = NumberOfDaysSetting.get_setting_by_date(days_type, today)
+            # today = timezone.localtime(timezone.now()).date()
+            # days_type = NumberOfDaysType.objects.get(code=CODE_DAYS_BEFORE_DUE_COMPLIANCE)
+            # days_setting = NumberOfDaysSetting.get_setting_by_date(days_type, today)
             try:
-                if self.processing_status == Compliance.PROCESSING_STATUS_DUE:
-                    if self.due_date < today and self.lodgement_date is None and self.post_reminder_sent is False:
-                        send_reminder_email_notification(self)
-                        send_internal_reminder_email_notification(self)
-                        self.post_reminder_sent = True
-                        self.reminder_sent = True
-                        self.save()
-                        ComplianceUserAction.log_action(self, ComplianceUserAction.ACTION_REMINDER_SENT.format(self.id), user)
-                        logger.info('Post due date reminder sent for Compliance {} '.format(self.lodgement_number))
-                    elif self.due_date >= today >= self.due_date - datetime.timedelta(days=days_setting.number_of_days) and self.reminder_sent is False:
-                        # second part: if today is with 14 days of due_date, and email reminder is not sent (deals with Compliances created with the reminder period)
-                        send_due_email_notification(self)
-                        send_internal_due_email_notification(self)
-                        self.reminder_sent=True
-                        self.save()
-                        ComplianceUserAction.log_action(self, ComplianceUserAction.ACTION_REMINDER_SENT.format(self.id), user)
-                        logger.info('Pre due date reminder sent for Compliance {} '.format(self.lodgement_number))
+                if self.processing_status == Compliance.PROCESSING_STATUS_DUE and self.reminder_sent is False:
+                    send_due_email_notification(self)
+                    send_internal_due_email_notification(self)
+                    self.reminder_sent = True
+                    self.save()
+                    ComplianceUserAction.log_action(self, ComplianceUserAction.ACTION_REMINDER_SENT.format(self.id), user)
+                    logger.info('Pre due date reminder sent for Compliance {} '.format(self.lodgement_number))
+
+                if self.processing_status == Compliance.PROCESSING_STATUS_OVERDUE and self.post_reminder_sent is False:
+                    send_reminder_email_notification(self)
+                    send_internal_reminder_email_notification(self)
+                    self.post_reminder_sent = True
+                    self.reminder_sent = True
+                    self.save()
+                    ComplianceUserAction.log_action(self, ComplianceUserAction.ACTION_REMINDER_SENT.format(self.id), user)
+                    logger.info('Post due date reminder sent for Compliance {} '.format(self.lodgement_number))
 
             except Exception as e:
                 logger.info('Error sending Reminder Compliance {}\n{}'.format(self.lodgement_number, e))

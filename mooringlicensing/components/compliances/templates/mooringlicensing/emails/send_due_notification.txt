@@ -2,8 +2,7 @@
 
 {% block content_body %}
 {% include "mooringlicensing/emails_2/salutation.txt" %}
-Please be aware that the following is due for submission:
-{{ compliance.reference }} {{compliance.requirement.requirement}}
-To complete the licence requirement please login to your account here: {{url}}.
+Your compliance with requirement {{ compliance.lodgement_number }} for licence/permit {{ compliance.approval.lodgement_number }} is due on {{ due_date }}.
+Please access {{ external_compliance_url }} to view and submit the requirement.
 {% include "mooringlicensing/emails/signature-rottnest.txt" %}
 {%  endblock %}

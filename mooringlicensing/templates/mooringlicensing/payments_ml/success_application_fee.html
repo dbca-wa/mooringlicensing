@@ -27,16 +27,19 @@
                         </tr>
                     </table>
                     <br/>
+
                     {% if is_wla_or_aaa %}
                         <span>If there is any missing information, Rottnest Island Authority (RIA) may assign this application back to you to complete. In that case you will be notified by email.</span>
                     {% endif %}
                     {% if request.user == submitter or request.user.is_staff %}
                         {% if request.user.is_authenticated %}
-                        <div class="row" style="margin-top:2em;">
-                            <div class="col-sm-6">
-                                <div><strong>Invoice</strong>: <a href="{% url 'invoice-pdf' fee_invoice.invoice_reference %}" target="_blank"><i style='color:red;' class='fa fa-file-pdf-o'></i> #{{ fee_invoice.invoice_reference }}</a></div>
-                            </div>
-                        </div>
+                            {% if invoice.amount %}
+                                <div class="row" style="margin-top:2em;">
+                                    <div class="col-sm-6">
+                                        <div><strong>Invoice</strong>: <a href="{% url 'invoice-pdf' fee_invoice.invoice_reference %}" target="_blank"><i style='color:red;' class='fa fa-file-pdf-o'></i> #{{ fee_invoice.invoice_reference }}</a></div>
+                                    </div>
+                                </div>
+                            {% endif %}
                         {% endif %}
                     {% endif %}
                 </div>

@@ -20,7 +20,7 @@ from collections import OrderedDict
 from django.core.cache import cache
 from mooringlicensing import forms
 from mooringlicensing.components.proposals.email import send_create_mooring_licence_application_email_notification
-from mooringlicensing.components.main.decorators import basic_exception_handler, query_debugger
+from mooringlicensing.components.main.decorators import basic_exception_handler, query_debugger, timeit
 from mooringlicensing.components.payments_ml.api import logger
 from mooringlicensing.components.payments_ml.models import FeeSeason
 from mooringlicensing.components.payments_ml.serializers import DcvPermitSerializer, DcvAdmissionSerializer, \
@@ -35,6 +35,7 @@ from mooringlicensing.components.main.process_document import (
         process_generic_document, 
         )
 from mooringlicensing.components.approvals.serializers import (
+    WaitingListAllocationSerializer,
     ApprovalSerializer,
     ApprovalCancellationSerializer,
     ApprovalSuspensionSerializer,
@@ -65,6 +66,18 @@ class GetDailyAdmissionUrl(views.APIView):
     def get(self, request, format=None):
         daily_admission_url = env('DAILY_ADMISSION_PAGE_URL', '')
         data = {'daily_admission_url': daily_admission_url}
+        return Response(data)
+
+
+class GetStickerStatusDict(views.APIView):
+    renderer_classes = [JSONRenderer, ]
+
+    def get(self, request, format=None):
+        from mooringlicensing.components.main.models import ApplicationType
+        data = []
+        for status in Sticker.STATUS_CHOICES:
+            if status[0] in Sticker.STATUSES_FOR_FILTER:
+                data.append({'id': status[0], 'display': status[1]})
         return Response(data)
 
 
@@ -262,6 +275,9 @@ class ApprovalFilterBackend(DatatablesFilterBackend):
         queryset = queryset.order_by(*ordering)
         if len(ordering):
             queryset = queryset.order_by(*ordering)
+        else:
+            queryset = queryset.order_by('-id')
+
         try:
             queryset = super(ApprovalFilterBackend, self).filter_queryset(request, queryset, view)
         except Exception as e:
@@ -310,7 +326,7 @@ class ApprovalPaginatedViewSet(viewsets.ModelViewSet):
         qs = self.filter_queryset(qs)
 
         self.paginator.page_size = qs.count()
-        result_page = self.paginator.paginate_queryset(qs.order_by('-id'), request)
+        result_page = self.paginator.paginate_queryset(qs, request)
         serializer = ListApprovalSerializer(result_page, context={'request': request}, many=True)
         return self.paginator.get_paginated_response(serializer.data)
 
@@ -416,18 +432,24 @@ class ApprovalViewSet(viewsets.ModelViewSet):
         # external
         approval = self.get_object()
         details = request.data['details']
-        sticker_ids = [sticker['id'] for sticker in request.data['stickers']]
+        # sticker_ids = [sticker['id'] for sticker in request.data['stickers']]
+        sticker_ids = []
+        for sticker in request.data['stickers']:
+            if sticker['checked'] == True:
+                sticker_ids.append(sticker['id'])
 
         # TODO: Validation
 
         sticker_action_details = []
         stickers = Sticker.objects.filter(approval=approval, id__in=sticker_ids, status__in=(Sticker.STICKER_STATUS_CURRENT, Sticker.STICKER_STATUS_AWAITING_PRINTING,))
         data = {}
+        today = datetime.now(pytz.timezone(settings.TIME_ZONE)).date()
         for sticker in stickers:
             data['action'] = 'Request new sticker'
             data['user'] = request.user.id
             data['reason'] = details['reason']
-            serializer = StickerActionDetailSerializer(data=request.data)
+            data['date_of_lost_sticker'] = today.strftime('%d/%m/%Y')
+            serializer = StickerActionDetailSerializer(data=data)
             serializer.is_valid(raise_exception=True)
             new_sticker_action_detail = serializer.save()
             new_sticker_action_detail.sticker = sticker
@@ -441,7 +463,7 @@ class ApprovalViewSet(viewsets.ModelViewSet):
     @basic_exception_handler
     def stickers(self, request, *args, **kwargs):
         instance = self.get_object()
-        stickers = instance.stickers.filter(status__in=[Sticker.STICKER_STATUS_CURRENT,])
+        stickers = instance.stickers.filter(status__in=[Sticker.STICKER_STATUS_AWAITING_PRINTING, Sticker.STICKER_STATUS_CURRENT,])
         serializer = StickerSerializer(stickers, many=True)
         return Response({'stickers': serializer.data})
 
@@ -883,6 +905,8 @@ class DcvPermitFilterBackend(DatatablesFilterBackend):
         queryset = queryset.order_by(*ordering)
         if len(ordering):
             queryset = queryset.order_by(*ordering)
+        else:
+            queryset = queryset.order_by('-lodgement_number')
 
         try:
             queryset = super(DcvPermitFilterBackend, self).filter_queryset(request, queryset, view)
@@ -907,6 +931,7 @@ class DcvPermitPaginatedViewSet(viewsets.ModelViewSet):
     serializer_class = ListDcvPermitSerializer
     search_fields = ['lodgement_number', ]
     page_size = 10
+    ordering = ['-id']
 
     def get_queryset(self):
         request_user = self.request.user
@@ -1001,6 +1026,8 @@ class DcvAdmissionFilterBackend(DatatablesFilterBackend):
         queryset = queryset.order_by(*ordering)
         if len(ordering):
             queryset = queryset.order_by(*ordering)
+        else:
+            queryset = queryset.order_by('-lodgement_number')
 
         try:
             queryset = super(DcvAdmissionFilterBackend, self).filter_queryset(request, queryset, view)
@@ -1030,17 +1057,26 @@ class StickerFilterBackend(DatatablesFilterBackend):
 
         # Filter by approval types (wla, aap, aup, ml)
         filter_approval_type = request.GET.get('filter_approval_type')
-        #import ipdb; ipdb.set_trace()
         if filter_approval_type and not filter_approval_type.lower() == 'all':
-            filter_approval_type_list = filter_approval_type.split(',')
-            filtered_ids = [a.id for a in Approval.objects.all() if a.child_obj.code in filter_approval_type_list]
-            queryset = queryset.filter(approval__id__in=filtered_ids)
+            if filter_approval_type == 'wla':
+                queryset = queryset.filter(approval__in=Approval.objects.filter(waitinglistallocation__in=WaitingListAllocation.objects.all()))
+            elif filter_approval_type == 'aap':
+                queryset = queryset.filter(approval__in=Approval.objects.filter(annualadmissionpermit__in=AnnualAdmissionPermit.objects.all()))
+            elif filter_approval_type == 'aup':
+                queryset = queryset.filter(approval__in=Approval.objects.filter(authoriseduserpermit__in=AuthorisedUserPermit.objects.all()))
+            elif filter_approval_type == 'ml':
+                queryset = queryset.filter(approval__in=Approval.objects.filter(mooringlicence__in=MooringLicence.objects.all()))
 
         # Filter Year (FeeSeason)
         filter_fee_season_id = request.GET.get('filter_year')
         if filter_fee_season_id and not filter_fee_season_id.lower() == 'all':
             fee_season = FeeSeason.objects.get(id=filter_fee_season_id)
             queryset = queryset.filter(fee_constructor__fee_season=fee_season)
+
+        # Filter sticker status
+        filter_sticker_status_id = request.GET.get('filter_sticker_status')
+        if filter_sticker_status_id and not filter_sticker_status_id.lower() == 'all':
+            queryset = queryset.filter(status=filter_sticker_status_id)
 
         getter = request.query_params.get
         fields = self.get_fields(getter)
@@ -1105,7 +1141,7 @@ class StickerViewSet(viewsets.ModelViewSet):
         serializer = StickerSerializer(sticker)
 
         # Write approval history
-        sticker.approval.write_approval_history()
+        # sticker.approval.write_approval_history()
 
         return Response({'sticker': serializer.data})
 
@@ -1186,7 +1222,7 @@ class DcvAdmissionPaginatedViewSet(viewsets.ModelViewSet):
 
 class WaitingListAllocationViewSet(viewsets.ModelViewSet):
     queryset = WaitingListAllocation.objects.all().order_by('id')
-    serializer_class = ApprovalSerializer
+    serializer_class = WaitingListAllocationSerializer
 
     @detail_route(methods=['POST',])
     @basic_exception_handler

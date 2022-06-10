@@ -41,9 +41,9 @@
             <div class="tab-content" id="pills-tabContent">
               <div class="tab-pane fade" id="pills-applicant" role="tabpanel" aria-labelledby="pills-applicant-tab">
                   <div v-if="is_external">
-                    <Profile 
-                    :isApplication="true" 
-                    v-if="applicantType == 'SUB'" 
+                    <Profile
+                    :isApplication="true"
+                    v-if="applicantType == 'SUB'"
                     ref="profile"
                     @profile-fetched="populateProfile"
                     :showElectoralRoll="showElectoralRoll"
@@ -52,9 +52,9 @@
                     />
                   </div>
                   <div v-else>
-                    <Applicant 
-                        :email_user="proposal.submitter" 
-                        :applicantType="proposal.applicant_type" 
+                    <Applicant
+                        :email_user="proposal.submitter"
+                        :applicantType="proposal.applicant_type"
                         id="proposalStartApplicant"
                         :readonly="readonly"
                     />
@@ -62,16 +62,16 @@
               </div>
               <div class="tab-pane fade" id="pills-vessels" role="tabpanel" aria-labelledby="pills-vessels-tab">
                   <div v-if="proposal">
-                      <CurrentVessels 
+                      <CurrentVessels
                           :proposal=proposal
                           :readonly=readonly
                           :is_internal=is_internal
                           @resetCurrentVessel=resetCurrentVessel
                           />
                   </div>
-                  <Vessels 
-                  :proposal="proposal" 
-                  :profile="profileVar" 
+                  <Vessels
+                  :proposal="proposal"
+                  :profile="profileVar"
                   :id="'proposalStartVessels' + uuid"
                   :key="'proposalStartVessels' + uuid"
                   :keep_current_vessel=keepCurrentVessel
@@ -80,19 +80,22 @@
                   :is_internal="is_internal"
                   @updateVesselLength="updateVesselLength"
                   @vesselChanged="vesselChanged"
+                  @noVessel="noVessel"
+                  @updateMaxVesselLengthForAAComponent=updateMaxVesselLengthForAAComponent
+                  @updateMaxVesselLengthForMainComponent=updateMaxVesselLengthForMainComponent
                   />
               </div>
               <div class="tab-pane fade" id="pills-insurance" role="tabpanel" aria-labelledby="pills-insurance-tab">
                   <Insurance
-                  :proposal="proposal" 
-                  id="insurance" 
+                  :proposal="proposal"
+                  id="insurance"
                   ref="insurance"
                   :readonly="readonly"
                   />
               </div>
               <div class="tab-pane fade" id="pills-mooring" role="tabpanel" aria-labelledby="pills-mooring-tab">
                   <div v-if="proposal">
-                      <CurrentMooring 
+                      <CurrentMooring
                           :proposal=proposal
                           :readonly=readonly
                           :is_internal=is_internal
@@ -100,11 +103,11 @@
                           />
                   </div>
                   <MooringAuthorisation
-                  :proposal="proposal" 
-                  id="mooring_authorisation" 
+                  :proposal="proposal"
+                  id="mooring_authorisation"
                   :id="'mooringAuthorisation' + mooringAuthorisationUuid"
                   :key="'mooringAuthorisation' + mooringAuthorisationUuid"
-                  :change_mooring=changeMooring
+                  :changeMooring="changeMooring"
                   :newAua="newAua"
                   ref="mooring_authorisation"
                   :readonly="readonly"
@@ -193,12 +196,15 @@
                 showPaymentTab: false,
                 showInsuranceTab: true,
                 higherVesselCategory: false,
+                max_vessel_length_with_no_payment: 0,
+                max_vessel_length_for_main_component: 0,
+                max_vessel_length_for_aa_component: 0,
             }
         },
         watch: {
-            change_mooring: {
+            changeMooring: {
                 handler: async function() {
-                    await this.$emit("changeMooring", this.change_mooring);
+                    await this.$emit("changeMooring", this.changeMooring);
                 },
             },
         },
@@ -250,6 +256,46 @@
             */
         },
         methods:{
+            updateMaxVesselLength: function(max_length) {
+                console.log('updateMaxVesselLength')
+                //this.max_vessel_length_with_no_payment = max_length
+                let combined_length = 0
+                if (this.max_vessel_length_for_main_component == null && this.max_vessel_length_for_aa_component == null){
+                    combined_length = null
+                } else {
+                    if (this.max_vessel_length_for_main_component == null){
+                        // aa component has a value
+                        combined_length = this.max_vessel_length_for_aa_component
+                    } else if (this.max_vessel_length_for_aa_component == null){
+                        // main component has a value
+                        combined_length = this.max_vessel_length_for_main_component
+                    } else {
+                        // both have a value
+                        if (this.max_vessel_length_for_aa_component < this.max_vessel_length_for_main_component){
+                            combined_length = this.max_vessel_length_for_aa_component
+                        } else {
+                            combined_length = this.max_vessel_length_for_main_component
+                        }
+                    }
+                }
+                if (combined_length < 0){  // This can be -1, which is set as a defautl value at the vessels.vue
+                    combined_length = 0
+                }
+                this.max_vessel_length_with_no_payment = combined_length
+            },
+            updateMaxVesselLengthForAAComponent: function(length){
+                console.log('updateMaxVesselLengthForAAComponent')
+                this.max_vessel_length_for_aa_component = length
+                this.updateMaxVesselLength()
+            },
+            updateMaxVesselLengthForMainComponent: function(length){
+                console.log('updateMaxVesselLengthForMainComponent')
+                this.max_vessel_length_for_main_component = length
+                this.updateMaxVesselLength()
+            },
+            noVessel: async function(noVessel) {
+                await this.$emit("noVessel", noVessel);
+            },
             vesselChanged: async function(vesselChanged) {
                 await this.$emit("vesselChanged", vesselChanged);
             },
@@ -261,7 +307,7 @@
                         // new application
                         //higherCategory = true;
                         //pass
-                    } else if (this.proposal.max_vessel_length_with_no_payment && 
+                    } else if (this.proposal.max_vessel_length_with_no_payment &&
                         this.proposal.max_vessel_length_with_no_payment <= length) {
                         // vessel length is in higher category
                         higherCategory = true;
@@ -276,8 +322,10 @@
             */
             updateVesselLength: function(length) {
                 if (this.is_external && this.proposal) {
-                    if (this.proposal.max_vessel_length_with_no_payment && 
-                        this.proposal.max_vessel_length_with_no_payment <= length) {
+                    //if (this.proposal.max_vessel_length_with_no_payment !== null &&
+                    //    this.proposal.max_vessel_length_with_no_payment <= length) {
+                    if (this.max_vessel_length_with_no_payment !== null &&
+                        this.max_vessel_length_with_no_payment <= length) {
                         // vessel length is in higher category
                         this.higherVesselCategory = true;
                     } else {
@@ -292,44 +340,57 @@
                 this.updateAmendmentRenewalProperties();
             },
             resetCurrentMooring: function(keep) {
+                console.log('resetCurrentMooring() in form_aua.vue')
                 this.changeMooring = keep;
                 this.mooringAuthorisationUuid++
                 this.updateAmendmentRenewalProperties();
             },
             updateAmendmentRenewalProperties: function() {
-                this.$nextTick(() => {
-                    if (this.keepCurrentVessel && !this.higherVesselCategory && !this.changeMooring) {
-                        this.showPaymentTab = true;
-                        this.showInsuranceTab = false;
-                        this.$emit("updateSubmitText", "Pay / Submit");
-                        this.$emit("updateAutoRenew", true);
-                    } else if (this.keepCurrentVessel && this.higherVesselCategory && !this.changeMooring) {
-                        this.showPaymentTab = false;
-                        this.showInsuranceTab = false;
-                        this.$emit("updateSubmitText", "Submit");
-                        this.$emit("updateAutoRenew", false);
-                    } else if (!this.keepCurrentVessel && !this.changeMooring) {
-                        this.showPaymentTab = false;
-                        this.showInsuranceTab = true;
-                        this.$emit("updateSubmitText", "Submit");
-                        this.$emit("updateAutoRenew", false);
-                    } else if (!this.keepCurrentVessel && !this.higherVesselCategory && this.changeMooring) {
-                        this.showPaymentTab = false;
-                        this.showInsuranceTab = false;
-                        this.$emit("updateSubmitText", "Submit");
-                        this.$emit("updateAutoRenew", false);
-                    } else if (this.keepCurrentVessel && this.changeMooring) {
-                        this.showPaymentTab = false;
-                        this.showInsuranceTab = true;
-                        this.$emit("updateSubmitText", "Submit");
-                        this.$emit("updateAutoRenew", false);
-                    } else if (this.higherVesselCategory && this.changeMooring) {
-                        this.showPaymentTab = false;
-                        this.showInsuranceTab = false;
-                        this.$emit("updateSubmitText", "Submit");
-                        this.$emit("updateAutoRenew", false);
-                    }
-                });
+                console.log('updateAmendmentRenewalProperties in form_aua.vue')
+                if (this.proposal && this.proposal.proposal_type.code === 'amendment') {
+                    this.$nextTick(() => {
+                        if (!this.keepCurrentVessel) {
+                            this.showPaymentTab = false;
+                            this.showInsuranceTab = true;
+                            this.$emit("updateSubmitText", "Submit");
+                        } else {
+                            this.showPaymentTab = false;
+                            this.showInsuranceTab = false;
+                            this.$emit("updateSubmitText", "Submit");
+                        }
+                        // auto approve
+                        if (!this.proposal.vessel_on_proposal || this.higherVesselCategory || !this.keepCurrentVessel || this.changeMooring) {
+                            this.$emit("updateAutoApprove", false);
+                        } else {
+                            this.$emit("updateAutoApprove", true);
+                        }
+                    });
+                } else if (this.proposal && this.proposal.proposal_type.code === 'renewal') {
+                    this.$nextTick(() => {
+                        if (this.proposal.vessel_on_proposal && this.keepCurrentVessel && !this.higherVesselCategory && !this.changeMooring) {
+                            this.showPaymentTab = true;
+                            this.showInsuranceTab = false;
+                            this.$emit("updateSubmitText", "Pay / Submit");
+                            //this.$emit("updateAutoRenew", true);
+                        } else if (!this.keepCurrentVessel) {
+                            this.showPaymentTab = false;
+                            this.showInsuranceTab = true;
+                            this.$emit("updateSubmitText", "Submit");
+                            //this.$emit("updateAutoRenew", false);
+                        } else {
+                            this.showPaymentTab = false;
+                            this.showInsuranceTab = false;
+                            this.$emit("updateSubmitText", "Submit");
+                            //this.$emit("updateAutoRenew", false);
+                        }
+                        // auto approve
+                        if (!this.proposal.vessel_on_proposal || this.higherVesselCategory || !this.keepCurrentVessel || this.changeMooring) {
+                            this.$emit("updateAutoApprove", false);
+                        } else {
+                            this.$emit("updateAutoApprove", true);
+                        }
+                    });
+                }
             },
             populateProfile: function(profile) {
                 this.profile = Object.assign({}, profile);
@@ -376,15 +437,13 @@
             let vm = this;
             vm.set_tabs();
             vm.form = document.forms.new_proposal;
-            if (this.proposal && this.proposal.proposal_type == 'renewal') {
-                this.updateAmendmentRenewalProperties();
-            }
+            this.updateAmendmentRenewalProperties();
             //vm.eventListener();
             //window.addEventListener('beforeunload', vm.leaving);
             //indow.addEventListener('onblur', vm.leaving);
 
         }
- 
+
     }
 </script>
 

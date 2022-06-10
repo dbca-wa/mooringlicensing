@@ -132,7 +132,7 @@ def create_fee_lines(instance, invoice_text=None, vouchers=[], internal=False):
 
     # Retrieve FeeItem object from FeeConstructor object
     if isinstance(instance, Proposal):
-        fee_constructor = FeeConstructor.get_current_fee_constructor_by_application_type_and_date(application_type, target_date)
+        fee_constructor = FeeConstructor.get_fee_constructor_by_application_type_and_date(application_type, target_date)
         if not fee_constructor:
             # Fees have not been configured for this application type and date
             raise Exception('FeeConstructor object for the ApplicationType: {} not found for the date: {}'.format(application_type, target_date))
@@ -144,12 +144,13 @@ def create_fee_lines(instance, invoice_text=None, vouchers=[], internal=False):
     else:
         raise Exception('Something went wrong when calculating the fee')
 
+    fee_item = fee_constructor.get_fee_item(vessel_length, proposal_type, target_date)
+
+    db_processes_after_success['fee_item_id'] = fee_item.id
     db_processes_after_success['fee_constructor_id'] = fee_constructor.id
     db_processes_after_success['season_start_date'] = fee_constructor.fee_season.start_date.__str__()
     db_processes_after_success['season_end_date'] = fee_constructor.fee_season.end_date.__str__()
     db_processes_after_success['datetime_for_calculating_fee'] = target_datetime.__str__()
-
-    fee_item = fee_constructor.get_fee_item(vessel_length, proposal_type, target_date)
 
     line_items = [
         {
@@ -173,13 +174,26 @@ def create_fee_lines(instance, invoice_text=None, vouchers=[], internal=False):
     return line_items, db_processes_after_success
 
 
-def generate_line_item(application_type, fee_amount_adjusted, fee_constructor, instance, target_datetime):
+def generate_line_item(application_type, fee_amount_adjusted, fee_constructor, instance, target_datetime, v_rego_no=''):
     target_datetime_str = target_datetime.astimezone(pytz.timezone(TIME_ZONE)).strftime('%d/%m/%Y %I:%M %p')
-    proposal_type_text = '({})'.format(instance.proposal_type.description) if hasattr(instance, 'proposal_type') else ''
+    application_type_display = fee_constructor.application_type.description
+    application_type_display = application_type_display.replace('Application', '')
+    application_type_display = application_type_display.replace('fees', '')
+    application_type_display = application_type_display.strip()
+    vessel_rego_no = v_rego_no
+    if not vessel_rego_no and instance.vessel_details and instance.vessel_details.vessel:
+        vessel_rego_no = instance.vessel_details.vessel.rego_no
+    if not vessel_rego_no:
+        # We want to show something rather than empty string
+        vessel_rego_no = 'no vessel'
+
+    proposal_type_text = '{}'.format(instance.proposal_type.description) if hasattr(instance, 'proposal_type') else ''
     return {
-        'ledger_description': '{}({}) Fee: {} (Season: {} to {}) @{}'.format(
-            fee_constructor.application_type.description,
+        'ledger_description': '{} fee ({}, {}): {} (Season: {} to {}) @{}'.format(
+            # fee_constructor.application_type.description,
+            application_type_display,
             proposal_type_text,
+            vessel_rego_no,
             instance.lodgement_number,
             fee_constructor.fee_season.start_date.strftime('%d/%m/%Y'),
             fee_constructor.fee_season.end_date.strftime('%d/%m/%Y'),
@@ -333,7 +347,8 @@ def checkout_existing_invoice(request, invoice, return_url_ns='public_booking_su
         application_fee = ApplicationFee.objects.filter(invoice_reference=invoice.reference)
         if application_fee:
             application_fee = application_fee[0]
-            checkout_params['basket_owner'] = application_fee.approval.relevant_applicant_email_user.id
+            # checkout_params['basket_owner'] = application_fee.approval.relevant_applicant_email_user.id
+            checkout_params['basket_owner'] = application_fee.proposal.applicant_id
         else:
             # Should not reach here
             # At the moment, there should be only the 'annual rental fee' invoices for anonymous user

@@ -32,7 +32,7 @@ from mooringlicensing.components.proposals.serializers import (
         SaveVesselOwnershipSerializer,
         SaveCompanyOwnershipSerializer,
         SaveDraftProposalVesselSerializer,
-        SaveProposalSerializer,
+        #SaveProposalSerializer,
         SaveWaitingListApplicationSerializer,
         SaveMooringLicenceApplicationSerializer,
         SaveAuthorisedUserApplicationSerializer,
@@ -366,7 +366,8 @@ def save_proponent_data_aaa(instance, request, viewset):
             data=proposal_data, 
             context={
                 "action": viewset.action,
-                "ignore_insurance_check": request.data.get("ignore_insurance_check")
+                "proposal_id": instance.id
+                #"ignore_insurance_check": request.data.get("ignore_insurance_check")
                 }
     )
     serializer.is_valid(raise_exception=True)
@@ -377,7 +378,6 @@ def save_proponent_data_aaa(instance, request, viewset):
             # Probably this is the case that assessor put back this application to external and then external submit this.
             logger.info('Proposal {} has been submitted but already paid.  Update the status of it to {}'.format(instance.lodgement_number, Proposal.PROCESSING_STATUS_WITH_ASSESSOR))
             instance.processing_status = Proposal.PROCESSING_STATUS_WITH_ASSESSOR
-            instance.customer_status = Proposal.CUSTOMER_STATUS_WITH_ASSESSOR
             instance.save()
 
 
@@ -396,7 +396,8 @@ def save_proponent_data_wla(instance, request, viewset):
             instance, 
             data=proposal_data, 
             context={
-                "action": viewset.action
+                "action": viewset.action,
+                "proposal_id": instance.id
                 }
     )
     serializer.is_valid(raise_exception=True)
@@ -407,7 +408,6 @@ def save_proponent_data_wla(instance, request, viewset):
             # Probably this is the case that assessor put back this application to external and then external submit this.
             logger.info('Proposal {} has been submitted but already paid.  Update the status of it to {}'.format(instance.lodgement_number, Proposal.PROCESSING_STATUS_WITH_ASSESSOR))
             instance.processing_status = Proposal.PROCESSING_STATUS_WITH_ASSESSOR
-            instance.customer_status = Proposal.CUSTOMER_STATUS_WITH_ASSESSOR
             instance.save()
 
 
@@ -427,7 +427,8 @@ def save_proponent_data_mla(instance, request, viewset):
             data=proposal_data, 
             context={
                 "action": viewset.action,
-                "ignore_insurance_check":request.data.get("ignore_insurance_check")
+                "proposal_id": instance.id
+                #"ignore_insurance_check":request.data.get("ignore_insurance_check")
                 }
     )
     serializer.is_valid(raise_exception=True)
@@ -454,7 +455,8 @@ def save_proponent_data_aua(instance, request, viewset):
             data=proposal_data, 
             context={
                 "action": viewset.action,
-                "ignore_insurance_check":request.data.get("ignore_insurance_check")
+                "proposal_id": instance.id
+                #"ignore_insurance_check":request.data.get("ignore_insurance_check")
                 }
     )
     serializer.is_valid(raise_exception=True)
@@ -513,6 +515,24 @@ def dot_check_wrapper(request, payload, vessel_lookup_errors, vessel_data):
     if not boat_found or not boat_owner_match or not dot_boat_length == float(ml_boat_length):
         vessel_lookup_errors[vessel_data.get("rego_no")] = "The provided details do not match those recorded with the Department of Transport"
 
+#def delete_draft_vessel_data(instance):
+#    instance.rego_no = ''
+#    instance.vessel_id = None
+#    instance.vessel_type = ''
+#    instance.vessel_name = ''
+#    instance.vessel_length = '0.00'
+#    instance.vessel_draft = '0.00'
+#    instance.vessel_beam = '0.00'
+#    instance.vessel_weight = '0.00'
+#    instance.berth_mooring = ''
+#    instance.percentage = None
+#    instance.individual_owner = None
+#    instance.company_ownership_percentage = None
+#    instance.company_ownership_name = ''
+#    instance.dot_name = ''
+#    instance.temporary_document_collection_id = None
+#    instance.save()
+
 def submit_vessel_data(instance, request, vessel_data):
     print("submit vessel data")
     print(vessel_data)
@@ -550,9 +570,16 @@ def submit_vessel_data(instance, request, vessel_data):
     min_vessel_size = float(min_vessel_size_str)
     min_mooring_vessel_size = float(min_mooring_vessel_size_str)
 
-    if (not vessel_data.get('rego_no') and instance.proposal_type.code in [PROPOSAL_TYPE_RENEWAL, PROPOSAL_TYPE_AMENDMENT] and
-            type(instance.child_obj) in [WaitingListApplication, MooringLicenceApplication, AnnualAdmissionApplication]):
-        return
+    #if (not vessel_data.get('rego_no') and instance.proposal_type.code in [PROPOSAL_TYPE_RENEWAL, PROPOSAL_TYPE_AMENDMENT] and
+     #       type(instance.child_obj) in [WaitingListApplication, MooringLicenceApplication, AnnualAdmissionApplication]):
+      #  return
+    if not vessel_data.get('rego_no'):
+        if (instance.proposal_type.code == PROPOSAL_TYPE_RENEWAL and 
+        type(instance.child_obj) in [MooringLicenceApplication, AuthorisedUserApplication]):
+            return
+        else:
+            raise serializers.ValidationError("Application cannot be submitted without a vessel listed")
+
     ## save vessel data into proposal first
     save_vessel_data(instance, request, vessel_data)
     vessel, vessel_details = store_vessel_data(request, vessel_data)
@@ -568,7 +595,7 @@ def submit_vessel_data(instance, request, vessel_data):
         if instance.vessel_details.vessel_applicable_length < min_vessel_size:
             logger.error("Proposal {}: Vessel must be at least {}m in length".format(instance, min_vessel_size_str))
             raise serializers.ValidationError("Vessel must be at least {}m in length".format(min_vessel_size_str))
-        # proposal
+        # check new site licensee mooring
         proposal_data = request.data.get('proposal') if request.data.get('proposal') else {}
         mooring_id = proposal_data.get('mooring_id')
         if mooring_id and proposal_data.get('site_licensee_email'):
@@ -577,6 +604,16 @@ def submit_vessel_data(instance, request, vessel_data):
             instance.vessel_details.vessel_draft > mooring.vessel_draft_limit):
                 logger.error("Proposal {}: Vessel unsuitable for mooring".format(instance))
                 raise serializers.ValidationError("Vessel unsuitable for mooring")
+        ## amend / renewal
+        #if instance.approval:
+        #    # check existing moorings against current vessel dimensions
+        #    for moa in instance.approval.mooringonapproval_set.filter(end_date__isnull=True):
+        #        mooring = Mooring.objects.get(id=moa.mooring_id)
+        #        if (instance.vessel_details.vessel_applicable_length > mooring.vessel_size_limit or
+        #        instance.vessel_details.vessel_draft > mooring.vessel_draft_limit):
+        #            logger.error("Proposal {}: Vessel unsuitable for one or more moorings".format(instance))
+        #            raise serializers.ValidationError("Vessel unsuitable for one or more moorings")
+
     elif type(instance.child_obj) == WaitingListApplication:
         if instance.vessel_details.vessel_applicable_length < min_mooring_vessel_size:
             logger.error("Proposal {}: Vessel must be at least {}m in length".format(instance, min_mooring_vessel_size_str))
@@ -609,7 +646,8 @@ def submit_vessel_data(instance, request, vessel_data):
     proposals_mla = []
     proposals_aaa = []
     proposals_aua = []
-    approvals = [ah.approval for ah in ApprovalHistory.objects.filter(end_date=None, vessel_ownership__vessel=vessel)]
+    # 20220311 - add exclusion for amendment applications
+    approvals = [ah.approval for ah in ApprovalHistory.objects.filter(end_date=None, vessel_ownership__vessel=vessel).exclude(approval_id=instance.approval_id)]
     approvals = list(dict.fromkeys(approvals))  # remove duplicates
     approvals_wla = []
     approvals_ml = []
@@ -644,8 +682,8 @@ def submit_vessel_data(instance, request, vessel_data):
             proposals_mla or approvals_ml)):
         #association_fail = True
         raise serializers.ValidationError("The vessel in the application is already listed in " +  
-        ", ".join(['{} {}'.format(proposal.description, proposal.lodgement_number) for proposal in proposals_wla]) +
-        ", ".join(['{} {}'.format(approval.description, approval.lodgement_number) for approval in approvals_wla])
+        ", ".join(['{} {} '.format(proposal.description, proposal.lodgement_number) for proposal in proposals_wla]) +
+        ", ".join(['{} {} '.format(approval.description, approval.lodgement_number) for approval in approvals_wla])
         )
     # Person can have only one WLA, Waiting Liast application, Mooring Licence and Mooring Licence application
     elif (type(instance.child_obj) == WaitingListApplication and (
@@ -659,30 +697,31 @@ def submit_vessel_data(instance, request, vessel_data):
             proposals_aua or approvals_aup or proposals_mla or approvals_ml)):
         #association_fail = True
         raise serializers.ValidationError("The vessel in the application is already listed in " +  
-        ", ".join(['{} {}'.format(proposal.description, proposal.lodgement_number) for proposal in proposals_aaa]) +
-        ", ".join(['{} {}'.format(proposal.description, proposal.lodgement_number) for proposal in proposals_aua]) +
-        ", ".join(['{} {}'.format(proposal.description, proposal.lodgement_number) for proposal in proposals_mla]) +
-        ", ".join(['{} {}'.format(approval.description, approval.lodgement_number) for approval in approvals_aap]) +
-        ", ".join(['{} {}'.format(approval.description, approval.lodgement_number) for approval in approvals_aup]) +
-        ", ".join(['{} {}'.format(approval.description, approval.lodgement_number) for approval in approvals_ml])
+        ", ".join(['{} {} '.format(proposal.description, proposal.lodgement_number) for proposal in proposals_aaa]) +
+        ", ".join(['{} {} '.format(proposal.description, proposal.lodgement_number) for proposal in proposals_aua]) +
+        ", ".join(['{} {} '.format(proposal.description, proposal.lodgement_number) for proposal in proposals_mla]) +
+        ", ".join(['{} {} '.format(approval.description, approval.lodgement_number) for approval in approvals_aap]) +
+        ", ".join(['{} {} '.format(approval.description, approval.lodgement_number) for approval in approvals_aup]) +
+        ", ".join(['{} {} '.format(approval.description, approval.lodgement_number) for approval in approvals_ml])
         )
     elif type(instance.child_obj) == AuthorisedUserApplication and (proposals_aua or approvals_aup):
         #association_fail = True
         raise serializers.ValidationError("The vessel in the application is already listed in " +  
-        ", ".join(['{} {}'.format(proposal.description, proposal.lodgement_number) for proposal in proposals_aua]) +
-        ", ".join(['{} {}'.format(approval.description, approval.lodgement_number) for approval in approvals_aup])
+        ", ".join(['{} {} '.format(proposal.description, proposal.lodgement_number) for proposal in proposals_aua]) +
+        ", ".join(['{} {} '.format(approval.description, approval.lodgement_number) for approval in approvals_aup])
         )
     elif type(instance.child_obj) == MooringLicenceApplication and (proposals_mla or approvals_ml):
         #association_fail = True
         raise serializers.ValidationError("The vessel in the application is already listed in " +  
-        ", ".join(['{} {}'.format(proposal.description, proposal.lodgement_number) for proposal in proposals_mla]) +
-        ", ".join(['{} {}'.format(approval.description, approval.lodgement_number) for approval in approvals_ml])
+        ", ".join(['{} {} '.format(proposal.description, proposal.lodgement_number) for proposal in proposals_mla]) +
+        ", ".join(['{} {} '.format(approval.description, approval.lodgement_number) for approval in approvals_ml])
         )
     #if association_fail:
      #   raise serializers.ValidationError("This vessel is already part of another application/permit/licence")
 
     ## vessel ownership cannot be greater than 100%
     ownership_percentage_validation(vessel_ownership)
+    #delete_draft_vessel_data(instance)
 
 def store_vessel_data(request, vessel_data):
     if not vessel_data.get('rego_no'):
@@ -921,7 +960,8 @@ def get_fee_amount_adjusted(proposal, fee_item_being_applied, vessel_length):
             # TODO: We don't charge for this application but when new replacement vessel details are provided,calculate fee and charge it
             fee_amount_adjusted = 0
         else:
-            raise Exception('FeeItem not found.')
+            msg = 'The application fee admin data might have not been set up correctly.  Please contact the Rottnest Island Authority.'
+            raise Exception(msg)
 
     return fee_amount_adjusted
 

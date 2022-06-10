@@ -217,7 +217,7 @@ export default {
             mooringsDtHeaders: [
                 'Id',
                 '',
-                'Mooring',
+                'Currently listed moorings',
                 'Bay',
                 '',
                 'Status',
@@ -317,7 +317,7 @@ export default {
             vesselsDtHeaders: [
                 'Id',
                 '',
-                'Vessel rego',
+                'Currently listed vessels',
                 'Vessel name',
                 'Status',
             ],

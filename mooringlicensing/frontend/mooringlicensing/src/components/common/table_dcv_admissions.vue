@@ -148,8 +148,8 @@ export default {
             let vm = this
             return {
                 data: "id",
-                orderable: true,
-                searchable: true,
+                orderable: false,
+                searchable: false,
                 visible: true,
                 'render': function(row, type, full){
                     let links = ''
@@ -170,36 +170,11 @@ export default {
                 }
             }
         },
-        /*
-        column_organisation: function(){
-            return {
-                data: "id",
-                orderable: true,
-                searchable: true,
-                visible: true,
-                'render': function(row, type, full){
-                    return full.dcv_organisation_name;
-                    //return '';
-                }
-            }
-        },
-        column_status: function(){
-            return {
-                data: "id",
-                orderable: true,
-                searchable: true,
-                visible: true,
-                'render': function(row, type, full){
-                    return full.status;
-                }
-            }
-        },
-        */
         column_arrival_date: function(){
             return {
                 data: "id",
                 orderable: true,
-                searchable: true,
+                searchable: false,
                 visible: true,
                 'render': function(row, type, full){
                     let ret = ''
@@ -213,7 +188,8 @@ export default {
 
                     }
                     return ret
-                }
+                },
+                name: 'dcv_admission_arrivals__arrival_date',
             }
         },
         column_lodgement_date: function(){
@@ -224,43 +200,17 @@ export default {
                 visible: true,
                 'render': function(row, type, full){
                     return full.lodgement_date;
-                }
+                },
+                name: 'lodgement_datetime',
             }
         },
-
-        /*
-        column_invoice: function(){
-            let vm = this
-            return {
-                // 7. Invoice
-                data: "id",
-                orderable: true,
-                searchable: true,
-                visible: true,
-                'render': function(row, type, full){
-                    let links = '';
-                    if (full.invoices){
-                        for (let invoice of full.invoices){
-                            links += '<div>'
-                            links +=  `<a href='/payments/invoice-pdf/${invoice.reference}.pdf' target='_blank'><i style='color:red;' class='fa fa-file-pdf-o'></i> #${invoice.reference}</a>`;
-                            if (!vm.is_external){
-                                links +=  `&nbsp;&nbsp;&nbsp;<a href='/ledger/payments/invoice/payment?invoice=${invoice.reference}' target='_blank'>View Payment</a><br/>`;
-                            }
-                            links += '</div>'
-                        }
-                    }
-                    return links
-                }
-            }
-        },
-        */
         column_action: function(){
             let vm = this
             return {
                 // 8. Action
                 data: "id",
-                orderable: true,
-                searchable: true,
+                orderable: false,
+                searchable: false,
                 visible: true,
                 'render': function(row, type, full){
                     /*

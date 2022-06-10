@@ -260,11 +260,23 @@ class ApprovalSurrenderSerializer(serializers.Serializer):
     surrender_date = serializers.DateField(input_formats=['%d/%m/%Y'])
     surrender_details = serializers.CharField()
 
+
 class ApprovalUserActionSerializer(serializers.ModelSerializer):
-    who = serializers.CharField(source='who.get_full_name')
+    who = serializers.SerializerMethodField()
+
     class Meta:
         model = ApprovalUserAction
         fields = '__all__'
+
+    def get_who(self, obj):
+        ret_name = 'System'
+        if obj.who:
+            name = obj.who.get_full_name()
+            name = name.strip()
+            if name:
+                ret_name = name
+        return ret_name
+
 
 class ApprovalLogEntrySerializer(CommunicationLogEntrySerializer):
     documents = serializers.SerializerMethodField()
@@ -277,6 +289,13 @@ class ApprovalLogEntrySerializer(CommunicationLogEntrySerializer):
 
     def get_documents(self,obj):
         return [[d.name,d._file.url] for d in obj.documents.all()]
+
+
+class WaitingListAllocationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = WaitingListAllocation
+        fields = '__all__'
 
 
 class ApprovalSerializer(serializers.ModelSerializer):
@@ -439,12 +458,14 @@ class ApprovalSerializer(serializers.ModelSerializer):
             for vessel_ownership in obj.child_obj.vessel_ownership_list:
                 vessel = vessel_ownership.vessel
                 vessels.append(vessel)
-                sticker_numbers = ''
+                sticker_numbers = []
                 for sticker in obj.stickers.filter(
-                        status__in=['current', 'ready', 'awaiting_printing', 'to_be_returned'],
-                        vessel_ownership=vessel_ownership):
-                    sticker_numbers += sticker.number + ', '
-                sticker_numbers = sticker_numbers[0:-2]
+                        status__in=['current', 'awaiting_printing', 'to_be_returned'],
+                        vessel_ownership=vessel_ownership).order_by('-number'):
+                    # sticker_numbers += sticker.number + '<br>, '
+                    sticker_numbers.append(sticker.number)
+                # sticker_numbers = sticker_numbers[0:-2]
+                sticker_numbers = '<br/>'.join(sticker_numbers)
 
                 vessel_details.append({
                     "id": vessel.id,
@@ -491,7 +512,7 @@ class ApprovalSerializer(serializers.ModelSerializer):
     def get_ria_generated_proposals(self, obj):
         links = '<br/>'
         if type(obj.child_obj) == WaitingListAllocation:
-            for mla in obj.ria_generated_proposal.all():
+            for mla in obj.child_obj.ria_generated_proposal.all():
                 links += '<a href="/internal/proposal/{}">{} : {}</a><br/>'.format(
                         mla.id,
                         mla.lodgement_number,
@@ -619,6 +640,7 @@ class ApprovalSerializer(serializers.ModelSerializer):
 
 class ListApprovalSerializer(serializers.ModelSerializer):
     licence_document = serializers.CharField(source='licence_document._file.url')
+    # licence_document = serializers.SerializerMethodField()
     authorised_user_summary_document = serializers.CharField(source='authorised_user_summary_document._file.url')
     renewal_document = serializers.SerializerMethodField(read_only=True)
     status = serializers.SerializerMethodField()
@@ -626,6 +648,7 @@ class ListApprovalSerializer(serializers.ModelSerializer):
     approval_type_dict = serializers.SerializerMethodField()
     holder = serializers.SerializerMethodField()
     issue_date_str = serializers.SerializerMethodField()
+    start_date_str = serializers.SerializerMethodField()
     expiry_date_str = serializers.SerializerMethodField()
     vessel_length = serializers.SerializerMethodField()
     vessel_draft = serializers.SerializerMethodField()
@@ -645,6 +668,7 @@ class ListApprovalSerializer(serializers.ModelSerializer):
     allowed_assessors_user = serializers.SerializerMethodField()
     stickers = serializers.SerializerMethodField()
     is_approver = serializers.SerializerMethodField()
+    is_assessor = serializers.SerializerMethodField()
     vessel_regos = serializers.SerializerMethodField()
 
     class Meta:
@@ -659,6 +683,7 @@ class ListApprovalSerializer(serializers.ModelSerializer):
             'issue_date',
             'holder',
             'issue_date_str',
+            'start_date_str',
             'expiry_date_str',
             'vessel_length',
             'vessel_draft',
@@ -682,6 +707,7 @@ class ListApprovalSerializer(serializers.ModelSerializer):
             'stickers',
             'licence_document',
             'authorised_user_summary_document',
+            'is_assessor',
             'is_approver',
             'vessel_regos',
         )
@@ -697,6 +723,7 @@ class ListApprovalSerializer(serializers.ModelSerializer):
             'issue_date',
             'holder',
             'issue_date_str',
+            'start_date_str',
             'expiry_date_str',
             'vessel_length',
             'vessel_draft',
@@ -720,6 +747,7 @@ class ListApprovalSerializer(serializers.ModelSerializer):
             'stickers',
             'licence_document',
             'authorised_user_summary_document',
+            'is_assessor',
             'is_approver',
             'vessel_regos',
         )
@@ -733,6 +761,13 @@ class ListApprovalSerializer(serializers.ModelSerializer):
 
     def get_current_proposal_approved(self, obj):
         return obj.current_proposal.processing_status == 'approved'
+
+    def get_is_assessor(self, obj):
+        request = self.context.get('request')
+        if request:
+            return obj.is_assessor(request.user)
+        else:
+            return False
 
     def get_is_approver(self, obj):
         request = self.context.get('request')
@@ -806,7 +841,7 @@ class ListApprovalSerializer(serializers.ModelSerializer):
     def get_ria_generated_proposals(self, obj):
         links = '<br/>'
         if type(obj.child_obj) == WaitingListAllocation:
-            for mla in obj.ria_generated_proposal.all():
+            for mla in obj.child_obj.ria_generated_proposal.all():
                 links += '<a href="/internal/proposal/{}">{} : {}</a><br/>'.format(
                         mla.id,
                         mla.lodgement_number,
@@ -934,6 +969,12 @@ class ListApprovalSerializer(serializers.ModelSerializer):
         if obj.expiry_date:
             expiry_date = obj.expiry_date.strftime('%d/%m/%Y')
         return expiry_date
+
+    def get_start_date_str(self, obj):
+        start_date = ''
+        if obj.start_date:
+            start_date = obj.start_date.strftime('%d/%m/%Y')
+        return start_date
 
 
 class LookupApprovalSerializer(serializers.ModelSerializer):
@@ -1302,7 +1343,7 @@ class ListDcvAdmissionSerializer(serializers.ModelSerializer):
 
 
 class ApprovalHistorySerializer(serializers.ModelSerializer):
-    reason = serializers.SerializerMethodField()
+    #reason = serializers.SerializerMethodField()
     approval_letter = serializers.CharField(source='approval_letter._file.url')
     sticker_numbers = serializers.SerializerMethodField()
     approval_lodgement_number = serializers.SerializerMethodField()
@@ -1336,8 +1377,8 @@ class ApprovalHistorySerializer(serializers.ModelSerializer):
                 'approval_letter',
                 )
 
-    def get_reason(self, obj):
-        return ''
+    #def get_reason(self, obj):
+     #   return ''
 
     def get_approval_status(self, obj):
         return obj.approval.get_status_display()

@@ -11,13 +11,17 @@ from email.header import decode_header, make_header
 from django.core.files.base import ContentFile
 
 from mooringlicensing.components.approvals.models import Sticker
-from mooringlicensing.components.main.utils import sticker_export, email_stickers_document
 
 import logging
 
-from mooringlicensing.components.proposals.models import StickerPrintingResponse, StickerPrintingResponseEmail
+from mooringlicensing.components.emails.emails import TemplateEmailBase
+from mooringlicensing.components.emails.utils import get_public_url
+from mooringlicensing.components.proposals.models import StickerPrintingResponse, StickerPrintingResponseEmail, \
+    StickerPrintedContact
+from mooringlicensing.management.commands.utils import construct_email_message
 
-logger = logging.getLogger('log')
+logger = logging.getLogger('cron_tasks')
+cron_email = logging.getLogger('cron_email')
 
 
 class Command(BaseCommand):
@@ -33,7 +37,10 @@ class Command(BaseCommand):
         sticker_email_password = env('STICKER_EMAIL_PASSWORD', '')
 
         if not sticker_email_host or not sticker_email_port or not sticker_email_username or not sticker_email_password:
-            raise Exception('Configure email settings at .env to process sticker responses')
+            msg = 'Configure email settings at .env to process sticker responses'
+            logger.error(msg)
+            cron_email.info(msg)
+            raise Exception(msg)
 
         context = ssl.create_default_context()
         imapclient = imaplib.IMAP4_SSL(sticker_email_host, sticker_email_port, ssl_context=context)
@@ -51,8 +58,6 @@ class Command(BaseCommand):
 
         if (len(datas) - fetch_num) < 0:
             fetch_num = len(datas)
-
-        # msg_list = []
 
         for num in datas[len(datas) - fetch_num::]:
             try:
@@ -127,15 +132,20 @@ class Command(BaseCommand):
         ##########
         # 3. Process xlsx file saved in django model
         ##########
-        updates, errors = process_sticker_printing_response()
+        process_summary = {'stickers': [], 'errors': [], 'sticker_printing_responses': []}  # To be used for sticker processed email
+        updates, errors = process_sticker_printing_response(process_summary)
+
+        # Send sticker import batch emails
+        send_sticker_import_batch_email(process_summary)
 
         cmd_name = __name__.split('.')[-1].replace('_', ' ').upper()
         # error_count = len(errors) + len(error_filenames)
-        error_count = len(errors)
-        err_str = '<strong style="color: red;">Errors: {}</strong>'.format(error_count) if error_count else '<strong style="color: green;">Errors: 0</strong>'
-        msg = '<p>{} completed. {}. IDs updated: {}.</p>'.format(cmd_name, err_str, updates)
+        # error_count = len(errors)
+        # err_str = '<strong style="color: red;">Errors: {}</strong>'.format(error_count) if error_count else '<strong style="color: green;">Errors: 0</strong>'
+        # msg = '<p>{} completed. {}. IDs updated: {}.</p>'.format(cmd_name, err_str, updates)
+        msg = construct_email_message(cmd_name, errors, updates)
         logger.info(msg)
-        print(msg)  # will redirect to cron_tasks.log file, by the parent script
+        cron_email.info(msg)
 
 
 def get_text(msg):
@@ -166,12 +176,13 @@ def is_empty(cell):
     return cell.value is None or not str(cell.value).strip()
 
 
-def process_sticker_printing_response():
+def process_sticker_printing_response(process_summary):
     errors = []
     updates = []
 
     responses = StickerPrintingResponse.objects.filter(processed=False)
     for response in responses:
+        process_summary['sticker_printing_responses'].append(response)
         if response._file:
             response.no_errors_when_process = True
             # Load file
@@ -236,9 +247,14 @@ def process_sticker_printing_response():
                     sticker.mailing_date = mailing_date_value
                     sticker.sticker_printing_response = response
                     if sticker.status in (Sticker.STICKER_STATUS_AWAITING_PRINTING, Sticker.STICKER_STATUS_READY):
-                        # sticker shoudl not be in READY status though.
+                        # sticker should not be in READY status though.
                         sticker.status = Sticker.STICKER_STATUS_CURRENT
+                        #if sticker.sticker_to_replace:  # new sticker has the old sticker here if it's created for renewal
+                        #    # When this sticker is created for renewal, set 'expiry' status to the old sticker.
+                        #    sticker.sticker_to_replace.status = Sticker.STICKER_STATUS_EXPIRED
+                        #    sticker.sticker_to_replace.save()
                     sticker.save()
+                    process_summary['stickers'].append(sticker)
 
                     updates.append(sticker.number)
                 except Sticker.DoesNotExist as e:
@@ -246,19 +262,58 @@ def process_sticker_printing_response():
                     logger.exception('{}\n{}'.format(err_msg, str(e)))
                     errors.append(err_msg)
                     response.no_errors_when_process = False
+                    process_summary['errors'].append(err_msg)
+                    response.processed = True  # Update response obj not to process again.  But from no_errors_when_process flag tells admin that there was an error.
+                    response.save()
                     continue
                 except Exception as e:
                     err_msg = 'Error updating the sticker {}'.format(sticker_number_value)
                     logger.exception('{}\n{}'.format(err_msg, str(e)))
                     errors.append(err_msg)
                     response.no_errors_when_process = False
+                    process_summary['errors'].append(err_msg)
+                    response.processed = True  # Update response obj not to process again.  But from no_errors_when_process flag tells admin that there was an error.
+                    response.save()
                     continue
 
-            # Update response obj not to process again
-            response.processed = True
+            response.processed = True  # Update response obj not to process again
             response.save()
         else:
             # No fild is saved in the _file field
             pass
 
     return updates, errors
+
+
+def send_sticker_import_batch_email(process_summary):
+    try:
+        email = TemplateEmailBase(
+            subject='Sticker Import Batch',
+            html_template='mooringlicensing/emails/send_sticker_import_batch.html',
+            txt_template='mooringlicensing/emails/send_sticker_import_batch.txt',
+        )
+
+        attachments = []
+        context = {
+            'public_url': get_public_url(),
+            'process_summary': process_summary,
+        }
+
+        from mooringlicensing.components.proposals.models import StickerPrintingContact
+        tos = StickerPrintedContact.objects.filter(type=StickerPrintingContact.TYPE_EMIAL_TO, enabled=True)
+        ccs = StickerPrintedContact.objects.filter(type=StickerPrintingContact.TYPE_EMAIL_CC, enabled=True)
+        bccs = StickerPrintedContact.objects.filter(type=StickerPrintingContact.TYPE_EMAIL_BCC, enabled=True)
+
+        if tos:
+            to_address = [contact.email for contact in tos]
+            cc = [contact.email for contact in ccs]
+            bcc = [contact.email for contact in bccs]
+
+            # Send email
+            msg = email.send(to_address, context=context, attachments=attachments, cc=cc, bcc=bcc,)
+            return msg
+
+    except Exception as e:
+        err_msg = 'Error sending sticker import email'
+        logger.exception('{}\n{}'.format(err_msg, str(e)))
+
