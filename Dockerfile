@@ -24,7 +24,7 @@ FROM builder_base_mooringlicensing as python_libs_mooringlicensing
 WORKDIR /app
 
 COPY requirements.txt ./
-COPY git_history_recent ./
+#COPY git_history_recent ./
 RUN touch /app/rand_hash
 #RUN touch /app/git_history
 
@@ -48,6 +48,8 @@ ENV TZ=Australia/Perth
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN touch /app/.env
 #COPY .git ./.git
+COPY .git ./.git
+RUN git log --pretty=medium -30 > ./git_history_recent && rm -rf .git
 COPY mooringlicensing ./mooringlicensing
 # RUN rm -r mooringlicensing/utils/csv
 RUN python manage_ml.py collectstatic --noinput

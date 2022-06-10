@@ -108,8 +108,8 @@ class AuthUserPermitMigration(object):
         no_licencee = []
         count_no_mooring = 0
         with transaction.atomic():
-            for idx, record in enumerate(self.moorings[827:], 827):
-            #for idx, record in enumerate(self.moorings, 1):
+            #for idx, record in enumerate(self.moorings[827:], 827):
+            for idx, record in enumerate(self.moorings, 1):
                 try:
                     #import ipdb; ipdb.set_trace()
                     username = record.get('_1') #.lower()

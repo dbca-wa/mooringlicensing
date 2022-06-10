@@ -86,8 +86,8 @@ class MooringLicenceMigration(object):
         with transaction.atomic():
             for idx, record in enumerate(self.mooring_no, 1):
             #for idx, record in enumerate(self.mooring_no[257:], 1):
-                if idx==258:
-                    import ipdb; ipdb.set_trace()
+                #if idx==258:
+                #    import ipdb; ipdb.set_trace()
                 try:
                     #import ipdb; ipdb.set_trace()
                     pers_no = record.get('PersNo')

@@ -5,7 +5,7 @@ import csv
 import datetime
 from decimal import Decimal
 from django.db import transaction
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from oscar.apps.address.models import Country
 from ledger.accounts.models import EmailUser, Address
 from mooringlicensing.components.proposals.models import (
@@ -62,33 +62,43 @@ class AnnualAdmissionMigration(object):
                 reader = csv.reader(csvfile, delimiter=str(','))
                 header = next(reader) # skip header
                 for row in reader:
+                    #import ipdb; ipdb.set_trace()
                     if not row[0].startswith('#'):
                         idx += 1
 
                         ID = row[0]
-                        firstname = row[1].strip()
-                        lastname = row[2].strip()
-                        email = row[3].lower().strip()
-                        mobile_no = row[4].strip()
-                        phone_no = row[5].strip()
-                        vessel_name = row[6].strip()
-                        rego_no = row[7].strip()
-                        length = row[8].strip()
-                        sticker_no = row[9].strip()
-                        year = row[10].strip()
-                        status = row[11].strip()
-                        booking_period = row[12].strip()
-                        address1 = row[13].strip()
-                        address2 = row[14].strip()
-                        suburb = row[15].strip()
-                        postcode = row[16].strip()
-                        state = row[17].strip()
+                        created = row[1].strip()
+                        firstname = row[2].strip()
+                        lastname = row[3].strip()
+                        address1 = row[4].strip()
+                        suburb = row[5].strip()
+                        state = row[6].strip()
+                        postcode = row[7].strip()
+                        sticker_no = row[8].strip()
+                        rego_no = row[9].strip()
+                        email = row[10].lower().strip()
+                        mobile_no = row[11].strip()
+                        phone_no = row[12].strip()
+                        vessel_name = row[13].strip()
+                        length = row[14].strip()
+                        year = row[15].strip()
+                        status = row[16].strip()
+                        booking_period = row[17].strip()
                         country = row[18].strip()
 
-                        if status != 'expired':
-                            # ignore everything, except 'expired' records
-                            continue
-                        elif idx % 50 == 0:
+#                        if status != 'expired':
+#                            # ignore everything, except 'expired' records
+#                            continue
+#                        elif idx % 50 == 0:
+#                            print(f"{idx} {status}")
+
+#                        if status == 'current' and idx % 50 == 0:
+#                            print(f"{idx} {status}")
+#                        else:
+#                            # ignore everything, except 'current' records
+#                            continue
+
+                        if idx % 50 == 0:
                             print(f"{idx} {status}")
 
                         if self.test:
@@ -109,7 +119,7 @@ class AnnualAdmissionMigration(object):
                                 user = EmailUser.objects.create(email=email, first_name=firstname, last_name=lastname, mobile_number=mobile_no, phone_number=phone_no)
 
                                 country = Country.objects.get(printable_name='Australia')
-                                address, address_created = Address.objects.get_or_create(line1=address1, line2=address2, line3=suburb, postcode=postcode, state=state, country=country, user=user)
+                                address, address_created = Address.objects.get_or_create(line1=address1, line3=suburb, postcode=postcode, state=state, country=country, user=user)
 
                                 user.residential_address = address
                                 user.postal_address = address
@@ -134,7 +144,9 @@ class AnnualAdmissionMigration(object):
 
                             try:
                                 vessel_details = VesselDetails.objects.get(vessel=vessel)
-                            except ObjectDoesNotExist:
+                            except MultipleObjectsReturned as e:
+                                vessel_details = VesselDetails.objects.filter(vessel=vessel)[0]
+                            except ObjectDoesNotExist as e:
                                 vessel_details = VesselDetails.objects.create(
                                 vessel_type=vessel_type,
                                 vessel=vessel,
