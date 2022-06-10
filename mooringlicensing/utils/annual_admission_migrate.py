@@ -30,6 +30,7 @@ class AnnualAdmissionMigration(object):
         """
         NOTE:
             filename='mooringlicensing/utils/tests/AA/annual_admissions_booking_report_20210928.csv' comes from Moorings RIA system (??)
+            (https://mooring-ria-internal.dbca.wa.gov.au/dashboard/bookings/annual-admissions/)
         """
         self.filename = filename
         self.test = test
@@ -38,8 +39,8 @@ class AnnualAdmissionMigration(object):
 
     def migrate(self):
 
-        expiry_date = datetime.date(2021,11,30)
-        start_date = datetime.date(2020,8,31)
+        expiry_date = datetime.date(2022,11,30)
+        start_date = datetime.date(2021,8,31)
 
         address_list = []
         user_list = []

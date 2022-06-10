@@ -81,8 +81,8 @@ class AuthUserPermitMigration(object):
     def migrate(self):
 
         #submitter = EmailUser.objects.get(email='jawaid.mushtaq@dbca.wa.gov.au')
-        expiry_date = datetime.date(2021,11,30)
-        date_applied = '2020-08-31'
+        expiry_date = datetime.date(2022,11,30)
+        date_applied = '2021-08-31'
 
         address_not_found = []
         address_l_not_found = []
@@ -108,8 +108,8 @@ class AuthUserPermitMigration(object):
         no_licencee = []
         count_no_mooring = 0
         with transaction.atomic():
-            #for idx, record in enumerate(self.moorings[984:], 984):
-            for idx, record in enumerate(self.moorings, 1):
+            for idx, record in enumerate(self.moorings[827:], 827):
+            #for idx, record in enumerate(self.moorings, 1):
                 try:
                     #import ipdb; ipdb.set_trace()
                     username = record.get('_1') #.lower()
@@ -143,7 +143,10 @@ class AuthUserPermitMigration(object):
                         print(f'ADDRESS NOT FOUND: {idx}, {pers_no}, {username} {permit_type}, {mooring_no}')
                         continue
                     email, username = gs2.get_email()
+                    if not email:
+                        continue
                     email = email.split(';')[0]
+                    email = email.strip().replace('{','').replace('}','')
                     firstname = username.split(' ')[-1]
                     lastname = ' '.join(username.split(' ')[:-1])
 

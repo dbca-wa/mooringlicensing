@@ -59,7 +59,7 @@ class WaitingListMigration(object):
     def migrate(self):
 
         #submitter = EmailUser.objects.get(email='jawaid.mushtaq@dbca.wa.gov.au')
-        expiry_date = datetime.date(2021,11,30)
+        expiry_date = datetime.date(2022,11,30)
 
         addresses_not_found = []
         address_list = []
@@ -78,7 +78,7 @@ class WaitingListMigration(object):
         added = []
         errors = []
         with transaction.atomic():
-            #for idx, record in enumerate(self.waitlist[281:], 281):
+            #for idx, record in enumerate(self.waitlist[541:], 541):
             for idx, record in enumerate(self.waitlist, 1):
                 try:
                     #import ipdb; ipdb.set_trace()
@@ -104,6 +104,10 @@ class WaitingListMigration(object):
                         phonehome_record = address_record
 
                     email = email_record.get('EMail').lower().strip()
+                    if email=='mjmatthews@me.com':
+                        errors.append(email)
+                        continue
+
                     mobile_no = phonemobile_record.get('PhoneMobile')
                     username = record.get('UserName').lower()
                     firstname = username.split(' ')[-1].title()
@@ -155,7 +159,18 @@ class WaitingListMigration(object):
                         user = EmailUser.objects.create(email=email, first_name=firstname, last_name=lastname, mobile_number=mobile_no, phone_number=phone_no)
 
                     country = Country.objects.get(printable_name='Australia')
-                    address, address_created = Address.objects.get_or_create(line1=line1, line2=line2, line3=line3, postcode=postcode, state=state, country=country, user=user)
+                    #address, address_created = Address.objects.get_or_create(line1=line1, line2=line2, line3=line3, postcode=postcode, state=state, country=country, user=user)
+                    address, address_created = Address.objects.get_or_create(
+                        user=user,
+                        defaults={
+                            'line1':line1, 
+                            'line2':line2, 
+                            'line3':line3, 
+                            'postcode':postcode, 
+                            'state':state, 
+                            'country':country
+                        }
+                    )
                     user.residential_address = address
                     user.postal_address = address
                     user.save()
