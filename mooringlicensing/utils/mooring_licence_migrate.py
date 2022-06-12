@@ -135,7 +135,7 @@ class MooringLicenceMigration(object):
 
                     allocated_record = self.search('PersNo', pers_no, self.allocated)
                     try:
-                        date_invited = datetime.datetime.strptime(allocated_record.get('DateAllocated'), '%Y-%m-%d').date() 
+                        date_invited = datetime.datetime.strptime(allocated_record.get('DateAllocated'), '%Y-%m-%d').date()
                     except:
                         date_invited = None
 
@@ -158,7 +158,7 @@ class MooringLicenceMigration(object):
                     #    import ipdb; ipdb.set_trace()
                     #    continue
 
- 
+
 #                    mooring_record = self.search('_1', username, self.moorings)
 #                    try:
 #                        mooring = mooring_record['MooringNo']
