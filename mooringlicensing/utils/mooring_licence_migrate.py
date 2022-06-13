@@ -3,7 +3,7 @@ import subprocess
 import json
 import datetime
 from decimal import Decimal
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from oscar.apps.address.models import Country
 from ledger.accounts.models import EmailUser, Address
@@ -65,9 +65,9 @@ class MooringLicenceMigration(object):
     def migrate(self):
 
         #submitter = EmailUser.objects.get(email='jawaid.mushtaq@dbca.wa.gov.au')
-        expiry_date = datetime.date(2021,11,30)
-        start_date = datetime.date(2020,8,31)
-        date_applied = '2020-08-31'
+        expiry_date = datetime.date(2022,11,30)
+        start_date = datetime.date(2021,8,31)
+        date_applied = '2021-08-31'
 
         address_list = []
         user_list = []
@@ -85,7 +85,9 @@ class MooringLicenceMigration(object):
         count_no_mooring = 0
         with transaction.atomic():
             for idx, record in enumerate(self.mooring_no, 1):
-            #for idx, record in enumerate(self.mooring_no[800:], 1):
+            #for idx, record in enumerate(self.mooring_no[257:], 1):
+                #if idx==258:
+                #    import ipdb; ipdb.set_trace()
                 try:
                     #import ipdb; ipdb.set_trace()
                     pers_no = record.get('PersNo')
@@ -107,6 +109,10 @@ class MooringLicenceMigration(object):
                     #email_record.get('EMail').lower().strip()
                     #H1N = GrepSearch(pers_no, path=self.path).search('PersNo', 'H1N1')
                     email = surname_record['EMail'].split(',')[0].strip().lower()
+                    if email=='{ronrouwenhorst@bigpond.com} ;arthur@technitemp.com':
+                        errors.append(email)
+                        continue
+
                     HIN = surname_record['HIN1']
 
                     vessel_record = self.search('PersNo', pers_no, self.vessel)
@@ -129,7 +135,7 @@ class MooringLicenceMigration(object):
 
                     allocated_record = self.search('PersNo', pers_no, self.allocated)
                     try:
-                        date_invited = datetime.datetime.strptime(allocated_record.get('DateAllocated'), '%Y-%m-%d').date() 
+                        date_invited = datetime.datetime.strptime(allocated_record.get('DateAllocated'), '%Y-%m-%d').date()
                     except:
                         date_invited = None
 
@@ -152,7 +158,7 @@ class MooringLicenceMigration(object):
                     #    import ipdb; ipdb.set_trace()
                     #    continue
 
- 
+
 #                    mooring_record = self.search('_1', username, self.moorings)
 #                    try:
 #                        mooring = mooring_record['MooringNo']
@@ -360,20 +366,23 @@ class MooringLicenceMigration(object):
                     approval_list.append(approval.id)
                     approval_history_list.append(approval_history.id)
 
+#                except IntegrityError as e:
+#                    errors.append(repr(e))
+#                    continue
                 except Exception as e:
                     #errors.append(str(e))
                     import ipdb; ipdb.set_trace()
                     raise Exception(str(e))
 
-        print(f'Address.objects.get(id__in={address_list}).delete()')
-        print(f'EmailUser.objects.get(id__in={user_list}).delete()')
-        print(f'Vessel.objects.get(id__in={vessel_list}).delete()')
-        print(f'Owner.objects.get(id__in={owner_list}).delete()')
-        print(f'VesselOwnership.objects.get(id__in={ownership_list}).delete()')
-        print(f'VesselDetails.objects.get(id__in={details_list}).delete()')
-        print(f'ProposalUserAction.objects.get(id__in={user_action_list}).delete()')
-        print(f'WaitingListAllocation.objects.get(id__in={approval_list}).delete()')
-        print(f'ApprovalHistory.objects.get(id__in={approval_history_list}).delete()')
+#        print(f'Address.objects.get(id__in={address_list}).delete()')
+#        print(f'EmailUser.objects.get(id__in={user_list}).delete()')
+#        print(f'Vessel.objects.get(id__in={vessel_list}).delete()')
+#        print(f'Owner.objects.get(id__in={owner_list}).delete()')
+#        print(f'VesselOwnership.objects.get(id__in={ownership_list}).delete()')
+#        print(f'VesselDetails.objects.get(id__in={details_list}).delete()')
+#        print(f'ProposalUserAction.objects.get(id__in={user_action_list}).delete()')
+#        print(f'WaitingListAllocation.objects.get(id__in={approval_list}).delete()')
+#        print(f'ApprovalHistory.objects.get(id__in={approval_history_list}).delete()')
         print(f'errors: {errors}')
 
 def clear_record():

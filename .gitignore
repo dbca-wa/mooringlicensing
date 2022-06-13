@@ -120,6 +120,7 @@ git_history_recent
 
 #mooringlicensing/utils/csv/ml_20210831.csv
 mooringlicensing/utils/csv/*
+*.xls*
 
 # Reversion utility
 reversion_utility_output.txt
