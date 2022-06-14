@@ -1559,7 +1559,12 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                 if not request or (request and self.approval and self.approval.reissued):
                     # system reissue or admin reissue
                     approval, created = self.child_obj.update_or_create_approval(datetime.datetime.now(pytz.timezone(TIME_ZONE)), request)
-                    self.refresh_from_db()  # Reflect child_ojb's attributes, such as processing_status, to this proposal object.
+
+                    #--- Reflect any changes made in the function above (update_or_create_approval) ---#
+                    self.refresh_from_db()
+                    self.child_obj.refresh_from_db()
+                    #-------------------------------#
+
                     self.approval = approval.approval
                     self.save()
                 else:
@@ -1577,6 +1582,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                         # Ledger skips the payment step, which calling the function below
                         approval, created = self.child_obj.update_or_create_approval(datetime.datetime.now(pytz.timezone(TIME_ZONE)), request=request)
                         self.refresh_from_db()  # Reflect child_ojb's attributes, such as processing_status, to this proposal object.
+                        self.child_obj.refresh_from_db()
                     else:
                         # proposal type must be awaiting payment
                         self.processing_status = Proposal.PROCESSING_STATUS_AWAITING_PAYMENT
@@ -2768,7 +2774,9 @@ class AuthorisedUserApplication(Proposal):
         else:
             self.processing_status = Proposal.PROCESSING_STATUS_APPROVED
         self.save()
-        self.refresh_from_db()
+        # self.refresh_from_db()
+        # self.proposal.refresh_from_db()
+        self.proposal.save()
 
         approval.generate_doc()
 
@@ -2806,6 +2814,8 @@ class AuthorisedUserApplication(Proposal):
         #    approval.write_approval_history('new')
         #else:
         #    approval.write_approval_history()
+        self.save()
+        self.proposal.save()
 
         return approval, created
 
