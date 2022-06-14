@@ -1582,6 +1582,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                         # Ledger skips the payment step, which calling the function below
                         approval, created = self.child_obj.update_or_create_approval(datetime.datetime.now(pytz.timezone(TIME_ZONE)), request=request)
                         self.refresh_from_db()  # Reflect child_ojb's attributes, such as processing_status, to this proposal object.
+                        self.child_obj.refresh_from_db()
                     else:
                         # proposal type must be awaiting payment
                         self.processing_status = Proposal.PROCESSING_STATUS_AWAITING_PAYMENT
