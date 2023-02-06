@@ -1,5 +1,5 @@
 Django==1.11.29
-ipython==7.19.0
+ipython==7.31.1
 psycopg2==2.8.6
 jedi==0.17.2
 #git+https://github.com/xzzy/ledger.git@master2#egg=ledger
