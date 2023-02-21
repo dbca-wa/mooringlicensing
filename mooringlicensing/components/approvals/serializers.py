@@ -1,8 +1,9 @@
 import logging
 
 from django.conf import settings
-from ledger.accounts.models import EmailUser
-from ledger.payments.models import Invoice
+# from ledger.accounts.models import EmailUser
+# from ledger.payments.models import Invoice
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Invoice
 from django.db.models import Q, Min, Count
 
 from mooringlicensing.components.main import serializers
@@ -951,11 +952,16 @@ class ListApprovalSerializer(serializers.ModelSerializer):
     def get_holder(self, obj):
         holder_str = ''
         if obj.submitter:
-            holder_str = '<span>{}</br>{}</br>{}</br></span>'.format(
-                    obj.submitter.get_full_name(),
-                    obj.submitter.mobile_number,
-                    obj.submitter.email
-                    )
+            items = []
+            items.append(obj.submitter.get_full_name())
+            if obj.submitter.mobile_number:
+                items.append('<span class="glyphicon glyphicon-phone"></span> ' + obj.submitter.mobile_number)
+            if obj.submitter.phone_number:
+                items.append('<span class="glyphicon glyphicon-earphone"></span> ' + obj.submitter.phone_number)
+            items.append(obj.submitter.email)
+
+            items = '</br>'.join(items)
+            holder_str = '<span>' + items + '</span>'
         return holder_str
 
     def get_issue_date_str(self, obj):

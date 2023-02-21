@@ -1,5 +1,5 @@
 from __future__ import unicode_literals
-from ledger.accounts.models import EmailUser
+# from ledger.accounts.models import EmailUser
 from django.conf import settings
 
 import logging

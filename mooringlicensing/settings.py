@@ -9,7 +9,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 confy.read_environment_file(BASE_DIR+"/.env")
 os.environ.setdefault("BASE_DIR", BASE_DIR)
 
-from ledger.settings_base import *
+# from ledger.settings_base import *
+from ledger_api_client.settings_base import *
 
 ROOT_URLCONF = 'mooringlicensing.urls'
 SITE_ID = 1
@@ -54,12 +55,13 @@ INSTALLED_APPS += [
     'mooringlicensing.components.approvals',
     'mooringlicensing.components.compliances',
     'mooringlicensing.components.payments_ml',
-    'taggit',
+    # 'taggit',
     'rest_framework',
     'rest_framework_datatables',
     'rest_framework_gis',
     'reset_migrations',
     'ckeditor',
+    'ledger_api_client',
 ]
 
 ADD_REVERSION_ADMIN=True
@@ -253,6 +255,7 @@ LOGGING['loggers']['cron_email'] = {
 
 # Logging all to mooringlicensing.log file
 LOGGING['loggers']['']['handlers'].append('file_mooringlicensing')
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 GROUP_MOORING_LICENSING_ADMIN = 'Mooring Licensing - Admin'
 GROUP_MOORING_LICENSING_PAYMENT_OFFICER = 'Mooring Licensing - Payment Officers'
@@ -441,3 +444,5 @@ GIT_COMMIT_DATE = ''
 #    if len(GIT_COMMIT_HASH) == 0:
 #       print ("ERROR: No git hash provided")
 
+MIDDLEWARE = MIDDLEWARE_CLASSES
+MIDDLEWARE_CLASSES = None

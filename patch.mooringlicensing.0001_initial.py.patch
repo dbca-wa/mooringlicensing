@@ -1,0 +1,309 @@
+--- 0001_initial_original.py	2022-12-05 13:03:46.703982663 +0800
++++ mooringlicensing/migrations/0001_initial.py	2022-12-06 09:56:48.689072517 +0800
+@@ -22,7 +22,7 @@
+     dependencies = [
+         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+         ('sites', '0002_alter_domain_unique'),
+-        ('accounts', '0024_organisation_email'),
++        # ('accounts', '0024_organisation_email'),
+     ]
+ 
+     operations = [
+@@ -188,7 +188,8 @@
+                 ('when', models.DateTimeField(auto_now_add=True)),
+                 ('what', models.TextField()),
+                 ('compliance', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='action_logs', to='mooringlicensing.Compliance')),
+-                ('who', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
++                # ('who', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
++                ('who', models.IntegerField()),
+             ],
+         ),
+         migrations.CreateModel(
+@@ -245,8 +246,14 @@
+             name='OrganisationAccessGroup',
+             fields=[
+                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+-                ('members', models.ManyToManyField(to=settings.AUTH_USER_MODEL)),
+-                ('site', models.OneToOneField(default='1', on_delete=django.db.models.deletion.CASCADE, to='sites.Site')),
++                # ('members', models.ManyToManyField(to=settings.AUTH_USER_MODEL)),
++                (
++                    "members",
++                    django.contrib.postgres.fields.ArrayField(
++                        base_field=models.IntegerField(), blank=True, size=None
++                    ),
++                ),
++                # ('site', models.OneToOneField(default='1', on_delete=django.db.models.deletion.CASCADE, to='sites.Site')),
+             ],
+             options={
+                 'verbose_name_plural': 'Organisation access group',
+@@ -259,7 +266,8 @@
+                 ('when', models.DateTimeField(auto_now_add=True)),
+                 ('what', models.TextField()),
+                 ('organisation', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='action_logs', to='mooringlicensing.Organisation')),
+-                ('who', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
++                # ('who', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
++                ('who', models.IntegerField()),
+             ],
+         ),
+         migrations.CreateModel(
+@@ -298,8 +306,10 @@
+                 ('status', models.CharField(choices=[('with_assessor', 'With Assessor'), ('approved', 'Approved'), ('declined', 'Declined')], default='with_assessor', max_length=100)),
+                 ('lodgement_date', models.DateTimeField(auto_now_add=True)),
+                 ('role', models.CharField(choices=[('employee', 'Employee'), ('consultant', 'Consultant')], default='employee', max_length=100)),
+-                ('assigned_officer', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='org_request_assignee', to=settings.AUTH_USER_MODEL)),
+-                ('requester', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
++                # ('assigned_officer', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='org_request_assignee', to=settings.AUTH_USER_MODEL)),
++                # ('requester', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
++                ('assigned_officer', models.IntegerField()),
++                ('requester', models.IntegerField()),
+             ],
+         ),
+         migrations.CreateModel(
+@@ -307,7 +317,8 @@
+             fields=[
+                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                 ('reason', models.TextField(blank=True)),
+-                ('officer', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
++                # ('officer', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
++                ('officer', models.IntegerField()),
+                 ('request', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='mooringlicensing.OrganisationRequest')),
+             ],
+         ),
+@@ -328,7 +339,8 @@
+                 ('when', models.DateTimeField(auto_now_add=True)),
+                 ('what', models.TextField()),
+                 ('request', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='action_logs', to='mooringlicensing.OrganisationRequest')),
+-                ('who', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
++                # ('who', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
++                ('who', models.IntegerField()),
+             ],
+         ),
+         migrations.CreateModel(
+@@ -365,7 +377,13 @@
+             fields=[
+                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                 ('name', models.CharField(max_length=255)),
+-                ('members', models.ManyToManyField(to=settings.AUTH_USER_MODEL)),
++                # ('members', models.ManyToManyField(to=settings.AUTH_USER_MODEL)),
++                (
++                    "members",
++                    django.contrib.postgres.fields.ArrayField(
++                        base_field=models.IntegerField(), blank=True, size=None
++                    ),
++                ),
+             ],
+             options={
+                 'verbose_name': 'Application Approver Group',
+@@ -378,7 +396,8 @@
+                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                 ('completed', models.BooleanField(default=False)),
+                 ('proposal', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='assessment', to='mooringlicensing.Proposal')),
+-                ('submitter', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='proposal_assessment', to=settings.AUTH_USER_MODEL)),
++                # ('submitter', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='proposal_assessment', to=settings.AUTH_USER_MODEL)),
++                ('submitter', models.IntegerField()),
+             ],
+         ),
+         migrations.CreateModel(
+@@ -400,7 +419,13 @@
+             fields=[
+                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                 ('name', models.CharField(max_length=255)),
+-                ('members', models.ManyToManyField(to=settings.AUTH_USER_MODEL)),
++                # ('members', models.ManyToManyField(to=settings.AUTH_USER_MODEL)),
++                (
++                    "members",
++                    django.contrib.postgres.fields.ArrayField(
++                        base_field=models.IntegerField(), blank=True, size=None
++                    ),
++                ),
+             ],
+             options={
+                 'verbose_name': 'Application Assessor Group',
+@@ -413,7 +438,8 @@
+                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                 ('reason', models.TextField(blank=True)),
+                 ('cc_email', models.TextField(null=True)),
+-                ('officer', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
++                # ('officer', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
++                ('officer', models.IntegerField()),
+                 ('proposal', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='mooringlicensing.Proposal')),
+             ],
+         ),
+@@ -451,7 +477,8 @@
+                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                 ('comment', models.TextField(blank=True)),
+                 ('documents', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='onhold_documents', to='mooringlicensing.ProposalDocument')),
+-                ('officer', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
++                # ('officer', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
++                ('officer', models.IntegerField()),
+                 ('proposal', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='mooringlicensing.Proposal')),
+             ],
+         ),
+@@ -504,7 +531,8 @@
+                 ('when', models.DateTimeField(auto_now_add=True)),
+                 ('what', models.TextField()),
+                 ('proposal', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='action_logs', to='mooringlicensing.Proposal')),
+-                ('who', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
++                # ('who', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
++                ('who', models.IntegerField()),
+             ],
+             options={
+                 'ordering': ('-when',),
+@@ -574,15 +602,17 @@
+             fields=[
+                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                 ('organisation', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='mooringlicensing.Organisation')),
+-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
++                # ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
++                ('user', models.IntegerField()),
+             ],
+         ),
+         migrations.CreateModel(
+             name='UserSystemSettings',
+             fields=[
+                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='system_settings', to=settings.AUTH_USER_MODEL)),
+-            ],
++                # ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='system_settings', to=settings.AUTH_USER_MODEL)),
++                ('user', models.IntegerField(unique=True)),  # EmailUserRO
++    ],
+             options={
+                 'verbose_name_plural': 'User System Settings',
+             },
+@@ -623,7 +653,7 @@
+                 ('date_last_reminded', models.DateField(blank=True, null=True)),
+                 ('comment', models.TextField(blank=True)),
+                 ('purpose', models.TextField(blank=True)),
+-                ('assigned_assessor', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
++                # ('assigned_assessor', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+             ],
+             bases=('mooringlicensing.proposalrequest',),
+         ),
+@@ -693,7 +723,8 @@
+         migrations.AddField(
+             model_name='proposalrequest',
+             name='officer',
+-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
++            # field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
++            field=models.IntegerField(),
+         ),
+         migrations.AddField(
+             model_name='proposalrequest',
+@@ -713,12 +744,14 @@
+         migrations.AddField(
+             model_name='proposal',
+             name='assigned_approver',
+-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='mooringlicensing_proposals_approvals', to=settings.AUTH_USER_MODEL),
++            # field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='mooringlicensing_proposals_approvals', to=settings.AUTH_USER_MODEL),
++            field=models.IntegerField(),
+         ),
+         migrations.AddField(
+             model_name='proposal',
+             name='assigned_officer',
+-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='mooringlicensing_proposals_assigned', to=settings.AUTH_USER_MODEL),
++            # field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='mooringlicensing_proposals_assigned', to=settings.AUTH_USER_MODEL),
++            field=models.IntegerField(),
+         ),
+         migrations.AddField(
+             model_name='proposal',
+@@ -733,12 +766,14 @@
+         migrations.AddField(
+             model_name='proposal',
+             name='proxy_applicant',
+-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='mooringlicensing_proxy', to=settings.AUTH_USER_MODEL),
++            # field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='mooringlicensing_proxy', to=settings.AUTH_USER_MODEL),
++            field=models.IntegerField(),
+         ),
+         migrations.AddField(
+             model_name='proposal',
+             name='submitter',
+-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='mooringlicensing_proposals', to=settings.AUTH_USER_MODEL),
++            # field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='mooringlicensing_proposals', to=settings.AUTH_USER_MODEL),
++            field=models.IntegerField(),
+         ),
+         migrations.AddField(
+             model_name='organisation',
+@@ -748,7 +783,8 @@
+         migrations.AddField(
+             model_name='organisation',
+             name='organisation',
+-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='accounts.Organisation'),
++            # field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='accounts.Organisation'),
++            field=models.IntegerField()
+         ),
+         migrations.AddField(
+             model_name='comprequest',
+@@ -758,7 +794,8 @@
+         migrations.AddField(
+             model_name='comprequest',
+             name='officer',
+-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
++            # field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
++            field=models.IntegerField(),
+         ),
+         migrations.AddField(
+             model_name='compliance',
+@@ -768,7 +805,8 @@
+         migrations.AddField(
+             model_name='compliance',
+             name='assigned_to',
+-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='mooringlicensing_compliance_assignments', to=settings.AUTH_USER_MODEL),
++            # field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='mooringlicensing_compliance_assignments', to=settings.AUTH_USER_MODEL),
++            field=models.IntegerField(),
+         ),
+         migrations.AddField(
+             model_name='compliance',
+@@ -783,17 +821,20 @@
+         migrations.AddField(
+             model_name='compliance',
+             name='submitter',
+-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='mooringlicensing_compliances', to=settings.AUTH_USER_MODEL),
++            # field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='mooringlicensing_compliances', to=settings.AUTH_USER_MODEL),
++            field=models.IntegerField(),
+         ),
+         migrations.AddField(
+             model_name='communicationslogentry',
+             name='customer',
+-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='+', to=settings.AUTH_USER_MODEL),
++            # field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='+', to=settings.AUTH_USER_MODEL),
++            field=models.IntegerField(),
+         ),
+         migrations.AddField(
+             model_name='communicationslogentry',
+             name='staff',
+-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='+', to=settings.AUTH_USER_MODEL),
++            # field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='+', to=settings.AUTH_USER_MODEL),
++            field=models.IntegerField(),
+         ),
+         migrations.AddField(
+             model_name='approvaluseraction',
+@@ -803,7 +844,8 @@
+         migrations.AddField(
+             model_name='approvaluseraction',
+             name='who',
+-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
++            # field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
++            field=models.IntegerField(),
+         ),
+         migrations.AddField(
+             model_name='approvaldocument',
+@@ -833,7 +875,8 @@
+         migrations.AddField(
+             model_name='approval',
+             name='proxy_applicant',
+-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='proxy_approvals', to=settings.AUTH_USER_MODEL),
++            # field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='proxy_approvals', to=settings.AUTH_USER_MODEL),
++            field=models.IntegerField(),
+         ),
+         migrations.AddField(
+             model_name='approval',
+@@ -848,7 +891,8 @@
+         migrations.AddField(
+             model_name='approval',
+             name='submitter',
+-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='mooringlicensing_approvals', to=settings.AUTH_USER_MODEL),
++            # field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='mooringlicensing_approvals', to=settings.AUTH_USER_MODEL),
++            field=models.IntegerField(),
+         ),
+         migrations.AlterUniqueTogether(
+             name='userdelegation',

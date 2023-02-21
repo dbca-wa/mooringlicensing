@@ -119,7 +119,10 @@ class DefaultDataManager(object):
             try:
                 types_to_be_deleted = NumberOfDaysType.objects.filter(code__isnull=True)
                 types_to_be_deleted.delete()  # Delete left overs
+            except Exception as e:
+                logger.error('{}'.format(e))
 
+            try:
                 myType, created = NumberOfDaysType.objects.get_or_create(code=item['code'])
                 if created:
                     # Save description
@@ -139,7 +142,8 @@ class DefaultDataManager(object):
                     )
 
             except Exception as e:
-                logger.error('{}, Number of days type: {}'.format(e, myType.name))
+                # logger.error('{}, Number of days type: {}'.format(e, myType.name))
+                logger.error('{}'.format(e))
 
         # Oracle account codes
         today = datetime.datetime.now(pytz.timezone(settings.TIME_ZONE)).date()

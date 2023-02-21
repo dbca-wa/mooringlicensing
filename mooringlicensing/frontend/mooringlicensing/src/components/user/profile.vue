@@ -187,7 +187,7 @@
                           <div class="form-group">
                             <label for="" class="col-sm-3 control-label">Phone (work)</label>
                             <div v-if="profile.is_department_user" class="col-sm-6">
-                               <input :readonly="phoneNumberReadonly || readonly" type="text" class="form-control" id="phone" name="Phone" placeholder="" v-model="profile.phone_number">           
+                               <input :readonly="phoneNumberReadonly || readonly" type="text" class="form-control" id="phone" name="Phone" placeholder="" v-model="profile.phone_number">
                             </div>
                             <div v-else class="col-sm-6">
                                 <input type="text" class="form-control" id="phone" name="Phone" placeholder="" v-model="profile.phone_number">
@@ -229,7 +229,7 @@
                 <div class="col-sm-8">
                     <input :disabled="readonly" type="radio" id="electoral_roll_yes" :value="false" v-model="silentElector"/>
                     <label for="electoral_roll_yes">
-                        Yes, I am on the 
+                        Yes, I am on the
                         <a href="/" @click.prevent="uploadProofElectoralRoll">WA state electoral roll</a>
                     </label>
                 </div>
@@ -253,7 +253,15 @@
                 </div>
             </div>
         </FormSection>
-      </div>
+        </div>
+        <div class="col-sm-12">
+            <div class="well well-sm">
+                <p>
+                    Once completed the form above, click Continue to start using the system.
+                <a :disabled="!completedProfile" href="/" class="btn btn-primary pull-right">Continue</a>
+                </p>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -487,7 +495,7 @@ export default {
             var input = $(vm.$refs.uploadedFile)[0];
             if (input.files && input.files[0]) {
                 var reader = new FileReader();
-                reader.readAsDataURL(input.files[0]); 
+                reader.readAsDataURL(input.files[0]);
                 reader.onload = function(e) {
                     _file = e.target.result;
                 };
@@ -563,7 +571,7 @@ export default {
             });
           }
         },
-        
+
         uploadID: function() {
             let vm = this;
             console.log('uploading id');
@@ -606,7 +614,7 @@ export default {
                 });
             }
         },
-        
+
         updateContact: function() {
             let vm = this;
             vm.missing_fields = [];
@@ -739,8 +747,8 @@ export default {
         fetchOrgRequestList: function() { //Fetch all the Organisation requests submitted by user which are pending for approval.
             let vm = this;
             vm.$http.get(helpers.add_endpoint_json(api_endpoints.organisation_requests,'get_pending_requests')).then((response) => {
-                
-                vm.orgRequest_list=response.body; 
+
+                vm.orgRequest_list=response.body;
             }, (error) => {
                 console.log(error);
             });
@@ -775,7 +783,7 @@ export default {
                 }else {
                     swal(
                         'Validate Pins',
-                        'The pins you entered were incorrect', 
+                        'The pins you entered were incorrect',
                         'error'
                     )
                 }
@@ -949,7 +957,7 @@ export default {
                     )
                 });
             },(error) => {
-            }); 
+            });
         },
         fetchProfile: async function(){
             let response = null;

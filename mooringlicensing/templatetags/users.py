@@ -4,9 +4,10 @@ from django.template import Library
 from django.conf import settings
 from mooringlicensing import helpers as mooringlicensing_helpers
 from mooringlicensing.components.main.models import SystemMaintenance
-from ledger.payments.helpers import is_payment_admin
+# from ledger.payments.helpers import is_payment_admin
 from datetime import datetime, timedelta
 from django.utils import timezone
+from ledger_api_client.helpers import is_payment_admin
 import pytz
 
 register = Library()

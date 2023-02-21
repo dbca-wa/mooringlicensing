@@ -1,7 +1,8 @@
 import os
 
 from io import BytesIO
-from oscar.templatetags.currency_filters import currency
+# from oscar.templatetags.currency_filters import currency
+from ledger_api_client.utils import currency
 from reportlab.lib import enums
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import BaseDocTemplate, PageTemplate, Frame, Paragraph, Spacer, Table, TableStyle, Flowable, FrameBreak
@@ -10,7 +11,8 @@ from reportlab.lib.utils import ImageReader
 from reportlab.lib.units import inch
 from reportlab.lib import colors
 from django.conf import settings
-from ledger.checkout.utils import calculate_excl_gst
+# from ledger.checkout.utils import calculate_excl_gst
+from ledger_api_client.utils import calculate_excl_gst
 from mooringlicensing.components.main.utils import to_local_tz
 from mooringlicensing.components.payments_ml.models import StickerActionFee, FeeItemStickerReplacement
 

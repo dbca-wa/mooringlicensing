@@ -15,9 +15,11 @@ from django.contrib.postgres.fields.jsonb import JSONField
 from django.utils import timezone
 from django.conf import settings
 from django.db.models import Q
-from ledger.settings_base import TIME_ZONE
-from ledger.accounts.models import EmailUser, RevisionedMixin
-from ledger.payments.invoice.models import Invoice
+# from ledger.settings_base import TIME_ZONE
+from mooringlicensing.settings import TIME_ZONE
+# from ledger.accounts.models import EmailUser, RevisionedMixin
+# from ledger.payments.invoice.models import Invoice
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Invoice
 from mooringlicensing.components.approvals.pdf import create_dcv_permit_document, create_dcv_admission_document, \
     create_approval_doc, create_renewal_doc
 from mooringlicensing.components.emails.utils import get_public_url
@@ -26,7 +28,7 @@ from mooringlicensing.components.payments_ml.models import StickerActionFee
 from mooringlicensing.components.proposals.models import Proposal, ProposalUserAction, MooringBay, Mooring, \
     StickerPrintingBatch, StickerPrintingResponse, Vessel, VesselOwnership, ProposalType
 from mooringlicensing.components.main.models import CommunicationsLogEntry, UserAction, Document, \
-    GlobalSettings  # , ApplicationType
+    GlobalSettings, RevisionedMixin  # , ApplicationType
 from mooringlicensing.components.approvals.email import (
     send_approval_expire_email_notification,
     send_approval_cancel_email_notification,
@@ -53,7 +55,7 @@ def update_approval_comms_log_filename(instance, filename):
 
 
 class WaitingListOfferDocument(Document):
-    approval = models.ForeignKey('Approval',related_name='waiting_list_offer_documents')
+    approval = models.ForeignKey('Approval',related_name='waiting_list_offer_documents', on_delete=models.CASCADE)
     _file = models.FileField(max_length=512)
     input_name = models.CharField(max_length=255,null=True,blank=True)
     can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
@@ -66,7 +68,7 @@ class WaitingListOfferDocument(Document):
 
 
 class RenewalDocument(Document):
-    approval = models.ForeignKey('Approval',related_name='renewal_documents')
+    approval = models.ForeignKey('Approval',related_name='renewal_documents', on_delete=models.CASCADE)
     _file = models.FileField(upload_to=update_approval_doc_filename)
     can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
 
@@ -80,7 +82,7 @@ class RenewalDocument(Document):
 
 
 class AuthorisedUserSummaryDocument(Document):
-    approval = models.ForeignKey('Approval', related_name='authorised_user_summary_documents')
+    approval = models.ForeignKey('Approval', related_name='authorised_user_summary_documents', on_delete=models.CASCADE)
     _file = models.FileField(upload_to=update_approval_doc_filename, max_length=512)
 
     class Meta:
@@ -88,7 +90,7 @@ class AuthorisedUserSummaryDocument(Document):
 
 
 class ApprovalDocument(Document):
-    approval = models.ForeignKey('Approval',related_name='documents')
+    approval = models.ForeignKey('Approval',related_name='documents', on_delete=models.CASCADE)
     _file = models.FileField(upload_to=update_approval_doc_filename, max_length=512)
     can_delete = models.BooleanField(default=True) # after initial submit prevent document from being deleted
 
@@ -102,9 +104,9 @@ class ApprovalDocument(Document):
 
 
 class MooringOnApproval(RevisionedMixin):
-    approval = models.ForeignKey('Approval')
-    mooring = models.ForeignKey(Mooring)
-    sticker = models.ForeignKey('Sticker', blank=True, null=True)
+    approval = models.ForeignKey('Approval', on_delete=models.CASCADE)
+    mooring = models.ForeignKey(Mooring, on_delete=models.CASCADE)
+    sticker = models.ForeignKey('Sticker', blank=True, null=True, on_delete=models.SET_NULL)
     site_licensee = models.BooleanField()
     end_date = models.DateField(blank=True, null=True)
 
@@ -130,8 +132,8 @@ class MooringOnApproval(RevisionedMixin):
 
 
 class VesselOwnershipOnApproval(RevisionedMixin):
-    approval = models.ForeignKey('Approval')
-    vessel_ownership = models.ForeignKey(VesselOwnership)
+    approval = models.ForeignKey('Approval', on_delete=models.CASCADE)
+    vessel_ownership = models.ForeignKey(VesselOwnership, on_delete=models.CASCADE)
     end_date = models.DateField(blank=True, null=True)
 
     def __str__(self):
@@ -162,14 +164,14 @@ class ApprovalHistory(RevisionedMixin):
     #reason = models.CharField(max_length=40, choices=REASON_CHOICES, blank=True, null=True)
     reason = models.CharField(max_length=100, blank=True, null=True)
                                        #default=REASON_CHOICES[0][0])
-    approval = models.ForeignKey('Approval')
+    approval = models.ForeignKey('Approval', on_delete=models.CASCADE)
     # can be null due to requirement to allow null vessels on renewal/amendment applications
-    vessel_ownership = models.ForeignKey(VesselOwnership, blank=True, null=True)
-    proposal = models.ForeignKey(Proposal,related_name='approval_history_records')
+    vessel_ownership = models.ForeignKey(VesselOwnership, blank=True, null=True, on_delete=models.SET_NULL)
+    proposal = models.ForeignKey(Proposal, related_name='approval_history_records', on_delete=models.CASCADE)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField(blank=True, null=True)
     stickers = models.ManyToManyField('Sticker')
-    approval_letter = models.ForeignKey(ApprovalDocument, blank=True, null=True)
+    approval_letter = models.ForeignKey(ApprovalDocument, blank=True, null=True, on_delete=models.SET_NULL)
     # derive from proposal
 
     class Meta:
@@ -209,12 +211,12 @@ class Approval(RevisionedMixin):
     status = models.CharField(max_length=40, choices=STATUS_CHOICES,
                                        default=STATUS_CHOICES[0][0])
     internal_status = models.CharField(max_length=40, choices=INTERNAL_STATUS_CHOICES, blank=True, null=True)
-    licence_document = models.ForeignKey(ApprovalDocument, blank=True, null=True, related_name='licence_document')
-    authorised_user_summary_document = models.ForeignKey(AuthorisedUserSummaryDocument, blank=True, null=True, related_name='approvals')
-    cover_letter_document = models.ForeignKey(ApprovalDocument, blank=True, null=True, related_name='cover_letter_document')
-    replaced_by = models.OneToOneField('self', blank=True, null=True, related_name='replace')
-    current_proposal = models.ForeignKey(Proposal,related_name='approvals', null=True)
-    renewal_document = models.ForeignKey(RenewalDocument, blank=True, null=True, related_name='renewal_document')
+    licence_document = models.ForeignKey(ApprovalDocument, blank=True, null=True, related_name='licence_document', on_delete=models.SET_NULL)
+    authorised_user_summary_document = models.ForeignKey(AuthorisedUserSummaryDocument, blank=True, null=True, related_name='approvals', on_delete=models.SET_NULL)
+    cover_letter_document = models.ForeignKey(ApprovalDocument, blank=True, null=True, related_name='cover_letter_document', on_delete=models.SET_NULL)
+    replaced_by = models.OneToOneField('self', blank=True, null=True, related_name='replace', on_delete=models.SET_NULL)
+    current_proposal = models.ForeignKey(Proposal,related_name='approvals', null=True, on_delete=models.SET_NULL)
+    renewal_document = models.ForeignKey(RenewalDocument, blank=True, null=True, related_name='renewal_document', on_delete=models.SET_NULL)
     renewal_sent = models.BooleanField(default=False)
     issue_date = models.DateTimeField()
     wla_queue_date = models.DateTimeField(blank=True, null=True)
@@ -224,8 +226,8 @@ class Approval(RevisionedMixin):
     surrender_details = JSONField(blank=True,null=True)
     suspension_details = JSONField(blank=True,null=True)
     submitter = models.ForeignKey(EmailUser, on_delete=models.PROTECT, blank=True, null=True, related_name='mooringlicensing_approvals')
-    org_applicant = models.ForeignKey(Organisation,on_delete=models.PROTECT, blank=True, null=True, related_name='org_approvals')
-    proxy_applicant = models.ForeignKey(EmailUser,on_delete=models.PROTECT, blank=True, null=True, related_name='proxy_approvals')
+    org_applicant = models.ForeignKey(Organisation, on_delete=models.PROTECT, blank=True, null=True, related_name='org_approvals')
+    proxy_applicant = models.ForeignKey(EmailUser, on_delete=models.PROTECT, blank=True, null=True, related_name='proxy_approvals')
     extracted_fields = JSONField(blank=True, null=True)
     cancellation_details = models.TextField(blank=True)
     extend_details = models.TextField(blank=True)
@@ -926,7 +928,7 @@ class Approval(RevisionedMixin):
 
 
 class WaitingListAllocation(Approval):
-    approval = models.OneToOneField(Approval, parent_link=True)
+    approval = models.OneToOneField(Approval, parent_link=True, on_delete=models.PROTECT)
     code = 'wla'
     prefix = 'WLA'
     description = 'Waiting List Allocation'
@@ -1008,7 +1010,7 @@ class WaitingListAllocation(Approval):
 
 
 class AnnualAdmissionPermit(Approval):
-    approval = models.OneToOneField(Approval, parent_link=True)
+    approval = models.OneToOneField(Approval, parent_link=True, on_delete=models.PROTECT)
     code = 'aap'
     prefix = 'AAP'
     description = 'Annual Admission Permit'
@@ -1161,7 +1163,7 @@ class AnnualAdmissionPermit(Approval):
 
 
 class AuthorisedUserPermit(Approval):
-    approval = models.OneToOneField(Approval, parent_link=True)
+    approval = models.OneToOneField(Approval, parent_link=True, on_delete=models.PROTECT)
     code = 'aup'
     prefix = 'AUP'
     description = 'Authorised User Permit'
@@ -1532,7 +1534,7 @@ class AuthorisedUserPermit(Approval):
 
 
 class MooringLicence(Approval):
-    approval = models.OneToOneField(Approval, parent_link=True)
+    approval = models.OneToOneField(Approval, parent_link=True, on_delete=models.PROTECT)
     code = 'ml'
     prefix = 'MOL'
     description = 'Mooring Licence'
@@ -1896,7 +1898,7 @@ class PreviewTempApproval(Approval):
 
 
 class ApprovalLogEntry(CommunicationsLogEntry):
-    approval = models.ForeignKey(Approval, related_name='comms_logs')
+    approval = models.ForeignKey(Approval, related_name='comms_logs', on_delete=models.CASCADE)
 
     class Meta:
         app_label = 'mooringlicensing'
@@ -1908,7 +1910,7 @@ class ApprovalLogEntry(CommunicationsLogEntry):
         super(ApprovalLogEntry, self).save(**kwargs)
 
 class ApprovalLogDocument(Document):
-    log_entry = models.ForeignKey('ApprovalLogEntry',related_name='documents', null=True,)
+    log_entry = models.ForeignKey('ApprovalLogEntry',related_name='documents', null=True, on_delete=models.CASCADE)
     _file = models.FileField(upload_to=update_approval_comms_log_filename, null=True, max_length=512)
 
     class Meta:
@@ -1941,10 +1943,10 @@ class ApprovalUserAction(UserAction):
             what=str(action)
         )
 
-    who = models.ForeignKey(EmailUser, null=True, blank=True)
+    who = models.ForeignKey(EmailUser, null=True, blank=True, on_delete=models.PROTECT)
     when = models.DateTimeField(null=False, blank=False, auto_now_add=True)
     what = models.TextField(blank=False)
-    approval= models.ForeignKey(Approval, related_name='action_logs')
+    approval= models.ForeignKey(Approval, related_name='action_logs', on_delete=models.PROTECT)
 
 
 class DcvOrganisation(RevisionedMixin):
@@ -1961,7 +1963,7 @@ class DcvOrganisation(RevisionedMixin):
 class DcvVessel(RevisionedMixin):
     rego_no = models.CharField(max_length=200, unique=True, blank=True, null=True)
     vessel_name = models.CharField(max_length=400, blank=True)
-    dcv_organisation = models.ForeignKey(DcvOrganisation, blank=True, null=True)
+    dcv_organisation = models.ForeignKey(DcvOrganisation, blank=True, null=True, on_delete=models.SET_NULL)
 
     def __str__(self):
         return self.rego_no
@@ -1973,12 +1975,12 @@ class DcvVessel(RevisionedMixin):
 class DcvAdmission(RevisionedMixin):
     LODGEMENT_NUMBER_PREFIX = 'DCV'
 
-    submitter = models.ForeignKey(EmailUser, blank=True, null=True, related_name='dcv_admissions')
+    submitter = models.ForeignKey(EmailUser, blank=True, null=True, related_name='dcv_admissions', on_delete=models.SET_NULL)
     lodgement_number = models.CharField(max_length=10, blank=True, unique=True)
     lodgement_datetime = models.DateTimeField(blank=True, null=True)  # This is the datetime when payment
     skipper = models.CharField(max_length=50, blank=True, null=True)
     contact_number = models.CharField(max_length=50, blank=True, null=True)
-    dcv_vessel = models.ForeignKey(DcvVessel, blank=True, null=True, related_name='dcv_admissions')
+    dcv_vessel = models.ForeignKey(DcvVessel, blank=True, null=True, related_name='dcv_admissions', on_delete=models.SET_NULL)
 
     class Meta:
         app_label = 'mooringlicensing'
@@ -2044,11 +2046,11 @@ class DcvAdmission(RevisionedMixin):
 
 
 class DcvAdmissionArrival(RevisionedMixin):
-    dcv_admission = models.ForeignKey(DcvAdmission, null=True, blank=True, related_name='dcv_admission_arrivals')
+    dcv_admission = models.ForeignKey(DcvAdmission, null=True, blank=True, related_name='dcv_admission_arrivals', on_delete=models.SET_NULL)
     arrival_date = models.DateField(null=True, blank=True)
     departure_date = models.DateField(null=True, blank=True)
     private_visit = models.BooleanField(default=False)
-    fee_season = models.ForeignKey('FeeSeason', null=True, blank=True)
+    fee_season = models.ForeignKey('FeeSeason', null=True, blank=True, on_delete=models.SET_NULL)
     start_date = models.DateField(null=True, blank=True)  # This is the season.start_date when payment
     end_date = models.DateField(null=True, blank=True)  # This is the season.end_date when payment
     fee_constructor = models.ForeignKey('FeeConstructor', on_delete=models.PROTECT, blank=True, null=True, related_name='dcv_admission_arrivals')
@@ -2133,9 +2135,9 @@ class AdmissionType(models.Model):
 
 class NumberOfPeople(RevisionedMixin):
     number = models.PositiveSmallIntegerField(null=True, blank=True, default=0)
-    dcv_admission_arrival = models.ForeignKey(DcvAdmissionArrival, null=True, blank=True)
-    age_group = models.ForeignKey(AgeGroup, null=True, blank=True)
-    admission_type = models.ForeignKey(AdmissionType, null=True, blank=True)
+    dcv_admission_arrival = models.ForeignKey(DcvAdmissionArrival, null=True, blank=True, on_delete=models.SET_NULL)
+    age_group = models.ForeignKey(AgeGroup, null=True, blank=True, on_delete=models.SET_NULL)
+    admission_type = models.ForeignKey(AdmissionType, null=True, blank=True, on_delete=models.SET_NULL)
 
     class Meta:
         app_label = 'mooringlicensing'
@@ -2155,14 +2157,14 @@ class DcvPermit(RevisionedMixin):
     )
     LODGEMENT_NUMBER_PREFIX = 'DCVP'
 
-    submitter = models.ForeignKey(EmailUser, blank=True, null=True, related_name='dcv_permits')
+    submitter = models.ForeignKey(EmailUser, blank=True, null=True, related_name='dcv_permits', on_delete=models.SET_NULL)
     lodgement_number = models.CharField(max_length=10, blank=True, unique=True)
     lodgement_datetime = models.DateTimeField(blank=True, null=True)  # This is the datetime when payment
-    fee_season = models.ForeignKey('FeeSeason', null=True, blank=True, related_name='dcv_permits')
+    fee_season = models.ForeignKey('FeeSeason', null=True, blank=True, related_name='dcv_permits', on_delete=models.SET_NULL)
     start_date = models.DateField(null=True, blank=True)  # This is the season.start_date when payment
     end_date = models.DateField(null=True, blank=True)  # This is the season.end_date when payment
-    dcv_vessel = models.ForeignKey(DcvVessel, blank=True, null=True, related_name='dcv_permits')
-    dcv_organisation = models.ForeignKey(DcvOrganisation, blank=True, null=True)
+    dcv_vessel = models.ForeignKey(DcvVessel, blank=True, null=True, related_name='dcv_permits', on_delete=models.SET_NULL)
+    dcv_organisation = models.ForeignKey(DcvOrganisation, blank=True, null=True, on_delete=models.SET_NULL)
     renewal_sent = models.BooleanField(default=False)
     migrated = models.BooleanField(default=False)
 
@@ -2342,7 +2344,7 @@ def update_dcv_permit_doc_filename(instance, filename):
 
 
 class DcvAdmissionDocument(Document):
-    dcv_admission = models.ForeignKey(DcvAdmission, related_name='admissions')
+    dcv_admission = models.ForeignKey(DcvAdmission, related_name='admissions', on_delete=models.PROTECT)
     _file = models.FileField(upload_to=update_dcv_admission_doc_filename, max_length=512)
     can_delete = models.BooleanField(default=False)  # after initial submit prevent document from being deleted
 
@@ -2356,7 +2358,7 @@ class DcvAdmissionDocument(Document):
 
 
 class DcvPermitDocument(Document):
-    dcv_permit = models.ForeignKey(DcvPermit, related_name='permits')
+    dcv_permit = models.ForeignKey(DcvPermit, related_name='permits', on_delete=models.PROTECT)
     _file = models.FileField(upload_to=update_dcv_permit_doc_filename, max_length=512)
     can_delete = models.BooleanField(default=False)  # after initial submit prevent document from being deleted
 
@@ -2419,17 +2421,17 @@ class Sticker(models.Model):
     ]
     number = models.CharField(max_length=9, blank=True, default='')
     status = models.CharField(max_length=40, choices=STATUS_CHOICES, default=STATUS_CHOICES[0][0])
-    sticker_printing_batch = models.ForeignKey(StickerPrintingBatch, blank=True, null=True)  # When None, most probably 'awaiting_
-    sticker_printing_response = models.ForeignKey(StickerPrintingResponse, blank=True, null=True)
-    approval = models.ForeignKey(Approval, blank=True, null=True, related_name='stickers')  # Sticker links to either approval or dcv_permit, never to both.
-    dcv_permit = models.ForeignKey(DcvPermit, blank=True, null=True, related_name='stickers')
+    sticker_printing_batch = models.ForeignKey(StickerPrintingBatch, blank=True, null=True, on_delete=models.SET_NULL)  # When None, most probably 'awaiting_
+    sticker_printing_response = models.ForeignKey(StickerPrintingResponse, blank=True, null=True, on_delete=models.SET_NULL)
+    approval = models.ForeignKey(Approval, blank=True, null=True, related_name='stickers', on_delete=models.SET_NULL)  # Sticker links to either approval or dcv_permit, never to both.
+    dcv_permit = models.ForeignKey(DcvPermit, blank=True, null=True, related_name='stickers', on_delete=models.SET_NULL)
     printing_date = models.DateField(blank=True, null=True)  # The day this sticker printed
     mailing_date = models.DateField(blank=True, null=True)  # The day this sticker sent
-    fee_constructor = models.ForeignKey('FeeConstructor', blank=True, null=True)
-    fee_season = models.ForeignKey('FeeSeason', blank=True, null=True)
-    vessel_ownership = models.ForeignKey('VesselOwnership', blank=True, null=True)
-    proposal_initiated = models.ForeignKey('Proposal', blank=True, null=True)  # This propposal created this sticker object.  Can be None when sticker created by RequestNewSticker action or so.
-    sticker_to_replace = models.ForeignKey('self', null=True, blank=True)  # This sticker object replaces the sticker_to_replace for renewal
+    fee_constructor = models.ForeignKey('FeeConstructor', blank=True, null=True, on_delete=models.SET_NULL)
+    fee_season = models.ForeignKey('FeeSeason', blank=True, null=True, on_delete=models.SET_NULL)
+    vessel_ownership = models.ForeignKey('VesselOwnership', blank=True, null=True, on_delete=models.SET_NULL)
+    proposal_initiated = models.ForeignKey('Proposal', blank=True, null=True, on_delete=models.SET_NULL)  # This propposal created this sticker object.  Can be None when sticker created by RequestNewSticker action or so.
+    sticker_to_replace = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL)  # This sticker object replaces the sticker_to_replace for renewal
 
     class Meta:
         app_label = 'mooringlicensing'
@@ -2643,15 +2645,15 @@ class Sticker(models.Model):
 
 
 class StickerActionDetail(models.Model):
-    sticker = models.ForeignKey(Sticker, blank=True, null=True, related_name='sticker_action_details')
+    sticker = models.ForeignKey(Sticker, blank=True, null=True, related_name='sticker_action_details', on_delete=models.SET_NULL)
     reason = models.TextField(blank=True)
     date_created = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     date_updated = models.DateTimeField(blank=True, null=True, auto_now=True)
     date_of_lost_sticker = models.DateField(blank=True, null=True)
     date_of_returned_sticker = models.DateField(blank=True, null=True)
     action = models.CharField(max_length=50, null=True, blank=True)
-    user = models.ForeignKey(EmailUser, null=True, blank=True)
-    sticker_action_fee = models.ForeignKey(StickerActionFee, null=True, blank=True, related_name='sticker_action_details')
+    user = models.ForeignKey(EmailUser, null=True, blank=True, on_delete=models.SET_NULL)
+    sticker_action_fee = models.ForeignKey(StickerActionFee, null=True, blank=True, related_name='sticker_action_details', on_delete=models.SET_NULL)
 
     class Meta:
         app_label = 'mooringlicensing'

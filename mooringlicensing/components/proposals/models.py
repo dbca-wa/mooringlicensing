@@ -8,35 +8,40 @@ import traceback
 
 import pytz
 import uuid
-from ledger.settings_base import TIME_ZONE
-from ledger.payments.pdf import create_invoice_pdf_bytes
+# from ledger.settings_base import TIME_ZONE
+from mooringlicensing.settings import TIME_ZONE
+# from ledger.payments.pdf import create_invoice_pdf_bytes
+from ledger_api_client.pdf import create_invoice_pdf_bytes
 from django.db import models, transaction
 from django.dispatch import receiver
 from django.db.models.signals import pre_delete
-from django.utils.encoding import python_2_unicode_compatible
+# from django.utils.encoding import python_2_unicode_compatible
 from django.core.exceptions import ValidationError, ObjectDoesNotExist, ImproperlyConfigured
 from django.contrib.postgres.fields.jsonb import JSONField
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.auth.models import Group
 from django.utils import timezone
 from django.conf import settings
-from django.core.urlresolvers import reverse
-from ledger.accounts.models import EmailUser, RevisionedMixin
+# from django.core.urlresolvers import reverse
+from django.urls import reverse
+# from ledger.accounts.models import EmailUser, RevisionedMixin
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser
+# from ledger.payments.invoice.models import Invoice
+from ledger_api_client.ledger_models import Invoice
 from mooringlicensing import exceptions
 from mooringlicensing.components.organisations.models import Organisation
 from mooringlicensing.components.main.models import (
     CommunicationsLogEntry,
     UserAction,
-    Document, ApplicationType, NumberOfDaysType, NumberOfDaysSetting,
+    Document, ApplicationType, NumberOfDaysType, NumberOfDaysSetting, RevisionedMixin,
 )
 from mooringlicensing.components.main.decorators import (
         basic_exception_handler, 
         timeit, 
         query_debugger
         )
-from ledger.checkout.utils import createCustomBasket
-from ledger.payments.invoice.models import Invoice
-from ledger.payments.invoice.utils import CreateInvoiceBasket
+# from ledger.checkout.utils import createCustomBasket
+# from ledger.payments.invoice.utils import CreateInvoiceBasket
 
 from mooringlicensing.components.proposals.email import (
     send_application_approved_or_declined_email,
@@ -322,7 +327,7 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
     listed_vessels = models.ManyToManyField('VesselOwnership', 'listed_on_proposals')
     keep_existing_vessel = models.BooleanField(default=True)
 
-    fee_season = models.ForeignKey('FeeSeason', null=True, blank=True)  # In some case, proposal doesn't have any fee related objects.  Which results in the impossibility to retrieve season, start_date, end_date, etc.
+    fee_season = models.ForeignKey('FeeSeason', null=True, blank=True, on_delete=models.SET_NULL)  # In some case, proposal doesn't have any fee related objects.  Which results in the impossibility to retrieve season, start_date, end_date, etc.
                                                                         # To prevent that, fee_season is used in order to store those data.
     auto_approve = models.BooleanField(default=False)
     null_vessel_on_create = models.BooleanField(default=True)
@@ -1615,6 +1620,9 @@ class Proposal(DirtyFieldsMixin, RevisionedMixin):
                         try:
                             logger.info('Creating invoice for the application: {}'.format(self))
 
+                            # Following two lines are for future invoicing.
+                            # However because we need to segregate 'ledger' from this system, we cannot use these two functions.
+                            # TODO: Review and rewrite to create an invoice with ledger_client_api.
                             basket = createCustomBasket(line_items, self.submitter, PAYMENT_SYSTEM_ID)
                             order = CreateInvoiceBasket(payment_method='other', system=PAYMENT_SYSTEM_PREFIX).create_invoice_and_order(
                                 basket, 0, None, None, user=self.submitter, invoice_text='Payment Invoice')
@@ -3868,7 +3876,8 @@ class AmendmentRequest(ProposalRequest):
 
 class ProposalDeclinedDetails(models.Model):
     proposal = models.OneToOneField(Proposal, null=True, on_delete=models.SET_NULL)
-    officer = models.ForeignKey(EmailUser, null=True, on_delete=models.SET_NULL)
+    # officer = models.ForeignKey(EmailUser, null=True, on_delete=models.SET_NULL)
+    officer = models.IntegerField()
     reason = models.TextField(blank=True)
     cc_email = models.TextField(null=True)
 
@@ -3876,7 +3885,7 @@ class ProposalDeclinedDetails(models.Model):
         app_label = 'mooringlicensing'
 
 
-@python_2_unicode_compatible
+# @python_2_unicode_compatible
 class ProposalStandardRequirement(RevisionedMixin):
     text = models.TextField()
     code = models.CharField(max_length=10, unique=True)

@@ -1,6 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from ledger.accounts.models import EmailUser
+# from ledger.accounts.models import EmailUser
 from mooringlicensing.components.proposals.models import HelpPage #ProposalAssessorGroup,ProposalApproverGroup
 from mooringlicensing.components.main.models import SystemMaintenance
 from ckeditor.widgets import CKEditorWidget

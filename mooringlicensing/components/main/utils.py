@@ -1,5 +1,6 @@
 from io import BytesIO
-from ledger.settings_base import TIME_ZONE
+# from ledger.settings_base import TIME_ZONE
+from ledger_api_client.settings_base import TIME_ZONE
 from django.utils import timezone
 from confy import env
 

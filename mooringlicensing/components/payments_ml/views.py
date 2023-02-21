@@ -1,11 +1,12 @@
 import datetime
 import logging
-from ledger.checkout.utils import calculate_excl_gst
+# from ledger.checkout.utils import calculate_excl_gst
 import pytz
 import json
-from ledger.settings_base import TIME_ZONE
+# from ledger.settings_base import TIME_ZONE
+from mooringlicensing.settings import TIME_ZONE
 from decimal import *
-from ledger.payments.bpoint.models import BpointTransaction, BpointToken
+# from ledger.payments.bpoint.models import BpointTransaction
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from mooringlicensing.components.main.models import ApplicationType
 from mooringlicensing.components.payments_ml.invoice_pdf import create_invoice_pdf_bytes
@@ -14,16 +15,19 @@ from rest_framework.response import Response
 import dateutil.parser
 from django.db import transaction
 from django.http import HttpResponse, HttpResponseRedirect
-from django.core.urlresolvers import reverse
+# from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
 from django.views.generic import TemplateView
-from ledger.basket.models import Basket
-from ledger.payments.invoice.models import Invoice
-from ledger.payments.utils import update_payments
-#from oscar.apps.order.models import Order
-from ledger.order.models import Order
+# from ledger.basket.models import Basket
+# from ledger.payments.invoice.models import Invoice
+from ledger_api_client.ledger_models import Invoice, Basket
+# from ledger.payments.utils import update_payments
+from ledger_api_client.utils import update_payments, calculate_excl_gst
+# from oscar.apps.order.models import Order
+from ledger_api_client.order import Order
 
 from mooringlicensing import settings
 from mooringlicensing.components.approvals.models import DcvPermit, DcvAdmission, Approval, StickerActionDetail, Sticker
@@ -871,7 +875,7 @@ class RefundProposalHistoryView(LoginRequiredMixin, TemplateView):
              return render(request, self.template_name,context)
         else:
              messages.error(self.request, 'Permission denied.')
-             return HttpResponseRedirect(reverse('home')) 
+             return HttpResponseRedirect(reverse('home'))
 
     #def get_newest_booking(self, booking_id):
     #    latest_id = booking_id
@@ -903,9 +907,9 @@ class RefundProposalHistoryView(LoginRequiredMixin, TemplateView):
                      if trans.action == 'payment':
                             if trans.txn_number not in bpoint_trans_totals:
                                    bpoint_trans_totals[trans.txn_number] = {'crn1': '', 'amount': Decimal('0.00')}
-                             
+
                             total_bpoint_amount_available = total_bpoint_amount_available + trans.amount
-                            bpoint_trans_totals[trans.txn_number]['amount'] = bpoint_trans_totals[trans.txn_number]['amount'] + trans.amount 
+                            bpoint_trans_totals[trans.txn_number]['amount'] = bpoint_trans_totals[trans.txn_number]['amount'] + trans.amount
                             bpoint_trans_totals[trans.txn_number]['crn1'] = trans.crn1
                      if trans.action == 'refund':
                             if trans.original_txn not in bpoint_trans_totals:
@@ -929,7 +933,7 @@ class RefundProposalHistoryView(LoginRequiredMixin, TemplateView):
                              pass
                         else:
                              if ol.oracle_code not in unique_oracle_code_on_booking:
-                                 unique_oracle_code_on_booking[ol.oracle_code] = Decimal('0.00') 
+                                 unique_oracle_code_on_booking[ol.oracle_code] = Decimal('0.00')
 
                              unique_oracle_code_on_booking[ol.oracle_code] = unique_oracle_code_on_booking[ol.oracle_code] + Decimal(ol.line_price_incl_tax)
 #                             unique_oracle_code_on_booking[ol.oracle_code] = float("%.2f".format(str(unique_oracle_code_on_booking[ol.oracle_code])))
@@ -942,11 +946,11 @@ class RefundProposalHistoryView(LoginRequiredMixin, TemplateView):
         #UNALLOCATED_ORACLE_CODE
 
         invoice_line_items_array.sort(key=lambda item:item['order_date_placed'], reverse=False)
-       
+
         for il in invoice_line_items_array:
             rolling_total = Decimal(rolling_total) + Decimal(il['line_price_incl_tax'])
             il['rolling_total'] = rolling_total
-        
+
         booking_balance_issue = False
         if rolling_total < 0:
             booking_balance_issue = True
@@ -958,7 +962,7 @@ class RefundProposalHistoryView(LoginRequiredMixin, TemplateView):
         booking.invoices =()
         booking_invoices= ApplicationFee.objects.filter(proposal=booking)
         booking_array.append({'booking': booking, 'invoices': booking_invoices})
- 
+
         #if booking.old_booking:
          #    self.get_history(booking.old_booking.id, booking_array)
         return booking_array
@@ -991,7 +995,7 @@ class ProposalPaymentHistoryView(LoginRequiredMixin, TemplateView):
     #def get_newest_booking(self, booking_id):
     #    latest_id = booking_id
     #    if Booking.objects.filter(old_booking=booking_id).exclude(booking_type=3).count() > 0:
-    #        booking = Booking.objects.filter(old_booking=booking_id)[0]   
+    #        booking = Booking.objects.filter(old_booking=booking_id)[0]
     #        latest_id = self.get_newest_booking(booking.id)
     #    return latest_id
 
@@ -999,7 +1003,7 @@ class ProposalPaymentHistoryView(LoginRequiredMixin, TemplateView):
         booking = Proposal.objects.get(pk=booking_id)
         booking.invoices =()
         #booking.invoices = BookingInvoice.objects.filter(booking=booking)
-        booking_invoices= ApplicationFee.objects.filter(proposal=booking) 
+        booking_invoices= ApplicationFee.objects.filter(proposal=booking)
 #        for bi in booking_invoices:
 #            print bi
 #            booking.invoices.add(bi)

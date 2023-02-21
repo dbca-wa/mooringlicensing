@@ -4,9 +4,10 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group
 from django.conf import settings
 
-from ledger.accounts import admin as ledger_admin
+# from ledger.accounts import admin as ledger_admin
 #from ledger.accounts.models import EmailUser, Document, Address, Profile
-from ledger.accounts.models import EmailUser
+# from ledger.accounts.models import EmailUser
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser
 from copy import deepcopy
 
 
@@ -17,9 +18,10 @@ class MooringLicensingAdminSite(AdminSite):
 
 mooringlicensing_admin_site = MooringLicensingAdminSite(name='mooringlicensingadmin')
 
-admin.site.unregister(EmailUser) # because this base classAdmin alsready registered in ledger.accounts.admin
+# admin.site.unregister(EmailUser) # because this base classAdmin alsready registered in ledger.accounts.admin
 @admin.register(EmailUser)
-class EmailUserAdmin(ledger_admin.EmailUserAdmin):
+class EmailUserAdmin(admin.ModelAdmin):
+# class EmailUserAdmin(ledger_admin.EmailUserAdmin):
     """
     Overriding the EmailUserAdmin from ledger.accounts.admin, to remove is_superuser checkbox field on Admin page
     """

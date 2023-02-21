@@ -1,60 +1,63 @@
 import traceback
-import base64
-import geojson
-from six.moves.urllib.parse import urlparse
-from wsgiref.util import FileWrapper
+# import base64
+# import geojson
+# from six.moves.urllib.parse import urlparse
+# from wsgiref.util import FileWrapper
 from django.db.models import Q, Min, CharField, Value
 from django.db.models.functions import Concat
 from django.db import transaction
-from django.http import HttpResponse
-from django.core.files.base import ContentFile
+# from django.http import HttpResponse
+# from django.core.files.base import ContentFile
 from django.core.exceptions import ValidationError
 from django.conf import settings
-from django.contrib import messages
-from django.views.decorators.http import require_http_methods
-from django.views.decorators.csrf import csrf_exempt
-from django.utils import timezone
+# from django.contrib import messages
+# from django.views.decorators.http import require_http_methods
+# from django.views.decorators.csrf import csrf_exempt
+# from django.utils import timezone
 from django_countries import countries
 from rest_framework import viewsets, serializers, status, generics, views
-from rest_framework.decorators import detail_route, list_route,renderer_classes
+# from rest_framework.decorators import detail_route, list_route,renderer_classes
+from rest_framework.decorators import action as detail_route
+# from rest_framework.decorators import action as list_route
+from rest_framework.decorators import renderer_classes
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer
-from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser, BasePermission
-from rest_framework.pagination import PageNumberPagination
-from datetime import datetime, timedelta
-from collections import OrderedDict
+# from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser, BasePermission
+# from rest_framework.pagination import PageNumberPagination
+# from datetime import datetime, timedelta
+# from collections import OrderedDict
 from django.core.cache import cache
-from ledger.accounts.models import EmailUser,Address, Profile, EmailIdentity, EmailUserAction
-from ledger.address.models import Country
-from datetime import datetime,timedelta, date
-from mooringlicensing.components.main.decorators import (
-        basic_exception_handler, 
-        timeit, 
-        query_debugger
-        )
-from mooringlicensing.components.organisations.models import  (
-                                    Organisation,
-                                )
+# from ledger.accounts.models import EmailUser,Address, Profile, EmailIdentity, EmailUserAction
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Address
+# from ledger.address.models import Country
+# from datetime import datetime,timedelta, date
+# from mooringlicensing.components.main.decorators import (
+#         basic_exception_handler,
+#         timeit,
+#         query_debugger
+#         )
+# from mooringlicensing.components.organisations.models import  (
+#                                     Organisation,
+#                                 )
 from mooringlicensing.components.proposals.serializers import EmailUserAppViewSerializer
-
-from mooringlicensing.components.users.serializers import   (
-                                                UserSerializer,
-                                                UserFilterSerializer,
-                                                UserAddressSerializer,
-                                                PersonalSerializer,
-                                                ContactSerializer,
-                                                EmailUserActionSerializer,
-                                                EmailUserCommsSerializer,
-                                                EmailUserLogEntrySerializer,
-                                                UserSystemSettingsSerializer,
-                                            )
+from mooringlicensing.components.users.serializers import (
+    UserSerializer,
+    UserFilterSerializer,
+    UserAddressSerializer,
+    PersonalSerializer,
+    ContactSerializer,
+    # EmailUserActionSerializer,
+    EmailUserCommsSerializer,
+    EmailUserLogEntrySerializer,
+    UserSystemSettingsSerializer,
+)
 from mooringlicensing.components.organisations.serializers import (
     OrganisationRequestDTSerializer,
 )
 from mooringlicensing.components.main.models import UserSystemSettings
-from mooringlicensing.components.main.process_document import (
-        process_generic_document, 
-        )
+# from mooringlicensing.components.main.process_document import (
+#         process_generic_document,
+#         )
 
 import logging
 logger = logging.getLogger('mooringlicensing')
@@ -152,7 +155,7 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = EmailUser.objects.all()
     serializer_class = UserSerializer
 
-    @detail_route(methods=['POST',])
+    @detail_route(methods=['POST',], detail=True)
     def update_personal(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -171,7 +174,7 @@ class UserViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['POST',])
+    @detail_route(methods=['POST',], detail=True)
     def update_contact(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -190,7 +193,7 @@ class UserViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['POST',])
+    @detail_route(methods=['POST',], detail=True)
     def update_address(self, request, *args, **kwargs):
         try:
             with transaction.atomic():
@@ -247,7 +250,7 @@ class UserViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['POST',])
+    @detail_route(methods=['POST',], detail=True)
     def update_system_settings(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -270,15 +273,18 @@ class UserViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['POST',])
+    @detail_route(methods=['POST',], detail=True)
     def upload_id(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
             instance.upload_identification(request)
             with transaction.atomic():
                 instance.save()
-                instance.log_user_action(EmailUserAction.ACTION_ID_UPDATE.format(
-                '{} {} ({})'.format(instance.first_name, instance.last_name, instance.email)), request)
+
+                # TODO: log user action
+                # instance.log_user_action(EmailUserAction.ACTION_ID_UPDATE.format(
+                # '{} {} ({})'.format(instance.first_name, instance.last_name, instance.email)), request)
+
             serializer = UserSerializer(instance, partial=True)
             return Response(serializer.data)
         except serializers.ValidationError:
@@ -291,7 +297,7 @@ class UserViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['GET', ])
+    @detail_route(methods=['GET', ], detail=True)
     def pending_org_requests(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -311,13 +317,15 @@ class UserViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['GET', ])
+    @detail_route(methods=['GET', ], detail=True)
     def action_log(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
             qs = instance.action_logs.all()
-            serializer = EmailUserActionSerializer(qs, many=True)
-            return Response(serializer.data)
+
+            # TODO: return a list of user actions
+            # serializer = EmailUserActionSerializer(qs, many=True)
+            # return Response(serializer.data)
         except serializers.ValidationError:
             print(traceback.print_exc())
             raise
@@ -328,7 +336,7 @@ class UserViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['GET',])
+    @detail_route(methods=['GET',], detail=True)
     def comms_log(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -345,7 +353,7 @@ class UserViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['POST',])
+    @detail_route(methods=['POST',], detail=True)
     @renderer_classes((JSONRenderer,))
     def add_comms_log(self, request, *args, **kwargs):
         try:

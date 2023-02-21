@@ -2,7 +2,7 @@ import logging
 
 from django.core.mail import EmailMultiAlternatives, EmailMessage
 from django.utils.encoding import smart_text
-from django.core.urlresolvers import reverse
+# from django.core.urlresolvers import reverse
 from django.conf import settings
 
 from mooringlicensing.components.emails.emails import TemplateEmailBase

@@ -8,9 +8,11 @@ from dateutil.relativedelta import relativedelta
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Min
-from ledger.accounts.models import RevisionedMixin, EmailUser
-from ledger.payments.invoice.models import Invoice
-from ledger.settings_base import TIME_ZONE
+# from ledger.accounts.models import RevisionedMixin, EmailUser
+# from ledger.payments.invoice.models import Invoice
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Invoice
+# from ledger.settings_base import TIME_ZONE
+from mooringlicensing.settings import TIME_ZONE
 
 from mooringlicensing import settings
 from mooringlicensing.components.main.models import ApplicationType, VesselSizeCategoryGroup, VesselSizeCategory
@@ -167,9 +169,9 @@ class StickerActionFee(Payment):
 
 
 class FeeItemApplicationFee(models.Model):
-    fee_item = models.ForeignKey('FeeItem',)
-    application_fee = models.ForeignKey('ApplicationFee',)
-    vessel_details = models.ForeignKey(VesselDetails, null=True, blank=True)
+    fee_item = models.ForeignKey('FeeItem', on_delete=models.CASCADE)
+    application_fee = models.ForeignKey('ApplicationFee', on_delete=models.CASCADE)
+    vessel_details = models.ForeignKey(VesselDetails, null=True, blank=True, on_delete=models.SET_NULL)
     amount_to_be_paid = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True, default=None)
     amount_paid = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True, default=None)
 
@@ -216,7 +218,7 @@ class ApplicationFee(Payment):
 
 
 class FeeSeason(models.Model):
-    application_type = models.ForeignKey(ApplicationType, null=True, blank=True, limit_choices_to={'fee_by_fee_constructor': True})
+    application_type = models.ForeignKey(ApplicationType, null=True, blank=True, limit_choices_to={'fee_by_fee_constructor': True}, on_delete=models.SET_NULL)
     name = models.CharField(max_length=50, null=False, blank=False)
 
     def __str__(self):
@@ -257,7 +259,7 @@ class FeeSeason(models.Model):
 
 
 class FeePeriod(models.Model):
-    fee_season = models.ForeignKey(FeeSeason, null=True, blank=True, related_name='fee_periods')
+    fee_season = models.ForeignKey(FeeSeason, null=True, blank=True, related_name='fee_periods', on_delete=models.SET_NULL)
     name = models.CharField(max_length=50, null=True, blank=True, default='')
     start_date = models.DateField(null=True, blank=True)
 
@@ -276,7 +278,7 @@ class FeePeriod(models.Model):
 
 
 class FeeConstructor(models.Model):
-    application_type = models.ForeignKey(ApplicationType, null=False, blank=False, limit_choices_to={'fee_by_fee_constructor': True})
+    application_type = models.ForeignKey(ApplicationType, null=False, blank=False, limit_choices_to={'fee_by_fee_constructor': True}, on_delete=models.PROTECT)
     fee_season = ChainedForeignKey(FeeSeason,
                                    chained_field='application_type',
                                    chained_model_field='application_type',
@@ -286,7 +288,7 @@ class FeeConstructor(models.Model):
                                    null=True,
                                    blank=True,
                                    related_name='fee_constructors')
-    vessel_size_category_group = models.ForeignKey(VesselSizeCategoryGroup, null=False, blank=False, related_name='fee_constructors')
+    vessel_size_category_group = models.ForeignKey(VesselSizeCategoryGroup, null=False, blank=False, related_name='fee_constructors', on_delete=models.PROTECT)
     incur_gst = models.BooleanField(default=True)
     enabled = models.BooleanField(default=True)
 
@@ -528,15 +530,15 @@ class FeeItemStickerReplacement(models.Model):
 
 
 class FeeItem(models.Model):
-    fee_constructor = models.ForeignKey(FeeConstructor, null=True, blank=True)
-    fee_period = models.ForeignKey(FeePeriod, null=True, blank=True)
-    vessel_size_category = models.ForeignKey(VesselSizeCategory, null=True, blank=True)
-    proposal_type = models.ForeignKey('ProposalType', null=True, blank=True)
+    fee_constructor = models.ForeignKey(FeeConstructor, null=True, blank=True, on_delete=models.SET_NULL)
+    fee_period = models.ForeignKey(FeePeriod, null=True, blank=True, on_delete=models.SET_NULL)
+    vessel_size_category = models.ForeignKey(VesselSizeCategory, null=True, blank=True, on_delete=models.SET_NULL)
+    proposal_type = models.ForeignKey('ProposalType', null=True, blank=True, on_delete=models.SET_NULL)
     amount = models.DecimalField(max_digits=8, decimal_places=2, default='0.00', help_text='$')
     incremental_amount = models.BooleanField(default=False, help_text='When ticked, The amount will be the increase in the rate per meter')  # When False, the 'amount' value is the price for this item.  When True, the 'amount' is the price per meter.
     # For DcvAdmission
-    age_group = models.ForeignKey('AgeGroup', null=True, blank=True)
-    admission_type = models.ForeignKey('AdmissionType', null=True, blank=True)
+    age_group = models.ForeignKey('AgeGroup', null=True, blank=True, on_delete=models.SET_NULL)
+    admission_type = models.ForeignKey('AdmissionType', null=True, blank=True, on_delete=models.SET_NULL)
 
     def __str__(self):
         return '${}: {}, {}, {}, {}'.format(self.amount, self.fee_constructor.application_type, self.fee_period, self.vessel_size_category, self.proposal_type)
@@ -595,7 +597,7 @@ class FeeItem(models.Model):
 
 
 class OracleCodeItem(models.Model):
-    application_type = models.ForeignKey(ApplicationType, blank=True, null=True, related_name='oracle_code_items')
+    application_type = models.ForeignKey(ApplicationType, blank=True, null=True, related_name='oracle_code_items', on_delete=models.SET_NULL)
     value = models.CharField(max_length=50, null=True, blank=True, default='T1 EXEMPT')
     date_of_enforcement = models.DateField(blank=True, null=True)
 

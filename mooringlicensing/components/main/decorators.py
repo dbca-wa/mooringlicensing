@@ -9,11 +9,13 @@ from django.http import HttpRequest
 from rest_framework import serializers
 from rest_framework.request import Request
 import logging
+from functools import wraps
 
 logger = logging.getLogger()
 
 
 def basic_exception_handler(func):
+    @wraps(func)
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)

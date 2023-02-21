@@ -8,7 +8,8 @@ import geojson
 import requests
 import io
 from django.conf import settings
-from django.core.urlresolvers import reverse, reverse_lazy
+# from django.core.urlresolvers import reverse, reverse_lazy
+from django.urls import reverse
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
@@ -17,17 +18,16 @@ from django.shortcuts import redirect
 from django.utils import timezone
 from dateutil.tz.tz import tzoffset
 from pytz import timezone as pytimezone
-from ledger.payments.models import Invoice,OracleInterface,CashTransaction
-from ledger.payments.utils import oracle_parser_on_invoice, update_payments
-from ledger.checkout.utils import create_basket_session, create_checkout_session, place_order_submission, get_cookie_basket
+# from ledger.payments.models import Invoice,OracleInterface,CashTransaction
+# from ledger.payments.utils import oracle_parser_on_invoice, update_payments
+# from ledger.checkout.utils import create_basket_session, create_checkout_session, place_order_submission, get_cookie_basket
+from ledger_api_client.utils import create_basket_session, create_checkout_session, place_order_submission, update_payments
 #from mooring.models import (MooringArea, Mooringsite, MooringsiteRate, MooringsiteBooking, Booking, BookingInvoice, MooringsiteBookingRange, Rate, MooringAreaBookingRange,MooringAreaStayHistory, MooringsiteRate, MarinaEntryRate, BookingVehicleRego, AdmissionsBooking, AdmissionsOracleCode, AdmissionsRate, AdmissionsLine, ChangePricePeriod, CancelPricePeriod, GlobalSettings, MooringAreaGroup, AdmissionsLocation, ChangeGroup, CancelGroup, BookingPeriod, BookingPeriodOption, AdmissionsBookingInvoice, BookingAnnualAdmission)
 #from mooring import models
 #from mooring.serialisers import BookingRegoSerializer, MooringsiteRateSerializer, MarinaEntryRateSerializer, RateSerializer, MooringsiteRateReadonlySerializer, AdmissionsRateSerializer
 #from mooring.emails import send_booking_invoice,send_booking_confirmation
 #from mooring import emails
-#from oscar.apps.order.models import Order
-from ledger.order.models import Order
-from ledger.payments.invoice import utils
+from ledger_api_client.order import Order
 #from mooring import models
 from mooringlicensing.components.proposals.models import Proposal
 from mooringlicensing.components.payments_ml.models import ApplicationFee
@@ -91,7 +91,7 @@ def calculate_price_booking_cancellation(booking, overide_cancel_fees=False):
          mooring_group =None
          for i in mg:
             if i.moorings.count() > 0:
-                    mooring_group = i.moorings.all()[0].id 
+                    mooring_group = i.moorings.all()[0].id
 
 
          for cpp in cancel_price_period:
@@ -160,7 +160,7 @@ def calculate_price_booking_change(old_booking, new_booking,overide_change_fees=
 
 
          if changed is True:
-             change_fee_amount = '0.00' 
+             change_fee_amount = '0.00'
  #            change_price_period = ChangePricePeriod.objects.filter(id=ob.booking_period_option.change_group_id).order_by('-days')
              change_group =  ChangeGroup.objects.get(id=ob.booking_period_option.change_group_id)
              change_price_period = change_group.change_period.all().order_by('days')
@@ -174,7 +174,7 @@ def calculate_price_booking_change(old_booking, new_booking,overide_change_fees=
                 if refund_policy.calulation_type == 0:
                     # Percentage
                     change_fee_amount = float(ob.amount) * (refund_policy.percentage / 100)
-                elif refund_policy.calulation_type == 1: 
+                elif refund_policy.calulation_type == 1:
                     change_fee_amount = refund_policy.amount
                     # Fixed Pricing
 
@@ -190,13 +190,13 @@ def calculate_price_booking_change(old_booking, new_booking,overide_change_fees=
                      change_fees.append({'additional_fees': 'true', 'description': 'Refund - '+description,'amount': str(format(ob.amount - ob.amount - ob.amount, '.2f')), 'oracle_code': str(ob.campsite.mooringarea.oracle_code), 'mooring_group': mooring_group, 'line_status': 3})
              else:
                  print ("NO REFUND POLICY")
-               
+
          else:
              #description = 'Mooring {} ({} - {})'.format(ob.campsite.mooringarea.name,ob.from_dt.astimezone(pytimezone('Australia/Perth')).strftime('%d/%m/%Y %H:%M %p'),ob.to_dt.astimezone(pytimezone('Australia/Perth')).strftime('%d/%m/%Y %H:%M %p'))
              adjustment_fee = float('0.00')
              adjustment_fee = float(ob.amount) + adjustment_fee
              description = 'Mooring {} ({} - {})'.format(ob.campsite.mooringarea.name,ob.from_dt.astimezone(pytimezone('Australia/Perth')).strftime('%d/%m/%Y %H:%M %p'),ob.to_dt.astimezone(pytimezone('Australia/Perth')).strftime('%d/%m/%Y %H:%M %p'))
-#             change_fees.append({'additional_fees': 'true', 'description': 'Adjustment - '+description ,'amount': str(adjustment_fee - adjustment_fee - adjustment_fee), 'oracle_code': str(ob.campsite.mooringarea.oracle_code), 'mooring_group': mooring_group})   
+#             change_fees.append({'additional_fees': 'true', 'description': 'Adjustment - '+description ,'amount': str(adjustment_fee - adjustment_fee - adjustment_fee), 'oracle_code': str(ob.campsite.mooringarea.oracle_code), 'mooring_group': mooring_group})
              change_fees.append({'additional_fees': 'true', 'description': 'Adjustment - '+description ,'amount': str(format(adjustment_fee - adjustment_fee - adjustment_fee, '.2f')), 'oracle_code': str(ob.campsite.mooringarea.oracle_code), 'mooring_group': mooring_group, 'line_status': 3})
 
     return change_fees
@@ -205,11 +205,11 @@ def calculate_price_admissions_cancel(adBooking, change_fees, overide_cancel_fee
     ad_lines = AdmissionsLine.objects.filter(admissionsBooking=adBooking)
     for line in ad_lines:
         if line.arrivalDate > date.today() or overide_cancel_fees is True:
-            
+
 
             description = "Admission ({}) for {} guest(s)".format(datetime.strftime(line.arrivalDate, '%d/%m/%Y'), adBooking.total_admissions)
             oracle_code = AdmissionsOracleCode.objects.filter(mooring_group=line.location.mooring_group)[0]
-    
+
             change_fees.append({'additional_fees': 'true', 'description': 'Refund - ' +  description,'amount': str(line.cost - line.cost - line.cost), 'oracle_code': str(oracle_code.oracle_code), 'mooring_group': line.location.mooring_group.id, 'line_status': 3})
     return change_fees
 
@@ -217,10 +217,10 @@ def calculate_price_admissions_cancel(adBooking, change_fees, overide_cancel_fee
 def calculate_price_admissions_change(adBooking, change_fees):
     ad_lines = AdmissionsLine.objects.filter(admissionsBooking=adBooking)
     for line in ad_lines:
-          
+
         description = "Admission ({}) for {} guest(s)".format(datetime.strftime(line.arrivalDate, '%d/%m/%Y'), adBooking.total_admissions)
         oracle_code = AdmissionsOracleCode.objects.filter(mooring_group=line.location.mooring_group)[0]
-        
+
         # Fees
         change_fees.append({'additional_fees': 'true', 'description': 'Adjustment - ' +  description,'amount': str(line.cost - line.cost - line.cost), 'oracle_code': str(oracle_code.oracle_code), 'mooring_group': line.location.mooring_group.id, 'line_status': 3 })
 
@@ -259,7 +259,7 @@ def price_or_lineitems_extras(request,booking,change_fees,invoice_lines=[]):
     for cf in change_fees:
 #       invoice_lines.append({'ledger_description':cf['description'],"quantity":1,"price_incl_tax":cf['amount'],"oracle_code":cf['oracle_code']})
        invoice_lines.append({'ledger_description':cf['description'],"quantity":1,"price_incl_tax":cf['amount'],"oracle_code":cf['oracle_code'], 'line_status': cf['line_status']})
-    return invoice_lines 
+    return invoice_lines
 
 def old_price_or_lineitems(request,booking,campsite_list,lines=True,old_booking=None):
     total_price = Decimal(0)
@@ -438,7 +438,7 @@ def admissions_price_or_lineitems(request, admissionsBooking,lines=True):
                     if oracle_codes.count() > 0:
                         oracle_code = oracle_codes[0].oracle_code
                     invoice_lines.append({'ledger_description':'Admission fee on {} ({}) {}'.format(adLine.arrivalDate, group, overnightStay),"quantity":amount,"price_incl_tax":price, "oracle_code":oracle_code, 'line_status': 1})
-                
+
             else:
                 daily_rate = daily_rates[adLine.arrivalDate.strftime('%d/%m/%Y')]
                 price = Decimal(daily_rate)
@@ -494,7 +494,7 @@ def create_temp_bookingupdate(request,arrival,departure,booking_details,old_book
     for r in old_booking.regos.all():
         r.booking = booking
         r.save()
-    
+
     lines = price_or_lineitems(request,booking,booking.campsite_id_list)
     booking_arrival = booking.arrival.strftime('%d-%m-%Y')
     booking_departure = booking.departure.strftime('%d-%m-%Y')
@@ -513,7 +513,7 @@ def create_temp_bookingupdate(request,arrival,departure,booking_details,old_book
             if 'invoice=' in h.url:
                 invoice = h.url.split('invoice=', 1)[1]
                 break
-    
+
     # create the new invoice
     new_invoice = internal_create_booking_invoice(booking, invoice)
 
@@ -557,7 +557,7 @@ def get_annual_admissions_pricing_info(annual_booking_period_id,vessel_size):
              abpovc = models.AnnualBookingPeriodOptionVesselCategoryPrice.objects.filter(annual_booking_period_option=abpo[0],vessel_category=vsc[0])
              price = abpovc[0].price
              annual_admissions['abpg'] = abpg
-             if abpo.count() > 0: 
+             if abpo.count() > 0:
                  annual_admissions['abpo'] = abpo[0]
              if abpovc.count() > 0:
                  annual_admissions['abpovc'] = abpovc[0]
@@ -585,7 +585,7 @@ def iiiicreate_temp_bookingupdate(request,arrival,departure,booking_details,old_
     for r in old_booking.regos.all():
         r.booking = booking
         r.save()
-    
+
     lines = price_or_lineitems(request,booking,booking.campsite_id_list)
     booking_arrival = booking.arrival.strftime('%d-%m-%Y')
     booking_departure = booking.departure.strftime('%d-%m-%Y')
@@ -594,7 +594,7 @@ def iiiicreate_temp_bookingupdate(request,arrival,departure,booking_details,old_
     # Proceed to generate invoice
     checkout_response = checkout(request,booking,lines,invoice_text=reservation,internal=True)
     internal_create_booking_invoice(booking, checkout_response)
-    
+
     # Get the new invoice
     new_invoice = booking.invoices.first()
 
@@ -671,7 +671,7 @@ def update_booking(request,old_booking,booking_details):
 
             # Add history
             new_history = old_booking._generate_history(user=request.user)
-            
+
             if request.data.get('entryFees').get('regos'):
                 new_regos = request.data['entryFees'].pop('regos')
                 sent_regos = [r['rego'] for r in new_regos]
@@ -777,7 +777,7 @@ def create_or_update_booking(request,booking_details,updating=False,override_che
             customer=booking_details['customer'],
             override_checks=override_checks
         )
-        
+
         booking.details['first_name'] = booking_details['first_name']
         booking.details['last_name'] = booking_details['last_name']
         booking.details['phone'] = booking_details['phone']
@@ -810,7 +810,7 @@ def old_create_or_update_booking(request,booking_details,updating=False):
             vessel_size=booking_details['vessel_size'],
             cost_total=booking_details['cost_total'],
             customer=booking_details['customer'])
-        
+
         booking.details['first_name'] = booking_details['first_name']
         booking.details['last_name'] = booking_details['last_name']
         booking.details['phone'] = booking_details['phone']
@@ -837,7 +837,7 @@ def admissionsCheckout(request, admissionsBooking, lines, invoice_text=None, vou
         'custom_basket': True,
         'booking_reference': 'AD-'+str(admissionsBooking.id)
     }
-    
+
     basket, basket_hash = create_basket_session(request, basket_params)
     checkout_params = {
         'system': settings.PS_PAYMENT_SYSTEM_ID,
@@ -848,7 +848,7 @@ def admissionsCheckout(request, admissionsBooking, lines, invoice_text=None, vou
         'proxy': True if internal else False,
         'invoice_text': invoice_text,
     }
-    
+
     if internal or request.user.is_anonymous():
         checkout_params['basket_owner'] = admissionsBooking.customer.id
     create_checkout_session(request, checkout_params)
@@ -937,7 +937,7 @@ def checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=F
         'custom_basket': True,
         'booking_reference': 'PS-'+str(booking.id)
     }
- 
+
     basket, basket_hash = create_basket_session(request, basket_params)
     checkout_params = {
         'system': settings.PS_PAYMENT_SYSTEM_ID,
@@ -1065,7 +1065,7 @@ def allocate_refund_to_invoice(request, booking, lines, invoice_text=None, inter
         #    print ("BookingAnnualAdmission")
         #    book_inv, created = models.BookingAnnualInvoice.objects.get_or_create(booking_annual_admission=booking, invoice_reference=new_invoice.reference, system_invoice=True)
         #else:
-            
+
         book_inv, created = ApplicationFee.objects.get_or_create(proposal=booking, invoice_reference=new_invoice.reference, system_invoice=system_invoice)
 
         return order
@@ -1127,7 +1127,7 @@ def internal_booking(request,booking_details,internal=True,updating=False):
             return booking
 
     except:
-        if booking: 
+        if booking:
             booking.delete()
         raise
 
@@ -1156,7 +1156,7 @@ def old_internal_booking(request,booking_details,internal=True,updating=False):
             return booking
 
     except:
-        if booking: 
+        if booking:
             booking.delete()
         raise
 
@@ -1255,7 +1255,7 @@ def admissions_lines(booking_mooring):
         else:
             # if new_lines[i]['from'].date() > new_lines[i-1]['to'].date():
             latest_to = new_lines[i]['to'].date()
-        
+
         if latest_to:
             lines.append({"rowid":'admission_fee_id'+str(i), 'id': i,'from':datetime.strftime(latest_from, '%d %b %Y'), 'to': datetime.strftime(latest_to, '%d %b %Y'), 'admissionFee': 0, 'group': new_lines[i]['group']})
             if i < len(new_lines)-1:
@@ -1264,7 +1264,7 @@ def admissions_lines(booking_mooring):
         i+= 1
     return lines
 
-# Access Level check for Group   
+# Access Level check for Group
 def mooring_group_access_level_change(pk,request):
      mooring_groups = MooringAreaGroup.objects.filter(members__in=[request.user,])
      if request.user.is_superuser is True:
@@ -1306,7 +1306,7 @@ def mooring_group_access_level_cancel_options(cg,pk,request):
               return True
 
      return False
- 
+
 def mooring_group_access_level_booking_period(pk,request):
      mooring_groups = MooringAreaGroup.objects.filter(members__in=[request.user,])
      if request.user.is_superuser is True:
@@ -1314,7 +1314,7 @@ def mooring_group_access_level_booking_period(pk,request):
      else:
           if BookingPeriod.objects.filter(pk=pk,mooring_group__in=mooring_groups).count() > 0:
               return True
-    
+
      return False
 
 def mooring_group_access_level_annual_booking_period(pk,request):
@@ -1339,7 +1339,7 @@ def mooring_group_access_level_booking_period_option(pk,bp_group_id,request):
      return False
 
 
-def check_mooring_admin_access(request): 
+def check_mooring_admin_access(request):
     if request.user.is_superuser is True:
         return True
     else:
@@ -1621,7 +1621,7 @@ def booking_admission_success(basket, booking, context_processor):
 
              try:
                  # send out the invoice before the confirmation is sent
-                 emails.send_admissions_booking_invoice(booking,context_processor) 
+                 emails.send_admissions_booking_invoice(booking,context_processor)
              except Exception as e:
                  print ("Error Sending Invoice ("+str(booking.id)+") :"+str(e))
 

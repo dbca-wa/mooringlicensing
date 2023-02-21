@@ -1,5 +1,6 @@
 from django.conf import settings
-from ledger.accounts.models import EmailUser,OrganisationAddress
+# from ledger.accounts.models import EmailUser,OrganisationAddress
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser
 from mooringlicensing.components.organisations.models import (
                                 Organisation,
                                 OrganisationContact,
@@ -8,7 +9,7 @@ from mooringlicensing.components.organisations.models import (
                                 OrganisationAction,
                                 OrganisationRequestLogEntry,
                                 OrganisationLogEntry,
-                                ledger_organisation,
+                                # ledger_organisation,
                             )
 from mooringlicensing.components.organisations.utils import (
                                 can_manage_org,
@@ -25,26 +26,32 @@ import rest_framework_gis.serializers as gis_serializers
 
 
 class LedgerOrganisationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ledger_organisation
-        fields = '__all__'
+    pass
+    # TODO: implement this class
+
+    # class Meta:
+    #     model = ledger_organisation
+    #     fields = '__all__'
 
 
 class LedgerOrganisationFilterSerializer(serializers.ModelSerializer):
-    #address = serializers.SerializerMethodField(read_only=True)
-    email = serializers.SerializerMethodField(read_only=True)
+    pass
+    # TODO: implement this class
 
-    class Meta:
-        model = ledger_organisation
-        fields = (
-            'id',
-            'name',
-            'email',
-            #'address',
-        )
-
-    def get_email(self, obj):
-        return ''
+    # #address = serializers.SerializerMethodField(read_only=True)
+    # email = serializers.SerializerMethodField(read_only=True)
+    #
+    # class Meta:
+    #     model = ledger_organisation
+    #     fields = (
+    #         'id',
+    #         'name',
+    #         'email',
+    #         #'address',
+    #     )
+    #
+    # def get_email(self, obj):
+    #     return ''
 
 
 class OrganisationCheckSerializer(serializers.Serializer):
@@ -64,17 +71,21 @@ class OrganisationPinCheckSerializer(serializers.Serializer):
     pin1 = serializers.CharField()
     pin2 = serializers.CharField()
 
+
 class OrganisationAddressSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = OrganisationAddress
-        fields = (
-            'id',
-            'line1',
-            'locality',
-            'state',
-            'country',
-            'postcode'
-        )
+    pass
+    # TODO: implement this class
+
+    # class Meta:
+    #     model = OrganisationAddress
+    #     fields = (
+    #         'id',
+    #         'line1',
+    #         'locality',
+    #         'state',
+    #         'country',
+    #         'postcode'
+    #     )
 
 class DelegateSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source='get_full_name')
@@ -211,19 +222,18 @@ class MyOrganisationsSerializer(serializers.ModelSerializer):
 
 
 class DetailsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ledger_organisation
-        fields = (
-            'id',
-            'name',
-            'trading_name',
-            'email',
-            'abn',
-#            'apply_application_discount',
-#            'application_discount',
-#            'apply_licence_discount',
-#            'licence_discount',
-        )
+    pass
+    # TODO: implement this class
+
+    # class Meta:
+    #     model = ledger_organisation
+    #     fields = (
+    #         'id',
+    #         'name',
+    #         'trading_name',
+    #         'email',
+    #         'abn',
+    #     )
 
     def validate(self, data):
         #import ipdb; ipdb.set_trace()

@@ -4,13 +4,15 @@ from dateutil.relativedelta import relativedelta
 from django.contrib.auth.models import Group
 from django.core.mail import EmailMultiAlternatives, EmailMessage
 from django.utils.encoding import smart_text
-from django.core.urlresolvers import reverse
+# from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.conf import settings
 from datetime import timedelta
-from ledger.payments.pdf import create_invoice_pdf_bytes
+# from ledger.payments.pdf import create_invoice_pdf_bytes
 from mooringlicensing import settings
 from mooringlicensing.components.emails.emails import TemplateEmailBase, _extract_email_headers
-from ledger.accounts.models import EmailUser
+# from ledger.accounts.models import EmailUser
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser
 from mooringlicensing.components.emails.utils import get_user_as_email_user, get_public_url, make_http_https
 from mooringlicensing.components.organisations.models import OrganisationLogEntry, Organisation
 from django.core.files.storage import default_storage

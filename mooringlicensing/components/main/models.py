@@ -2,11 +2,11 @@ from __future__ import unicode_literals
 import pytz
 import os
 
-from ledger.settings_base import TIME_ZONE
+# from ledger.settings_base import TIME_ZONE
 from django.db import models
-from django.utils.encoding import python_2_unicode_compatible
+# from django.utils.encoding import python_2_unicode_compatible
 from django.core.exceptions import ValidationError
-from ledger.accounts.models import EmailUser, RevisionedMixin
+# from ledger.accounts.models import EmailUser, RevisionedMixin
 from datetime import datetime
 from django.dispatch import receiver
 from django.db.models.signals import post_save, post_delete, pre_delete
@@ -14,16 +14,18 @@ from mooringlicensing import settings
 
 
 class UserSystemSettings(models.Model):
-    user = models.OneToOneField(EmailUser, related_name='system_settings')
+    # user = models.OneToOneField(EmailUser, related_name='system_settings')
+    user = models.IntegerField(unique=True)  # EmailUserRO
 
     class Meta:
         app_label = 'mooringlicensing'
         verbose_name_plural = "User System Settings"
 
 
-@python_2_unicode_compatible
+# @python_2_unicode_compatible
 class UserAction(models.Model):
-    who = models.ForeignKey(EmailUser, null=False, blank=False)
+    # who = models.ForeignKey(EmailUser, null=False, blank=False)
+    who = models.IntegerField()  # EmailUserRO
     when = models.DateTimeField(null=False, blank=False, auto_now_add=True)
     what = models.TextField(blank=False)
 
@@ -62,8 +64,10 @@ class CommunicationsLogEntry(models.Model):
     subject = models.CharField(max_length=200, blank=True, verbose_name="Subject / Description")
     text = models.TextField(blank=True)
 
-    customer = models.ForeignKey(EmailUser, null=True, related_name='+')
-    staff = models.ForeignKey(EmailUser, null=True, related_name='+')
+    # customer = models.ForeignKey(EmailUser, null=True, related_name='+')
+    customer = models.IntegerField(null=True)  # EmailUserRO
+    # staff = models.ForeignKey(EmailUser, null=True, related_name='+')
+    staff = models.IntegerField()  # EmailUserRO
 
     created = models.DateTimeField(auto_now_add=True, null=False, blank=False)
 
@@ -71,7 +75,7 @@ class CommunicationsLogEntry(models.Model):
         app_label = 'mooringlicensing'
 
 
-@python_2_unicode_compatible
+# @python_2_unicode_compatible
 class Document(models.Model):
     name = models.CharField(max_length=255, blank=True,
                             verbose_name='name', help_text='')
@@ -187,7 +191,7 @@ class GlobalSettings(models.Model):
         verbose_name_plural = "Global Settings"
 
 
-@python_2_unicode_compatible
+# @python_2_unicode_compatible
 class SystemMaintenance(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
@@ -216,7 +220,9 @@ class TemporaryDocumentCollection(models.Model):
 class TemporaryDocument(Document):
     temp_document_collection = models.ForeignKey(
         TemporaryDocumentCollection,
-        related_name='documents')
+        related_name='documents',
+        on_delete=models.CASCADE,
+    )
     _file = models.FileField(max_length=255)
 
     class Meta:
@@ -226,6 +232,41 @@ class TemporaryDocument(Document):
 def update_electoral_roll_doc_filename(instance, filename):
     return '{}/emailusers/{}/documents/{}'.format(settings.MEDIA_APP_DIR, instance.emailuser.id,filename)
 
+
+class RevisionedMixin(models.Model):
+    """
+    A model tracked by reversion through the save method.
+    """
+
+    def save(self, **kwargs):
+        from reversion import revisions
+
+        if kwargs.pop("no_revision", False):
+            super(RevisionedMixin, self).save(**kwargs)
+        else:
+            with revisions.create_revision():
+                if "version_user" in kwargs:
+                    revisions.set_user(kwargs.pop("version_user", None))
+                if "version_comment" in kwargs:
+                    revisions.set_comment(kwargs.pop("version_comment", ""))
+                super(RevisionedMixin, self).save(**kwargs)
+
+    @property
+    def created_date(self):
+        from reversion.models import Version
+
+        # return revisions.get_for_object(self).last().revision.date_created
+        return Version.objects.get_for_object(self).last().revision.date_created
+
+    @property
+    def modified_date(self):
+        from reversion.models import Version
+
+        # return revisions.get_for_object(self).first().revision.date_created
+        return Version.objects.get_for_object(self).first().revision.date_created
+
+    class Meta:
+        abstract = True
 
 class VesselSizeCategoryGroup(RevisionedMixin):
     name = models.CharField(max_length=100, null=False, blank=False)
@@ -274,7 +315,7 @@ class VesselSizeCategory(RevisionedMixin):
     name = models.CharField(max_length=100)
     start_size = models.DecimalField(max_digits=8, decimal_places=2, default='0.00', help_text='unit [m]')
     include_start_size = models.BooleanField(default=True)  # When true, 'start_size' is included.
-    vessel_size_category_group = models.ForeignKey(VesselSizeCategoryGroup, null=True, blank=True, related_name='vessel_size_categories')
+    vessel_size_category_group = models.ForeignKey(VesselSizeCategoryGroup, null=True, blank=True, related_name='vessel_size_categories', on_delete=models.SET_NULL)
     null_vessel = models.BooleanField(default=False)
 
     def get_one_smaller_category(self):
@@ -340,11 +381,11 @@ class NumberOfDaysType(RevisionedMixin):
         verbose_name = 'Number of days Settings'
         verbose_name_plural = 'Number of days Settings'
 
-    def get_setting_by_date(self, target_date=datetime.now(pytz.timezone(TIME_ZONE)).date()):
+    def get_setting_by_date(self, target_date=datetime.now(pytz.timezone(settings.TIME_ZONE)).date()):
         return NumberOfDaysSetting.get_setting_by_date(self, target_date)
 
     def get_number_of_days_currently_applied(self):
-        setting = self.get_setting_by_date(target_date=datetime.now(pytz.timezone(TIME_ZONE)).date())
+        setting = self.get_setting_by_date(target_date=datetime.now(pytz.timezone(settings.TIME_ZONE)).date())
         if setting:
             return setting.number_of_days
         else:
@@ -357,7 +398,7 @@ class NumberOfDaysType(RevisionedMixin):
 class NumberOfDaysSetting(RevisionedMixin):
     number_of_days = models.PositiveSmallIntegerField(blank=True, null=True)
     date_of_enforcement = models.DateField(blank=True, null=True)
-    number_of_days_type = models.ForeignKey(NumberOfDaysType, blank=True, null=True, related_name='settings')
+    number_of_days_type = models.ForeignKey(NumberOfDaysType, blank=True, null=True, related_name='settings', on_delete=models.CASCADE)
 
     def __str__(self):
         return '{} ({})'.format(self.number_of_days, self.number_of_days_type.name)
@@ -367,7 +408,7 @@ class NumberOfDaysSetting(RevisionedMixin):
         ordering = ['-date_of_enforcement',]
 
     @staticmethod
-    def get_setting_by_date(number_of_days_type, target_date=datetime.now(pytz.timezone(TIME_ZONE)).date()):
+    def get_setting_by_date(number_of_days_type, target_date=datetime.now(pytz.timezone(settings.TIME_ZONE)).date()):
         """
         Return an setting object which is enabled at the target_date
         """

@@ -1,16 +1,14 @@
 import traceback
 from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
-from ledger.payments.utils import oracle_parser_on_invoice
-from django.conf import settings
+# from ledger.payments.utils import oracle_parser_on_invoice
 from django.db import transaction
 from wsgiref.util import FileWrapper
 from rest_framework import viewsets, serializers, status, generics, views
-from rest_framework.decorators import detail_route, list_route, renderer_classes, parser_classes
+# from rest_framework.decorators import detail_route, list_route, renderer_classes, parser_classes
+from rest_framework.decorators import action as detail_route
+from rest_framework.decorators import renderer_classes
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer
-from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser, BasePermission
-from rest_framework.pagination import PageNumberPagination
-from django.urls import reverse
 from mooringlicensing.components.main.models import (
         GlobalSettings,
         TemporaryDocumentCollection,
@@ -23,15 +21,15 @@ from mooringlicensing.components.main.serializers import (
 )
 from mooringlicensing.components.main.process_document import save_document, cancel_document, delete_document
 from django.core.exceptions import ValidationError
-from django.db.models import Q
+# from django.db.models import Q
 
 from mooringlicensing.components.payments_ml import reports
 from mooringlicensing.components.proposals.models import Proposal
 from mooringlicensing.components.proposals.serializers import ProposalSerializer
-from ledger.checkout.utils import create_basket_session, create_checkout_session, place_order_submission, get_cookie_basket
-from collections import namedtuple
-import json
-from decimal import Decimal
+# from ledger.checkout.utils import create_basket_session, create_checkout_session, place_order_submission, get_cookie_basket
+# from collections import namedtuple
+# import json
+# from decimal import Decimal
 
 import logging
 
@@ -88,7 +86,9 @@ class BookingSettlementReportView(views.APIView):
 
 def oracle_integration(date, override):
     system = PAYMENT_SYSTEM_PREFIX
-    oracle_codes = oracle_parser_on_invoice(date, system, SYSTEM_NAME, override=override)
+
+    # TODO: implement oracle_parser_on_invoice
+    # oracle_codes = oracle_parser_on_invoice(date, system, SYSTEM_NAME, override=override)
 
 
 class OracleJob(views.APIView):
@@ -144,7 +144,7 @@ class TemporaryDocumentCollectionViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['POST'])
+    @detail_route(methods=['POST'], detail=True)
     @renderer_classes((JSONRenderer,))
     def process_temp_document(self, request, *args, **kwargs):
         print("process_temp_document")

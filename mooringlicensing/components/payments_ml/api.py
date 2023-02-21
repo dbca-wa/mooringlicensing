@@ -12,10 +12,14 @@ from mooringlicensing import settings
 from mooringlicensing.components.main.models import ApplicationType
 from mooringlicensing.components.payments_ml.models import FeeConstructor
 from mooringlicensing.components.payments_ml.serializers import FeeConstructorSerializer
-from ledger.payments.models import Invoice, OracleAccountCode
-from ledger.payments.bpoint.models import BpointTransaction, BpointToken
-from ledger.checkout.utils import create_basket_session, create_checkout_session, place_order_submission, get_cookie_basket, calculate_excl_gst
-from ledger.payments.utils import oracle_parser_on_invoice, update_payments
+# from ledger.payments.models import Invoice, OracleAccountCode
+from ledger_api_client.ledger_models import Invoice
+# from ledger.payments.bpoint.models import BpointTransaction, BpointToken
+# from ledger.checkout.utils import create_basket_session, create_checkout_session, place_order_submission, get_cookie_basket, calculate_excl_gst
+from ledger_api_client.utils import create_basket_session, create_checkout_session, place_order_submission, calculate_excl_gst
+# from ledger.payments.utils import oracle_parser_on_invoice, update_payments
+from ledger_api_client.utils import update_payments
+
 from mooringlicensing.components.proposals.models import Proposal
 from mooringlicensing import mooring_booking_utils as utils
 

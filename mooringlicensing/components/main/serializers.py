@@ -1,11 +1,12 @@
-from ledger.payments.invoice.models import Invoice
 from rest_framework import serializers
 from django.db.models import Sum, Max
 from mooringlicensing.components.main.models import (
         CommunicationsLogEntry,
         GlobalSettings, TemporaryDocumentCollection,
         )
-from ledger.accounts.models import EmailUser
+# from ledger.payments.invoice.models import Invoice
+# from ledger.accounts.models import EmailUser
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Invoice
 from datetime import datetime, date
 
 

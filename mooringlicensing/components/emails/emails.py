@@ -5,13 +5,13 @@ from confy import env
 import six
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives, EmailMessage
-from django.core.urlresolvers import reverse
+# from django.core.urlresolvers import reverse
 from django.template import loader, Template
 from django.utils.encoding import smart_text
 from django.utils.html import strip_tags
 from confy import env
 
-from ledger.accounts.models import Document
+from ledger_api_client.ledger_models import Document
 
 from mooringlicensing.settings import SYSTEM_NAME
 
@@ -26,8 +26,8 @@ def _render(template, context):
     return template.render(context)
 
 
-def host_reverse(name, args=None, kwargs=None):
-    return "{}{}".format(settings.DEFAULT_HOST, reverse(name, args=args, kwargs=kwargs))
+# def host_reverse(name, args=None, kwargs=None):
+#     return "{}{}".format(settings.DEFAULT_HOST, reverse(name, args=args, kwargs=kwargs))
 
 
 class TemplateEmailBase(object):

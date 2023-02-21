@@ -5,7 +5,8 @@ from django.conf.urls.static import static
 from rest_framework import routers
 from django_media_serv.urls import urlpatterns as media_serv_patterns
 
-import mooringlicensing.components.approvals.api
+import mooringlicensing
+# import mooringlicensing.components.approvals.api
 from mooringlicensing import views
 from mooringlicensing.components.approvals.views import DcvAdmissionFormView
 from mooringlicensing.components.payments_ml.views import ApplicationFeeView, ApplicationFeeSuccessView, InvoicePDFView, \
@@ -23,7 +24,8 @@ from mooringlicensing.components.proposals.views import AuthorisedUserApplicatio
 from mooringlicensing.components.users import api as users_api
 from mooringlicensing.components.organisations import api as org_api
 from mooringlicensing.components.main import api as main_api
-from ledger.urls import urlpatterns as ledger_patterns
+# from ledger.urls import urlpatterns as ledger_patterns
+from ledger_api_client.urls import urlpatterns as ledger_patterns
 
 # API patterns
 from mooringlicensing.management.default_data_manager import DefaultDataManager

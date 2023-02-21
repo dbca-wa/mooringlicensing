@@ -1,13 +1,15 @@
 import logging
-from ledger.settings_base import TIME_ZONE
+# from ledger.settings_base import TIME_ZONE
+from ledger_api_client.settings_base import TIME_ZONE
 import pytz
 from datetime import datetime
 from decimal import Decimal
 from math import ceil
 
 from django.conf import settings
-from ledger.accounts.models import EmailUser,Address
-from ledger.payments.invoice.models import Invoice
+# from ledger.accounts.models import EmailUser,Address
+# from ledger.payments.invoice.models import Invoice
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Invoice, Address
 
 from mooringlicensing.components.main.models import ApplicationType
 from mooringlicensing.components.payments_ml.models import FeeConstructor

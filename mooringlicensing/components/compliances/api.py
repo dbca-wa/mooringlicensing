@@ -1,32 +1,37 @@
 
 import traceback
-import os
-import datetime
-import base64
-import geojson
+# import os
+# import datetime
+# import base64
+# import geojson
 from rest_framework_datatables.filters import DatatablesFilterBackend
 from rest_framework_datatables.renderers import DatatablesRenderer
-from wsgiref.util import FileWrapper
+# from wsgiref.util import FileWrapper
 from django.db.models import Q, Min
 from django.db import transaction
-from django.http import HttpResponse
-from django.core.files.base import ContentFile
+# from django.http import HttpResponse
+# from django.core.files.base import ContentFile
 from django.core.exceptions import ValidationError
 from django.conf import settings
-from django.contrib import messages
-from django.utils import timezone
-from rest_framework import viewsets, serializers, status, generics, views
-from rest_framework.decorators import detail_route, list_route, renderer_classes
+# from django.contrib import messages
+# from django.utils import timezone
+from rest_framework import viewsets, serializers, views
+# from rest_framework.decorators import detail_route, list_route, renderer_classes
+from rest_framework.decorators import action as detail_route
+from rest_framework.decorators import action as list_route
+from rest_framework.decorators import renderer_classes
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer
-from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser, BasePermission
-from rest_framework.pagination import PageNumberPagination
-from datetime import datetime, timedelta
-from collections import OrderedDict
+# from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser, BasePermission
+# from rest_framework.pagination import PageNumberPagination
+# from datetime import datetime, timedelta
+# from collections import OrderedDict
 from django.core.cache import cache
-from ledger.accounts.models import EmailUser, Address
-from ledger.address.models import Country
-from datetime import datetime, timedelta, date
+# from ledger.accounts.models import EmailUser, Address
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser
+
+# from ledger.address.models import Country
+# from datetime import datetime, timedelta, date
 from mooringlicensing.components.compliances.models import (
    Compliance,
    ComplianceAmendmentRequest,
@@ -70,13 +75,13 @@ class ComplianceViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
-    @detail_route(methods=['GET',])
+    @detail_route(methods=['GET',], detail=True)
     def internal_compliance(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = InternalComplianceSerializer(instance,context={'request':request})
         return Response(serializer.data)
 
-    @detail_route(methods=['POST',])
+    @detail_route(methods=['POST',], detail=True)
     @renderer_classes((JSONRenderer,))
     def submit(self, request, *args, **kwargs):
         try:
@@ -123,7 +128,7 @@ class ComplianceViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['GET',])
+    @detail_route(methods=['GET',], detail=True)
     def assign_request_user(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -140,7 +145,7 @@ class ComplianceViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['POST',])
+    @detail_route(methods=['POST',], detail=True)
     def delete_document(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -159,7 +164,7 @@ class ComplianceViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['POST',])
+    @detail_route(methods=['POST',], detail=True)
     def assign_to(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -184,7 +189,7 @@ class ComplianceViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['GET',])
+    @detail_route(methods=['GET',], detail=True)
     def unassign(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -201,7 +206,7 @@ class ComplianceViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['GET',])
+    @detail_route(methods=['GET',], detail=True)
     def accept(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -218,7 +223,7 @@ class ComplianceViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['GET',])
+    @detail_route(methods=['GET',], detail=True)
     def amendment_request(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -236,7 +241,7 @@ class ComplianceViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['GET',])
+    @detail_route(methods=['GET',], detail=True)
     def action_log(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -253,7 +258,7 @@ class ComplianceViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['GET',])
+    @detail_route(methods=['GET',], detail=True)
     def comms_log(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -270,7 +275,7 @@ class ComplianceViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['POST',])
+    @detail_route(methods=['POST',], detail=True)
     @renderer_classes((JSONRenderer,))
     def add_comms_log(self, request, *args, **kwargs):
         try:
@@ -413,7 +418,7 @@ class CompliancePaginatedViewSet(viewsets.ModelViewSet):
 
         return qs
 
-    @list_route(methods=['GET',])
+    @list_route(methods=['GET',], detail=False)
     def list_external(self, request, *args, **kwargs):
         """
         User is accessing /external/ page

@@ -14,6 +14,7 @@
 {% block messages %}
 {% endblock %}
 
+
 {% block content %}
     <div class="container">
         <div class="row">
@@ -33,7 +34,6 @@
                 </div>
                 <div class="row">
                     Click <a href="{{ daily_admission_page_url }}" target="_blank">here</a> if you want to pay for daily admission fees
-
                 </div>
                 <div class="row">
                     <h3>
@@ -52,6 +52,10 @@
                         <h3>
                             Access to {{system_name}}
                         </h3>
+
+                        <!--   Auth2   -->
+                        <a href="/ssologin">Login</a>
+
                         {% bootstrap_messages %}
                         <form method="post" action="{% url "social:complete" backend="email" %}">
                             {% csrf_token %}
