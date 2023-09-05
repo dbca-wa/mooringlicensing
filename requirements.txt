@@ -1,5 +1,5 @@
 # Django==1.11.29
-Django==3.2.20
+Django==3.2.21
 ipython==7.19.0
 psycopg2==2.8.6
 jedi==0.17.2
