@@ -1,6 +1,6 @@
 # Django==1.11.29
-Django==3.2.20
-ipython==7.19.0
+Django==3.2.23
+ipython==8.10.0
 psycopg2==2.8.6
 jedi==0.17.2
 #git+https://github.com/xzzy/ledger.git@master2#egg=ledger
@@ -75,3 +75,4 @@ django-phonenumber-field==6.1.0
 babel==2.10.1
 git+https://github.com/dbca-wa/webtemplate2.git#egg=webtemplate_dbca
 tqdm==4.64.1
+setuptools>=65.5.1 # not directly required, pinned by Snyk to avoid a vulnerability
