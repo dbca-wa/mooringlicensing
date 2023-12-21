@@ -75,3 +75,4 @@ django-phonenumber-field==6.1.0
 babel==2.10.1
 git+https://github.com/dbca-wa/webtemplate2.git#egg=webtemplate_dbca
 tqdm==4.64.1
+pillow>=10.0.1 # not directly required, pinned by Snyk to avoid a vulnerability
