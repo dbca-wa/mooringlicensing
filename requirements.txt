@@ -81,3 +81,4 @@ click==8.1.7
 numpy==1.26.3
 setuptools==69.0.3
 wheel==0.42.0
+pillow>=10.2.0 # not directly required, pinned by Snyk to avoid a vulnerability
