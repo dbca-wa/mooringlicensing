@@ -261,7 +261,7 @@ class StickerReplacementFeeView(TemplateView):
                         'quantity': 1,
                     }
                     if not applicant:
-                        applicant = sticker_action_detail.sticker.approval.applicant_obj
+                        applicant = sticker_action_detail.approval.applicant_obj
                     lines.append(line)
 
 
@@ -316,7 +316,7 @@ class StickerReplacementFeeSuccessViewPreload(APIView):
 
             sticker_action_fee.invoice_reference = invoice.reference
             sticker_action_fee.save()
-
+            
             if sticker_action_fee.payment_type == StickerActionFee.PAYMENT_TYPE_TEMPORARY:
                 sticker_action_fee.payment_type = ApplicationFee.PAYMENT_TYPE_INTERNET
                 sticker_action_fee.expiry_time = None
@@ -324,9 +324,44 @@ class StickerReplacementFeeSuccessViewPreload(APIView):
 
                 old_sticker_numbers = []
                 for sticker_action_detail in sticker_action_details.all():
-                    old_sticker = sticker_action_detail.sticker
-                    new_sticker = old_sticker.request_replacement(Sticker.STICKER_STATUS_LOST, sticker_action_detail)
-                    old_sticker_numbers.append(old_sticker.number)
+                    if sticker_action_detail.sticker:
+                        old_sticker = sticker_action_detail.sticker
+                        new_sticker = old_sticker.request_replacement(Sticker.STICKER_STATUS_LOST, sticker_action_detail)
+                        old_sticker_numbers.append(old_sticker.number)
+                    else:
+                        if sticker_action_detail.change_sticker_address:
+                            # Create replacement sticker
+                            new_sticker = Sticker.objects.create(
+                                approval=sticker_action_detail.approval,
+                                vessel_ownership=sticker_action_detail.approval.current_proposal.vessel_ownership,
+                                fee_constructor=sticker_action_detail.approval.current_proposal.fee_constructor,
+                                fee_season=sticker_action_detail.approval.latest_applied_season,
+                                postal_address_line1 = sticker_action_detail.new_postal_address_line1,
+                                postal_address_line2 = sticker_action_detail.new_postal_address_line2,
+                                postal_address_line3 = sticker_action_detail.new_postal_address_line3,
+                                postal_address_locality = sticker_action_detail.new_postal_address_locality,
+                                postal_address_state = sticker_action_detail.new_postal_address_state,
+                                postal_address_country = sticker_action_detail.new_postal_address_country,
+                                postal_address_postcode = sticker_action_detail.new_postal_address_postcode,
+                            )
+                            logger.info(f'New Sticker: [{new_sticker}] has been created for the approval with a new postal address: [{sticker_action_detail.approval}].')
+                        else:
+                            # Create replacement sticker
+                            new_sticker = Sticker.objects.create(
+                                approval=sticker_action_detail.approval,
+                                vessel_ownership=sticker_action_detail.approval.current_proposal.vessel_ownership,
+                                fee_constructor=sticker_action_detail.approval.current_proposal.fee_constructor,
+                                fee_season=sticker_action_detail.approval.latest_applied_season,
+                                postal_address_line1 = sticker_action_detail.approval.postal_address_line1,
+                                postal_address_line2 = sticker_action_detail.approval.postal_address_line2,
+                                postal_address_line3 = sticker_action_detail.approval.postal_address_line3,
+                                postal_address_locality = sticker_action_detail.approval.postal_address_suburb,
+                                postal_address_state = sticker_action_detail.approval.postal_address_state,
+                                postal_address_country = sticker_action_detail.approval.postal_address_country,
+                                postal_address_postcode = sticker_action_detail.approval.postal_address_postcode,
+                            )
+                            logger.info(f'New Sticker: [{new_sticker}] has been created for the approval: [{sticker_action_detail.approval}].')
+                
                 # Send email with the invoice
                 send_sticker_replacement_email(request, old_sticker_numbers, new_sticker.approval, invoice.reference)
 

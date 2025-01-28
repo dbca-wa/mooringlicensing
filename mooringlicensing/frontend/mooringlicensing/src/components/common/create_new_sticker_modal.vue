@@ -3,7 +3,7 @@
         <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :title="title" large>
             <div class="container-fluid">
                 <alert :show.sync="showError" type="danger"><strong>{{ errorString }}</strong></alert>
-                <div class="row form-group">
+                <div v-if="!replacementFee" class="row form-group">
                     <label class="col-sm-2 control-label">Mailed Date</label>
                     <div class="col-sm-3">
                         <div class="input-group date" ref="mailedDatePicker">
@@ -51,10 +51,20 @@
                         </select>
                     </div>
                 </div>
+                <div v-if="replacementFee" class="row form-group">
+                    <label class="col-sm-2 control-label" for="reason">Reason</label>
+                    <div class="col-sm-9">
+                        <textarea class="col-sm-9 form-control" name="reason" v-model="details.reason"></textarea>
+                    </div>
+                </div>
             </div>
             <div slot="footer">
                 <div class="row">
+                    <div class="col-md-7" v-if="replacementFee">
+                        <span v-if="is_internal"><strong><input type="checkbox" v-model="waive_the_fee" /> Waive the fee</strong></span>
+                    </div>
                     <div class="col-md-5">
+                        <span v-if="replacementFee"><strong>Sticker replacement cost ${{ total_fee }}</strong></span>
                         <button type="button" v-if="processing" disabled class="btn btn-default" @click="ok"><i class="fa fa-spinner fa-spin"></i> Processing</button>
                         <button type="button" v-else class="btn btn-default" @click="ok" :disabled="!okButtonEnabled">Ok</button>
                         <button type="button" class="btn btn-default" @click="cancel">Cancel</button>
@@ -79,9 +89,13 @@ export default {
     data:function () {
         let vm = this;
         return {
-            dcv_permit_id: null,
+            details: vm.getDefaultDetails(),
+            approval_id: null,
             isModalOpen:false,
             processing: false,
+            replacementFee: false,
+            fee_item: null,
+            waive_the_fee: false,
             countries: [],
             errors: false,
             mailed_date: null,
@@ -96,11 +110,15 @@ export default {
             postal_address_postcode: '',
         }
     },
-    watch: {
+    props:{
+        is_internal: {
+            type: Boolean,
+            default: false,
+        }
     },
     computed: {
         okButtonEnabled: function(){
-            if(this.mailed_date){
+            if (this.details.reason){
                 return true
             }
             return false
@@ -112,14 +130,32 @@ export default {
         title: function() {
             return 'Create New Sticker'
         },
+        total_fee: function() {
+            let vm = this
+            let amount = 0
+
+            if (!vm.waive_the_fee){
+                amount = vm.fee_item.amount;
+            }
+
+            return amount
+        },
     },
     methods:{
+        getDefaultDetails: function(){
+            return {
+                reason: '',
+                date_of_lost_sticker: null,
+                date_of_returned_sticker: null,
+            }
+        },
         ok:function () {
             let vm =this;
             vm.errors = false
             vm.processing = true
             vm.$emit("sendData", {
-                "dcv_permit_id": vm.dcv_permit_id,
+                "waive_the_fee": vm.waive_the_fee,
+                "approval_id": vm.approval_id,
                 "mailed_date": vm.mailed_date,
                 "change_sticker_address": vm.change_sticker_address,
                 "postal_address_line1": vm.postal_address_line1,
@@ -129,16 +165,18 @@ export default {
                 "postal_address_state": vm.postal_address_state,
                 "postal_address_country": vm.postal_address_country,
                 "postal_address_postcode": vm.postal_address_postcode,
+                "details": vm.details,
             })
         },
         cancel:function () {
             this.close();
         },
         close:function () {
+            this.details = this.getDefaultDetails()
             this.isModalOpen = false
             this.errors = false
             this.processing = false
-            this.dcv_permit_id = null
+            this.approval_id = null
         },
         addEventListeners: function () {
             let vm = this;
@@ -159,6 +197,18 @@ export default {
                 vm.mailed_date = selected_date;
             });
         },
+        fetchData: function(){
+            let vm = this
+
+            vm.$http.get(api_endpoints.fee_item_sticker_replacement).then(
+                (response) => {
+                    vm.fee_item = response.body
+                },
+                (error) => {
+                    console.log(error)
+                }
+            )
+        },
         fetchCountries: function () {
             let vm = this;
             vm.$http.get(api_endpoints.countries).then((response) => {
@@ -170,6 +220,7 @@ export default {
         this.fetchCountries();
     },
     created:function () {
+        this.fetchData();
         this.$nextTick(() => {
             this.addEventListeners();
         });

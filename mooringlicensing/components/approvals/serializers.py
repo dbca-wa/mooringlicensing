@@ -599,6 +599,7 @@ class ListApprovalSerializer(serializers.ModelSerializer):
     allowed_assessors_user = serializers.SerializerMethodField()
     stickers = serializers.SerializerMethodField()
     stickers_historical = serializers.SerializerMethodField()
+    has_sticker = serializers.SerializerMethodField()
     is_approver = serializers.SerializerMethodField()
     is_assessor = serializers.SerializerMethodField()
     vessel_regos = serializers.SerializerMethodField()
@@ -641,6 +642,7 @@ class ListApprovalSerializer(serializers.ModelSerializer):
             'allowed_assessors_user',
             'stickers',
             'stickers_historical',
+            'has_sticker',
             'licence_document',
             'authorised_user_summary_document',
             'is_assessor',
@@ -685,6 +687,7 @@ class ListApprovalSerializer(serializers.ModelSerializer):
             'allowed_assessors_user',
             'stickers',
             'stickers_historical',
+            'has_sticker',
             'licence_document',
             'authorised_user_summary_document',
             'is_assessor',
@@ -718,6 +721,9 @@ class ListApprovalSerializer(serializers.ModelSerializer):
                     'name': proposal.allocated_mooring.name,
                 }
         return mooring
+
+    def get_has_sticker(self,obj):
+        return Sticker.objects.filter(approval=obj).exclude(status__in=[Sticker.STICKER_STATUS_EXPIRED,Sticker.STICKER_STATUS_CANCELLED]).exists()
 
     def get_moorings(self, obj):
         links = []
@@ -1123,6 +1129,7 @@ class StickerActionDetailSerializer(serializers.ModelSerializer):
         model = StickerActionDetail
         fields = (
             'id',
+            'approval',
             'sticker',
             'reason',
             'date_created',

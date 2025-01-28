@@ -375,10 +375,10 @@ export default {
         },
         sendDataForCreateNewSticker: function(params){
             let vm = this
-            vm.$http.post('/api/internal_dcv_permit/' + params.dcv_permit_id + '/create_new_sticker/', params).then(
+            vm.$http.post('/api/internal_dcv_permit/' + params.approval_id + '/create_new_sticker/', params).then(
                 res => {
                     // Retrieve the element clicked on
-                    let elem_clicked = $("a[data-create-new-sticker='" + params.dcv_permit_id + "']")
+                    let elem_clicked = $("a[data-create-new-sticker='" + params.approval_id + "']")
 
                     // Retrieve the row index clicked on
                     let row_index_clicked = elem_clicked.closest('tr').index()
@@ -461,7 +461,7 @@ export default {
         },
         createNewSticker: function(dcv_permit_id){
             console.log('dcv_permit_id: ' + dcv_permit_id)
-            this.$refs.create_new_sticker_modal.dcv_permit_id = dcv_permit_id
+            this.$refs.create_new_sticker_modal.approval_id = dcv_permit_id
             this.$refs.create_new_sticker_modal.isModalOpen = true
         },
         requestNewSticker: function(dcv_permit_id){

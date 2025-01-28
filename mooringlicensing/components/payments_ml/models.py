@@ -134,8 +134,12 @@ class StickerActionFee(Payment):
     def __str__(self):
         stickers = []
         for sticker_action_detail in self.sticker_action_details.all():
-            stickers.append(sticker_action_detail.sticker.number)
-        return 'Sticker(s): [{}] : Invoice {}'.format(','.join(stickers), self.invoice_reference)
+            if sticker_action_detail.sticker:
+                stickers.append(sticker_action_detail.sticker.number)
+        if stickers:
+            return 'Sticker(s): [{}] : Invoice {}'.format(','.join(stickers), self.invoice_reference)
+        else:
+            return 'New Sticker Invoice {}'.format(self.invoice_reference)
 
     class Meta:
         app_label = 'mooringlicensing'

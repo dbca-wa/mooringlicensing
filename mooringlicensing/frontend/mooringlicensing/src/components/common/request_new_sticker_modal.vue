@@ -180,9 +180,7 @@ export default {
             let vm = this
             let amount = 0
 
-            if (vm.waive_the_fee){
-
-            } else {
+            if (!vm.waive_the_fee){
                 for (let sticker of this.stickers){
                     if (sticker.checked){
                         amount += vm.fee_item.amount

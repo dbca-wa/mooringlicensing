@@ -86,6 +86,11 @@
                 :approvalId="approvalHistoryId"
             />
         </div>
+        <CreateNewStickerModal
+            ref="create_new_sticker_modal"
+            :is_internal="is_internal"
+            @sendData="sendDataForCreateNewSticker"
+        />
         <RequestNewStickerModal
             ref="request_new_sticker_modal"
             :is_internal="is_internal"
@@ -111,6 +116,7 @@ import ApprovalCancellation from '../internal/approvals/approval_cancellation.vu
 import ApprovalSuspension from '../internal/approvals/approval_suspension.vue'
 import ApprovalSurrender from '../internal/approvals/approval_surrender.vue'
 import ApprovalHistory from '../internal/approvals/approval_history.vue'
+import CreateNewStickerModal from "@/components/common/create_new_sticker_modal.vue"
 import RequestNewStickerModal from "@/components/common/request_new_sticker_modal.vue"
 import RequestStickerAddressModal from "@/components/common/request_sticker_address_modal.vue"
 import SwapMooringsModal from "@/components/common/swap_moorings_modal.vue"
@@ -167,6 +173,7 @@ export default {
         ApprovalSuspension,
         ApprovalSurrender,
         ApprovalHistory,
+        CreateNewStickerModal,
         RequestNewStickerModal,
         SwapMooringsModal,
         RequestStickerAddressModal,
@@ -478,8 +485,17 @@ export default {
                                 }
                             }
                             if (full.approval_type_dict.code != 'wla') {
-                                links += `<a href='#${full.id}' data-request-new-sticker='${full.id}'>Request New Sticker</a><br/>`
-                                links += `<a href='#${full.id}' data-request-sticker-address='${full.id}'>Update Sticker Address</a><br/>`
+
+                                if (!full.has_sticker) {
+                                    if (vm.is_internal) {
+                                        links += `<a href='#${full.id}' data-create-new-sticker='${full.id}'>Create New Sticker</a><br/>`
+                                    } else {
+                                        links += `<a href='#${full.id}' data-create-new-sticker='${full.id}'>Request New Sticker</a><br/>`
+                                    }
+                                } else {
+                                    links += `<a href='#${full.id}' data-request-new-sticker='${full.id}'>Request New Sticker</a><br/>`
+                                    links += `<a href='#${full.id}' data-request-sticker-address='${full.id}'>Update Sticker Address</a><br/>`
+                                }
                             }
 
                             return links;
@@ -843,6 +859,24 @@ export default {
                 }
             )
         },
+        sendDataForCreateNewSticker: function(params){
+            let vm = this
+            vm.$http.post(helpers.add_endpoint_json(api_endpoints.approvals, params.approval_id + '/create_new_sticker'), params).then(
+                res => {
+                    helpers.post_and_redirect('/sticker_replacement_fee/', {'csrfmiddlewaretoken' : vm.csrf_token, 'data': JSON.stringify(res.body)});
+                },
+                err => {
+                    vm.$refs.create_new_sticker_modal.processing = false
+                    vm.$refs.create_new_sticker_modal.isModalOpen = false
+                    vm.$refs.create_new_sticker_modal.replacementFee = false
+                    swal({
+                        title: "Request New Sticker",
+                        text: err.body,
+                        type: "error",
+                    })
+                }
+            )  
+        },
         sendDataForNewSticker: function(params){
             let vm = this
             vm.$http.post(helpers.add_endpoint_json(api_endpoints.approvals, params.approval_id + '/request_new_stickers'), params).then(
@@ -991,6 +1025,12 @@ export default {
                 vm.surrenderApproval(id, approval_type_name); 
             });
 
+            vm.$refs.approvals_datatable.vmDataTable.on('click', 'a[data-create-new-sticker]', function(e) {
+                e.preventDefault();
+                var id = $(this).attr('data-create-new-sticker');
+                vm.createNewSticker(id);
+            });
+
             //External Request New Sticker listener
             vm.$refs.approvals_datatable.vmDataTable.on('click', 'a[data-request-new-sticker]', function(e) {
                 e.preventDefault();
@@ -1135,6 +1175,11 @@ export default {
             this.$refs.approval_surrender.approval_id = approval_id;
             this.$refs.approval_surrender.approval_type_name = approval_type_name
             this.$refs.approval_surrender.isModalOpen = true;
+        },
+        createNewSticker: function(approval_id){
+            this.$refs.create_new_sticker_modal.approval_id = approval_id
+            this.$refs.create_new_sticker_modal.isModalOpen = true
+            this.$refs.create_new_sticker_modal.replacementFee = true
         },
         requestNewSticker: function(approval_id){
             this.$refs.request_new_sticker_modal.approval_id = approval_id

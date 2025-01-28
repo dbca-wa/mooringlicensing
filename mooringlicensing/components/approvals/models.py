@@ -432,6 +432,17 @@ class Approval(RevisionedMixin):
         return ret_value
 
     @property
+    def postal_address_line3(self):
+        try:
+            ret_value = self.proposal_applicant.postal_address_line3
+        except:
+            logger.error(f'Postal address line3 cannot be retrieved for the approval [{self}]')
+            return ''
+
+        return ret_value
+
+
+    @property
     def postal_address_state(self):
         try:
             ret_value = self.proposal_applicant.postal_address_state
@@ -467,6 +478,19 @@ class Approval(RevisionedMixin):
 
         if not ret_value:
             logger.warning(f'Empty postcode found for the postal address of the Approval: [{self}].')
+
+        return ret_value
+
+    @property
+    def postal_address_country(self):
+        try:
+            ret_value = self.proposal_applicant.postal_address_country
+        except:
+            logger.error(f'Postal address country cannot be retrieved for the approval [{self}]')
+            return ''
+
+        if not ret_value:
+            logger.warning(f'Empty country found for the postal address of the Approval: [{self}].')
 
         return ret_value
 
@@ -3676,6 +3700,7 @@ class Sticker(models.Model):
 
 
 class StickerActionDetail(models.Model):
+    approval = models.ForeignKey(Approval, blank=True, null=True, related_name='sticker_action_approval', on_delete=models.SET_NULL)
     sticker = models.ForeignKey(Sticker, blank=True, null=True, related_name='sticker_action_details', on_delete=models.SET_NULL)
     reason = models.TextField(blank=True)
     date_created = models.DateTimeField(blank=True, null=True, auto_now_add=True)

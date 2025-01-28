@@ -547,6 +547,65 @@ class ApprovalViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin):
 
     @detail_route(methods=['POST'], detail=True)
     @basic_exception_handler
+    def create_new_sticker(self, request, *args, **kwargs):
+        # external
+        approval = self.get_object()
+        details = request.data['details']
+
+        if approval.current_proposal:
+            v_details = approval.current_proposal.latest_vessel_details
+            v_ownership = approval.current_proposal.vessel_ownership
+
+        if v_details and not v_ownership.end_date:
+            # Licence/Permit has a vessel
+            sticker_action_details = []
+            
+            #only allow this if there are no sticker records associated with the approval
+            if Sticker.objects.filter(approval=approval).exclude(status__in=[Sticker.STICKER_STATUS_EXPIRED,Sticker.STICKER_STATUS_CANCELLED]).exists():
+                raise serializers.ValidationError("This approval already has an active sticker record.")
+
+            data = {}
+            today = datetime.now(pytz.timezone(settings.TIME_ZONE)).date()
+
+            data['action'] = 'Create new sticker'
+            data['user'] = request.user.id
+            data['reason'] = details['reason']
+            if is_internal(request):
+                data['waive_the_fee'] = request.data.get('waive_the_fee', False) 
+            else:
+                data['waive_the_fee'] = False
+            #new address checkbox
+            data['change_sticker_address'] = request.data.get('change_sticker_address', False)
+            #address change (only applied if above True)
+            data['new_postal_address_line1'] = request.data.get('postal_address_line1','')
+            data['new_postal_address_line2'] = request.data.get('postal_address_line2','')
+            data['new_postal_address_line3'] = request.data.get('postal_address_line3','')
+            data['new_postal_address_locality'] = request.data.get('postal_address_locality','')
+            data['new_postal_address_state'] = request.data.get('postal_address_state','')
+            data['new_postal_address_country'] = request.data.get('postal_address_country','AU')
+            data['new_postal_address_postcode'] = request.data.get('postal_address_postcode','')
+            if data['change_sticker_address'] and '' in [
+                    data['new_postal_address_line1'],
+                    data['new_postal_address_locality'],
+                    data['new_postal_address_state'],
+                    data['new_postal_address_country'],
+                    data['new_postal_address_postcode']
+                ]:
+                raise serializers.ValidationError("Required address details not provided")                
+
+            serializer = StickerActionDetailSerializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            new_sticker_action_detail = serializer.save()
+            new_sticker_action_detail.approval = approval
+            new_sticker_action_detail.save()
+            sticker_action_details.append(new_sticker_action_detail.id)
+
+            return Response({'sticker_action_detail_ids': sticker_action_details})
+        else:
+            raise Exception('You cannot request a new sticker for the licence/permit without a vessel.')
+
+    @detail_route(methods=['POST'], detail=True)
+    @basic_exception_handler
     def request_new_stickers(self, request, *args, **kwargs):
         # external
         approval = self.get_object()
@@ -578,7 +637,11 @@ class ApprovalViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin):
                 data['user'] = request.user.id
                 data['reason'] = details['reason']
                 data['date_of_lost_sticker'] = today.strftime('%d/%m/%Y')
-                data['waive_the_fee'] = request.data.get('waive_the_fee', False)
+                
+                if is_internal(request):
+                    data['waive_the_fee'] = request.data.get('waive_the_fee', False) 
+                else:
+                    data['waive_the_fee'] = False
 
                 #new address checkbox
                 data['change_sticker_address'] = request.data.get('change_sticker_address', False)
@@ -602,6 +665,7 @@ class ApprovalViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin):
                 serializer = StickerActionDetailSerializer(data=data)
                 serializer.is_valid(raise_exception=True)
                 new_sticker_action_detail = serializer.save()
+                new_sticker_action_detail.approval = approval
                 new_sticker_action_detail.sticker = sticker
                 new_sticker_action_detail.save()
                 sticker_action_details.append(new_sticker_action_detail.id)
@@ -1753,7 +1817,10 @@ class StickerViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin):
         data['sticker'] = sticker.id
         data['action'] = 'Request replacement'
         data['user'] = request.user.id
-        data['waive_the_fee'] = request.data.get('waive_the_fee', False)
+        if is_internal(request):
+            data['waive_the_fee'] = request.data.get('waive_the_fee', False) 
+        else:
+            data['waive_the_fee'] = False
         data['reason'] = request.data.get('details', {}).get('reason', '')
         serializer = StickerActionDetailSerializer(data=data)
         serializer.is_valid(raise_exception=True)
