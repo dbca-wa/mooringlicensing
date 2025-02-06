@@ -36,7 +36,7 @@ from mooringlicensing.utils import are_migrations_running
 from django.urls import path
 
 router = routers.DefaultRouter()
-router.include_root_view = settings.DEBUG
+router.include_root_view = settings.SHOW_API_ROOT
 router.register(r'proposal', proposal_api.ProposalViewSet, 'proposal')
 router.register(r'proposal_by_uuid', proposal_api.ProposalByUuidViewSet, 'proposal_by_uuid')
 router.register(r'waitinglistapplication', proposal_api.WaitingListApplicationViewSet, 'waitinglistapplication')

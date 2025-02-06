@@ -17,6 +17,7 @@ SYSTEM_MAINTENANCE_WARNING = env('SYSTEM_MAINTENANCE_WARNING', 24) # hours
 DISABLE_EMAIL = env('DISABLE_EMAIL', False)
 SHOW_TESTS_URL = env('SHOW_TESTS_URL', False)
 SHOW_DEBUG_TOOLBAR = env('SHOW_DEBUG_TOOLBAR', False)
+SHOW_API_ROOT = env('SHOW_API_ROOT', False)
 
 #Settings for rounding application fee items
 ROUND_FEE_ITEMS = env('ROUND_FEE_ITEMS', False)
