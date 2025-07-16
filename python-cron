@@ -8,3 +8,4 @@
 */4 * * * * python manage_ml.py approval_renewal_notices >> logs/run_approval_renewal_notices_cron_task.log 2>&1
 30 3 * * 4 python manage_ml.py clearsessions >> logs/clearsessions.log 2>&1
 30 * * * * python manage_ml.py auto_lock_system_account >> logs/auto_lock_system_account.log 2>&1
+1 0 * * *  /bin/log_rotate.sh  >> /app/logs/log_rotate.log 2>&1
