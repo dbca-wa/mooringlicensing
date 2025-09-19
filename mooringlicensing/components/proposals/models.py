@@ -3190,8 +3190,8 @@ class AnnualAdmissionApplication(Proposal):
                     approval.child_obj.current_proposal.proposal_applicant.email_user_id != self.proposal_applicant.email_user_id):
                     approvals_wla.append(approval)
 
-        if proposals_aaa or approvals_aap or proposals_aua or approvals_aup or proposals_mla or approvals_ml or proposals_wla:
-            list_sum = proposals_aaa + proposals_aua + proposals_mla + approvals_aap + approvals_aup + approvals_ml + proposals_wla
+        if proposals_aaa or approvals_aap or proposals_aua or approvals_aup or proposals_mla or approvals_ml or proposals_wla or approvals_wla:
+            list_sum = proposals_aaa + proposals_aua + proposals_mla + approvals_aap + approvals_aup + approvals_ml + proposals_wla + approvals_wla
             raise serializers.ValidationError("The vessel in the application is already listed in " +
             ", ".join(['{} {} '.format(item.description, item.lodgement_number) for item in list_sum]))
 
