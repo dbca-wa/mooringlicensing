@@ -2106,11 +2106,12 @@ class AuthorisedUserPermit(Approval):
             moa_to_be_on_new_sticker.sticker = new_sticker
             moa_to_be_on_new_sticker.save()
 
-        if proposal.proposal_type.code == 'renewal':
+        if proposal and proposal.proposal_type and proposal.proposal_type.code == 'renewal':
             #if renewing and the sticker is not being replaced, simply expire it now
             for sticker in stickers_to_be_replaced_for_renewal:
                 if not sticker in stickers_replaced_for_renewal:
                     sticker.status = Sticker.STICKER_STATUS_EXPIRED
+                    sticker.save()
 
         return stickers_to_be_returned
 
