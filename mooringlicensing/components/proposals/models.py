@@ -971,6 +971,7 @@ class Proposal(RevisionedMixin):
         continue_loop = True
 
         target_proposal = proposal
+        latest_vessel_ownership = VesselOwnership.objects.filter(vessel=vessel,end_date=None).order_by('-id').first()
 
         # run loop to first find BASE AMOUNT PAID FOR THE TARGET VESSEL
         # run a second loop to find VALID DEDUCTIONS
@@ -1009,7 +1010,7 @@ class Proposal(RevisionedMixin):
                         current_approvals = target_vessel.get_current_approvals(target_date)
                         logger.info(f'Current approvals for the vessel: [{target_vessel}]: {current_approvals}')
 
-                        if vessel == target_vessel:
+                        if (not proposal.vessel_ownership and vessel == target_vessel) or proposal.vessel_ownership == latest_vessel_ownership:
                             # This is paid for AA component for a target_vessel
                             # In this case, we can transfer this amount
                             amount_paid = fee_item_application_fee.amount_paid if fee_item_application_fee.amount_paid else 0
@@ -1153,27 +1154,25 @@ class Proposal(RevisionedMixin):
 
                         target_vessel = proposal.vessel_ownership.vessel
                         max_paid_for_vessel = 0
-                        if target_vessel:
-                            if target_vessel and target_vessel == vessel:
-                                max_paid_for_vessel = max_amount_paid
-                            elif target_vessel.rego_no and target_vessel.rego_no in max_amount_paid_per_vessel:
-                                max_paid_for_vessel = max_amount_paid_per_vessel[target_vessel.rego_no]
-                        
-                        try:
-                            paid_date = ApprovalHistory.objects.filter(proposal=proposal).first().start_date.date()
-                            fee_constructor_for_aa = FeeConstructor.get_fee_constructor_by_application_type_and_date(annual_admission_type, paid_date)
-                            fee_item = fee_constructor_for_aa.get_fee_item(proposal.vessel_length, proposal.proposal_type, paid_date)
-                            logger.info(f'Proposal: [{proposal}] AA would have cost ${fee_item.get_absolute_amount(proposal.vessel_length)} if paid for')
+                        if target_vessel and target_vessel.rego_no and target_vessel.rego_no in max_amount_paid_per_vessel:
+                            max_paid_for_vessel = max_amount_paid_per_vessel[target_vessel.rego_no]
 
-                            deduction_for_zero_payment = fee_item.get_absolute_amount(proposal.vessel_length) - max_paid_for_vessel
-                            logger.info(f'Proposal: Vessel on [{proposal}] was charged ${max_paid_for_vessel}')
+                        if proposal.vessel_ownership != latest_vessel_ownership:
+                            try:
+                                paid_date = ApprovalHistory.objects.filter(proposal=proposal).first().start_date.date()
+                                fee_constructor_for_aa = FeeConstructor.get_fee_constructor_by_application_type_and_date(annual_admission_type, paid_date)
+                                fee_item = fee_constructor_for_aa.get_fee_item(proposal.vessel_length, proposal.proposal_type, paid_date)
+                                logger.info(f'Proposal: [{proposal}] AA would have cost ${fee_item.get_absolute_amount(proposal.vessel_length)} if paid for')
 
-                            if deduction_for_zero_payment > 0:
-                                logger.info(f'Proposal: [{proposal}] was deducted ${deduction_for_zero_payment}')
-                                previously_applied_deductions += deduction_for_zero_payment
+                                deduction_for_zero_payment = fee_item.get_absolute_amount(proposal.vessel_length) - max_paid_for_vessel
+                                logger.info(f'Proposal: Vessel on [{proposal}] was charged ${max_paid_for_vessel}')
 
-                        except:
-                            logger.warning(f'Unable to determine proposal approval start date - will be unable to determine how much would have been paid for it')
+                                if deduction_for_zero_payment > 0:
+                                    logger.info(f'Proposal: [{proposal}] was deducted ${deduction_for_zero_payment}')
+                                    previously_applied_deductions += deduction_for_zero_payment
+
+                            except:
+                                logger.warning(f'Unable to determine proposal approval start date - will be unable to determine how much would have been paid for it')
                         
                     #Here a fee item exists. A deduction may have been made for one of three reasons:
                     # - Another vessel ownership is no longer valid
@@ -1183,7 +1182,7 @@ class Proposal(RevisionedMixin):
                     # - In the last case, the original payment for the vessel should be factored before any potential former deductions are determined as the "deduction" in those cases have actually been paid for and are still valid
                     # - To do this, we must use the max paid value for the vessel in question, and subtract the payment from expected full amount
                     for fee_item_application_fee in FeeItemApplicationFee.objects.filter(application_fee__proposal=proposal, fee_item__fee_constructor__application_type=annual_admission_type):
-                                
+                        
                         # We are interested only in the AnnualAdmission component
                         logger.info(f'FeeItemApplicationFee: [{fee_item_application_fee}] found through the proposal: [{proposal}]')
 
@@ -1193,6 +1192,9 @@ class Proposal(RevisionedMixin):
                             logger.warning("Application fee missing vessel details - invoices may require review")
                             target_vessel = None
 
+                        if proposal.vessel_ownership == latest_vessel_ownership:
+                            continue
+                        
                         # Retrieve the current approvals of the target_vessel
                         if target_vessel:
                             current_approvals = target_vessel.get_current_approvals(target_date)
@@ -1235,7 +1237,7 @@ class Proposal(RevisionedMixin):
 
         
         deductions_to_be_factored = valid_deductions - previously_applied_deductions
-        logger.info(f"${max_amount_paid} has been paid for this vessel. There are ${valid_deductions} worth of potential deductions on this approval. ${previously_applied_deductions} has already been applied.")
+        logger.info(f"${max_amount_paid} has been paid for this vessel. There are ${valid_deductions} worth of potential deductions on this approval. ${previously_applied_deductions} has already been applied (or specified deductions must be applied again).")
         if deductions_to_be_factored > 0:
             max_amount_paid += deductions_to_be_factored
 
