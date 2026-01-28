@@ -750,6 +750,10 @@ class ListApprovalSerializer(serializers.ModelSerializer):
             return False
         return not Sticker.objects.filter(approval=obj).exclude(status__in=[Sticker.STICKER_STATUS_EXPIRED,Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_RETURNED,Sticker.STICKER_STATUS_TO_BE_RETURNED,Sticker.STICKER_STATUS_LOST]).exists()
 
+    #TODO missing sticker message
+    #specified WHICH valid sticker(s) is/are missing (and what invalid stikcers will be replaced)
+    #OR what vessel/mooring is missing a sticker (and will have a sticker made for)
+
     def get_moorings(self, obj):
         links = []
         request = self.context.get('request')
