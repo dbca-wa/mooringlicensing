@@ -582,63 +582,85 @@ class ApprovalViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin):
     @detail_route(methods=['POST'], detail=True)
     @basic_exception_handler
     def create_new_sticker(self, request, *args, **kwargs):
-
-        #TODO this needs a complete overhaul...
-        #This function should:
-        #replace a specified sticker (?) (if necessary, may not be)
-        #identify a missing sticker and replace it OR
-        #identify a cancelled sticker and replace it
-        #In that order
-
         # internal only
         if is_internal(self.request):
             approval = self.get_object()
+
+            if not approval.status in Approval.APPROVED_STATUSES:
+                raise serializers.ValidationError("Approval is not valid for sticker replacement (Must be Current or Suspended).")
+
             details = request.data['details']
 
             replace_sticker = None
             sticker_action_details = []
 
-            #TODO current proposal having a vessel is irrelevant for ML
-            #we should do this differently (on the approval directly if possible)
-            #if approval.current_proposal:
-            #    v_details = approval.current_proposal.latest_vessel_details
-            #    v_ownership = approval.current_proposal.vessel_ownership
-
-            #if v_details and not v_ownership.end_date:
-
-            # Licence/Permit has a vessel
-            
-            #only allow this if there are no sticker records associated with the approval
+            #First we check if there are missing valid stickers
+            #Then we check if there is an invalid sticker that can be directly replaced
+            #If there is not, we continue anyway and the sticker purpose will be established after payment
+            #But we must not allow this to continue if there are no missing stickers
 
             #Annual Admissions can only have one sticker
             if type(approval.child_obj) == AnnualAdmissionPermit:
-                if Sticker.objects.filter(approval=approval).exclude(status__in=[Sticker.STICKER_STATUS_EXPIRED,Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST]).exists():
+                if Sticker.objects.filter(approval=approval).exclude(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST]).exists():
                     raise serializers.ValidationError("This approval already has an active sticker record.")
-                #TODO if the approval is current but has no sticker that is current or printing (or awaiting export) then replace then latest sticker (set replace sticker) if it exists
+                #if the approval is current but has no sticker that is current or printing (or awaiting export) then replace then latest sticker (set replace sticker) if it exists
+                vessel_ownership = approval.current_proposal.vessel_ownership if approval.current_proposal else None
+                if not vessel_ownership or vessel_ownership.end_date:
+                    raise serializers.ValidationError("Approval does not have a valid vessel ownership.")
+                stickers_qs = Sticker.objects.filter(approval=approval,vessel_ownership=vessel_ownership).filter(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST]).order_by('-id')
+                if sticker_qs.exists():
+                    replace_sticker = stickers_qs.first()
                 #if none, replace blindly (handled after payment)
     
             #MLA - one sticker per vessel
             elif type(approval.child_obj) == MooringLicence:
-                #get all vessels on MooringLicense (directly not via AUP) that are assigned invalid stickers
-                vessel_ownerships = approval.child_obj.vessel_ownership_list
-                #TODO identify missing stickers (any VOOA VO that is not on a valid sticker with this approval assigned)
+                pass
+                #dentify missing stickers (any VOOA VO that is not on a valid sticker with this approval assigned)
+                vessel_ownership_on_approvals = approval.child_obj.get_current_vessel_ownership_on_approvals().values_list("vessel_ownership_id",flat=True)
+
+                if not vessel_ownership_on_approvals:
+                    raise serializers.ValidationError("Approval does not have a valid vessel ownership.")
+
+                stickers_qs = Sticker.objects.filter(approval=approval,vessel_ownership_id__in=list(vessel_ownership_on_approvals)).exclude(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST])
+                vo_missing_sticker = []
+
+                missing = False
+                for vo in vessel_ownership_on_approvals:
+                    if not stickers_qs.filter(vessel_ownership_id=vo).exists():
+                        missing = True
+                        vo_missing_sticker.append(vo)
+                
                 #if none are missing raise error
+                if not missing:
+                    raise serializers.ValidationError("This approval has active stickers for all relevant vessels.")
+
                 #otherwise then find any cancelled or lost stickers that can be replaced for those missing stickers (the latest sticker with the VO and approval)
+                stickers_qs = Sticker.objects.filter(approval=approval,vessel_ownership__in=vo_missing_sticker).filter(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST]).order_by('-id')
                 #replace first that comes up
+                if sticker_qs.exists():
+                    replace_sticker = stickers_qs.first()
                 #if none, replace blindly (handled after payment)
                 
             #AUP - one sticker for every four moorings, each mooring must have a sticker
             elif type(approval.child_obj) == AuthorisedUserPermit:
-                pass
-                #TODO identify missing stickers (any MOA with a null sticker OR a sticker that is cancelled or lost)
-                #if none are missing reaise error
+                #identify missing stickers (any MOA with a null sticker OR a sticker that is cancelled or lost)
+                active_moa_with_invalid_sticker_or_no_sticker = MooringOnApproval.objects.filter(
+                    approval=approval,active=True
+                ).filter(
+                    Q(sticker__isnull=True)|Q(sticker__status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST])
+                )
+                #if none are missing raise error
+                if not active_moa_with_invalid_sticker_or_no_sticker.exists():
+                    raise serializers.ValidationError("This approval has active stickers for all relevant moorings.")
+
                 #otherwise then find any cancelled or lost stickers that can be replaced for those missing stickers (whatever is on the MOA)
+                active_moa_with_invalid_sticker = active_moa_with_invalid_sticker_or_no_sticker.exclude(sticker=None).filter(sticker__status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST]).order_by('-id')
                 #replace first that comes up
+                if active_moa_with_invalid_sticker.exists():
+                    replace_sticker = active_moa_with_invalid_sticker.first().sticker
                 #if none, replace blindly (handled after payment)
             
             data = {}
-            today = datetime.now(pytz.timezone(settings.TIME_ZONE)).date()
-
             # include the sticker (to be replaced) in the action detail - if available
             if replace_sticker:
                 data['sticker'] = replace_sticker.id
@@ -679,8 +701,6 @@ class ApprovalViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin):
             approval.log_user_action(f"New sticker created for Approval {approval}", request)
 
             return Response({'sticker_action_detail_ids': sticker_action_details})
-        #else:
-        #    raise Exception('You cannot request a new sticker for the licence/permit without a vessel.')
 
     @detail_route(methods=['POST'], detail=True)
     @basic_exception_handler

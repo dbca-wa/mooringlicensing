@@ -26,7 +26,7 @@ from ledger_api_client.ledger_models import Invoice
 
 from mooringlicensing.helpers import is_authorised_to_modify, is_applicant_address_set, is_authorised_to_pay_auto_approved
 from mooringlicensing import settings
-from mooringlicensing.components.approvals.models import DcvPermit, DcvAdmission, StickerActionDetail, Sticker
+from mooringlicensing.components.approvals.models import DcvPermit, DcvAdmission, StickerActionDetail, Sticker, MooringOnApproval
 from mooringlicensing.components.payments_ml.email import send_application_submit_confirmation_email
 from mooringlicensing.components.approvals.email import (
     send_dcv_permit_mail, send_dcv_admission_mail,
@@ -335,9 +335,13 @@ class StickerReplacementFeeSuccessViewPreload(APIView):
                     sticker_action_fee.save()
                     
                     if sticker_action_fee.payment_type == StickerActionFee.PAYMENT_TYPE_TEMPORARY:
+
+                        #check if payment has been complete
+                        
+
                         sticker_action_fee.payment_type = ApplicationFee.PAYMENT_TYPE_INTERNET
                         sticker_action_fee.expiry_time = None
-                        sticker_action_fee.save()
+                        sticker_action_fee.save() 
 
                         old_sticker_numbers = []
                         for sticker_action_detail in sticker_action_details.all():
@@ -389,32 +393,85 @@ class StickerReplacementFeeSuccessViewPreload(APIView):
                                         )
 
                                         if type(sticker_action_detail.approval.child_obj) == AnnualAdmissionPermit:
-                                            pass
                                             #vessel ownership should be whatever is on the current proposal
                                             #raise an error if there is not one
+                                            if not sticker_action_detail.approval.current_proposal or not sticker_action_detail.approval.current_proposal.vessel_ownership or sticker_action_detail.approval.current_proposal.vessel_ownership.end_date:
+                                                raise serializers.ValidationError("Annual Admission Permit missing valid vessel ownership. If payment has been taken for sticker replacement, it should be refunded. Invoice: {invoice_reference}")
                                             
-                                            #identify pre-existing sticker - if it is valid (not lost or cancelled), raise an error
+                                            #identify pre-existing sticker - if it is valid (not lost or cancelled), raise an error (if it is expired, this is not the place to replace it)
+                                            if Sticker.objects.filter(
+                                                approval=sticker_action_detail.approval,vessel_ownership=sticker_action_detail.approval.current_proposal.vessel_ownership
+                                            ).exclude(
+                                                id=new_sticker.id,
+                                                status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST]
+                                            ).exists():
+                                                raise serializers.ValidationError("Valid sticker already exists. If payment has been taken for sticker replacement, it should be refunded. Invoice: {invoice_reference}")
 
                                         elif type(sticker_action_detail.approval.child_obj) == MooringLicence:
-                                            pass
                                             #vessel ownership in vessel ownership on approval table
                                             #raise an error is none exist
+                                            vooa = sticker_action_detail.approval.child_obj.get_current_vessel_ownership_on_approvals()
+                                            if not vooa.exists():
+                                                raise serializers.ValidationError("Mooring Site Licence missing valid vessel ownership. If payment has been taken for sticker replacement, it should be refunded. Invoice: {invoice_reference}")
 
-                                            #identify if any of those vessel ownership have non-current stickers (cancelled, lost)
-                                            #replace the first of them
-                                            
-                                            #otherwise, raise an error
+                                            #identify if any of those vessel ownerships have non-current stickers (cancelled, lost) or no sticker at all
+                                            vessel_ownership_on_approvals = vooa.values_list("vessel_ownership_id",flat=True)
+                                            stickers_qs = Sticker.objects.filter(
+                                                approval=sticker_action_detail.approval,vessel_ownership_id__in=list(vessel_ownership_on_approvals)
+                                            )
+                                            vo_missing_stickers = []
+                                            for vo in vessel_ownership_on_approvals:
+                                                sticker_with_vo = stickers_qs.filter(vessel_ownership_id=vo)
+                                                if sticker_with_vo.exists():
+                                                    if not sticker_with_vo.exclude(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST]).exists():
+                                                        vo_missing_stickers.append(vo)
+                                                else:
+                                                    vo_missing_stickers.append(vo)
+
+                                            #if none of the vo's are missing valid stickers, raise an error
+                                            if not vo_missing_stickers:
+                                                raise serializers.ValidationError("All vessel on license already have valid stickers. If payment has been taken for sticker replacement, it should be refunded. Invoice: {invoice_reference}")
+
+                                            #replace the first of them (change the vo on the new sticker)
+                                            if new_sticker.vessel_ownership_id != vo_missing_stickers[0]:
+                                                new_sticker.vessel_ownership_id = vo_missing_stickers[0]
+                                                proposal = Proposal.objects.filter(approval=sticker_action_detail.approval,vessel_ownership_id=vo_missing_stickers[0]).order_by("-id").first()
+                                                new_sticker.fee_constructor = proposal.fee_constructor
+                                                new_sticker.save()
                                         
                                         elif type(sticker_action_detail.approval.child_obj) == AuthorisedUserPermit:
-                                            pass
                                             #vessel ownership should be whatever is on the current proposal
                                             #raise an error if there is not one
+                                            if not sticker_action_detail.approval.current_proposal or not sticker_action_detail.approval.current_proposal.vessel_ownership or sticker_action_detail.approval.current_proposal.vessel_ownership.end_date:
+                                                raise serializers.ValidationError("Authorised User Permit missing valid vessel ownership. If payment has been taken for sticker replacement, it should be refunded. Invoice: {invoice_reference}")
 
-                                            #identify related MOAs with invalid stickers (cancelled, lost)
-                                            #replace the first of the identified stickers - by updating the moas to the new sticker
-                                            #otherwise raise an error - AUP stickers cannot be reliably identified for replacement via the current proposal alone 
+                                            #identify related MOAs with invalid stickers (cancelled, lost) or missing stickers
+                                            active_moa_with_invalid_sticker_or_no_sticker = MooringOnApproval.objects.filter(
+                                                approval=sticker_action_detail.approval,active=True
+                                            ).filter(
+                                                Q(sticker__isnull=True)|Q(sticker__status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST])
+                                            ).order_by('-id')
+                                            
+                                            #if all MOAs have a valid sticker raise an error - AUP stickers cannot be reliably identified for replacement via the current proposal alone 
+                                            if not active_moa_with_invalid_sticker_or_no_sticker.exists():
+                                                raise serializers.ValidationError("Authorised User Permit Moorings all have valid stickers. If payment has been taken for sticker replacement, it should be refunded. Invoice: {invoice_reference}")
 
-                                
+                                            #take care of those with (invalid) stickers first
+                                            with_stickers = active_moa_with_invalid_sticker_or_no_sticker.filter(sticker__isnull=False)
+                                            if with_stickers.exists():
+                                                #replace the first of the identified stickers (or lack thereof) - by updating the moas to the new sticker
+                                                bad_sticker = with_stickers.first().sticker
+                                                update_moas = with_stickers.filter(sticker=bad_sticker)
+                                                for moa in update_moas:
+                                                    moa.sticker = new_sticker
+                                                    moa.save()
+
+                                            #if there are only moas with null stickers, update up to four of them with the new sticker
+                                            without_stickers = active_moa_with_invalid_sticker_or_no_sticker.filter(sticker__isnull=True)
+                                            if not with_stickers.exists() and without_stickers.exists():
+                                                for i in range(0,min(4,len(without_stickers))): #NOTE the 4 should really be an env var (other functions would need a refactor as well)
+                                                    without_stickers[i].sticker = new_sticker
+                                                    without_stickers[i].save()
                     
                     # Send email with the invoice
                     send_sticker_replacement_email(request, old_sticker_numbers, new_sticker.approval, invoice.reference)
