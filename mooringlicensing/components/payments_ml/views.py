@@ -390,8 +390,9 @@ class StickerReplacementFeeSuccessViewPreload(APIView):
                                         logger.info(f'New Sticker: [{new_sticker}] has been created for the approval: [{sticker_action_detail.approval}].')
 
                                     if new_sticker:
+                                        season = sticker_action_detail.approval.latest_applied_season
                                         from mooringlicensing.components.approvals.models import (
-                                            MooringLicence,AuthorisedUserPermit, AnnualAdmissionPermit,
+                                            MooringLicence, AuthorisedUserPermit, AnnualAdmissionPermit,
                                         )
 
                                         if type(sticker_action_detail.approval.child_obj) == AnnualAdmissionPermit:
@@ -401,7 +402,7 @@ class StickerReplacementFeeSuccessViewPreload(APIView):
                                                 raise serializers.ValidationError("Annual Admission Permit missing valid vessel ownership. If payment has been taken for sticker replacement, it should be refunded. Invoice: {invoice_reference}")
                                             
                                             #identify pre-existing sticker - if it is valid (not lost or cancelled), raise an error (if it is expired, this is not the place to replace it)
-                                            if Sticker.objects.filter(
+                                            if Sticker.objects.filter(fee_season=season).filter(
                                                 approval=sticker_action_detail.approval,vessel_ownership=sticker_action_detail.approval.current_proposal.vessel_ownership
                                             ).exclude(
                                                 id=new_sticker.id,
@@ -418,7 +419,7 @@ class StickerReplacementFeeSuccessViewPreload(APIView):
 
                                             #identify if any of those vessel ownerships have non-current stickers (cancelled, lost) or no sticker at all
                                             vessel_ownership_on_approvals = vooa.values_list("vessel_ownership_id",flat=True)
-                                            stickers_qs = Sticker.objects.filter(
+                                            stickers_qs = Sticker.objects.filter(fee_season=season).filter(
                                                 approval=sticker_action_detail.approval,vessel_ownership_id__in=list(vessel_ownership_on_approvals)
                                             )
                                             vo_missing_stickers = []
@@ -451,7 +452,7 @@ class StickerReplacementFeeSuccessViewPreload(APIView):
                                             active_moa_with_invalid_sticker_or_no_sticker = MooringOnApproval.objects.filter(
                                                 approval=sticker_action_detail.approval,active=True
                                             ).filter(
-                                                Q(sticker__isnull=True)|Q(sticker__status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST])
+                                                Q(sticker__isnull=True)|(Q(sticker__status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST])&Q(fee_season=season))
                                             ).order_by('-id')
                                             
                                             #if all MOAs have a valid sticker raise an error - AUP stickers cannot be reliably identified for replacement via the current proposal alone 
@@ -459,7 +460,7 @@ class StickerReplacementFeeSuccessViewPreload(APIView):
                                                 raise serializers.ValidationError("Authorised User Permit Moorings all have valid stickers. If payment has been taken for sticker replacement, it should be refunded. Invoice: {invoice_reference}")
 
                                             #take care of those with (invalid) stickers first
-                                            with_stickers = active_moa_with_invalid_sticker_or_no_sticker.filter(sticker__isnull=False)
+                                            with_stickers = active_moa_with_invalid_sticker_or_no_sticker.filter(sticker__isnull=False).filter(sticker__fee_season=season)
                                             if with_stickers.exists():
                                                 #replace the first of the identified stickers (or lack thereof) - by updating the moas to the new sticker
                                                 bad_sticker = with_stickers.first().sticker
@@ -469,7 +470,7 @@ class StickerReplacementFeeSuccessViewPreload(APIView):
                                                     moa.save()
 
                                             #if there are only moas with null stickers, update up to four of them with the new sticker
-                                            without_stickers = active_moa_with_invalid_sticker_or_no_sticker.filter(sticker__isnull=True)
+                                            without_stickers = active_moa_with_invalid_sticker_or_no_sticker.filter(Q(sticker__isnull=True)|~Q(sticker__fee_season=season))
                                             if not with_stickers.exists() and without_stickers.exists():
                                                 for i in range(0,min(4,len(without_stickers))): #NOTE the 4 should really be an env var (other functions would need a refactor as well)
                                                     without_stickers[i].sticker = new_sticker

@@ -735,20 +735,26 @@ class ListApprovalSerializer(serializers.ModelSerializer):
     def get_has_sticker(self,obj):
         return Sticker.objects.filter(approval=obj).exclude(status__in=[Sticker.STICKER_STATUS_EXPIRED,Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_RETURNED,Sticker.STICKER_STATUS_TO_BE_RETURNED,Sticker.STICKER_STATUS_LOST]).exists()
 
+    #we only consider a sticker missing if the only stickers that exist for the season are lost or cancelled
     def get_is_missing_sticker(self,obj):
+        season = obj.latest_applied_season
         if type(obj.child_obj) == AuthorisedUserPermit:
             #check moas
-            return MooringOnApproval.objects.filter(approval=obj, active=True, end_date__isnull=False).filter(Q(sticker__isnull=True)|Q(sticker__status__in=[Sticker.STICKER_STATUS_EXPIRED,Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_RETURNED,Sticker.STICKER_STATUS_TO_BE_RETURNED,Sticker.STICKER_STATUS_LOST])).exists()
+            return MooringOnApproval.objects.filter(
+                    approval=obj,active=True
+                ).filter(
+                    Q(sticker__isnull=True)|(Q(sticker__status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST])&Q(fee_season=season))
+                )
         elif type(obj.child_obj) == MooringLicence:
             #check vos
             vo_ids = list(VesselOwnershipOnApproval.objects.filter(approval=obj, end_date__isnull=True, vessel_ownership__end_date__isnull=True).values_list("vessel_ownership__id",flat=True))
             vos = VesselOwnership.objects.filter(id__in=vo_ids)
             for vo in vos:
-                if not Sticker.objects.filter(vessel_ownership=vo).exclude(status__in=[Sticker.STICKER_STATUS_EXPIRED,Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_RETURNED,Sticker.STICKER_STATUS_TO_BE_RETURNED,Sticker.STICKER_STATUS_LOST]).exists():
+                if not Sticker.objects.filter(vessel_ownership=vo).filter(fee_season=season).exclude(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST]).exists():
                     return True
         elif type(obj.child_obj) == WaitingListAllocation:
             return False
-        return not Sticker.objects.filter(approval=obj).exclude(status__in=[Sticker.STICKER_STATUS_EXPIRED,Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_RETURNED,Sticker.STICKER_STATUS_TO_BE_RETURNED,Sticker.STICKER_STATUS_LOST]).exists()
+        return not Sticker.objects.filter(approval=obj).filter(fee_season=season).exclude(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST]).exists()
 
     #TODO missing sticker message
     #specified WHICH valid sticker(s) is/are missing (and what invalid stikcers will be replaced)
