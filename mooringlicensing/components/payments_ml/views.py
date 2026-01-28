@@ -337,7 +337,9 @@ class StickerReplacementFeeSuccessViewPreload(APIView):
                     if sticker_action_fee.payment_type == StickerActionFee.PAYMENT_TYPE_TEMPORARY:
 
                         #check if payment has been complete
-                        
+                        invoice_payment_status = get_invoice_payment_status(invoice.id)
+                        if not invoice_payment_status in ('paid', 'over_paid',):
+                            raise serializers.ValidationError("Invoice has not been fully paid. Invoice: {invoice_reference}")
 
                         sticker_action_fee.payment_type = ApplicationFee.PAYMENT_TYPE_INTERNET
                         sticker_action_fee.expiry_time = None
@@ -472,9 +474,9 @@ class StickerReplacementFeeSuccessViewPreload(APIView):
                                                 for i in range(0,min(4,len(without_stickers))): #NOTE the 4 should really be an env var (other functions would need a refactor as well)
                                                     without_stickers[i].sticker = new_sticker
                                                     without_stickers[i].save()
-                    
-                    # Send email with the invoice
-                    send_sticker_replacement_email(request, old_sticker_numbers, new_sticker.approval, invoice.reference)
+                            if new_sticker:
+                                # Send email with the invoice
+                                send_sticker_replacement_email(request, old_sticker_numbers, new_sticker.approval, invoice.reference)
         except Exception as e:
             logger.error(e)
             if error_message:
@@ -516,7 +518,7 @@ class StickerReplacementFeeSuccessView(TemplateView):
             # Should not reach here
             msg = 'Failed to process the payment. {}'.format(str(e))
             logger.error(msg)
-            raise Exception(msg)
+            raise serializers.ValidationError(msg)
 
 
 class ApplicationFeeView(TemplateView):

@@ -608,7 +608,7 @@ class ApprovalViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin):
                 if not vessel_ownership or vessel_ownership.end_date:
                     raise serializers.ValidationError("Approval does not have a valid vessel ownership.")
                 stickers_qs = Sticker.objects.filter(approval=approval,vessel_ownership=vessel_ownership).filter(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST]).order_by('-id')
-                if sticker_qs.exists():
+                if stickers_qs.exists():
                     replace_sticker = stickers_qs.first()
                 #if none, replace blindly (handled after payment)
     
@@ -637,7 +637,7 @@ class ApprovalViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin):
                 #otherwise then find any cancelled or lost stickers that can be replaced for those missing stickers (the latest sticker with the VO and approval)
                 stickers_qs = Sticker.objects.filter(approval=approval,vessel_ownership__in=vo_missing_sticker).filter(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST]).order_by('-id')
                 #replace first that comes up
-                if sticker_qs.exists():
+                if stickers_qs.exists():
                     replace_sticker = stickers_qs.first()
                 #if none, replace blindly (handled after payment)
                 
