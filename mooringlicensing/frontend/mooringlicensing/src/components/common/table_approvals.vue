@@ -492,9 +492,9 @@ export default {
                             }
                             if (full.approval_type_dict.code != 'wla' && full.status == 'Current') {
 
-                                if (!full.has_sticker || full.is_missing_sticker) {
+                                if (full.is_missing_sticker) {
                                     if (vm.is_internal) {
-                                        links += `<a href='#${full.id}' data-create-new-sticker='${full.id}'>Create New Sticker</a><br/>`
+                                        links += `<a href='#${full.id}' data-create-new-sticker='${full.id}' data-missing-sticker-message='${full.missing_sticker_message}'>Create New Sticker</a><br/>`
                                     }
                                 } else {
                                     links += `<a href='#${full.id}' data-request-new-sticker='${full.id}'>Request New Sticker</a><br/>`
@@ -906,6 +906,7 @@ export default {
                     vm.$refs.create_new_sticker_modal.processing = false
                     vm.$refs.create_new_sticker_modal.isModalOpen = false
                     vm.$refs.create_new_sticker_modal.replacementFee = false
+                    vm.$refs.create_new_sticker_modal.missing_sticker_message = ""
                     swal({
                         title: "Request New Sticker",
                         text: err.body,
@@ -1073,7 +1074,8 @@ export default {
             vm.$refs.approvals_datatable.vmDataTable.on('click', 'a[data-create-new-sticker]', function(e) {
                 e.preventDefault();
                 var id = $(this).attr('data-create-new-sticker');
-                vm.createNewSticker(id);
+                var message = $(this).attr('data-missing-sticker-message');
+                vm.createNewSticker(id, message);
             });
 
             //External Request New Sticker listener
@@ -1226,10 +1228,11 @@ export default {
             this.$refs.approval_surrender.approval_type_name = approval_type_name
             this.$refs.approval_surrender.isModalOpen = true;
         },
-        createNewSticker: function(approval_id){
+        createNewSticker: function(approval_id, message){
             this.$refs.create_new_sticker_modal.approval_id = approval_id
             this.$refs.create_new_sticker_modal.isModalOpen = true
             this.$refs.create_new_sticker_modal.replacementFee = true
+            this.$refs.create_new_sticker_modal.missing_sticker_message = message
         },
         requestNewSticker: function(approval_id){
             this.$refs.request_new_sticker_modal.approval_id = approval_id

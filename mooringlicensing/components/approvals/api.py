@@ -614,7 +614,6 @@ class ApprovalViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin):
     
             #MLA - one sticker per vessel
             elif type(approval.child_obj) == MooringLicence:
-                pass
                 #identify missing stickers (any VOOA VO that is not on a valid sticker with this approval assigned)
                 vessel_ownership_on_approvals = approval.child_obj.get_current_vessel_ownership_on_approvals().values_list("vessel_ownership_id",flat=True)
 

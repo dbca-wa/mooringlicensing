@@ -606,6 +606,7 @@ class ListApprovalSerializer(serializers.ModelSerializer):
     stickers_historical = serializers.SerializerMethodField()
     has_sticker = serializers.SerializerMethodField()
     is_missing_sticker = serializers.SerializerMethodField()
+    missing_sticker_message = serializers.SerializerMethodField()
     is_approver = serializers.SerializerMethodField()
     is_assessor = serializers.SerializerMethodField()
     vessel_regos = serializers.SerializerMethodField()
@@ -651,6 +652,7 @@ class ListApprovalSerializer(serializers.ModelSerializer):
             'stickers_historical',
             'has_sticker',
             'is_missing_sticker',
+            'missing_sticker_message',
             'licence_document',
             'authorised_user_summary_document',
             'is_assessor',
@@ -698,6 +700,7 @@ class ListApprovalSerializer(serializers.ModelSerializer):
             'stickers_historical',
             'has_sticker',
             'is_missing_sticker',
+            'missing_sticker_message',
             'licence_document',
             'authorised_user_summary_document',
             'is_assessor',
@@ -743,22 +746,108 @@ class ListApprovalSerializer(serializers.ModelSerializer):
             return MooringOnApproval.objects.filter(
                     approval=obj,active=True
                 ).filter(
-                    Q(sticker__isnull=True)|(Q(sticker__status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST])&Q(fee_season=season))
-                )
+                    Q(sticker__isnull=True)|(Q(sticker__status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST])&Q(sticker__fee_season=season))
+                ).exists()
         elif type(obj.child_obj) == MooringLicence:
             #check vos
             vo_ids = list(VesselOwnershipOnApproval.objects.filter(approval=obj, end_date__isnull=True, vessel_ownership__end_date__isnull=True).values_list("vessel_ownership__id",flat=True))
             vos = VesselOwnership.objects.filter(id__in=vo_ids)
             for vo in vos:
-                if not Sticker.objects.filter(vessel_ownership=vo).filter(fee_season=season).exclude(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST]).exists():
+                if not Sticker.objects.filter(approval=obj,vessel_ownership=vo).filter(fee_season=season).exclude(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST]).exists():
                     return True
         elif type(obj.child_obj) == WaitingListAllocation:
             return False
         return not Sticker.objects.filter(approval=obj).filter(fee_season=season).exclude(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST]).exists()
 
-    #TODO missing sticker message
-    #specified WHICH valid sticker(s) is/are missing (and what invalid stikcers will be replaced)
-    #OR what vessel/mooring is missing a sticker (and will have a sticker made for)
+
+    def get_missing_sticker_message(self,obj):
+        #specified WHICH valid sticker(s) is/are missing (and what invalid stikcers will be replaced)
+        #OR what vessel/mooring is missing a sticker (and will have a sticker made for)
+        season = obj.latest_applied_season
+        if type(obj.child_obj) == AuthorisedUserPermit:
+            moas = MooringOnApproval.objects.filter(
+                    approval=obj,active=True
+                ).filter(
+                    Q(sticker__isnull=True)|(Q(sticker__status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST])&Q(sticker__fee_season=season))
+                ).order_by("-id")
+
+            message = ""
+            stickers = []
+            if moas.exists():
+                message = "The following moorings do not have a valid sticker record assigned: "
+                for moa in moas:
+                    if moa.sticker:
+                        stickers.append(moa.sticker.number)
+                    if moa.mooring and moa.mooring.name:
+                        message += f"{str(moa.mooring.name)}, "
+
+                message = f"{message[:-2]}."
+                stickers = list(set(stickers))
+                if stickers:
+                    message += f" Stickers that need to be replaced: {','.join(stickers)}."
+                    if len(stickers) > 1:
+                        message += " New sticker will replace first in list." 
+                return message
+            else:
+                return ""
+
+        elif type(obj.child_obj) == MooringLicence:
+            vo_ids = list(VesselOwnershipOnApproval.objects.filter(approval=obj, end_date__isnull=True, vessel_ownership__end_date__isnull=True).values_list("vessel_ownership__id",flat=True))
+            vos = VesselOwnership.objects.filter(id__in=vo_ids)
+            vo_stickers = Sticker.objects.filter(vessel_ownership_id__in=vo_ids,approval=obj).filter(fee_season=season).order_by('-id')
+            
+            bad_vos = []
+            bad_stickers = []
+
+            for vo in vos:
+                sticker_check = vo_stickers.filter(vessel_ownership=vo,approval=obj)
+
+                if sticker_check.exclude(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST]).exists():
+                    #vo is fine
+                    continue
+                elif not sticker_check.exists():
+                    #vo has no stickers at all
+                    bad_vos.append(vo)
+                elif sticker_check.filter(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST]).exists():
+                    #vo has bad stickers
+                    bad_vos.append(vo)
+                    bad_stickers.append(sticker_check.filter(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST]).first())
+
+            if bad_vos:
+                message = "The following vessels do not have a valid sticker record assigned: "
+                for vo in bad_vos:
+                    if vo.vessel:
+                        message += f"{str(vo.vessel.rego_no)}, "
+                message = f"{message[:-2]}."
+
+                if bad_stickers:
+                    message += f" Stickers that need to be replaced: {','.join(bad_stickers)}."
+                    if len(bad_stickers) > 1:
+                        message += " New sticker will replace first in list." 
+                return message
+            else:
+                return ""
+
+        elif type(obj.child_obj) == AnnualAdmissionPermit:
+            stickers = Sticker.objects.filter(approval=obj).filter(fee_season=season).order_by('-id')
+            bad_vo = None
+            bad_sticker = None
+            if not stickers.exists():
+                #AA has no stickers at all
+                bad_vo = obj.current_proposal.vessel_ownership if obj.current_proposal else None
+            elif not stickers.exclude(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST]):
+                #AA has no valid stickers
+                bad_vo = obj.current_proposal.vessel_ownership if obj.current_proposal else None
+                bad_sticker = stickers.filter(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST]).first()
+            
+            if bad_vo and bad_vo.vessel:
+                message = f"{bad_vo.vessel.rego_no} has no valid sticker record assigned."
+                if bad_sticker:
+                    message += f" Sticker {bad_sticker.number} will need to be replaced."
+                return message
+        else:
+            return ""
+        
 
     def get_moorings(self, obj):
         links = []
