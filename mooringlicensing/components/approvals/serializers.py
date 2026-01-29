@@ -753,11 +753,12 @@ class ListApprovalSerializer(serializers.ModelSerializer):
             vo_ids = list(VesselOwnershipOnApproval.objects.filter(approval=obj, end_date__isnull=True, vessel_ownership__end_date__isnull=True).values_list("vessel_ownership__id",flat=True))
             vos = VesselOwnership.objects.filter(id__in=vo_ids)
             for vo in vos:
-                if not Sticker.objects.filter(approval=obj,vessel_ownership=vo).filter(fee_season=season).exclude(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST]).exists():
+                #NOTE: we exclude returned from the check because a vessel can be re-added to a permit, but we never replace a returned sticker
+                if not Sticker.objects.filter(approval=obj,vessel_ownership=vo).filter(fee_season=season).exclude(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST, Sticker.STICKER_STATUS_RETURNED]).exists():
                     return True
         elif type(obj.child_obj) == WaitingListAllocation:
             return False
-        return not Sticker.objects.filter(approval=obj).filter(fee_season=season).exclude(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST]).exists()
+        return not Sticker.objects.filter(approval=obj).filter(fee_season=season).exclude(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST, Sticker.STICKER_STATUS_RETURNED]).exists()
 
 
     def get_missing_sticker_message(self,obj):
@@ -768,7 +769,7 @@ class ListApprovalSerializer(serializers.ModelSerializer):
             moas = MooringOnApproval.objects.filter(
                     approval=obj,active=True
                 ).filter(
-                    Q(sticker__isnull=True)|(Q(sticker__status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST])&Q(sticker__fee_season=season))
+                    Q(sticker__isnull=True)|(Q(sticker__status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST, Sticker.STICKER_STATUS_RETURNED])&Q(sticker__fee_season=season))
                 ).order_by("-id")
 
             message = ""
@@ -776,7 +777,8 @@ class ListApprovalSerializer(serializers.ModelSerializer):
             if moas.exists():
                 message = "The following moorings do not have a valid sticker record assigned: "
                 for moa in moas:
-                    if moa.sticker:
+                    #We do not want to replace a returned sticker, we treat it as if there is no sticker
+                    if moa.sticker and moa.sticker.status != Sticker.STICKER_STATUS_RETURNED:
                         stickers.append(moa.sticker.number)
                     if moa.mooring and moa.mooring.name:
                         message += f"{str(moa.mooring.name)}, "
@@ -802,16 +804,16 @@ class ListApprovalSerializer(serializers.ModelSerializer):
             for vo in vos:
                 sticker_check = vo_stickers.filter(vessel_ownership=vo,approval=obj)
 
-                if sticker_check.exclude(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST]).exists():
+                if sticker_check.exclude(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST, Sticker.STICKER_STATUS_RETURNED]).exists():
                     #vo is fine
                     continue
-                elif not sticker_check.exists():
+                elif not sticker_check.exclude(status=Sticker.STICKER_STATUS_RETURNED).exists():
                     #vo has no stickers at all
                     bad_vos.append(vo)
                 elif sticker_check.filter(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST]).exists():
                     #vo has bad stickers
                     bad_vos.append(vo)
-                    bad_stickers.append(sticker_check.filter(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST]).first())
+                    bad_stickers.append(sticker_check.filter(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST]).first().number)
 
             if bad_vos:
                 message = "The following vessels do not have a valid sticker record assigned: "
@@ -829,7 +831,7 @@ class ListApprovalSerializer(serializers.ModelSerializer):
                 return ""
 
         elif type(obj.child_obj) == AnnualAdmissionPermit:
-            stickers = Sticker.objects.filter(approval=obj).filter(fee_season=season).order_by('-id')
+            stickers = Sticker.objects.filter(approval=obj).filter(fee_season=season).exclude(status=Sticker.STICKER_STATUS_RETURNED).order_by('-id')
             bad_vo = None
             bad_sticker = None
             if not stickers.exists():

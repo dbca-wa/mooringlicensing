@@ -601,7 +601,7 @@ class ApprovalViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin):
 
             #Annual Admissions can only have one sticker
             if type(approval.child_obj) == AnnualAdmissionPermit:
-                if Sticker.objects.filter(approval=approval).filter(fee_season=season).exclude(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST]).exists():
+                if Sticker.objects.filter(approval=approval).filter(fee_season=season).exclude(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST,Sticker.STICKER_STATUS_RETURNED]).exists():
                     raise serializers.ValidationError("This approval already has an active sticker record.")
                 #if the approval is current but has no sticker that is current or printing (or awaiting export) then replace then latest sticker (set replace sticker) if it exists
                 vessel_ownership = approval.current_proposal.vessel_ownership if approval.current_proposal else None
@@ -620,7 +620,7 @@ class ApprovalViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin):
                 if not vessel_ownership_on_approvals:
                     raise serializers.ValidationError("Approval does not have a valid vessel ownership.")
 
-                stickers_qs = Sticker.objects.filter(approval=approval,vessel_ownership_id__in=list(vessel_ownership_on_approvals)).filter(fee_season=season).exclude(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST])
+                stickers_qs = Sticker.objects.filter(approval=approval,vessel_ownership_id__in=list(vessel_ownership_on_approvals)).filter(fee_season=season).exclude(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST,Sticker.STICKER_STATUS_RETURNED])
                 vo_missing_sticker = []
 
                 missing = False
@@ -646,14 +646,14 @@ class ApprovalViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin):
                 active_moa_with_invalid_sticker_or_no_sticker = MooringOnApproval.objects.filter(
                     approval=approval,active=True
                 ).filter(
-                    Q(sticker__isnull=True)|(Q(sticker__status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST])&Q(fee_season=season))
+                    Q(sticker__isnull=True)|(Q(sticker__status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST,Sticker.STICKER_STATUS_RETURNED])&Q(fee_season=season))
                 )
                 #if none are missing raise error
                 if not active_moa_with_invalid_sticker_or_no_sticker.exists():
                     raise serializers.ValidationError("This approval has active stickers for all relevant moorings.")
 
                 #otherwise then find any cancelled or lost stickers that can be replaced for those missing stickers (whatever is on the MOA)
-                active_moa_with_invalid_sticker = active_moa_with_invalid_sticker_or_no_sticker.exclude(sticker=None).filter(sticker__fee_season=season).filter(sticker__status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST]).order_by('-id')
+                active_moa_with_invalid_sticker = active_moa_with_invalid_sticker_or_no_sticker.exclude(sticker=None).exclude(sticker__status=Sticker.STICKER_STATUS_RETURNED).filter(sticker__fee_season=season).filter(sticker__status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST]).order_by('-id')
                 #replace first that comes up
                 if active_moa_with_invalid_sticker.exists():
                     replace_sticker = active_moa_with_invalid_sticker.first().sticker
