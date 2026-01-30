@@ -9,6 +9,7 @@ from django.http import HttpResponse
 from mooringlicensing import settings
 import json
 from mooringlicensing.components.main.utils import get_dot_vessel_information
+from mooringlicensing.components.main.models import GlobalSettings
 from mooringlicensing.components.main.process_document import save_vessel_registration_document_obj
 from mooringlicensing.components.proposals.models import (
     VesselOwnershipCompanyOwnership,
@@ -408,13 +409,27 @@ def submit_vessel_data(instance, request, vessel_data=None, approving=False):
                     raise serializers.ValidationError("Provided vessel details invalid")
             except:
                 raise serializers.ValidationError("Provided vessel details invalid")
+            
+            if isinstance(instance.child_obj,WaitingListApplication):
+                try:
+                    minimum_length = float(GlobalSettings.objects.get(key=GlobalSettings.KEY_MINUMUM_MOORING_VESSEL_LENGTH).value)
+                except:
+                    minimum_length = float(GlobalSettings.default_values[GlobalSettings.KEY_MINUMUM_MOORING_VESSEL_LENGTH])
+            else:
+                try:
+                    minimum_length = float(GlobalSettings.objects.get(key=GlobalSettings.KEY_MINIMUM_VESSEL_LENGTH).value)
+                except:
+                    minimum_length = float(GlobalSettings.default_values[GlobalSettings.KEY_MINIMUM_VESSEL_LENGTH])
 
+            if float(vessel_data["vessel_details"]["vessel_length"]) < minimum_length:
+                raise serializers.ValidationError(f"Vessel length must not be less than {minimum_length}m")
+            
     # Dot vessel rego lookup
     logger.info('Performing DoT check...')
     vessel_lookup_errors = {}
     # Mooring Licence vessel history
     # Migrated records do not have DOT name, so only run dot check for new vessel submissions
-    if (isinstance(instance,MooringLicenceApplication) and 
+    if (isinstance(instance.child_obj,MooringLicenceApplication) and 
         instance.approval and 
         not instance.approval.migrated
         ):
