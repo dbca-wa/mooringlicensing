@@ -646,7 +646,7 @@ class ApprovalViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin):
                 active_moa_with_invalid_sticker_or_no_sticker = MooringOnApproval.objects.filter(
                     approval=approval,active=True
                 ).filter(
-                    Q(sticker__isnull=True)|(Q(sticker__status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST,Sticker.STICKER_STATUS_RETURNED])&Q(fee_season=season))
+                    Q(sticker__isnull=True)|(Q(sticker__status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST,Sticker.STICKER_STATUS_RETURNED])&Q(sticker__fee_season=season))
                 )
                 #if none are missing raise error
                 if not active_moa_with_invalid_sticker_or_no_sticker.exists():
