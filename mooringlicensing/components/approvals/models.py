@@ -3884,7 +3884,7 @@ class Sticker(models.Model):
             logger.info(f'Status: [{Sticker.STICKER_STATUS_RETURNED}] has been set to the sticker: [{self}].')
 
     def request_replacement(self, new_status, sticker_action_detail):
-        if ((self.status == "current") and self.printing_date) or self.status == "cancelled":
+        if ((self.status == "current") and self.printing_date) or self.status == "cancelled" or self.status == "lost":
             logger.info(f'record_replacement() is being accessed for the sticker: [{self}].')
             self.status = new_status
             self.save()

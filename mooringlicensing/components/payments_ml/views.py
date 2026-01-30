@@ -26,7 +26,7 @@ from ledger_api_client.ledger_models import Invoice
 
 from mooringlicensing.helpers import is_authorised_to_modify, is_applicant_address_set, is_authorised_to_pay_auto_approved
 from mooringlicensing import settings
-from mooringlicensing.components.approvals.models import DcvPermit, DcvAdmission, StickerActionDetail, Sticker
+from mooringlicensing.components.approvals.models import DcvPermit, DcvAdmission, StickerActionDetail, Sticker, MooringOnApproval
 from mooringlicensing.components.payments_ml.email import send_application_submit_confirmation_email
 from mooringlicensing.components.approvals.email import (
     send_dcv_permit_mail, send_dcv_admission_mail,
@@ -310,82 +310,187 @@ class StickerReplacementFeeSuccessViewPreload(APIView):
 
     def get(self, request, uuid, format=None):
         logger.info(f'{StickerReplacementFeeSuccessViewPreload.__name__} get method is called.')
-
-        if uuid:
-            if not StickerActionFee.objects.filter(uuid=uuid).exists():
-                logger.info(f'StickerActionFee with uuid: {uuid} does not exist.  Redirecting user to dashboard page.')
-                return redirect(reverse('external'))
-            else:
-                logger.info(f'StickerActionFee with uuid: {uuid} exists.')
-            sticker_action_fee = StickerActionFee.objects.get(uuid=uuid)
-            sticker_action_details = sticker_action_fee.sticker_action_details
-
-            invoice_reference = request.GET.get("invoice", "")
-            logger.info(f"Invoice reference: {invoice_reference} and uuid: {uuid}.",)
-            if not Invoice.objects.filter(reference=invoice_reference).exists():
-                logger.info(f'Invoice with invoice_reference: {invoice_reference} does not exist.  Redirecting user to dashboard page.')
-                return redirect(reverse('external'))
-            else:
-                logger.info(f'Invoice with invoice_reference: {invoice_reference} exist.')
-            invoice = Invoice.objects.get(reference=invoice_reference)
-
-            sticker_action_fee.invoice_reference = invoice.reference
-            sticker_action_fee.save()
-            
-            if sticker_action_fee.payment_type == StickerActionFee.PAYMENT_TYPE_TEMPORARY:
-                sticker_action_fee.payment_type = ApplicationFee.PAYMENT_TYPE_INTERNET
-                sticker_action_fee.expiry_time = None
-                sticker_action_fee.save()
-
-                old_sticker_numbers = []
-                for sticker_action_detail in sticker_action_details.all():
-                    if sticker_action_detail.sticker:
-                        old_sticker = sticker_action_detail.sticker
-                        new_sticker = old_sticker.request_replacement(Sticker.STICKER_STATUS_LOST, sticker_action_detail)
-                        old_sticker_numbers.append(old_sticker.number)
+        error_message = ""
+        try:
+            with transaction.atomic():
+                if uuid:
+                    if not StickerActionFee.objects.filter(uuid=uuid).exists():
+                        logger.info(f'StickerActionFee with uuid: {uuid} does not exist.  Redirecting user to dashboard page.')
+                        return redirect(reverse('external'))
                     else:
-                        #TODO investigate where this would occur (where we do not know the old sticker)
-                        #If only for the purposes of migrated records, seek migrated MOAs for AUPs that are also missing stickers (up to four on one sticker)
-                        if sticker_action_detail.change_sticker_address:
-                            # Create replacement sticker
-                            new_sticker = Sticker.objects.create(
-                                approval=sticker_action_detail.approval,
-                                vessel_ownership=sticker_action_detail.approval.current_proposal.vessel_ownership,
-                                fee_constructor=sticker_action_detail.approval.current_proposal.fee_constructor,
-                                fee_season=sticker_action_detail.approval.latest_applied_season,
-                                postal_address_line1 = sticker_action_detail.new_postal_address_line1,
-                                postal_address_line2 = sticker_action_detail.new_postal_address_line2,
-                                postal_address_line3 = sticker_action_detail.new_postal_address_line3,
-                                postal_address_locality = sticker_action_detail.new_postal_address_locality,
-                                postal_address_state = sticker_action_detail.new_postal_address_state,
-                                postal_address_country = sticker_action_detail.new_postal_address_country,
-                                postal_address_postcode = sticker_action_detail.new_postal_address_postcode,
-                            )
-                            logger.info(f'New Sticker: [{new_sticker}] has been created for the approval with a new postal address: [{sticker_action_detail.approval}].')
-                        else:
-                            # Create replacement sticker
-                            new_sticker = Sticker.objects.create(
-                                approval=sticker_action_detail.approval,
-                                vessel_ownership=sticker_action_detail.approval.current_proposal.vessel_ownership,
-                                fee_constructor=sticker_action_detail.approval.current_proposal.fee_constructor,
-                                fee_season=sticker_action_detail.approval.latest_applied_season,
-                                postal_address_line1 = sticker_action_detail.approval.postal_address_line1,
-                                postal_address_line2 = sticker_action_detail.approval.postal_address_line2,
-                                postal_address_line3 = sticker_action_detail.approval.postal_address_line3,
-                                postal_address_locality = sticker_action_detail.approval.postal_address_suburb,
-                                postal_address_state = sticker_action_detail.approval.postal_address_state,
-                                postal_address_country = sticker_action_detail.approval.postal_address_country,
-                                postal_address_postcode = sticker_action_detail.approval.postal_address_postcode,
-                            )
-                            logger.info(f'New Sticker: [{new_sticker}] has been created for the approval: [{sticker_action_detail.approval}].')
-                
-                # Send email with the invoice
-                send_sticker_replacement_email(request, old_sticker_numbers, new_sticker.approval, invoice.reference)
+                        logger.info(f'StickerActionFee with uuid: {uuid} exists.')
+                    sticker_action_fee = StickerActionFee.objects.get(uuid=uuid)
+                    sticker_action_details = sticker_action_fee.sticker_action_details
 
-            logger.info(
-                "Returning status.HTTP_200_OK. Order created successfully.",
-            )
-            return Response(status=status.HTTP_200_OK)
+                    invoice_reference = request.GET.get("invoice", "")
+                    logger.info(f"Invoice reference: {invoice_reference} and uuid: {uuid}.",)
+                    if not Invoice.objects.filter(reference=invoice_reference).exists():
+                        logger.info(f'Invoice with invoice_reference: {invoice_reference} does not exist.  Redirecting user to dashboard page.')
+                        return redirect(reverse('external'))
+                    else:
+                        logger.info(f'Invoice with invoice_reference: {invoice_reference} exist.')
+                    invoice = Invoice.objects.get(reference=invoice_reference)
+
+                    sticker_action_fee.invoice_reference = invoice.reference
+                    sticker_action_fee.save()
+                    
+                    if sticker_action_fee.payment_type == StickerActionFee.PAYMENT_TYPE_TEMPORARY:
+
+                        #check if payment has been complete
+                        invoice_payment_status = get_invoice_payment_status(invoice.id)
+                        if not invoice_payment_status in ('paid', 'over_paid',):
+                            raise serializers.ValidationError("Invoice has not been fully paid. Invoice: {invoice_reference}")
+
+                        sticker_action_fee.payment_type = ApplicationFee.PAYMENT_TYPE_INTERNET
+                        sticker_action_fee.expiry_time = None
+                        sticker_action_fee.save() 
+
+                        old_sticker_numbers = []
+                        for sticker_action_detail in sticker_action_details.all():
+                            new_sticker = None
+                            if sticker_action_detail.sticker:
+                                old_sticker = sticker_action_detail.sticker
+                                new_sticker = old_sticker.request_replacement(Sticker.STICKER_STATUS_LOST, sticker_action_detail)
+                                old_sticker_numbers.append(old_sticker.number)
+                            else:
+                                #If here, no sticker has been specified for replacement
+                                #we should try to identify what stickers are missing and replace one of them
+                                #if no stickers are missing, raise an error - we should not blindly replace whatever happens to be the latest sticker if it is current
+                                if sticker_action_detail.approval:
+                                    if sticker_action_detail.change_sticker_address:
+                                        # Create replacement sticker
+                                        new_sticker = Sticker.objects.create(
+                                            approval=sticker_action_detail.approval,
+                                            vessel_ownership=sticker_action_detail.approval.current_proposal.vessel_ownership if sticker_action_detail.approval.current_proposal else None,
+                                            fee_constructor=sticker_action_detail.approval.current_proposal.fee_constructor if sticker_action_detail.approval.current_proposal else None,
+                                            fee_season=sticker_action_detail.approval.latest_applied_season,
+                                            postal_address_line1 = sticker_action_detail.new_postal_address_line1,
+                                            postal_address_line2 = sticker_action_detail.new_postal_address_line2,
+                                            postal_address_line3 = sticker_action_detail.new_postal_address_line3,
+                                            postal_address_locality = sticker_action_detail.new_postal_address_locality,
+                                            postal_address_state = sticker_action_detail.new_postal_address_state,
+                                            postal_address_country = sticker_action_detail.new_postal_address_country,
+                                            postal_address_postcode = sticker_action_detail.new_postal_address_postcode,
+                                        )
+                                        logger.info(f'New Sticker: [{new_sticker}] has been created for the approval with a new postal address: [{sticker_action_detail.approval}].')
+                                    else:
+                                        # Create replacement sticker
+                                        new_sticker = Sticker.objects.create(
+                                            approval=sticker_action_detail.approval,
+                                            vessel_ownership=sticker_action_detail.approval.current_proposal.vessel_ownership if sticker_action_detail.approval.current_proposal else None,
+                                            fee_constructor=sticker_action_detail.approval.current_proposal.fee_constructor if sticker_action_detail.approval.current_proposal else None,
+                                            fee_season=sticker_action_detail.approval.latest_applied_season,
+                                            postal_address_line1 = sticker_action_detail.approval.postal_address_line1,
+                                            postal_address_line2 = sticker_action_detail.approval.postal_address_line2,
+                                            postal_address_line3 = sticker_action_detail.approval.postal_address_line3,
+                                            postal_address_locality = sticker_action_detail.approval.postal_address_suburb,
+                                            postal_address_state = sticker_action_detail.approval.postal_address_state,
+                                            postal_address_country = sticker_action_detail.approval.postal_address_country,
+                                            postal_address_postcode = sticker_action_detail.approval.postal_address_postcode,
+                                        )
+                                        logger.info(f'New Sticker: [{new_sticker}] has been created for the approval: [{sticker_action_detail.approval}].')
+
+                                    if new_sticker:
+                                        season = sticker_action_detail.approval.latest_applied_season
+                                        from mooringlicensing.components.approvals.models import (
+                                            MooringLicence, AuthorisedUserPermit, AnnualAdmissionPermit,
+                                        )
+
+                                        if type(sticker_action_detail.approval.child_obj) == AnnualAdmissionPermit:
+                                            #vessel ownership should be whatever is on the current proposal
+                                            #raise an error if there is not one
+                                            if not sticker_action_detail.approval.current_proposal or not sticker_action_detail.approval.current_proposal.vessel_ownership or sticker_action_detail.approval.current_proposal.vessel_ownership.end_date:
+                                                raise serializers.ValidationError(f"Annual Admission Permit missing valid vessel ownership. If payment has been taken for sticker replacement, it should be refunded. Invoice: {invoice_reference}")
+                                            
+                                            #identify pre-existing sticker - if it is valid (not lost or cancelled), raise an error (if it is expired, this is not the place to replace it)
+                                            if Sticker.objects.filter(fee_season=season).filter(
+                                                approval=sticker_action_detail.approval,vessel_ownership=sticker_action_detail.approval.current_proposal.vessel_ownership
+                                            ).exclude(id=new_sticker.id).exclude(
+                                                status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST,Sticker.STICKER_STATUS_RETURNED]
+                                            ).exists():
+                                                raise serializers.ValidationError(f"Valid sticker already exists. If payment has been taken for sticker replacement, it should be refunded. Invoice: {invoice_reference}")
+
+                                        elif type(sticker_action_detail.approval.child_obj) == MooringLicence:
+                                            #vessel ownership in vessel ownership on approval table
+                                            #raise an error is none exist
+                                            vooa = sticker_action_detail.approval.child_obj.get_current_vessel_ownership_on_approvals()
+                                            if not vooa.exists():
+                                                raise serializers.ValidationError(f"Mooring Site Licence missing valid vessel ownership. If payment has been taken for sticker replacement, it should be refunded. Invoice: {invoice_reference}")
+
+                                            #identify if any of those vessel ownerships have non-current stickers (cancelled, lost) or no sticker at all
+                                            vessel_ownership_on_approvals = vooa.values_list("vessel_ownership_id",flat=True)
+                                            stickers_qs = Sticker.objects.filter(fee_season=season).filter(
+                                                approval=sticker_action_detail.approval,vessel_ownership_id__in=list(vessel_ownership_on_approvals)
+                                            ).exclude(id=new_sticker.id).exclude(
+                                                status=Sticker.STICKER_STATUS_RETURNED #if only returned stickers exist, we want to treat as though no sticker exists (new sticker, but not a replacement)
+                                            )
+  
+                                            vo_missing_stickers = []
+                                            for vo in vessel_ownership_on_approvals:
+                                                sticker_with_vo = stickers_qs.filter(vessel_ownership_id=vo)
+                                                if sticker_with_vo.exists():
+                                                    if not sticker_with_vo.exclude(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST]).exists():
+                                                        vo_missing_stickers.append(vo)
+                                                else:
+                                                    vo_missing_stickers.append(vo)
+                                            print(vo_missing_stickers)
+                                            #if none of the vo's are missing valid stickers, raise an error
+                                            if not vo_missing_stickers:
+                                                raise serializers.ValidationError(f"All vessels on license already have valid stickers. If payment has been taken for sticker replacement, it should be refunded. Invoice: {invoice_reference}")
+
+                                            #replace the first of them (change the vo on the new sticker)
+                                            if new_sticker.vessel_ownership_id != vo_missing_stickers[0]:
+                                                new_sticker.vessel_ownership_id = vo_missing_stickers[0]
+                                                proposal = Proposal.objects.filter(approval=sticker_action_detail.approval,vessel_ownership_id=vo_missing_stickers[0]).order_by("-id").first()
+                                                new_sticker.fee_constructor = proposal.fee_constructor
+                                                new_sticker.save()
+                                        
+                                        elif type(sticker_action_detail.approval.child_obj) == AuthorisedUserPermit:
+                                            #vessel ownership should be whatever is on the current proposal
+                                            #raise an error if there is not one
+                                            if not sticker_action_detail.approval.current_proposal or not sticker_action_detail.approval.current_proposal.vessel_ownership or sticker_action_detail.approval.current_proposal.vessel_ownership.end_date:
+                                                raise serializers.ValidationError(f"Authorised User Permit missing valid vessel ownership. If payment has been taken for sticker replacement, it should be refunded. Invoice: {invoice_reference}")
+
+                                            #identify related MOAs with invalid stickers (cancelled, lost) or missing stickers
+                                            active_moa_with_invalid_sticker_or_no_sticker = MooringOnApproval.objects.filter(
+                                                approval=sticker_action_detail.approval,active=True
+                                            ).filter(
+                                                Q(sticker__isnull=True)|(Q(sticker__status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST,Sticker.STICKER_STATUS_RETURNED])&Q(sticker__fee_season=season))
+                                            ).order_by('-id')
+                                            
+                                            #if all MOAs have a valid sticker raise an error - AUP stickers cannot be reliably identified for replacement via the current proposal alone 
+                                            if not active_moa_with_invalid_sticker_or_no_sticker.exists():
+                                                raise serializers.ValidationError(f"Authorised User Permit Moorings all have valid stickers. If payment has been taken for sticker replacement, it should be refunded. Invoice: {invoice_reference}")
+
+                                            #take care of those with (invalid) stickers first
+                                            with_stickers = active_moa_with_invalid_sticker_or_no_sticker.filter(sticker__isnull=False).exclude(sticker__status=Sticker.STICKER_STATUS_RETURNED).filter(sticker__fee_season=season)
+                                            if with_stickers.exists():
+                                                #replace the first of the identified stickers (or lack thereof) - by updating the moas to the new sticker
+                                                bad_sticker = with_stickers.first().sticker
+                                                update_moas = with_stickers.filter(sticker=bad_sticker)
+                                                for moa in update_moas:
+                                                    moa.sticker = new_sticker
+                                                    moa.save()
+
+                                            #if there are only moas with null stickers, update up to four of them with the new sticker
+                                            without_stickers = active_moa_with_invalid_sticker_or_no_sticker.filter(Q(sticker__isnull=True)|~Q(sticker__fee_season=season)|Q(sticker__status=Sticker.STICKER_STATUS_RETURNED))
+                                            if not with_stickers.exists() and without_stickers.exists():
+                                                for i in range(0,min(4,len(without_stickers))): #NOTE the 4 should really be an env var (other functions would need a refactor as well)
+                                                    without_stickers[i].sticker = new_sticker
+                                                    without_stickers[i].save()
+                            if new_sticker:
+                                # Send email with the invoice
+                                send_sticker_replacement_email(request, old_sticker_numbers, new_sticker.approval, invoice.reference)
+        except Exception as e:
+            logger.error(e)
+            if error_message:
+                logger.error(error_message)
+            return redirect(reverse('external'))
+
+        logger.info(
+            "Returning status.HTTP_200_OK. Order created successfully.",
+        )
+        return Response(status=status.HTTP_200_OK)
 
 
 class StickerReplacementFeeSuccessView(TemplateView):
@@ -403,9 +508,6 @@ class StickerReplacementFeeSuccessView(TemplateView):
             if is_internal(request) or invoice.owner.id == request.user.id:
                 invoice_url = f'/ledger-toolkit-api/invoice-pdf/{invoice.reference}/'
                 applicant = retrieve_email_userro(sticker_action_fee.created_by) if sticker_action_fee.created_by else ''
-
-                #TODO get related sticker/action/approval, determine if pertaining approval has any other missing stickers and display a message if so (modify template)
-
                 context = {
                     'applicant': applicant,
                     'fee_invoice': sticker_action_fee,
@@ -420,7 +522,7 @@ class StickerReplacementFeeSuccessView(TemplateView):
             # Should not reach here
             msg = 'Failed to process the payment. {}'.format(str(e))
             logger.error(msg)
-            raise Exception(msg)
+            raise serializers.ValidationError('Failed to process the payment.')
 
 
 class ApplicationFeeView(TemplateView):

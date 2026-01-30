@@ -585,119 +585,121 @@ class ApprovalViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin):
         # internal only
         if is_internal(self.request):
             approval = self.get_object()
+            season = approval.latest_applied_season
+            if not approval.status in Approval.APPROVED_STATUSES:
+                raise serializers.ValidationError("Approval is not valid for sticker replacement (Must be Current or Suspended).")
+
             details = request.data['details']
 
             replace_sticker = None
+            sticker_action_details = []
 
-            if approval.current_proposal:
-                v_details = approval.current_proposal.latest_vessel_details
-                v_ownership = approval.current_proposal.vessel_ownership
+            #First we check if there are missing valid stickers
+            #Then we check if there is an invalid sticker that can be directly replaced
+            #If there is not, we continue anyway and the sticker purpose will be established after payment
+            #But we must not allow this to continue if there are no missing stickers
 
-            if v_details and not v_ownership.end_date:
-                # Licence/Permit has a vessel
-                sticker_action_details = []
-                #only allow this if there are no sticker records associated with the approval
-                if type(approval.child_obj) == AnnualAdmissionPermit and Sticker.objects.filter(approval=approval).exclude(status__in=[Sticker.STICKER_STATUS_EXPIRED,Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST]).exists():
+            #Annual Admissions can only have one sticker
+            if type(approval.child_obj) == AnnualAdmissionPermit:
+                if Sticker.objects.filter(approval=approval).filter(fee_season=season).exclude(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST,Sticker.STICKER_STATUS_RETURNED]).exists():
                     raise serializers.ValidationError("This approval already has an active sticker record.")
-                #for MLA and AUP get all invalid stickers associated with the record - create an action for the earliest cancelled one (one at a time)
-                elif type(approval.child_obj) == MooringLicence:
-                    #get all vessels on MooringLicense (directly not via AUP) that are assigned invalid stickers
-                    vessel_ownerships = approval.child_obj.vessel_ownership_list
-                    invalid_stickers = approval.stickers.filter(
-                        status__in=[
-                            Sticker.STICKER_STATUS_CANCELLED,
-                        ],
-                        vessel_ownership__in=vessel_ownerships,
-                    )
-                    #get the latest sticker action for lost or cancelled stickers that correspond with invalid stickers - use the earliest among them
-                    if invalid_stickers.count() > 1:
-                        #get the latest sticker action for lost or cancelled stickers that correspond with invalid stickers - use the earliest among them
-                        action_details = StickerActionDetail.objects.filter(sticker_id__in=invalid_stickers).filter(Q(action="Cancel sticker")).order_by("-date_created")
-                        if not action_details.exists():
-                            #appropriate action does not appear to exist, will just have to work with the first in the list
-                            try:
-                                replace_sticker = Sticker.objects.get(id=invalid_stickers.first())
-                            except Exception as e:
-                                logger.error(e)
-                        else:
-                            replace_sticker = action_details.first().sticker
-                    else:
-                        try:
-                            replace_sticker = Sticker.objects.get(id=invalid_stickers.first())
-                        except Exception as e:
-                            logger.error(e)
+                #if the approval is current but has no sticker that is current or printing (or awaiting export) then replace then latest sticker (set replace sticker) if it exists
+                vessel_ownership = approval.current_proposal.vessel_ownership if approval.current_proposal else None
+                if not vessel_ownership or vessel_ownership.end_date:
+                    raise serializers.ValidationError("Approval does not have a valid vessel ownership.")
+                stickers_qs = Sticker.objects.filter(approval=approval,vessel_ownership=vessel_ownership).filter(fee_season=season).filter(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST]).order_by('-id')
+                if stickers_qs.exists():
+                    replace_sticker = stickers_qs.first()
+                #if none, replace blindly (handled after payment)
+    
+            #MLA - one sticker per vessel
+            elif type(approval.child_obj) == MooringLicence:
+                #identify missing stickers (any VOOA VO that is not on a valid sticker with this approval assigned)
+                vessel_ownership_on_approvals = approval.child_obj.get_current_vessel_ownership_on_approvals().values_list("vessel_ownership_id",flat=True)
 
-                elif type(approval.child_obj) == AuthorisedUserPermit:
-                    #get all associated MOAs with invalid stickers
-                    invalid_stickers = MooringOnApproval.objects.filter(approval=approval,
-                        sticker__status__in=[
-                            Sticker.STICKER_STATUS_CANCELLED,
-                            Sticker.STICKER_STATUS_LOST,
-                        ]
-                    ).values_list('sticker',flat=True)
+                if not vessel_ownership_on_approvals:
+                    raise serializers.ValidationError("Approval does not have a valid vessel ownership.")
 
-                    if invalid_stickers.count() > 1:
-                        #get the latest sticker action for lost or cancelled stickers that correspond with invalid stickers - use the earliest among them
-                        action_details = StickerActionDetail.objects.filter(sticker_id__in=invalid_stickers).filter(Q(action="Cancel sticker")).order_by("-date_created")
-                        if not action_details.exists():
-                            #appropriate action does not appear to exist, will just have to work with the first in the list
-                            try:
-                                replace_sticker = Sticker.objects.get(id=invalid_stickers.first())
-                            except Exception as e:
-                                logger.error(e)
-                        else:
-                            replace_sticker = action_details.first().sticker
-                    else:
-                        try:
-                            replace_sticker = Sticker.objects.get(id=invalid_stickers.first())
-                        except Exception as e:
-                            logger.error(e)
+                stickers_qs = Sticker.objects.filter(approval=approval,vessel_ownership_id__in=list(vessel_ownership_on_approvals)).filter(fee_season=season).exclude(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST,Sticker.STICKER_STATUS_RETURNED])
+                vo_missing_sticker = []
+
+                missing = False
+                for vo in vessel_ownership_on_approvals:
+                    if not stickers_qs.filter(vessel_ownership_id=vo).exists():
+                        missing = True
+                        vo_missing_sticker.append(vo)
                 
-                data = {}
-                today = datetime.now(pytz.timezone(settings.TIME_ZONE)).date()
+                #if none are missing raise error
+                if not missing:
+                    raise serializers.ValidationError("This approval has active stickers for all relevant vessels.")
 
-                # include the sticker (to be replaced) in the action detail
-                if replace_sticker:
-                    data['sticker'] = replace_sticker.id
+                #otherwise then find any cancelled or lost stickers that can be replaced for those missing stickers (the latest sticker with the VO and approval)
+                stickers_qs = Sticker.objects.filter(approval=approval,vessel_ownership__in=vo_missing_sticker).filter(fee_season=season).filter(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST]).order_by('-id')
+                #replace first that comes up
+                if stickers_qs.exists():
+                    replace_sticker = stickers_qs.first()
+                #if none, replace blindly (handled after payment)
+                
+            #AUP - one sticker for every four moorings, each mooring must have a sticker
+            elif type(approval.child_obj) == AuthorisedUserPermit:
+                #identify missing stickers (any MOA with a null sticker OR a sticker that is cancelled or lost)
+                active_moa_with_invalid_sticker_or_no_sticker = MooringOnApproval.objects.filter(
+                    approval=approval,active=True
+                ).filter(
+                    Q(sticker__isnull=True)|(Q(sticker__status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST,Sticker.STICKER_STATUS_RETURNED])&Q(sticker__fee_season=season))
+                )
+                #if none are missing raise error
+                if not active_moa_with_invalid_sticker_or_no_sticker.exists():
+                    raise serializers.ValidationError("This approval has active stickers for all relevant moorings.")
 
-                data['action'] = 'Create new sticker'
-                data['user'] = request.user.id
-                data['reason'] = details['reason']
-                if is_internal(request):
-                    data['waive_the_fee'] = request.data.get('waive_the_fee', False) 
-                else:
-                    data['waive_the_fee'] = False
-                #new address checkbox
-                data['change_sticker_address'] = request.data.get('change_sticker_address', False)
-                #address change (only applied if above True)
-                data['new_postal_address_line1'] = request.data.get('postal_address_line1','')
-                data['new_postal_address_line2'] = request.data.get('postal_address_line2','')
-                data['new_postal_address_line3'] = request.data.get('postal_address_line3','')
-                data['new_postal_address_locality'] = request.data.get('postal_address_locality','')
-                data['new_postal_address_state'] = request.data.get('postal_address_state','')
-                data['new_postal_address_country'] = request.data.get('postal_address_country','AU')
-                data['new_postal_address_postcode'] = request.data.get('postal_address_postcode','')
-                if data['change_sticker_address'] and '' in [
-                        data['new_postal_address_line1'],
-                        data['new_postal_address_locality'],
-                        data['new_postal_address_state'],
-                        data['new_postal_address_country'],
-                        data['new_postal_address_postcode']
-                    ]:
-                    raise serializers.ValidationError("Required address details not provided")                
+                #otherwise then find any cancelled or lost stickers that can be replaced for those missing stickers (whatever is on the MOA)
+                active_moa_with_invalid_sticker = active_moa_with_invalid_sticker_or_no_sticker.exclude(sticker=None).exclude(sticker__status=Sticker.STICKER_STATUS_RETURNED).filter(sticker__fee_season=season).filter(sticker__status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST]).order_by('-id')
+                #replace first that comes up
+                if active_moa_with_invalid_sticker.exists():
+                    replace_sticker = active_moa_with_invalid_sticker.first().sticker
+                #if none, replace blindly (handled after payment)
+            
+            data = {}
+            # include the sticker (to be replaced) in the action detail - if available
+            if replace_sticker:
+                data['sticker'] = replace_sticker.id
 
-                serializer = StickerActionDetailSerializer(data=data)
-                serializer.is_valid(raise_exception=True)
-                new_sticker_action_detail = serializer.save()
-                new_sticker_action_detail.approval = approval
-                new_sticker_action_detail.save()
-                sticker_action_details.append(new_sticker_action_detail.id)
-
-                approval.log_user_action(f"New sticker created for Approval {approval}", request)
-
-                return Response({'sticker_action_detail_ids': sticker_action_details})
+            data['action'] = 'Create new sticker'
+            data['user'] = request.user.id
+            data['reason'] = details['reason']
+            if is_internal(request):
+                data['waive_the_fee'] = request.data.get('waive_the_fee', False) 
             else:
-                raise Exception('You cannot request a new sticker for the licence/permit without a vessel.')
+                data['waive_the_fee'] = False
+            #new address checkbox
+            data['change_sticker_address'] = request.data.get('change_sticker_address', False)
+            #address change (only applied if above True)
+            data['new_postal_address_line1'] = request.data.get('postal_address_line1','')
+            data['new_postal_address_line2'] = request.data.get('postal_address_line2','')
+            data['new_postal_address_line3'] = request.data.get('postal_address_line3','')
+            data['new_postal_address_locality'] = request.data.get('postal_address_locality','')
+            data['new_postal_address_state'] = request.data.get('postal_address_state','')
+            data['new_postal_address_country'] = request.data.get('postal_address_country','AU')
+            data['new_postal_address_postcode'] = request.data.get('postal_address_postcode','')
+            if data['change_sticker_address'] and '' in [
+                    data['new_postal_address_line1'],
+                    data['new_postal_address_locality'],
+                    data['new_postal_address_state'],
+                    data['new_postal_address_country'],
+                    data['new_postal_address_postcode']
+                ]:
+                raise serializers.ValidationError("Required address details not provided")                
+
+            serializer = StickerActionDetailSerializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            new_sticker_action_detail = serializer.save()
+            new_sticker_action_detail.approval = approval
+            new_sticker_action_detail.save()
+            sticker_action_details.append(new_sticker_action_detail.id)
+
+            approval.log_user_action(f"New sticker created for Approval {approval}", request)
+
+            return Response({'sticker_action_detail_ids': sticker_action_details})
 
     @detail_route(methods=['POST'], detail=True)
     @basic_exception_handler
