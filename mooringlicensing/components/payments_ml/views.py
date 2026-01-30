@@ -521,7 +521,7 @@ class StickerReplacementFeeSuccessView(TemplateView):
             # Should not reach here
             msg = 'Failed to process the payment. {}'.format(str(e))
             logger.error(msg)
-            raise serializers.ValidationError(msg)
+            raise serializers.ValidationError('Failed to process the payment.')
 
 
 class ApplicationFeeView(TemplateView):
