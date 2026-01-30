@@ -347,6 +347,7 @@ class StickerReplacementFeeSuccessViewPreload(APIView):
 
                         old_sticker_numbers = []
                         for sticker_action_detail in sticker_action_details.all():
+                            new_sticker = None
                             if sticker_action_detail.sticker:
                                 old_sticker = sticker_action_detail.sticker
                                 new_sticker = old_sticker.request_replacement(Sticker.STICKER_STATUS_LOST, sticker_action_detail)
