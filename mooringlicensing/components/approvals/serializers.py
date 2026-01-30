@@ -837,7 +837,7 @@ class ListApprovalSerializer(serializers.ModelSerializer):
             if not stickers.exists():
                 #AA has no stickers at all
                 bad_vo = obj.current_proposal.vessel_ownership if obj.current_proposal else None
-            elif not stickers.exclude(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST]):
+            elif not stickers.exclude(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST]).exists():
                 #AA has no valid stickers
                 bad_vo = obj.current_proposal.vessel_ownership if obj.current_proposal else None
                 bad_sticker = stickers.filter(status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST]).first()
