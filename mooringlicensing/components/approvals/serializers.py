@@ -743,10 +743,15 @@ class ListApprovalSerializer(serializers.ModelSerializer):
         season = obj.latest_applied_season
         if type(obj.child_obj) == AuthorisedUserPermit:
             #check moas
+            #if there is a moa with a null sticker or the moa has a sticker that is cancelled, lost, or returned - that moa has not got a valid sticker
             return MooringOnApproval.objects.filter(
                     approval=obj,active=True
                 ).filter(
-                    Q(sticker__isnull=True)|(Q(sticker__status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST])&Q(sticker__fee_season=season))
+                    Q(sticker__isnull=True)|
+                    (
+                     Q(sticker__status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST, Sticker.STICKER_STATUS_RETURNED])
+                     &Q(sticker__fee_season=season)
+                    )
                 ).exists()
         elif type(obj.child_obj) == MooringLicence:
             #check vos
