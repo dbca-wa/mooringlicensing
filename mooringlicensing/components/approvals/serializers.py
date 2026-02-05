@@ -315,8 +315,8 @@ class ApprovalSerializer(serializers.ModelSerializer):
         return None
 
     def get_mooring_licence_mooring(self, obj):
-        if type(obj.child_obj) == MooringLicence:
-            return obj.child_obj.mooring.name
+        if type(obj.child_obj) == MooringLicence and hasattr(obj.child_obj,"mooring"):
+            return obj.child_obj.mooring.name 
         else:
             return None
 
@@ -363,7 +363,7 @@ class ApprovalSerializer(serializers.ModelSerializer):
 
     def get_mooring_licence_authorised_users(self, obj):
         authorised_users = []
-        if type(obj.child_obj) == MooringLicence:
+        if type(obj.child_obj) == MooringLicence and hasattr(obj.child_obj,"mooring"):
             moa_set = MooringOnApproval.objects.filter(
                     mooring=obj.child_obj.mooring,
                     active=True
@@ -743,10 +743,15 @@ class ListApprovalSerializer(serializers.ModelSerializer):
         season = obj.latest_applied_season
         if type(obj.child_obj) == AuthorisedUserPermit:
             #check moas
+            #if there is a moa with a null sticker or the moa has a sticker that is cancelled, lost, or returned - that moa has not got a valid sticker
             return MooringOnApproval.objects.filter(
                     approval=obj,active=True
                 ).filter(
-                    Q(sticker__isnull=True)|(Q(sticker__status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST])&Q(sticker__fee_season=season))
+                    Q(sticker__isnull=True)|
+                    (
+                     Q(sticker__status__in=[Sticker.STICKER_STATUS_CANCELLED,Sticker.STICKER_STATUS_LOST, Sticker.STICKER_STATUS_RETURNED])
+                     &Q(sticker__fee_season=season)
+                    )
                 ).exists()
         elif type(obj.child_obj) == MooringLicence:
             #check vos

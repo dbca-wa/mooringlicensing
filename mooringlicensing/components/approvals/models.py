@@ -1977,14 +1977,17 @@ class AuthorisedUserPermit(Approval):
                     logger.info(f'There is a non-filled sticker: [{sticker}], which is to be returned.')
                     stickers_to_be_returned.append(sticker)
                     for moa in sticker.mooringonapproval_set.all():
-                        # moas_to_be_reallocated.append(moa)
                         if moa not in moas_to_be_removed:
                             moas_to_be_reallocated.append(moa)
                 elif stickers.count() > 1:
                     # Should not reach here
                     msg = f'AUP: [{self.lodgement_number}] has more than one stickers without 4 moorings.'
-                    logger.error(msg)
-                    raise ValueError(msg)
+                    logger.warning(msg)
+                    logger.info(f'There is a non-filled sticker: [{sticker}], which is to be returned.')
+                    stickers_to_be_returned.append(sticker)
+                    for moa in sticker.mooringonapproval_set.all():
+                        if moa not in moas_to_be_removed:
+                            moas_to_be_reallocated.append(moa)
             else:
                 # Because the number of moorings to be on new stickers is a multiple of 4,
                 # We just assign all of them to new stickers rather than finding out an existing sticker which is not filled with 4 moorings

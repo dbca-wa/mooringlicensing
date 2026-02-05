@@ -971,7 +971,8 @@ class Proposal(RevisionedMixin):
         continue_loop = True
 
         target_proposal = proposal
-        latest_vessel_ownership = VesselOwnership.objects.filter(vessel=vessel,end_date=None).order_by('-id').first()
+        #NOTE: due to unexpected migration behaviour sometimes multiple valid VO records will exist for one vessel - we need to ensure that all non-sold valid VO records are able to be used for VO validation
+        latest_vessel_ownerships = VesselOwnership.objects.filter(vessel=vessel,end_date=None).order_by('-id')
 
         # run loop to first find BASE AMOUNT PAID FOR THE TARGET VESSEL
         # run a second loop to find VALID DEDUCTIONS
@@ -1010,7 +1011,7 @@ class Proposal(RevisionedMixin):
                         current_approvals = target_vessel.get_current_approvals(target_date)
                         logger.info(f'Current approvals for the vessel: [{target_vessel}]: {current_approvals}')
 
-                        if (not proposal.vessel_ownership and vessel == target_vessel) or proposal.vessel_ownership == latest_vessel_ownership:
+                        if (not proposal.vessel_ownership and vessel == target_vessel) or proposal.vessel_ownership in latest_vessel_ownerships:
                             # This is paid for AA component for a target_vessel
                             # In this case, we can transfer this amount
                             amount_paid = fee_item_application_fee.amount_paid if fee_item_application_fee.amount_paid else 0
@@ -1157,7 +1158,7 @@ class Proposal(RevisionedMixin):
                         if target_vessel and target_vessel.rego_no and target_vessel.rego_no in max_amount_paid_per_vessel:
                             max_paid_for_vessel = max_amount_paid_per_vessel[target_vessel.rego_no]
 
-                        if proposal.vessel_ownership != latest_vessel_ownership:
+                        if not proposal.vessel_ownership in latest_vessel_ownerships:
                             try:
                                 paid_date = ApprovalHistory.objects.filter(proposal=proposal).first().start_date.date()
                                 fee_constructor_for_aa = FeeConstructor.get_fee_constructor_by_application_type_and_date(annual_admission_type, paid_date)
@@ -1192,7 +1193,7 @@ class Proposal(RevisionedMixin):
                             logger.warning("Application fee missing vessel details - invoices may require review")
                             target_vessel = None
 
-                        if proposal.vessel_ownership == latest_vessel_ownership:
+                        if proposal.vessel_ownership in latest_vessel_ownerships:
                             continue
                         
                         # Retrieve the current approvals of the target_vessel
@@ -3366,10 +3367,6 @@ class WaitingListApplication(Proposal):
     def process_after_withdrawn(self):
         logger.debug(f'called in [{self}]')
 
-    @property
-    def child_obj(self):
-        raise NotImplementedError('This method cannot be called on a child_obj')
-
     @staticmethod
     def get_intermediate_proposals(email_user_id):
         proposals = WaitingListApplication.objects.filter(proposal_applicant__email_user_id=email_user_id).exclude(processing_status__in=[
@@ -3634,10 +3631,6 @@ class AnnualAdmissionApplication(Proposal):
     class Meta:
         app_label = 'mooringlicensing'
 
-    @property
-    def child_obj(self):
-        raise NotImplementedError('This method cannot be called on a child_obj')
-
     def create_fee_lines(self):
         """
         Create the ledger lines - line item for application fee sent to payment system
@@ -3897,10 +3890,6 @@ class AuthorisedUserApplication(Proposal):
 
     class Meta:
         app_label = 'mooringlicensing'
-
-    @property
-    def child_obj(self):
-        raise NotImplementedError('This method cannot be called on a child_obj')
 
     def create_fee_lines(self):
         """ Create the ledger lines - line item for application fee sent to payment system """
@@ -4472,10 +4461,6 @@ class MooringLicenceApplication(Proposal):
 
     class Meta:
         app_label = 'mooringlicensing'
-
-    @property
-    def child_obj(self):
-        raise NotImplementedError('This method cannot be called on a child_obj')
 
     @staticmethod
     def get_intermediate_proposals(email_user_id):

@@ -410,7 +410,7 @@ def submit_vessel_data(instance, request, vessel_data=None, approving=False):
             except:
                 raise serializers.ValidationError("Provided vessel details invalid")
             
-            if isinstance(instance.child_obj,WaitingListApplication):
+            if (hasattr(instance, 'child_obj') and isinstance(instance.child_obj,WaitingListApplication)) or (isinstance(instance,WaitingListApplication)):
                 try:
                     minimum_length = float(GlobalSettings.objects.get(key=GlobalSettings.KEY_MINUMUM_MOORING_VESSEL_LENGTH).value)
                 except:
@@ -429,7 +429,9 @@ def submit_vessel_data(instance, request, vessel_data=None, approving=False):
     vessel_lookup_errors = {}
     # Mooring Licence vessel history
     # Migrated records do not have DOT name, so only run dot check for new vessel submissions
-    if (isinstance(instance.child_obj,MooringLicenceApplication) and 
+    if (
+        ((hasattr(instance, 'child_obj') and isinstance(instance.child_obj,MooringLicenceApplication)) or 
+        isinstance(instance,MooringLicenceApplication)) and 
         instance.approval and 
         not instance.approval.migrated
         ):
