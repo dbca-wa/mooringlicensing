@@ -3366,10 +3366,6 @@ class WaitingListApplication(Proposal):
     def process_after_withdrawn(self):
         logger.debug(f'called in [{self}]')
 
-    @property
-    def child_obj(self):
-        raise NotImplementedError('This method cannot be called on a child_obj')
-
     @staticmethod
     def get_intermediate_proposals(email_user_id):
         proposals = WaitingListApplication.objects.filter(proposal_applicant__email_user_id=email_user_id).exclude(processing_status__in=[
@@ -3634,10 +3630,6 @@ class AnnualAdmissionApplication(Proposal):
     class Meta:
         app_label = 'mooringlicensing'
 
-    @property
-    def child_obj(self):
-        raise NotImplementedError('This method cannot be called on a child_obj')
-
     def create_fee_lines(self):
         """
         Create the ledger lines - line item for application fee sent to payment system
@@ -3897,10 +3889,6 @@ class AuthorisedUserApplication(Proposal):
 
     class Meta:
         app_label = 'mooringlicensing'
-
-    @property
-    def child_obj(self):
-        raise NotImplementedError('This method cannot be called on a child_obj')
 
     def create_fee_lines(self):
         """ Create the ledger lines - line item for application fee sent to payment system """
@@ -4472,10 +4460,6 @@ class MooringLicenceApplication(Proposal):
 
     class Meta:
         app_label = 'mooringlicensing'
-
-    @property
-    def child_obj(self):
-        raise NotImplementedError('This method cannot be called on a child_obj')
 
     @staticmethod
     def get_intermediate_proposals(email_user_id):
