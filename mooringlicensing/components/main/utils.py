@@ -25,7 +25,7 @@ from mooringlicensing.components.proposals.models import (
     MooringBay,
     Mooring,
     StickerPrintingBatch,
-    Proposal, VesselDetails
+    Proposal, VesselDetails, VesselOwnership
 )
 from mooringlicensing.components.payments_ml.models import ApplicationFee, StickerActionFee
 
@@ -44,6 +44,11 @@ import datetime
 import uuid
 from django.contrib.postgres.aggregates import ArrayAgg
 from urllib import parse
+
+from mooringlicensing.settings import (
+    PROPOSAL_TYPE_RENEWAL, 
+    PROPOSAL_TYPE_NEW,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -517,6 +522,48 @@ def get_dot_vessel_information(request,json_string):
     r = requests.get(DOT_URL+"?paramGET="+paramGET+"&client_ip="+client_ip, auth=auth)
     return r.text
 
+def get_removed_vessels_in_current_season(approval):
+
+    #get all vessel ownership formerly on approval (identified via proposals in seasons)
+    proposal_ids = []
+    vessel_ownership_ids = []
+    continue_loop = True
+
+    proposal = approval.current_proposal
+
+    while continue_loop:
+        if proposal:
+            if proposal.id in proposal_ids:
+                continue_loop = False
+                break
+            
+            proposal_ids.append(proposal.id)
+            if proposal.vessel_ownership:
+                vessel_ownership_ids.append(proposal.vessel_ownership.id)
+
+            if proposal.proposal_type.code in [PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL]:
+                # Now, 'prev_application' is the very first application for this season
+                # We are not interested in any older applications
+                continue_loop = False
+                break
+            else:
+                # Assign the previous application, then perform checking above again
+                proposal = proposal.previous_application
+        else:
+            continue_loop = False
+            break
+
+    vessel_ownership_ids = list(set(vessel_ownership_ids))
+
+    if type(approval.child_obj) in [AnnualAdmissionPermit, AuthorisedUserPermit]:
+        #if the vo has an end date OR is not the current proposal's vo, include in list
+        current_vo_id = approval.current_proposal.vessel_ownership.id if approval.current_proposal.vessel_ownership else None
+        return VesselOwnership.objects.filter(id__in=vessel_ownership_ids).filter(Q(end_date__isnull=False)|~Q(id=current_vo_id))
+    elif type(approval.child_obj) == MooringLicence:
+        #if the vo has an end date OR is not on a current vooa for the approval, include in list
+        current_vooa_ids = list(approval.child_obj.get_current_vessel_ownership_on_approvals().values_list("vessel_ownership_id",flat=True))
+        return VesselOwnership.objects.filter(id__in=vessel_ownership_ids).filter(Q(end_date__isnull=False)|~Q(id__in=current_vooa_ids))
+
 def export_to_mooring_booking(approval_id):
     try:
         url = settings.MOORING_BOOKINGS_API_URL + "licence-create-update/" + settings.MOORING_BOOKINGS_API_KEY + '/' 
@@ -529,9 +576,14 @@ def export_to_mooring_booking(approval_id):
             licence_type = 2
         elif type(approval.child_obj) == AnnualAdmissionPermit:
             licence_type = 3
+
         errors = []
         updates = []
-        if approval and type(approval.child_obj) in [AnnualAdmissionPermit, AuthorisedUserPermit] and approval.current_proposal and approval.current_proposal.vessel_ownership and approval.current_proposal.vessel_ownership.vessel:
+        
+        if (approval 
+            and type(approval.child_obj) in [AnnualAdmissionPermit, AuthorisedUserPermit] 
+            and approval.current_proposal 
+            and approval.current_proposal.vessel_ownership and not approval.current_proposal.vessel_ownership.end_date and approval.current_proposal.vessel_ownership.vessel):
             myobj = {
                     'vessel_rego': approval.current_proposal.vessel_ownership.vessel.rego_no,
                     'licence_id': approval.id,
@@ -548,8 +600,6 @@ def export_to_mooring_booking(approval_id):
 
             if resp_dict.get("status") == 200:
                 updates.append('approval_id: {}, vessel_id: {}'.format(approval.id, approval.current_proposal.vessel_ownership.vessel.id))
-                approval.export_to_mooring_booking = False
-                approval.save()
             else:
                 errors.append('approval_id: {}, vessel_id: {}, error_message: {}'.format(approval.id, approval.current_proposal.vessel_ownership.vessel.id, resp.text))
         elif approval and type(approval.child_obj) == MooringLicence:
@@ -573,10 +623,35 @@ def export_to_mooring_booking(approval_id):
                         updates.append('approval_id: {}, vessel_id: {}'.format(approval.id, vessel_ownership.vessel.id))
                     else:
                         errors.append('approval_id: {}, vessel_id: {}, error_message: {}'.format(approval.id, vessel_ownership.vessel.id, resp.text))
-            # do not mark mooring licences without vessels as exported
-            if not errors and approval.child_obj.vessel_ownership_list:
-                approval.export_to_mooring_booking = False
-                approval.save()
+        
+        if approval:
+            status = "cancelled"
+            cancelled_vessel_ownerships = get_removed_vessels_in_current_season(approval)
+            for vessel_ownership in cancelled_vessel_ownerships:
+                if vessel_ownership.vessel:
+                    myobj = {
+                            'vessel_rego': vessel_ownership.vessel.rego_no,
+                            'licence_id': approval.id,
+                            'licence_type': licence_type,
+                            'start_date': approval.start_date.strftime('%Y-%m-%d') if approval.start_date else '',
+                            'expiry_date' : approval.expiry_date.strftime('%Y-%m-%d') if approval.expiry_date else '',
+                            'status' : status,
+                            }
+                    resp = requests.post(url, data = myobj)
+                    if not resp or not resp.text:
+                        print("Server unavailable")
+                        raise Exception("Server unavailable")
+                    resp_dict = json.loads(resp.text)
+
+                    if resp_dict.get("status") == 200:
+                        updates.append('approval_id: {}, vessel_id: {}'.format(approval.id, vessel_ownership.vessel.id))
+                    else:
+                        errors.append('approval_id: {}, vessel_id: {}, error_message: {}'.format(approval.id, vessel_ownership.vessel.id, resp.text))
+            
+        if approval and not errors:
+            approval.export_to_mooring_booking = False
+            approval.save()
+
         return errors, updates
     except Exception as e:
         print(str(e))

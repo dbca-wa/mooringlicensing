@@ -2262,6 +2262,8 @@ class VesselOwnershipViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin)
                             send_reissue_ml_after_sale_recorded_email(approval, request, instance, stickers_to_be_returned)
 
                     approval.log_user_action(f'Vessel {instance.vessel.rego_no} on Approval {approval} marked sold on {sale_date}.', request)
+                    approval.export_to_mooring_booking = True
+                    approval.save()
 
             else:
                 raise serializers.ValidationError("Missing information: You must specify a sale date")
