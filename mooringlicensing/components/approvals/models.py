@@ -2078,10 +2078,17 @@ class AuthorisedUserPermit(Approval):
             logger.debug(f'moa_to_be_on_new_sticker: [{moa_to_be_on_new_sticker}]')
             if not new_sticker or new_sticker.mooringonapproval_set.count() % 4 == 0:
                 # There is no stickers to fill, or there is a sticker but already be filled with 4 moas, create a new sticker
+
+                #if no proposal has been provided it is either a swap or something has gone wrong
+                #substitute the vessel ownership with that on the latest proposal for this approval
+                sub_vessel_ownership = None
+                if not proposal:
+                    sub_vessel_ownership = self.current_proposal.vessel_ownership if self.current_proposal and self.current_proposal.vessel_ownership and not self.current_proposal.vessel_ownership.end_date else None
+
                 new_sticker = Sticker.objects.create(
                     approval=self,
-                    vessel_ownership=proposal.vessel_ownership if proposal and proposal.vessel_ownership else moa_to_be_on_new_sticker.sticker.vessel_ownership if moa_to_be_on_new_sticker.sticker else None,
-                    fee_constructor=proposal.fee_constructor if proposal and proposal.fee_constructor else moa_to_be_on_new_sticker.sticker.fee_constructor if moa_to_be_on_new_sticker.sticker else None,
+                    vessel_ownership=proposal.vessel_ownership if proposal and proposal.vessel_ownership else moa_to_be_on_new_sticker.sticker.vessel_ownership if moa_to_be_on_new_sticker.sticker else sub_vessel_ownership if sub_vessel_ownership else None,
+                    fee_constructor=proposal.fee_constructor if proposal and proposal.fee_constructor else moa_to_be_on_new_sticker.sticker.fee_constructor if moa_to_be_on_new_sticker.sticker else sub_vessel_ownership if sub_vessel_ownership else None,
                     proposal_initiated=proposal,
                     fee_season=self.latest_applied_season,
                     status=new_status
