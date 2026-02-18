@@ -2218,16 +2218,16 @@ class VesselOwnershipViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin)
                     # Generate a new licence/permit document
                     approval.generate_doc(False)
 
-                    # Update sticker status
+                    # Update sticker status - only for vessel ownerships with rego no of vessel sold
                     stickers_updated = []
-                    for a_sticker in approval.stickers.filter(status__in=[Sticker.STICKER_STATUS_CURRENT, Sticker.STICKER_STATUS_AWAITING_PRINTING]):
+                    for a_sticker in approval.stickers.filter(status__in=[Sticker.STICKER_STATUS_CURRENT, Sticker.STICKER_STATUS_AWAITING_PRINTING]).filter(vessel_ownership__vessel__rego_no=rego_no):
                         a_sticker.status = Sticker.STICKER_STATUS_TO_BE_RETURNED
                         a_sticker.save()
                         logger.info(f'Status of the sticker: {a_sticker} has been changed to {Sticker.STICKER_STATUS_TO_BE_RETURNED}')
 
                         stickers_to_be_returned.append(a_sticker)
                         stickers_updated.append(a_sticker)
-                    for a_sticker in approval.stickers.filter(status__in=[Sticker.STICKER_STATUS_READY, Sticker.STICKER_STATUS_NOT_READY_YET]):
+                    for a_sticker in approval.stickers.filter(status__in=[Sticker.STICKER_STATUS_READY, Sticker.STICKER_STATUS_NOT_READY_YET]).filter(vessel_ownership__vessel__rego_no=rego_no):
                         # vessel sold before the sticker is picked up by cron for export (very rarely happens)
                         a_sticker.status = Sticker.STICKER_STATUS_CANCELLED
                         a_sticker.save()
