@@ -20,6 +20,14 @@ from mooringlicensing.components.payments_ml.models import (
 import pytz
 import datetime
 
+def get_stickers_missing_vessel(stickers):
+
+    stickers = stickers.filter(status__in=[Sticker.STICKER_STATUS_CURRENT,Sticker.STICKER_STATUS_AWAITING_PRINTING,Sticker.STICKER_STATUS_NOT_READY_YET,Sticker.STICKER_STATUS_READY])
+    stickers_missing_vessel = list(stickers.filter(vessel_ownership=None).values_list('number',flat=True))
+
+    return ("Stickers that are missing a vessel ownership record (and by extension, vessel registration):", stickers_missing_vessel)
+
+
 def get_proposals_with_fee_records_missing_vessel_details(proposals):
     """
     Get proposal payment records that are missing vessel detail records
