@@ -1777,6 +1777,7 @@ class Proposal(RevisionedMixin):
                 Proposal.PROCESSING_STATUS_APPROVED, 
                 Proposal.PROCESSING_STATUS_AWAITING_PAYMENT, 
                 Proposal.PROCESSING_STATUS_DECLINED,
+                Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED,
                 Proposal.PROCESSING_STATUS_PRINTING_STICKER,
                 Proposal.PROCESSING_STATUS_EXPIRED,
             ]
