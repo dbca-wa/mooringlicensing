@@ -638,8 +638,9 @@ class Approval(RevisionedMixin):
             mooring_on_approval, created = MooringOnApproval.objects.update_or_create(
                 mooring=mooring,
                 approval=self,
-                site_licensee=site_licensee
             )
+            mooring_on_approval.site_licensee = site_licensee
+            mooring_on_approval.save()
             if created:
                 logger.info('New Mooring {} has been added to the approval {}'.format(mooring.name, self.lodgement_number))
         else:
