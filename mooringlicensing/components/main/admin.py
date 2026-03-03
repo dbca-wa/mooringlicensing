@@ -1,13 +1,48 @@
 from django import forms
 from django.contrib import admin
 
-from mooringlicensing.components.main.models import VesselSizeCategory, VesselSizeCategoryGroup, ApplicationType, \
-    NumberOfDaysSetting, NumberOfDaysType, Document, FileExtensionWhitelist, Notice
+from mooringlicensing.components.main.models import (
+    VesselSizeCategory, VesselSizeCategoryGroup, ApplicationType, 
+    NumberOfDaysSetting, NumberOfDaysType, Document, 
+    FileExtensionWhitelist, Notice, JobQueue
+)
 from mooringlicensing.components.payments_ml.models import OracleCodeItem
 from django.utils.html import mark_safe
 from django.apps import apps
 from django.utils.html import strip_tags
 from django_summernote.widgets import SummernoteWidget
+
+@admin.register(JobQueue)
+class JobQueueAdmin(admin.ModelAdmin):
+    list_display = [
+        'id',
+        'user',
+        'job_cmd',
+        'status',
+        'created',
+        'processed_dt',
+    ]
+    readonly_fields = [
+        'id',
+        'job_cmd',
+        'status',
+        'parameters_json',
+        'processed_dt',
+        'user',
+        'created',
+        'system_id',
+    ]
+    list_filter = ['status']
+    ordering = ['-id', ]
+
+    def has_add_permission(self, request):
+        return False
+    
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
 
 class NoticeForm(forms.ModelForm):
     message = forms.CharField(

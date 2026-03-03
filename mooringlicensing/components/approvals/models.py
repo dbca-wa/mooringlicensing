@@ -638,10 +638,18 @@ class Approval(RevisionedMixin):
             mooring_on_approval, created = MooringOnApproval.objects.update_or_create(
                 mooring=mooring,
                 approval=self,
-                site_licensee=site_licensee
             )
+            mooring_on_approval.site_licensee = site_licensee
+            if mooring_on_approval.sticker:
+                mooring_on_approval.previous_sticker = mooring_on_approval.sticker 
+            mooring_on_approval.sticker = None
+            mooring_on_approval.end_date = None
+            mooring_on_approval.active = True
+            mooring_on_approval.save()
             if created:
                 logger.info('New Mooring {} has been added to the approval {}'.format(mooring.name, self.lodgement_number))
+            else:
+                logger.info('Mooring {} has been re-added to the approval {}'.format(mooring.name, self.lodgement_number))
         else:
             logger.warning(f'There is already a current MooringOnApproval object whose approval: [{self}], mooring: [{mooring}] and site_licensee: [{site_licensee}].')
 
