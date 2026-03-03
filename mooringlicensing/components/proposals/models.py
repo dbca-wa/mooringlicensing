@@ -4189,25 +4189,26 @@ class AuthorisedUserApplication(Proposal):
                 if mooring_id_pk:
                     ria_selected_mooring = Mooring.objects.get(id=mooring_id_pk)
 
+                added_requested_moorings = []
                 if ria_selected_mooring:
                     approval.add_mooring(mooring=ria_selected_mooring, site_licensee=False)
+                    added_requested_moorings.append(ria_selected_mooring.id)
                 else:
                     for moa in self.proposed_issuance_approval.get('requested_mooring_on_approval'):
                         if moa.get("checked"):
                             requested_mooring = Mooring.objects.get(id=moa.get("id"))
                             approval.add_mooring(mooring=requested_mooring, site_licensee=True)
+                            added_requested_moorings.append(requested_mooring.id)
                 # updating checkboxes
                 for moa1 in self.proposed_issuance_approval.get('mooring_on_approval'):
-                    for moa2 in self.approval.mooringonapproval_set.filter(mooring__mooring_licence__status='current'):
+                    for moa2 in self.approval.mooringonapproval_set.filter(mooring__mooring_licence__status='current').exclude(mooring_id__in=added_requested_moorings):
                         # convert proposed_issuance_approval to an end_date
                         if moa1.get("id") == moa2.id and not moa1.get("checked") and not moa2.end_date:
                             moa2.end_date = current_datetime.date()
                             moa2.active = False
                             moa2.save()
                         elif moa1.get("id") == moa2.id and moa1.get("checked") and moa2.end_date:
-                            moa2.end_date = None
-                            moa2.active = True
-                            moa2.save()
+                            approval.add_mooring(mooring=moa2.mooring, site_licensee=moa2.site_licensee)
             # set auto_approve renewal application ProposalRequirement due dates to those from previous application + 12 months
             if self.auto_approve and self.proposal_type.code == PROPOSAL_TYPE_RENEWAL:
                 for req in self.requirements.filter(is_deleted=False):
