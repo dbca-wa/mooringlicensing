@@ -41,6 +41,7 @@ class ApprovalAdmin(admin.ModelAdmin):
 @admin.register(models.MooringOnApproval)
 class MooringOnApprovalAdmin(admin.ModelAdmin):
     list_display = [
+        'id',
         'approval__lodgement_number',
         'mooring__name',
         'sticker__number',
@@ -50,6 +51,8 @@ class MooringOnApprovalAdmin(admin.ModelAdmin):
     ]
     search_fields = ['approval__lodgement_number','mooring__name','sticker__number']
     readonly_fields = ['approval','mooring','sticker','previous_sticker', 'site_licensee', 'migrated']
+    ordering = ['-id', ]
+    
     def has_add_permission(self, request):
         return False
     
