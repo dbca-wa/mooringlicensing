@@ -37,3 +37,21 @@ class ApprovalAdmin(admin.ModelAdmin):
             return ''
 
     get_submitter.short_description = 'submitter'  # Rename column header
+
+@admin.register(models.MooringOnApproval)
+class MooringOnApprovalAdmin(admin.ModelAdmin):
+    list_display = [
+        'approval__lodgement_number',
+        'mooring__name',
+        'sticker__number',
+        'end_date',
+        'site_licensee',
+        'migrated',
+    ]
+    search_fields = ['approval__lodgement_number','mooring__name','sticker__number']
+    readonly_fields = ['approval','mooring','sticker','previous_sticker', 'site_licensee', 'migrated']
+    def has_add_permission(self, request):
+        return False
+    
+    def has_delete_permission(self, request, obj=None):
+        return False
