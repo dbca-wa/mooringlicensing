@@ -358,10 +358,19 @@ def dot_check_wrapper(request, payload, vessel_lookup_errors, vessel_data):
         dot_response = dot_response_json.get("data")
         dot_boat_length = dot_response.get("boatLength")
         boat_found = True if dot_response.get("boatFound") == "Y" else False
-        boat_owner_match = True if dot_response.get("boatOwnerMatch") else False
+        boat_owner_match = True if dot_response.get("boatOwnerMatch") == "Y" else False
         ml_boat_length = vessel_data.get("vessel_details", {}).get("vessel_length")
-        if not boat_found or not boat_owner_match or not dot_boat_length == float(ml_boat_length):
-            vessel_lookup_errors[vessel_data.get("rego_no")] = "The provided details do not match those recorded with the Department of Transport"
+
+        logger.info(f"Boat Found: {boat_found}, Boat Owner Match: {boat_owner_match}, DOT Boat Length: {dot_boat_length}, Provided Boat Length: {ml_boat_length}")
+
+        if not boat_found or not boat_owner_match or not float(dot_boat_length) == float(ml_boat_length):
+            vessel_lookup_errors[vessel_data.get("rego_no")] = "The provided details do not match those recorded with the Department of Transport."
+            if not boat_found:
+                vessel_lookup_errors[vessel_data.get("rego_no")] += " Boat not found."
+            if not boat_owner_match:
+                vessel_lookup_errors[vessel_data.get("rego_no")] += " Provided Owner name does not match existing records."
+            if not float(dot_boat_length) == float(ml_boat_length):
+                vessel_lookup_errors[vessel_data.get("rego_no")] += " Provided vessel length does not match records."
     except:
         raise serializers.ValidationError("Issue verifying your DoT vessel information. Please try again later, or if the problem persists, please contact us.")
 
@@ -448,8 +457,19 @@ def submit_vessel_data(instance, request, vessel_data=None, approving=False):
                             "owner": owner_str,
                             "userId": str(request.user.id)
                             }
+                    vessel_details = vo.vessel.latest_vessel_details
+
+                    vo_vessel_data = {"vessel_details": {
+                        "berth_mooring": vessel_details.berth_mooring,
+                        "vessel_beam": vessel_details.vessel_beam,
+                        "vessel_draft": vessel_details.vessel_draft,
+                        "vessel_length": vessel_details.vessel_length,
+                        "vessel_name": vessel_details.vessel_name,
+                        "vessel_type": vessel_details.vessel_type,
+                        "vessel_weight": vessel_details.vessel_weight,
+                    }}
                     if settings.DO_DOT_CHECK and vo.individual_owner:
-                        dot_check_wrapper(request, payload, vessel_lookup_errors, vessel_data)
+                        dot_check_wrapper(request, payload, vessel_lookup_errors, vo_vessel_data)
 
     # current proposal vessel check
     if vessel_data.get("rego_no"):
