@@ -452,24 +452,32 @@ def submit_vessel_data(instance, request, vessel_data=None, approving=False):
                 else:
                     owner_str = ""
                 if request: #if there is no request do not run DoT check (system reissue)
-                    payload = {
-                            "boatRegistrationNumber": vo.vessel.rego_no,
-                            "owner": owner_str,
-                            "userId": str(request.user.id)
-                            }
-                    vessel_details = vo.vessel.latest_vessel_details
+                    try:
+                        payload = {
+                                "boatRegistrationNumber": vo.vessel.rego_no,
+                                "owner": owner_str,
+                                "userId": str(request.user.id)
+                                }
+                        vessel_details = vo.vessel.latest_vessel_details
 
-                    vo_vessel_data = {"vessel_details": {
-                        "berth_mooring": vessel_details.berth_mooring,
-                        "vessel_beam": vessel_details.vessel_beam,
-                        "vessel_draft": vessel_details.vessel_draft,
-                        "vessel_length": vessel_details.vessel_length,
-                        "vessel_name": vessel_details.vessel_name,
-                        "vessel_type": vessel_details.vessel_type,
-                        "vessel_weight": vessel_details.vessel_weight,
-                    }}
-                    if settings.DO_DOT_CHECK and vo.individual_owner:
-                        dot_check_wrapper(request, payload, vessel_lookup_errors, vo_vessel_data)
+                        vo_vessel_data = {
+                            "rego_no": vo.vessel.rego_no, 
+                            "vessel_details": {
+                                "berth_mooring": vessel_details.berth_mooring,
+                                "vessel_beam": vessel_details.vessel_beam,
+                                "vessel_draft": vessel_details.vessel_draft,
+                                "vessel_length": vessel_details.vessel_length,
+                                "vessel_name": vessel_details.vessel_name,
+                                "vessel_type": vessel_details.vessel_type,
+                                "vessel_weight": vessel_details.vessel_weight,
+                            }
+                        }
+                        if settings.DO_DOT_CHECK and vo.individual_owner:
+                            dot_check_wrapper(request, payload, vessel_lookup_errors, vo_vessel_data)
+                    except Exception as e:
+                        logger.error(e)
+                        raise serializers.ValidationError("Issue verifying existing vessels on Mooring License with DOT.")
+
 
     # current proposal vessel check
     if vessel_data.get("rego_no"):
