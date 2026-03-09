@@ -182,7 +182,7 @@ class MooringOnApproval(RevisionedMixin):
     mooring = models.ForeignKey(Mooring, related_name="mooring_on_approval",on_delete=models.CASCADE)
     sticker = models.ForeignKey('Sticker', blank=True, null=True, on_delete=models.SET_NULL)
     previous_sticker = models.ForeignKey('Sticker', blank=True, null=True, on_delete=models.SET_NULL, related_name="previous_sticker")
-    site_licensee = models.BooleanField()
+    site_licensee = models.BooleanField(default=False)
     end_date = models.DateField(blank=True, null=True)
     active = models.BooleanField(default=True)
     migrated = models.BooleanField(default=False)
