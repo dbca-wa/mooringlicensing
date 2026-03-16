@@ -42,9 +42,11 @@ class StickerListener(object):
                 logger.info(f'There is still at least one sticker with the status: [{Sticker.STICKER_STATUS_TO_BE_RETURNED}] for the approval: [{sticker_saved.approval}].')
                 # There is still a sticker to be returned
                 # Ensure the current proposal with 'sticker_to_be_returned'. It probably has the status, though.
-                sticker_saved.approval.current_proposal.processing_status = Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED
-                sticker_saved.approval.current_proposal.save()
-                logger.info(f'Proposal: [{sticker_saved.approval.current_proposal}] still has sticker(s) to be returned.')
+                # But only if the proposal has not already been approved! We do not want to revert an application's approved status if a sticker needs to be returned after the fact
+                if not sticker_saved.approval.current_proposal.processing_status == Proposal.PROCESSING_STATUS_APPROVED:
+                    sticker_saved.approval.current_proposal.processing_status = Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED
+                    sticker_saved.approval.current_proposal.save()
+                    logger.info(f'Proposal: [{sticker_saved.approval.current_proposal}] still has sticker(s) to be returned.') 
             else:
                 logger.info(f'There are no sticker with the status: [{Sticker.STICKER_STATUS_TO_BE_RETURNED}] left for the approval: [{sticker_saved.approval}].')
                 # There are no stickers to be returned

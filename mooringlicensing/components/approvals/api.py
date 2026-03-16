@@ -1827,7 +1827,7 @@ class StickerFilterBackend(DatatablesFilterBackend):
         if filter_year and not filter_year.lower() == 'all':
             filter_year = datetime.strptime(filter_year, '%Y-%m-%d').date()
             fee_seasons = FeePeriod.objects.filter(start_date=filter_year).values_list('fee_season')
-            queryset = queryset.filter(fee_constructor__fee_season__in=fee_seasons)
+            queryset = queryset.filter(fee_season__in=fee_seasons)
 
         # Filter sticker status
         filter_sticker_status_id = request.GET.get('filter_sticker_status')
