@@ -17,8 +17,8 @@
                             <form class="form-horizontal">
                                 <div v-if="!proposalApplicant" class="form-group">
                                     <label for="" class="col-sm-3 control-label"></label>
-                                    <div class="col-sm-6">
-                                        <b>To update this account please <a class="btn btn-primary" target="_blank" :href="'/ledger-ui/accounts-management/'+user.id+'/change/'">click here</a></b>
+                                    <div class="col-sm-12">
+                                        <div class="alert alert-info"><b>To update the preferred name of the permit holder <a target="_blank" :href="'/ledger-ui/accounts-management/'+user.id+'/change/'">click here</a></b></div>
                                     </div>
                                 </div>
 
@@ -34,6 +34,13 @@
                                     <div class="col-sm-6">
                                         <input disabled type="text" class="form-control" placeholder=""
                                             v-model="user.last_name">
+                                    </div>
+                                </div>
+
+                                <div v-if="!proposalApplicant" class="form-group">
+                                    <label for="" class="col-sm-3 control-label"></label>
+                                    <div class="col-sm-12">
+                                        <div class="alert alert-info"><b>To update the legal name of the permit holder go to Accounts Management</b></div>
                                     </div>
                                 </div>
 
