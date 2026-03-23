@@ -48,6 +48,12 @@
                   </div>
                   <div class="panel-body collapse" :id="pBody">
                       <form class="form-horizontal">
+                        <div v-if="!proposalApplicant" class="form-group">
+                            <label for="" class="col-sm-3 control-label"></label>
+                            <div class="col-sm-12">
+                                <div class="alert alert-info"><b>To update the legal name of the permit holder, contact moorings@rottnestisland.com</b></div>
+                            </div>
+                        </div>
                         <div class="form-group">
                           <label for="" class="col-sm-3 control-label">Given name(s)</label>
                           <div class="col-sm-6" v-if="profile.legal_first_name">
