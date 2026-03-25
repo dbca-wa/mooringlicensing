@@ -920,6 +920,11 @@ class Approval(RevisionedMixin):
                         sticker.status = Sticker.STICKER_STATUS_EXPIRED
                         sticker.save()
                         logger.info(f'Status: [{Sticker.STICKER_STATUS_EXPIRED}] has been set to the sticker: [{sticker}]')
+
+                    #NOTE: post-cancel and post-expiry functionality identitical for these license types
+                    if (type(self.child_obj) == MooringLicence or 
+                        type(self.child_obj) == AuthorisedUserPermit):
+                        self.child_obj.processes_after_cancel()
             except:
                 raise
 
@@ -957,7 +962,7 @@ class Approval(RevisionedMixin):
                 if (type(self.child_obj) == WaitingListAllocation or 
                     type(self.child_obj) == MooringLicence or 
                     type(self.child_obj) == AuthorisedUserPermit):
-                    self.child_obj.processes_after_cancel(request)
+                    self.child_obj.processes_after_cancel()
                 # Log proposal action
                 self.log_user_action(ApprovalUserAction.ACTION_CANCEL_APPROVAL.format(self.id),request)
                 self.current_proposal.log_user_action(ProposalUserAction.ACTION_CANCEL_APPROVAL.format(self.current_proposal.id),request)
@@ -1150,7 +1155,7 @@ class Approval(RevisionedMixin):
                     self.child_obj.processes_after_surrender()
                 if (type(self.child_obj) == MooringLicence or 
                     type(self.child_obj) == AuthorisedUserPermit):
-                    self.child_obj.processes_after_cancel(request)
+                    self.child_obj.processes_after_cancel()
                 # Log approval action
                 self.log_user_action(ApprovalUserAction.ACTION_SURRENDER_APPROVAL.format(self.id),request)
                 # Log entry for proposal
@@ -1450,7 +1455,7 @@ class WaitingListAllocation(Approval):
         self.refresh_from_db()
         return self
 
-    def processes_after_cancel(self, request=None):
+    def processes_after_cancel(self):
         self.internal_status = None
         self.status = Approval.APPROVAL_STATUS_CANCELLED  # Cancelled has been probably set before reaching here.
         self.set_to_cancel = False
@@ -1727,7 +1732,7 @@ class AuthorisedUserPermit(Approval):
     class Meta:
         app_label = 'mooringlicensing'
 
-    def processes_after_cancel(self, request):
+    def processes_after_cancel(self):
         #iterate through moorings and update their au summary doc
         for moa in MooringOnApproval.objects.filter(approval=self):
             if moa.mooring and moa.mooring.mooring_licence:
@@ -2173,7 +2178,7 @@ class MooringLicence(Approval):
         Approval.APPROVAL_STATUS_SUSPENDED,
     ]
 
-    def processes_after_cancel(self, request):
+    def processes_after_cancel(self):
         #remove mooring from AUPs and set their stickers to be returned
         moas = MooringOnApproval.objects.filter(mooring__mooring_licence=self)
         for i in moas:
