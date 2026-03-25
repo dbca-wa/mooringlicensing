@@ -962,7 +962,7 @@ class Approval(RevisionedMixin):
                 if (type(self.child_obj) == WaitingListAllocation or 
                     type(self.child_obj) == MooringLicence or 
                     type(self.child_obj) == AuthorisedUserPermit):
-                    self.child_obj.processes_after_cancel(request)
+                    self.child_obj.processes_after_cancel()
                 # Log proposal action
                 self.log_user_action(ApprovalUserAction.ACTION_CANCEL_APPROVAL.format(self.id),request)
                 self.current_proposal.log_user_action(ProposalUserAction.ACTION_CANCEL_APPROVAL.format(self.current_proposal.id),request)
@@ -1155,7 +1155,7 @@ class Approval(RevisionedMixin):
                     self.child_obj.processes_after_surrender()
                 if (type(self.child_obj) == MooringLicence or 
                     type(self.child_obj) == AuthorisedUserPermit):
-                    self.child_obj.processes_after_cancel(request)
+                    self.child_obj.processes_after_cancel()
                 # Log approval action
                 self.log_user_action(ApprovalUserAction.ACTION_SURRENDER_APPROVAL.format(self.id),request)
                 # Log entry for proposal
