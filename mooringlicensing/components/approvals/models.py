@@ -920,6 +920,11 @@ class Approval(RevisionedMixin):
                         sticker.status = Sticker.STICKER_STATUS_EXPIRED
                         sticker.save()
                         logger.info(f'Status: [{Sticker.STICKER_STATUS_EXPIRED}] has been set to the sticker: [{sticker}]')
+
+                    #NOTE: post-cancel and post-expiry functionality identitical for these license types
+                    if (type(self.child_obj) == MooringLicence or 
+                        type(self.child_obj) == AuthorisedUserPermit):
+                        self.child_obj.processes_after_cancel()
             except:
                 raise
 
