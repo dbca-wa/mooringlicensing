@@ -1455,7 +1455,7 @@ class WaitingListAllocation(Approval):
         self.refresh_from_db()
         return self
 
-    def processes_after_cancel(self, request=None):
+    def processes_after_cancel(self):
         self.internal_status = None
         self.status = Approval.APPROVAL_STATUS_CANCELLED  # Cancelled has been probably set before reaching here.
         self.set_to_cancel = False
@@ -1732,7 +1732,7 @@ class AuthorisedUserPermit(Approval):
     class Meta:
         app_label = 'mooringlicensing'
 
-    def processes_after_cancel(self, request):
+    def processes_after_cancel(self):
         #iterate through moorings and update their au summary doc
         for moa in MooringOnApproval.objects.filter(approval=self):
             if moa.mooring and moa.mooring.mooring_licence:
@@ -2178,7 +2178,7 @@ class MooringLicence(Approval):
         Approval.APPROVAL_STATUS_SUSPENDED,
     ]
 
-    def processes_after_cancel(self, request):
+    def processes_after_cancel(self):
         #remove mooring from AUPs and set their stickers to be returned
         moas = MooringOnApproval.objects.filter(mooring__mooring_licence=self)
         for i in moas:
