@@ -12,7 +12,7 @@ from mooringlicensing.components.payments_ml.models import (
     DcvAdmissionFee, DcvPermitFee, StickerActionFee, ApplicationFee
 )
 from mooringlicensing.components.proposals.models import (
-    Proposal, ProposalApplicant, Owner, ProposalUserAction, ProposalLogEntry, MooringLogEntry, VesselLogEntry, VesselOwnership
+    Proposal, ProposalApplicant, Owner, ProposalUserAction, ProposalLogEntry, MooringLogEntry, VesselLogEntry, VesselOwnership, ProposalSiteLicenseeMooringRequest
 )
 from ledger_api_client.utils import get_or_create, change_user_invoice_ownership
 from django.db import transaction
@@ -436,7 +436,8 @@ class Command(BaseCommand):
             VesselLogEntry: ["customer"],
         }
         change_email = {
-            ProposalApplicant: ["email"]
+            ProposalApplicant: ["email"],
+            ProposalSiteLicenseeMooringRequest: ["site_licensee_email"],
         }
         log_change_models = {
             Approval: (ApprovalUserAction, "approval"), #(logging_model, logging_model_relation)
