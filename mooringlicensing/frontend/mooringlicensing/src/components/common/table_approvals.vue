@@ -382,6 +382,9 @@ export default {
                         searchable: false,
                         visible: true,
                         'render': function(row, type, full){
+                            if (full.status == "Expired") {
+                                return "Expired"
+                            }
                             return full.internal_status
                         },
                         name: "internal_status",
@@ -566,6 +569,9 @@ export default {
                         searchable: false,
                         visible: true,
                         'render': function(row, type, full){
+                            if (full.status == "Expired") {
+                                return ""
+                            }
                             return full.wla_order;
                         },
                         name: "wla_order",
