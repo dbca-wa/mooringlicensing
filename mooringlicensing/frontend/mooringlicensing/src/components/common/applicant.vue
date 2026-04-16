@@ -40,7 +40,7 @@
                                 <div v-if="!proposalApplicant" class="form-group">
                                     <label for="" class="col-sm-3 control-label"></label>
                                     <div class="col-sm-12">
-                                        <div class="alert alert-info"><b>To update the legal name of the permit holder go to Accounts Management</b></div>
+                                        <div class="alert alert-info"><b>To update the legal name of the permit holder go to Accounts Management: <u><a :href="'/ledger-ui/accounts-management/'+user.id+'/change'">Edit System Account</a></u></b></div>
                                     </div>
                                 </div>
 
