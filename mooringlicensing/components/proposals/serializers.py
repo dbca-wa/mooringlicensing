@@ -1031,60 +1031,72 @@ class InternalProposalSerializer(BaseProposalSerializer):
         )
 
     def get_affected_by_fee_constructor_change(self, obj):
-        from mooringlicensing.components.payments_ml.models import FeeConstructor
+        try:
+            from mooringlicensing.components.payments_ml.models import FeeConstructor
 
-        if not obj.processing_status in [Proposal.PROCESSING_STATUS_WITH_ASSESSOR,Proposal.PROCESSING_STATUS_WITH_APPROVER, Proposal.PROCESSING_STATUS_AWAITING_PAYMENT]:
-            return ""
+            if not obj.processing_status in [Proposal.PROCESSING_STATUS_WITH_ASSESSOR,Proposal.PROCESSING_STATUS_WITH_ASSESSOR_REQUIREMENTS,Proposal.PROCESSING_STATUS_WITH_APPROVER, Proposal.PROCESSING_STATUS_AWAITING_PAYMENT]:
+                return ""
 
-        annual_admission_type = ApplicationType.objects.get(code=AnnualAdmissionApplication.code) 
+            annual_admission_type = ApplicationType.objects.get(code=AnnualAdmissionApplication.code) 
 
-        #identify the relevant fee constructor by fee season and application type
-        current_datetime = datetime.datetime.now(pytz.timezone(TIME_ZONE))
-        target_date = obj.get_target_date(current_datetime.date())
+            #identify the relevant fee constructor by fee season and application type
+            current_datetime = datetime.now(pytz.timezone(TIME_ZONE))
+            target_date = obj.get_target_date(current_datetime.date())
 
-        fee_constructor = FeeConstructor.get_fee_constructor_by_application_type_and_date(obj.application_type, target_date)
-        aa_fee_constructor = None
+            fee_constructor = FeeConstructor.get_fee_constructor_by_application_type_and_date(obj.application_type, target_date)
+            aa_fee_constructor = None
 
-        #if this is an AUP/ML application then AA fee constructor must also be considered
-        if (obj.application_type.code in ["mla","aua"]):
-            aa_fee_constructor = FeeConstructor.get_fee_constructor_by_application_type_and_date(obj.application_type, target_date)
+            #if this is an AUP/ML application then AA fee constructor must also be considered
+            if (obj.application_type.code in ["mla","aua"]):
+                aa_fee_constructor = FeeConstructor.get_fee_constructor_by_application_type_and_date(annual_admission_type, target_date)
 
-        #if the relevant fee constructor(s) have a disabled copy with a usage count above 0, a warning must be displayed to the assessor
-        disabled_fee_constructors = FeeConstructor.objects.filter(
-            application_type=fee_constructor.application_type,
-            fee_season=fee_constructor.fee_season,
-            enabled=False,
-        )
-        disabled_aa_fee_constructors = None
-        if aa_fee_constructor:
-            disabled_aa_fee_constructors = FeeConstructor.objects.filter(
-                application_type=aa_fee_constructor.application_type,
-                fee_season=aa_fee_constructor.fee_season,
+            #if the relevant fee constructor(s) have a disabled copy with a usage count above 0, a warning must be displayed to the assessor
+            disabled_fee_constructors = FeeConstructor.objects.filter(
+                application_type=fee_constructor.application_type,
+                fee_season=fee_constructor.fee_season,
                 enabled=False,
             )
+            disabled_aa_fee_constructors = None
+            if aa_fee_constructor:
+                disabled_aa_fee_constructors = FeeConstructor.objects.filter(
+                    application_type=aa_fee_constructor.application_type,
+                    fee_season=aa_fee_constructor.fee_season,
+                    enabled=False,
+                )
 
-        main_fee_constructor_affected = False
-        if obj.proposal_type.code == "amendment" and disabled_fee_constructors.exists():
-            for disabled_fee_constructor in disabled_fee_constructors:
-                if disabled_fee_constructor.num_of_times_used_for_payment > 0:
-                    main_fee_constructor_affected = True
-                    break
+            main_fee_constructor_affected = False
+            if obj.proposal_type.code == "amendment" and disabled_fee_constructors.exists():
+                for disabled_fee_constructor in disabled_fee_constructors:
+                    if disabled_fee_constructor.num_of_times_used_for_payment > 0:
+                        main_fee_constructor_affected = True
+                        break
+            
+            aa_fee_constructor_affected = False
+            if aa_fee_constructor and disabled_aa_fee_constructors.exists():
+                for disabled_fee_constructor in disabled_aa_fee_constructors:
+                    if disabled_fee_constructor.num_of_times_used_for_payment > 0:
+                        aa_fee_constructor_affected = True
+                        break
 
-        aa_fee_constructor_affected = False
-        if disabled_aa_fee_constructors.exists():
-            for disabled_fee_constructor in disabled_aa_fee_constructors:
-                if disabled_fee_constructor.num_of_times_used_for_payment > 0:
-                    aa_fee_constructor_affected = True
-                    break
+            #different messages for each application
+            msg = ""
+            if (obj.application_type.code in ["mla","aua"]):
+                #for AU and ML - message indicating payment to be issued may require audit - only for amendments
+                #if the AA part affected, have a separate message indicating AA deductions may require audit - for all applications type (new, renewal, amendment, swap)
+                if main_fee_constructor_affected and obj.proposal_type.code == "amendment":
+                    msg += " Payment calculations for this application may be affected by a Fee Constructor change."
+                if aa_fee_constructor_affected:
+                    msg += "  Payment calculations for this application's Annual Admission items may be affected by a Fee Constructor change."
+            else:
+                #for WLA and AA - message indicating payment already taken may require audit - only for amendments
+                if main_fee_constructor_affected and obj.proposal_type.code == "amendment":
+                    msg = "Payment taken for this application may have been affected by a Fee Constructor change."
+        
 
-        #different messages for each application
-        if (obj.application_type.code in ["mla","aua"]):
-            #for AU and ML - message indicating payment to be issued may require audit - only for amendments
-            #if the AA part affected, have a separate message indicating AA deductions may require audit - for all applications type (new, renewal, amendment, swap)
-            pass
-        else:
-            #for WLA and AA - message indicating payment already may require audit - only for amendments
-            pass
+            return msg.strip()
+        except Exception as e:
+            logger.error(e)
+            return ""            
 
     def get_can_bypass_auto_approval(self,obj):
         if 'request' in self.context and is_internal(self.context['request']):
