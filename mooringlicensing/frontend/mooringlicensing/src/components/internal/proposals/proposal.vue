@@ -1,5 +1,6 @@
 <template lang="html">
     <div v-if="proposal" class="container" id="internalProposal">
+        <alert v-if="proposal.affected_by_fee_constructor_change" type="warning">{{proposal.affected_by_fee_constructor_change}}</alert>
         <div class="row">
             <h3 v-if="proposal.migrated">Application: {{ proposal.lodgement_number }} (Migrated)</h3>
             <h3 v-else>Application: {{ proposal.lodgement_number }}</h3>
@@ -208,6 +209,7 @@ import WaitingListApplication from '@/components/form_wla.vue';
 import AnnualAdmissionApplication from '@/components/form_aaa.vue';
 import AuthorisedUserApplication from '@/components/form_aua.vue';
 import MooringLicenceApplication from '@/components/form_mla.vue';
+import alert from '@vue-utils/alert.vue'
 
 export default {
     name: 'InternalProposal',
@@ -303,6 +305,7 @@ export default {
         AnnualAdmissionApplication,
         AuthorisedUserApplication,
         MooringLicenceApplication,
+        alert,
     },
     props: {
         proposalId: {
