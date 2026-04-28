@@ -310,6 +310,10 @@ def save_vessel_data(instance, request, vessel_data):
     vessel_details_data = {}
     vessel_id = vessel_data.get('id')
     vessel_details_data = vessel_data.get("vessel_details")
+
+    if vessel_data and not "rego_no" in vessel_data:
+        clear_vessel_data(instance)
+        return
     
     # update vessel details to vessel_data
     for key in vessel_details_data.keys():
@@ -374,6 +378,24 @@ def dot_check_wrapper(request, payload, vessel_lookup_errors, vessel_data):
     except:
         raise serializers.ValidationError("Issue verifying your DoT vessel information. Please try again later, or if the problem persists, please contact us.")
 
+def clear_vessel_data(instance):
+    instance.rego_no = None
+    instance.vessel_id = None
+    instance.vessel_type = ""
+    instance.vessel_name = ""
+    instance.vessel_length = None
+    instance.vessel_draft = None
+    instance.vessel_beam = None
+    instance.vessel_weight = None
+    instance.berth_mooring = ""
+    instance.percentage = None
+    instance.individual_owner = None
+    instance.company_ownership_percentage = None
+    instance.company_ownership_name = None
+    instance.dot_name = None
+    instance.temporary_document_collection_id = None
+    instance.save()
+
 def submit_vessel_data(instance, request, vessel_data=None, approving=False):
 
     #if vessel data not provided, get from instance
@@ -407,7 +429,7 @@ def submit_vessel_data(instance, request, vessel_data=None, approving=False):
     logger.info(f'submit_vessel_data() is called with the vessel_data: {vessel_data}')
 
     #only enforce this for requests and if a rego_no has been provided
-    if (request and vessel_data["rego_no"]):
+    if (request and "rego_no" in vessel_data and vessel_data["rego_no"]):
         if (not vessel_data or not vessel_data["vessel_details"] or 
             not (vessel_data["vessel_details"]["vessel_draft"] and vessel_data["vessel_details"]["vessel_length"] and vessel_data["vessel_details"]["vessel_weight"])
         ):
@@ -505,6 +527,9 @@ def submit_vessel_data(instance, request, vessel_data=None, approving=False):
             or 
             (isinstance(instance, MooringLicenceApplication) or isinstance(instance, WaitingListApplication))
         ):
+            #Remove vessel details from application
+            if vessel_data: #vessel data was provided but explicitly with no rego_no, indicating vessel has been excluded from request (as opposed to vessel_data=None)
+                clear_vessel_data(instance)
             return
         else:
             raise serializers.ValidationError("Application cannot be submitted without a vessel listed")
