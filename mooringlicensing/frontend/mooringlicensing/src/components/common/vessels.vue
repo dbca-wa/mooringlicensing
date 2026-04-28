@@ -601,6 +601,7 @@ export default {
                 minimumInputLength: 2,
                 "theme": "bootstrap",
                 placeholder: "",
+                allowClear: true,
                 tags: allow_add_new_vessel,
                 createTag: function (tag) {
                     return {
