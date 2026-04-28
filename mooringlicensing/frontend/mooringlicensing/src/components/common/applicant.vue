@@ -23,14 +23,14 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="" class="col-sm-3 control-label">Given Name(s)</label>
+                                    <label for="" class="col-sm-3 control-label">Legal Given Name(s)</label>
                                     <div class="col-sm-6">
                                         <input disabled type="text" class="form-control" placeholder=""
                                             v-model="user.first_name">
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label for="" class="col-sm-3 control-label">Surname</label>
+                                    <label for="" class="col-sm-3 control-label">Legal Surname</label>
                                     <div class="col-sm-6">
                                         <input disabled type="text" class="form-control" placeholder=""
                                             v-model="user.last_name">

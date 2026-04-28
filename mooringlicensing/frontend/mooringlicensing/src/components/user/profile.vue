@@ -50,12 +50,15 @@
                       <form class="form-horizontal">
                         <div v-if="!proposalApplicant" class="form-group">
                             <label for="" class="col-sm-3 control-label"></label>
-                            <div class="col-sm-12">
+                            <div v-if="!is_internal" class="col-sm-12">
                                 <div class="alert alert-info"><b>To update the legal name of the permit holder, contact moorings@rottnestisland.com</b></div>
+                            </div>
+                            <div v-else class="col-sm-12">
+                                <div class="alert alert-info"><b>To update the legal name of the permit holder go to Accounts Management: <u><a :href="'/ledger-ui/accounts-management/'+profile.id+'/change'">Edit System Account</a></u></b></div>
                             </div>
                         </div>
                         <div class="form-group">
-                          <label for="" class="col-sm-3 control-label">Given name(s)</label>
+                          <label for="" class="col-sm-3 control-label">Legal Given name(s)</label>
                           <div class="col-sm-6" v-if="profile.legal_first_name">
                               <input readonly type="text" class="form-control" id="first_name" name="Given name" placeholder="" v-model="profile.legal_first_name" required="">
                           </div>
@@ -64,7 +67,7 @@
                           </div>
                         </div>
                         <div class="form-group">
-                          <label for="" class="col-sm-3 control-label" >Surname</label>
+                          <label for="" class="col-sm-3 control-label" >Legal Surname</label>
                           <div class="col-sm-6" v-if="profile.legal_first_name">
                               <input readonly type="text" class="form-control" id="surname" name="Surname" placeholder="" v-model="profile.legal_last_name">
                           </div>
