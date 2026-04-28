@@ -281,12 +281,12 @@ class GetMooringBySiteLicensee(views.APIView):
             if private_moorings:
                 data = Mooring.private_moorings.filter(
                     name__icontains=search_term,
-                    mooring_licence__approval__current_proposal__proposal_applicant__email=site_licensee_email
+                    mooring_licence__approval__current_proposal__proposal_applicant__email__iexact=site_licensee_email
                 ).values('id', 'name')
             else:
                 data = Mooring.objects.filter(
                     name__icontains=search_term,
-                    mooring_licence__approval__current_proposal__proposal_applicant__email=site_licensee_email
+                    mooring_licence__approval__current_proposal__proposal_applicant__email__iexact=site_licensee_email
                 ).values('id', 'name')
             paginator = Paginator(data, items_per_page)
             try:
