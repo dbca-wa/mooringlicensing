@@ -5,6 +5,7 @@ from django.db.models import Q
 from mooringlicensing.components.approvals.models import (
     Approval,
     ApprovalUserAction, WaitingListAllocation,
+    MooringLicence, AuthorisedUserPermit
 )
 from mooringlicensing.components.proposals.models import ProposalUserAction
 import datetime
@@ -76,8 +77,12 @@ class Command(BaseCommand):
                         a.set_to_cancel = False
                         a.save()
 
-                        if hasattr(a, 'child_obj') and type(self.child_obj) == WaitingListAllocation:
-                            self.child_obj.processes_after_cancel()
+                        if hasattr(a, 'child_obj') and (
+                            type(a.child_obj) == WaitingListAllocation or
+                            type(a.child_obj) == AuthorisedUserPermit or
+                            type(a.child_obj) == MooringLicence                            
+                        ):
+                            a.child_obj.processes_after_cancel()
 
                         send_approval_cancel_email_notification(a)
 
@@ -100,6 +105,18 @@ class Command(BaseCommand):
                         a.status = Approval.APPROVAL_STATUS_SURRENDERED
                         a.set_to_surrender = False
                         a.save()
+
+                        if hasattr(a, 'child_obj') and (
+                            type(a.child_obj) == WaitingListAllocation
+                        ):
+                            a.child_obj.processes_after_surrender()
+                        
+                        if hasattr(a, 'child_obj') and (
+                            type(a.child_obj) == AuthorisedUserPermit or
+                            type(a.child_obj) == MooringLicence                            
+                        ):
+                            a.child_obj.processes_after_cancel()
+
                         send_approval_surrender_email_notification(a, stickers_to_be_returned=stickers_to_be_returned)
 
                         proposal = a.current_proposal
@@ -139,8 +156,12 @@ class Command(BaseCommand):
                         a.set_to_cancel = False
                         a.save()
 
-                        if hasattr(a, 'child_obj') and type(self.child_obj) == WaitingListAllocation:
-                            self.child_obj.processes_after_cancel()
+                        if hasattr(a, 'child_obj') and (
+                            type(a.child_obj) == WaitingListAllocation or
+                            type(a.child_obj) == AuthorisedUserPermit or
+                            type(a.child_obj) == MooringLicence                            
+                        ):
+                            a.child_obj.processes_after_cancel()
 
                         send_approval_cancel_email_notification(a)
 
@@ -162,6 +183,17 @@ class Command(BaseCommand):
                         a.status = Approval.APPROVAL_STATUS_SURRENDERED
                         a.set_to_surrender = False
                         a.save()
+
+                        if hasattr(a, 'child_obj') and (
+                            type(a.child_obj) == WaitingListAllocation
+                        ):
+                            a.child_obj.processes_after_surrender()
+                        
+                        if hasattr(a, 'child_obj') and (
+                            type(a.child_obj) == AuthorisedUserPermit or
+                            type(a.child_obj) == MooringLicence                            
+                        ):
+                            a.child_obj.processes_after_cancel()
 
                         send_approval_surrender_email_notification(a)
                         proposal = a.current_proposal

@@ -24,7 +24,6 @@ class StickerListener(object):
                         Sticker.STICKER_STATUS_READY,
                         Sticker.STICKER_STATUS_NOT_READY_YET,
                         Sticker.STICKER_STATUS_AWAITING_PRINTING,
-                        Sticker.STICKER_STATUS_TO_BE_RETURNED,
                     ])
                 if not stickers_being_printed:
                     # When a sticker gets 'current' status and there are no stickers with being-printed statuses, update related proposal.status

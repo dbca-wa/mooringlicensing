@@ -2323,7 +2323,7 @@ class Proposal(RevisionedMixin):
                     approval = approval.set_wla_order()
 
                 # send Proposal approval email with attachment
-                approval.generate_doc()
+                approval.generate_doc() #NOTE: this is done once per request. This does not need to be delayed but making a note in case things change.
                 if request:
                     send_application_approved_or_declined_email(self, 'approved', request, [sticker_to_be_returned,])
                 self.save(version_comment='Final Approval: {}'.format(self.approval.lodgement_number))
@@ -2477,7 +2477,7 @@ class Proposal(RevisionedMixin):
                                 logger.info(f'FeeItemApplicationFee: [{fiaf}] has been created.')
                   
                             if not self.proposal_type.code == settings.PROPOSAL_TYPE_SWAP_MOORINGS and not self.payment_required():
-                                self.approval.generate_doc()
+                                self.approval.generate_doc() #NOTE: this is done once per request. This does not need to be delayed but making a note in case things change.
                             
                             send_application_approved_or_declined_email(self, 'approved', request)
                             self.log_user_action(ProposalUserAction.ACTION_APPROVE_APPLICATION.format(self.lodgement_number), request)
@@ -4289,7 +4289,7 @@ class AuthorisedUserApplication(Proposal):
             self.save()
             self.proposal.save()
 
-            approval.generate_doc()
+            approval.generate_doc() #NOTE: this is done once per request. This does not need to be delayed but making a note in case things change.
             self.proposal.refresh()  # so that the approval doc field is updated by the doc generated above
 
             # Email - do not send if internal reissue (i.e. only send if there is a request)
@@ -4298,7 +4298,8 @@ class AuthorisedUserApplication(Proposal):
 
             # Email to ML holder when new moorings added
             for mooring_licence in mls_to_be_emailed:
-                mooring_licence.generate_au_summary_doc()
+                mooring_licence.regenerate_documents = True
+                mooring_licence.save()
                 if not self.mooring_authorisation_preference == 'ria':
                     send_au_summary_to_ml_holder(mooring_licence, request, self)
 
@@ -4933,14 +4934,14 @@ class MooringLicenceApplication(Proposal):
             moas_to_be_reallocated, stickers_to_be_returned = approval.manage_stickers(self)
 
             # Creating documents should be performed at the end
-            approval.generate_doc()
+            approval.generate_doc() #NOTE: this is done once per request. This does not need to be delayed but making a note in case things change.
 
             #end all approval moorings on previous ML
             if self.proposal_type.code == settings.PROPOSAL_TYPE_SWAP_MOORINGS:
                 approval.process_mooring_approvals_before_swap()
 
             if self.proposal_type.code in [PROPOSAL_TYPE_RENEWAL, PROPOSAL_TYPE_AMENDMENT, PROPOSAL_TYPE_SWAP_MOORINGS,]:
-                approval.generate_au_summary_doc()
+                approval.generate_au_summary_doc() #NOTE: this is done once per request. This does not need to be delayed but making a note in case things change.
 
             # Email with attachments
             send_application_approved_or_declined_email(self, 'approved_paid', request, stickers_to_be_returned)
@@ -5113,7 +5114,8 @@ class Mooring(RevisionedMixin):
                 logger.info(f'End date: [{today}] has been set to the MooringOnApproval: [{active_mooring_on_approval}] .')
 
                 active_mooring_on_approval.approval.manage_stickers()  
-                active_mooring_on_approval.approval.generate_doc()
+                active_mooring_on_approval.approval.regenerate_documents = True
+                active_mooring_on_approval.approval.save()
                 send_aup_revoked_due_to_mooring_swap_email(request, active_mooring_on_approval.approval.child_obj, active_mooring_on_approval.mooring, [active_mooring_on_approval.sticker,])
         
 

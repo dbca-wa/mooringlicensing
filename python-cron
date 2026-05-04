@@ -10,3 +10,4 @@
 30 * * * * python manage_ml.py auto_lock_system_account >> logs/auto_lock_system_account.log 2>&1
 1 0 * * *  /bin/log_rotate.sh  >> /app/logs/log_rotate.log 2>&1
 30 6 * * * python manage_ml.py record_issues_report >> logs/run_cron_tasks.log 2>&1
+*/5 * * * * python manage_ml.py regenerate_approval_documents >> logs/run_cron_tasks.log 2>&1

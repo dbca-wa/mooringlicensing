@@ -165,7 +165,7 @@ def create_pdf_licence(approvals):
                 if isinstance(a, DcvPermit) and len(a.dcv_permit_documents.all())==0:
                     a.generate_dcv_permit_doc()
                 elif not hasattr(a, 'licence_document') or a.licence_document is None: 
-                    a.generate_doc()
+                    a.generate_doc() #NOTE: this is exclusively called via mgt cmd. This does not need to be delayed but making a note in case things change.
                 print(f'{idx}, Created PDF for {permit_name}: {a}')
                 updates.append(a.lodgement_number)
             except Exception as e:

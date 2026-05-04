@@ -333,6 +333,8 @@ class Approval(RevisionedMixin):
     export_to_mooring_booking = models.BooleanField(default=False)
     created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
 
+    regenerate_documents = models.BooleanField(default=False)
+
     class Meta:
         app_label = 'mooringlicensing'
         unique_together = ('lodgement_number', 'issue_date')
@@ -1112,8 +1114,8 @@ class Approval(RevisionedMixin):
 
                             moa.end_date = None
                             moa.active = True
+                            moa.regenerate_documents = True
                             moa.save()
-                            moa.mooring.mooring_licence.generate_au_summary_doc()
 
                 send_approval_reinstate_email_notification(self, request)
                 # Log approval action
@@ -1736,7 +1738,8 @@ class AuthorisedUserPermit(Approval):
         #iterate through moorings and update their au summary doc
         for moa in MooringOnApproval.objects.filter(approval=self):
             if moa.mooring and moa.mooring.mooring_licence:
-                moa.mooring.mooring_licence.generate_au_summary_doc()
+                moa.mooring.mooring_licence.regenerate_documents = True
+                moa.mooring.mooring_licence.save()
 
     def get_grace_period_end_date(self):
         # No grace period for the AUP
@@ -2180,14 +2183,20 @@ class MooringLicence(Approval):
 
     def processes_after_cancel(self):
         #remove mooring from AUPs and set their stickers to be returned
-        moas = MooringOnApproval.objects.filter(mooring__mooring_licence=self)
+        moas = MooringOnApproval.objects.filter(mooring__mooring_licence=self).filter(end_date=None)
         for i in moas:
             i.end_date = datetime.date.today()
             i.active = False
             i.save()
+            
+            i.approval.manage_stickers()  
+            
+            if i.approval:
+                i.approval.regenerate_documents = True
+                i.approval.save()
 
         #update aup pdf
-        self.generate_au_summary_doc()
+        self.generate_au_summary_doc() #NOTE: this is done once per request or by mgt cmd. This does not need to be delayed but making a note in case things change.
 
     def _create_new_swap_moorings_application(self, request, new_mooring):
         new_proposal = self.current_proposal.clone_proposal_with_status_reset()
@@ -3098,7 +3107,7 @@ class ApprovalUserAction(UserAction):
     ACTION_REISSUE_APPROVAL = "Reissue approval {}"
     ACTION_REISSUE_APPROVAL_ML = "Reissued due to change in Mooring Site Licence {}"
     ACTION_RENEWAL_NOTICE_SENT_FOR_APPROVAL = "Renewal notice sent for approval: {}"
-
+    
     ACTION_STICKER_LOST = "Sticker recorded lost {}"
     ACTION_REQUEST_NEW_STICKER = "Request new sticker {}"
     ACTION_UPDATE_STICKER_ADDRESS = "Update sticker address {}"

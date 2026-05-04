@@ -68,6 +68,19 @@ class SanitiseFileMixin(SanitiseMixin, DirtyFieldsMixin):
         if not file_content:
             file_content = self._file
 
+        file_content_exists = True
+        try:
+            if path_to_file and file_content and storage:
+                content_test = file_content.size
+        except Exception as e:
+            print(e)
+            file_content_exists = False
+
+        #if file content does not exist, it does not need to be sanitised
+        if not file_content_exists:
+            super(SanitiseMixin, self).save(**kwargs)
+            return
+
         if path_to_file and file_content and storage:
             #check file extension
             check_file(file_content, self._meta.model_name)

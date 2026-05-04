@@ -2216,7 +2216,7 @@ class VesselOwnershipViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin)
                 stickers_to_be_returned = []
                 for approval in approval_list:
                     # Generate a new licence/permit document
-                    approval.generate_doc(False)
+                    approval.regenerate_documents = True
 
                     # Update sticker status - only for vessel ownerships with rego no of vessel sold
                     stickers_updated = []
@@ -2653,14 +2653,15 @@ class MooringViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin):
                     moa.end_date = today         
                     moa.save()
                     # regenerating Authorised User Permit after mooring has been removed
-                    moa.approval.generate_doc()
+                    moa.approval.generate_doc() #NOTE: this is done once per request. This does not need to be delayed but making a note in case things change.
                     # send_aup_revoked email if required
                     moas = MooringOnApproval.objects.filter(mooring=mooring, active=True)
                     mls = MooringLicence.objects.filter(mooring=mooring)
                     if moas.count() > 0:
                         for ml in mls:
                             # regenerating the List of Authorised Users document for the mooring Licence and sending email to the user
-                            ml.generate_au_summary_doc()
+                            ml.regenerate_documents = True
+                            ml.save()
                             #send email to mooring licence owner if with the above attachement if required
                     elif mooring.mooring_licence:
                         # removing the List of Authorised Users document if there is no more AUPs remaining 
