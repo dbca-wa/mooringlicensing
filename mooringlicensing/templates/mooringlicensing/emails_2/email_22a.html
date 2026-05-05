@@ -2,17 +2,25 @@
 
 {% block content_body %}
 {% include "mooringlicensing/emails_2/salutation.html" %}
+
 <p>Your application {{ proposal.lodgement_number }} to amend your authorised user permit has been conditionally approved pending payment of your fees. Please see attached document for more details.</p>
-{% if stickers_to_be_returned|length > 0 %}
-<p>If you have been issued a new sticker, you are required to return your old sticker
-    {% for sticker in stickers_to_be_returned %}
-    {{ sticker.number }}{% if forloop.last %}{% else %},{% endif %}
-    {% endfor %}
-to the Rottnest Island Authority and the new sticker for your vessel will be mailed to you in the coming days.</p>
-{% endif %}
-<p>Entry to the Reserve and access to the Shared Mooring System (SMS) is NOT approved until your current sticker is clearly displayed on the port side of your vessel. Penalties apply.</p>
+
+<p><b>If you have changed the vessel on your permit:</b></p>
+
+<p>All stickers issued in the current boating season for the previous vessel must be returned to the Rottnest Island Authority before stickers for your new vessel can be issued.</p>
+
+<p><b>For Authorised User Permit Holders:</b></p>
+
+<p>If the vessel has not changed, your new sticker/s will be posted to you. Once received, you are required to return all prior permit sticker/s to our office for auditing.</p>
+
+<p>You can track the progress by logging into the Mooring Licensing Portal.</p>
+
+<p>Please note: Penalties apply if stickers are not returned or surrendered upon request, or prior to the sale or disposal of your vessel.</p>
+
+<p>Once you receive your new sticker/s, ensure they are displayed on the port side of your vessel while within the Marine Reserve.</p>
+
 <p>Please click <a href="{{ payment_url }}">here</a> to pay the fees for your authorised user permit.</p>
-<p>Payment is due by {{proposal.payment_due_date}}.</p>
+
 {% if details %}<p>Details: {{ details }}</p>{% endif %}
 {% include "mooringlicensing/emails/signature-rottnest.html" %}
 {% endblock %}

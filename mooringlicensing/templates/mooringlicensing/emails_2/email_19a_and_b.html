@@ -3,11 +3,21 @@
 {% block content_body %}
 {% include "mooringlicensing/emails_2/salutation.html" %}
 {% if decision == 'approved' %}
-<p>Your annual admission application {{ proposal.lodgement_number }} has been approved. Please see attached document for more details.</p>
-<p>If you have changed the vessel on your permit as part of this amendment, you are required to return your previous sticker to the Rottnest Island Authority. A new sticker will be mailed to you in the coming days. Once received, you must ensure it is displayed on your vessel at all times whilst within the limits of the Reserve.</p>
-<p>Penalties apply for the failure to return or surrender stickers to RIA upon request, or prior to the sale or disposal of your vessel.</p>
 
-<p>The new sticker for your vessel will be mailed to you in the coming days. Once received, you must ensure it is displayed on your vessel at all times whilst within the limits of the Reserve. Penalties apply.</p>
+<p>Your annual admission application {{ proposal.lodgement_number }} has been approved. Please see attached document for more details.</p>
+
+<p><b>If you have changed the vessel on your permit:</b></p>
+
+<p>All stickers issued in the current boating season for the previous vessel must be returned to the Rottnest Island Authority before stickers for your new vessel can be issued.</p>
+
+<p><b>If you have made changes to your existing vessel’s specifications</b></p>
+
+<p>If the vessel has not changed but you have amended vessel details (such as registered length, or ownership percentage), a replacement sticker is not required.</p>
+
+<p>Please note: Penalties apply if stickers are not returned or surrendered upon request, or prior to the sale or disposal of your vessel.</p>
+
+<p>Ensure the sticker is displayed on the port side of your vessel while within the Marine Reserve.</p>
+
 {% endif %}
 {% if decision == 'declined' %}
 <p>Your annual admission application {{ proposal.lodgement_number }} has been declined.</p>
