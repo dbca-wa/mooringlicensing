@@ -3,15 +3,22 @@
 {% block content_body %}
 {% include "mooringlicensing/emails_2/salutation.html" %}
 {% if decision == 'approved' or decision == 'approved_paid' %}
-<p>Your application {{ proposal.lodgement_number }} to amend your authorised user permit has been approved. Please see attached document for more details.</p>
-{% if stickers_to_be_returned|length > 0 %}
-<p>If you have not already done so, you are required to return your previous sticker
-    {% for sticker in stickers_to_be_returned %}
-    {{ sticker.number }}{% if forloop.last %}{% else %},{% endif %}
-    {% endfor %}
-    to the Rottnest Island Authority. Failure to return or surrender stickers to RIA upon request, or prior to the sale or disposal of your vessel, can result in the cancellation of your authorised user permit. Once revoked, authorised user permits and mooring site authorisations cannot be re-instated.</p>
-{% endif %}
-<p>The new sticker for your vessel will be mailed to you in the coming days. Entry to the Reserve and access to the Shared Mooring System (SMS) is NOT approved until your current sticker is clearly displayed on the port side of your vessel. Penalties apply.</p>
+
+<p>Your application {{ proposal.lodgement_number }} to amend your permit has been approved. Please refer to the attached document for full details.</p>
+
+<p><b>If you have changed the vessel on your permit:</b></p>
+
+<p>All stickers issued in the current boating season for the previous vessel must be returned to the Rottnest Island Authority before stickers for your new vessel can be issued.</p>
+
+<p><b>For Authorised User Permit Holders:</b></p>
+
+<p>If the vessel has not changed, your new sticker/s will be posted to you. Once received, you are required to return all prior permit sticker/s to our office for auditing.</p>
+
+<p>You can track the progress by logging into the Mooring Licensing Portal.</p>
+
+<p>Please note: Penalties apply if stickers are not returned or surrendered upon request, or prior to the sale or disposal of your vessel.</p>
+
+<p>Once you receive your new sticker/s, ensure they are displayed on the port side of your vessel while within the Marine Reserve.</p>
 {% endif %}
 {% if decision == 'declined' %}
 <p>Your authorised user application {{ proposal.lodgement_number }} has been declined.</p>

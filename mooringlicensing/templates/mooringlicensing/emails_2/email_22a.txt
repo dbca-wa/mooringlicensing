@@ -3,16 +3,22 @@
 {% block content_body %}
 {% include "mooringlicensing/emails_2/salutation.txt" %}
 Your application {{ proposal.lodgement_number }} to amend your authorised user permit has been conditionally approved pending payment of your fees. Please see attached document for more details.
-{% if stickers_to_be_returned|length > 0 %}
-If you have been issued a new sticker, you are required to return your old sticker
-    {% for sticker in stickers_to_be_returned %}
-    {{ sticker.number }}{% if forloop.last %}{% else %},{% endif %}
-    {% endfor %}
-to the Rottnest Island Authority and the new sticker for your vessel will be mailed to you in the coming days.
-{% endif %}
-Entry to the Reserve and access to the Shared Mooring System (SMS) is NOT approved until your current sticker is clearly displayed on the port side of your vessel. Penalties apply.
-Please access {{ payment_url }} to pay the fees for your authorised user permit.
-Payment is due by {{proposal.payment_due_date}}.
+
+If you have changed the vessel on your permit:
+
+All stickers issued in the current boating season for the previous vessel must be returned to the Rottnest Island Authority before stickers for your new vessel can be issued.
+
+For Authorised User Permit Holders:
+
+If the vessel has not changed, your new sticker/s will be posted to you. Once received, you are required to return all prior permit sticker/s to our office for auditing.
+
+You can track the progress by logging into the Mooring Licensing Portal.
+
+Please note: Penalties apply if stickers are not returned or surrendered upon request, or prior to the sale or disposal of your vessel.
+
+Once you receive your new sticker/s, ensure they are displayed on the port side of your vessel while within the Marine Reserve.
+
+Please click here to pay the fees for your authorised user permit.
 {% if details %}Details: {{ details }}{% endif %}
 {% include "mooringlicensing/emails/signature-rottnest.txt" %}
 {% endblock %}
