@@ -700,7 +700,6 @@ class Approval(RevisionedMixin):
             ]:
                 current_stickers = self.stickers.filter(
                     status__in=[
-                        Sticker.STICKER_STATUS_AWAITING_PRINTING,
                         Sticker.STICKER_STATUS_NOT_READY_YET,
                         Sticker.STICKER_STATUS_READY,
                     ]
@@ -713,6 +712,7 @@ class Approval(RevisionedMixin):
 
                 current_stickers = self.stickers.filter(
                     status__in=[
+                        Sticker.STICKER_STATUS_AWAITING_PRINTING,
                         Sticker.STICKER_STATUS_CURRENT,
                     ]
                 )
