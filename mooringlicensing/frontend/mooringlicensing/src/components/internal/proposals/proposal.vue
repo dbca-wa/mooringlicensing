@@ -1,6 +1,7 @@
 <template lang="html">
     <div v-if="proposal" class="container" id="internalProposal">
         <alert v-if="proposal.affected_by_fee_constructor_change" type="warning">{{proposal.affected_by_fee_constructor_change}}</alert>
+        <alert v-if="proposal.proposal_type.code=='swap_moorings'" type="warning">Vessel Details cannot be altered on a Mooring Swap Application, only submitted as is or removed.</alert>
         <div class="row">
             <h3 v-if="proposal.migrated">Application: {{ proposal.lodgement_number }} (Migrated)</h3>
             <h3 v-else>Application: {{ proposal.lodgement_number }}</h3>
