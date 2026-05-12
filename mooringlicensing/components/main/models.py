@@ -78,7 +78,7 @@ class SanitiseFileMixin(SanitiseMixin, DirtyFieldsMixin):
 
         #if file content does not exist, it does not need to be sanitised
         if not file_content_exists:
-            super(SanitiseMixin, self).save(**kwargs)
+            super(SanitiseFileMixin, self).save(**kwargs)
             return
 
         if path_to_file and file_content and storage:
