@@ -166,6 +166,14 @@ def save_proponent_data_wla(instance, request, action):
 def save_proponent_data_mla(instance, request, action):
     logger.info(f'Saving proponent data of the proposal: [{instance}]')
 
+    if (instance.processing_status == Proposal.PROCESSING_STATUS_DRAFT and 
+        instance.proposal_type and 
+        instance.proposal_type.code == 'swap_moorings'):
+        logger.warning("Swap Application found in draft, bypassing save/submit functionality and escalating to awaiting documents.")
+        instance.processing_status = Proposal.PROCESSING_STATUS_AWAITING_DOCUMENTS
+        instance.save()
+        return
+
     # vessel
     vessel_data = deepcopy(request.data.get("vessel"))
     if vessel_data:
