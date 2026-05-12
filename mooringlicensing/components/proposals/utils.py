@@ -418,7 +418,7 @@ def check_swap_mooring_vessel(instance, vessel_data):
 
 def submit_vessel_data(instance, request, vessel_data=None, approving=False):
 
-    if instance.proposal_type and instance.proposal_type.code == "swap_moorings" and "rego_no" in vessel_data:
+    if instance.proposal_type and instance.proposal_type.code == "swap_moorings" and vessel_data and "rego_no" in vessel_data:
         check_swap_mooring_vessel(instance, vessel_data)
 
     #if vessel data not provided, get from instance
