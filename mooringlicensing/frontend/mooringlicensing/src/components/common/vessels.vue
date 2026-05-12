@@ -349,6 +349,10 @@ export default {
             return false
         },
         individualOwner: function () {
+            if (this.vessel && this.vessel.vessel_ownership && this.vessel.vessel_ownership.individual_owner == undefined) {
+                this.vessel.vessel_ownership.individual_owner = true;
+            }
+
             if (this.vessel && this.vessel.vessel_ownership && this.vessel.vessel_ownership.individual_owner == true) {
                 return true;
             }

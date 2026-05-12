@@ -404,7 +404,22 @@ def clear_vessel_data(instance):
     instance.temporary_document_collection_id = None
     instance.save()
 
+def check_swap_mooring_vessel(instance, vessel_data):
+    #if instance is a swap mooring application and vessel data has been provided - diff check the provided data with the original data source (the approval's set current_proposal)
+    if instance.previous_application and (
+        str(vessel_data["rego_no"]) != instance.previous_application.rego_no or
+        str(vessel_data["vessel_details"]["vessel_type"]) != str(instance.previous_application.vessel_type) or
+        str(vessel_data["vessel_details"]["vessel_name"]) != str(instance.previous_application.vessel_name) or
+        str(vessel_data["vessel_details"]["vessel_length"]) != str(instance.previous_application.vessel_length) or
+        str(vessel_data["vessel_details"]["vessel_draft"]) != str(instance.previous_application.vessel_draft) or
+        str(vessel_data["vessel_details"]["vessel_weight"]) != str(instance.previous_application.vessel_weight)
+    ):
+        raise serializers.ValidationError("Cannot change vessel details for a Swap Moorings application. Vessel must be submitted as is or removed.")
+
 def submit_vessel_data(instance, request, vessel_data=None, approving=False):
+
+    if instance.proposal_type and instance.proposal_type.code == "swap_moorings" and "rego_no" in vessel_data:
+        check_swap_mooring_vessel(instance, vessel_data)
 
     #if vessel data not provided, get from instance
     if not vessel_data:
