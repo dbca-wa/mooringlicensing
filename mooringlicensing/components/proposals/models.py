@@ -4366,7 +4366,7 @@ class MooringLicenceApplication(Proposal):
 
         vessel = self.vessel_ownership.vessel if self.vessel_ownership and (not self.vessel_ownership.end_date or self.vessel_ownership.end_date > today) else None
         
-        if vessel.rego_no != self.rego_no: #if the VO vessel and rego_no do not match, exclude the VO vessel
+        if vessel and vessel.rego_no != self.rego_no: #if the VO vessel and rego_no do not match, exclude the VO vessel
             vessel = None
 
         # Get blocking proposals

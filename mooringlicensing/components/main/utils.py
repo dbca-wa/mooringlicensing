@@ -1309,7 +1309,7 @@ def getApprovalExportFields(data):
         mooring_number=ArrayAgg(
             'moorings__name',
             filter=(
-                ~Q(moorings__name=None)
+                ~Q(moorings__name=None)&Q(mooringonapproval__active=True)
             ),
             distinct=True
         ), 
@@ -1572,7 +1572,7 @@ def getStickerExportFields(data):
                 approval__lodgement_number__startswith='AUP',
                 then=ArrayAgg(
                     "mooringonapproval__mooring__name",
-                    filter = Q(mooringonapproval__end_date__isnull=True),
+                    #filter = Q(mooringonapproval__end_date__isnull=True),
                     distinct=True,
                 ),
             ),
@@ -1651,6 +1651,14 @@ def getStickerExportFields(data):
             ),
             default=Value(""),
         )
+    ).annotate(
+        sent_date=Case(
+            When(
+                Q(~Q(status="cancelled")) | Q(printing_date__isnull=False),
+                then=F("sticker_printing_batch__emailed_datetime"),
+            ),
+            default=Value(None),
+        )
     ).values_list(
         "number",
         "status",
@@ -1666,7 +1674,7 @@ def getStickerExportFields(data):
         "postal_address_locality",
         "postal_address_state",
         "postal_address_postcode",
-        "sticker_printing_batch__emailed_datetime",
+        "sent_date",
         "printing_date",
         "mailing_date",
         "fee_season__name",

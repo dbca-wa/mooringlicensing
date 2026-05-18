@@ -3799,10 +3799,10 @@ class Sticker(models.Model):
     ]
     colour_matrix_dict = {
         colour_matrix[0]['colour']: colour_matrix[0]['length'],
-        colour_matrix[1]['colour']: colour_matrix[0]['length'],
-        colour_matrix[2]['colour']: colour_matrix[0]['length'],
-        colour_matrix[3]['colour']: colour_matrix[0]['length'],
-        colour_matrix[4]['colour']: colour_matrix[0]['length'],
+        colour_matrix[1]['colour']: colour_matrix[1]['length'],
+        colour_matrix[2]['colour']: colour_matrix[2]['length'],
+        colour_matrix[3]['colour']: colour_matrix[3]['length'],
+        colour_matrix[4]['colour']: colour_matrix[4]['length'],
     }
     number = models.CharField(max_length=9, blank=True, default='')
     
