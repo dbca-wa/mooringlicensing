@@ -1309,7 +1309,7 @@ def getApprovalExportFields(data):
         mooring_number=ArrayAgg(
             'moorings__name',
             filter=(
-                ~Q(moorings__name=None)
+                ~Q(moorings__name=None)&Q(mooringonapproval__active=True)
             ),
             distinct=True
         ), 
