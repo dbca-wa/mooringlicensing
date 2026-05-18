@@ -256,7 +256,7 @@ def save_proponent_data_aua(instance, request, action):
             for i in site_licensee_moorings_data:
                 #check if email and mooring id exist together as a valid mooring license
                 valid = current_mooring_licences.filter(
-                    approval__current_proposal__proposal_applicant__email=i["email"],
+                    approval__current_proposal__proposal_applicant__email__iexact=i["email"],
                     mooring__id=i["mooring_id"]
                 ).exists()
                 if not valid:

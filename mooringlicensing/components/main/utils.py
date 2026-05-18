@@ -1654,7 +1654,7 @@ def getStickerExportFields(data):
     ).annotate(
         sent_date=Case(
             When(
-                ~Q(status="cancelled")&Q(printing_date=None),
+                Q(~Q(status="cancelled")) | Q(printing_date__isnull=False),
                 then=F("sticker_printing_batch__emailed_datetime"),
             ),
             default=Value(None),
