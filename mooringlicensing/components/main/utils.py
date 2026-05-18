@@ -1651,6 +1651,14 @@ def getStickerExportFields(data):
             ),
             default=Value(""),
         )
+    ).annotate(
+        sent_date=Case(
+            When(
+                ~Q(status="cancelled")&Q(printing_date=None),
+                then=F("sticker_printing_batch__emailed_datetime"),
+            ),
+            default=Value(None),
+        )
     ).values_list(
         "number",
         "status",
@@ -1666,7 +1674,7 @@ def getStickerExportFields(data):
         "postal_address_locality",
         "postal_address_state",
         "postal_address_postcode",
-        "sticker_printing_batch__emailed_datetime",
+        "sent_date",
         "printing_date",
         "mailing_date",
         "fee_season__name",
