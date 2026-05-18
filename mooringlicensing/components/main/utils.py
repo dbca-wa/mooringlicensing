@@ -1572,7 +1572,7 @@ def getStickerExportFields(data):
                 approval__lodgement_number__startswith='AUP',
                 then=ArrayAgg(
                     "mooringonapproval__mooring__name",
-                    filter = Q(mooringonapproval__end_date__isnull=True),
+                    #filter = Q(mooringonapproval__end_date__isnull=True),
                     distinct=True,
                 ),
             ),
