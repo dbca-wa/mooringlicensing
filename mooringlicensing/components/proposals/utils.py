@@ -273,7 +273,7 @@ def save_proponent_data_aua(instance, request, action):
                     #if it does not exist
                     new_site_licence_mooring_request = ProposalSiteLicenseeMooringRequest.objects.create(
                         proposal=instance,
-                        site_licensee_email=i["email"],
+                        site_licensee_email=str(i["email"]).lower(),
                         mooring_id=i["mooring_id"],
                         enabled=True,
                     )

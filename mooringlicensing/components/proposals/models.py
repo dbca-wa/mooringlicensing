@@ -5179,7 +5179,7 @@ class ProposalSiteLicenseeMooringRequest(models.Model):
             )):
                 raise serializers.ValidationError("proposal not awaiting endorsement")
         
-        if not self.proposal.is_assessor(request.user) and self.site_licensee_email != request.user.email:
+        if not self.proposal.is_assessor(request.user) and self.site_licensee_email and self.site_licensee_email.lower() != request.user.email.lower():
             raise serializers.ValidationError("user not authorised to approve endorsement")
         
         if (self.declined_by_endorser or self.approved_by_endorser):
@@ -5198,7 +5198,7 @@ class ProposalSiteLicenseeMooringRequest(models.Model):
             )):
                 raise serializers.ValidationError("proposal not awaiting endorsement")
         
-        if not self.proposal.is_assessor(request.user) and self.site_licensee_email != request.user.email:
+        if not self.proposal.is_assessor(request.user) and self.site_licensee_email and self.site_licensee_email.lower() != request.user.email.lower():
             raise serializers.ValidationError("user not authorised to approve endorsement")
         
         if (self.declined_by_endorser or self.approved_by_endorser):

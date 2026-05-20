@@ -73,7 +73,7 @@ class AuthorisedUserApplicationEndorseView(TemplateView):
         #get ProposalSiteLicenseeMooringRequest
         site_licensee_mooring_request = ProposalSiteLicenseeMooringRequest.objects.filter(proposal=proposal,
             mooring__name=mooring_name,
-            site_licensee_email=request.user.email,
+            site_licensee_email__iexact=request.user.email,
             enabled=True)
         if not site_licensee_mooring_request.exists():
             raise ValidationError('No valid site licensee mooring request for site licensee, mooring, and proposal set')

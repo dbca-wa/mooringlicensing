@@ -919,9 +919,12 @@ class Approval(RevisionedMixin):
                     ProposalUserAction.log_action(proposal, ProposalUserAction.ACTION_EXPIRED_APPROVAL_.format(proposal.id), user)
 
                     for sticker in stickers:
-                        sticker.status = Sticker.STICKER_STATUS_EXPIRED
+                        if sticker.status in [Sticker.STICKER_STATUS_NOT_READY_YET, Sticker.STICKER_STATUS_READY]:
+                            sticker.status = Sticker.STICKER_STATUS_CANCELLED
+                        else:
+                            sticker.status = Sticker.STICKER_STATUS_EXPIRED
                         sticker.save()
-                        logger.info(f'Status: [{Sticker.STICKER_STATUS_EXPIRED}] has been set to the sticker: [{sticker}]')
+                        logger.info(f'Status: [{sticker.status}] has been set to the sticker: [{sticker}]')
 
                     #NOTE: post-cancel and post-expiry functionality identitical for these license types
                     if (type(self.child_obj) == MooringLicence or 
@@ -2163,7 +2166,10 @@ class AuthorisedUserPermit(Approval):
             #if renewing and the sticker is not being replaced, simply expire it now
             for sticker in stickers_to_be_replaced_for_renewal:
                 if not sticker in stickers_replaced_for_renewal:
-                    sticker.status = Sticker.STICKER_STATUS_EXPIRED
+                    if sticker.status in [Sticker.STICKER_STATUS_NOT_READY_YET, Sticker.STICKER_STATUS_READY]:
+                        sticker.status = Sticker.STICKER_STATUS_CANCELLED
+                    else:
+                        sticker.status = Sticker.STICKER_STATUS_EXPIRED
                     sticker.save()
 
         return stickers_to_be_returned

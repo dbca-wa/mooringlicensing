@@ -699,7 +699,7 @@ class SiteLicenseeMooringRequestPaginatedViewSet(viewsets.ReadOnlyModelViewSet):
             return ProposalSiteLicenseeMooringRequest.objects.filter(
                 site_licensee_email=request_user.email, 
                 mooring__mooring_licence__approval__status="current",
-                mooring__mooring_licence__approval__current_proposal__proposal_applicant__email=request_user.email,
+                mooring__mooring_licence__approval__current_proposal__proposal_applicant__email__iexact=request_user.email,
                 enabled=True)
         return ProposalSiteLicenseeMooringRequest.objects.none()
          
