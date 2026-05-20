@@ -3,6 +3,7 @@
         <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :title="title" large>
             <div class="container-fluid">
                 <alert :show.sync="showError" type="danger"><strong>{{ errorString }}</strong></alert>
+                <alert :show.sync="showWarning" type="warning"><strong>One or more stickers have a postal address set that does not match the postal address on holder's user profile. Use the Create New Sticker option to change the postal address that the sticker should be sent to.</strong></alert>
                 <div class="row form-group">
                     <table class="table table-striped table-bordered">
                         <thead>
@@ -38,8 +39,14 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="row form-group">
-                    <label class="col-sm-5 control-label" for="change_sticker_address">Change Sticker Address</label>
+                <div v-if="showWarning" class="row form-group" style="border: 2px solid rgba(51,122,183,0.3); box-shadow: 0 0 6px rgba(51,122,183,0.3); padding:5px; border-radius:4px;" for="change_sticker_address">
+                    <label class="col-sm-5 control-label">Change Sticker Address</label>
+                    <div class="col-md-6">
+                        <input :disabled="!formEnabled" type="checkbox" v-model="change_sticker_address" />
+                    </div>
+                </div>
+                <div v-else class="row form-group" for="change_sticker_address">
+                    <label class="col-sm-5 control-label">Change Sticker Address</label>
                     <div class="col-md-6">
                         <input :disabled="!formEnabled" type="checkbox" v-model="change_sticker_address" />
                     </div>
@@ -120,6 +127,7 @@ export default {
         let vm = this;
         return {
             approval_id: null,
+            proposal_id: null,
             stickers: [],
             isModalOpen:false,
             action: '',
@@ -138,6 +146,7 @@ export default {
             new_postal_address_state: '',
             new_postal_address_country: '',
             new_postal_address_postcode: '',
+            holder: null
         }
     },
     watch: {
@@ -156,9 +165,45 @@ export default {
             } else {
                 vm.stickers = []
             }
+        },
+        proposal_id: async function(){
+            let vm = this
+            if (vm.proposal_id){
+                //get the holder address details (via the proposal)
+                const res = await this.$http.get('/api/profile/' + vm.proposal_id)
+                if (res.ok) {
+                    vm.holder = res.body
+                }
+                console.log('vm.holder')
+                console.log(vm.holder)
+
+            } else {
+                vm.holder = null;
+            }
         }
     },
     computed: {
+        showWarning: function() {
+            for (let sticker of this.stickers){
+                if (sticker.checked === true){
+
+                    if (this.holder.postal_address_list.length > 0) {
+                        let holder_address = this.holder.postal_address_list[0];
+                        
+                        if (
+                            holder_address.country != this.postal_address_country ||
+                            holder_address.line1 != this.postal_address_line1 ||
+                            holder_address.locality != this.postal_address_locality ||
+                            holder_address.postcode != this.postal_address_postcode ||
+                            holder_address.state != this.postal_address_state
+                        ) {
+                            return true
+                        }   
+                    }
+                }
+            }
+            return false
+        },
         formEnabled: function(){
             for (let sticker of this.stickers){
                 if (sticker.checked === true){
@@ -237,6 +282,7 @@ export default {
             this.errors = false
             this.processing = false
             this.approval_id = null
+            this.proposal_id = null
         },
         addEventListeners: function () {
             let vm = this;

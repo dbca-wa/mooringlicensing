@@ -500,7 +500,7 @@ export default {
                                         links += `<a href='#${full.id}' data-create-new-sticker='${full.id}' data-missing-sticker-message='${full.missing_sticker_message}'>Create New Sticker</a><br/>`
                                     }
                                 } else {
-                                    links += `<a href='#${full.id}' data-request-new-sticker='${full.id}'>Request New Sticker</a><br/>`
+                                    links += `<a href='#${full.id}' data-request-new-sticker='${full.id}' data-request-new-sticker-proposal='${full.current_proposal_id}'>Request New Sticker</a><br/>`
                                     links += `<a href='#${full.id}' data-request-sticker-address='${full.id}'>Update Sticker Address</a><br/>`
                                 }
                             }
@@ -1088,7 +1088,8 @@ export default {
             vm.$refs.approvals_datatable.vmDataTable.on('click', 'a[data-request-new-sticker]', function(e) {
                 e.preventDefault();
                 var id = $(this).attr('data-request-new-sticker');
-                vm.requestNewSticker(id);
+                var proposal_id = $(this).attr('data-request-new-sticker-proposal');
+                vm.requestNewSticker(id, proposal_id);
             });
 
             //External Request Sticker Address Change listener
@@ -1240,8 +1241,9 @@ export default {
             this.$refs.create_new_sticker_modal.replacementFee = true
             this.$refs.create_new_sticker_modal.missing_sticker_message = message
         },
-        requestNewSticker: function(approval_id){
+        requestNewSticker: function(approval_id, proposal_id){
             this.$refs.request_new_sticker_modal.approval_id = approval_id
+            this.$refs.request_new_sticker_modal.proposal_id = proposal_id
             this.$refs.request_new_sticker_modal.isModalOpen = true
         },
         requestStickerAddress: function(approval_id){
