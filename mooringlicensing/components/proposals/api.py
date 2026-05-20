@@ -697,7 +697,7 @@ class SiteLicenseeMooringRequestPaginatedViewSet(viewsets.ReadOnlyModelViewSet):
             return ProposalSiteLicenseeMooringRequest.objects.all()
         elif is_customer(self.request):
             return ProposalSiteLicenseeMooringRequest.objects.filter(
-                site_licensee_email=request_user.email, 
+                site_licensee_email__iexact=request_user.email, 
                 mooring__mooring_licence__approval__status="current",
                 mooring__mooring_licence__approval__current_proposal__proposal_applicant__email__iexact=request_user.email,
                 enabled=True)
@@ -724,7 +724,7 @@ class ProposalPaginatedViewSet(viewsets.ReadOnlyModelViewSet):
 
                 #de-duplicate ids with distinct, but rebuild qs so there are no issues with alternative order by statements provided by filter backend
                 all_ids = all.filter(Q(proposal_applicant__email_user_id=target_user.id) | 
-                        Q(site_licensee_mooring_request__site_licensee_email=target_user.email,site_licensee_mooring_request__enabled=True)).distinct("id").values_list("id",flat=True)
+                        Q(site_licensee_mooring_request__site_licensee_email__iexact=target_user.email,site_licensee_mooring_request__enabled=True)).distinct("id").values_list("id",flat=True)
                 all = all.filter(id__in=list(all_ids))
             return all
         elif is_customer(self.request):

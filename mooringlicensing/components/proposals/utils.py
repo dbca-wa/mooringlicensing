@@ -261,7 +261,7 @@ def save_proponent_data_aua(instance, request, action):
                 ).exists()
                 if not valid:
                     raise serializers.ValidationError("Provided email and mooring are not in a current valid mooring license together")
-                qs = site_licensee_moorings.filter(site_licensee_email=i["email"],mooring_id=i["mooring_id"])
+                qs = site_licensee_moorings.filter(site_licensee_email__iexact=i["email"],mooring_id=i["mooring_id"])
                 if qs.exists():
                     site_licensee_mooring = qs.first()
                     if not site_licensee_mooring.enabled:
