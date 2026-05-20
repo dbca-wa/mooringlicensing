@@ -1492,7 +1492,7 @@ class Proposal(RevisionedMixin):
             raise serializers.ValidationError("proposal not awaiting endorsement")
         #only proceed if status is awaiting endorsement and request user is an endorser (or internal)
         site_licensee_mooring_request = self.site_licensee_mooring_request.all()
-        if not (self.is_assessor(request.user) or site_licensee_mooring_request.filter(site_licensee_email=request.user.email).exists()):
+        if not (self.is_assessor(request.user) or site_licensee_mooring_request.filter(site_licensee_email__iexact=request.user.email).exists()):
             raise serializers.ValidationError("user not authorised to check endorsements")
 
         if not (site_licensee_mooring_request.filter(declined_by_endorser=False,approved_by_endorser=False,enabled=True).exists()):

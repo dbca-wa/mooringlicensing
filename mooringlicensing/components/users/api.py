@@ -58,7 +58,7 @@ class GetProposalApplicantUser(views.APIView):
                     # Holder of this proposal is accessing OR internal user is accessing.                   
                     serializer = UserSerializer(applicant)
                     return Response(serializer.data)
-                elif is_customer(self.request) and proposal.site_licensee_mooring_request.filter(site_licensee_email=request.user.email).exists():
+                elif is_customer(self.request) and proposal.site_licensee_mooring_request.filter(site_licensee_email__iexact=request.user.email).exists():
                     # ML holder is accessing the proposal as an endorser
                     serializer = UserForEndorserSerializer(applicant)
                     return Response(serializer.data)
