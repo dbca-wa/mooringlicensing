@@ -211,22 +211,25 @@ export default {
                 return "There are no stickers associated with this Licence to replace."
             }
 
-            let has_unexported = false;
+            let has_unprinted = false;
             let has_current = false;
             for (let sticker of this.stickers){
-                if (sticker.status.code == "ready" || sticker.status.code == "not_ready") {
-                    has_unexported = true;
+                if (sticker.status.code == "ready" || sticker.status.code == "not_ready" || sticker.status.code == "awaiting_printing") {
+                    has_unprinted = true;
                 }
                 if (sticker.status.code == "current") {
                     has_current = true;
                 }
             }
 
-            if (!has_current && has_unexported) {
+            if (!has_current && has_unprinted) {
                 return "This licence only has stickers that are awaiting printing, which cannot be replaced."
             }
-            if (has_current && has_unexported) {
+            if (has_current && has_unprinted) {
                 return "This licence has some stickers that are awaiting printing, which cannot be replaced."
+            }
+            if (!has_current && !has_unprinted) {
+                return "This licence has no stickers that can be replaced nor does it have any stickers awaiting printing."
             }
 
             return ""
