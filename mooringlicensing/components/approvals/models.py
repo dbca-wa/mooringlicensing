@@ -408,7 +408,10 @@ class Approval(RevisionedMixin):
             licence_document = self.licence_document._file
             if licence_document is not None:
                 file_name = self.licence_document.name
-                attachment = (file_name, licence_document.file.read(), 'application/pdf')
+                try:
+                    attachment = (file_name, licence_document.file.read(), 'application/pdf')
+                except:
+                    logger.warning(f"Document {file_name} missing")
         return attachment
 
     @property
@@ -2691,9 +2694,14 @@ class MooringLicence(Approval):
 
             # Update sticker status
             self._update_status_of_sticker_to_be_removed(stickers_to_be_returned)
-            proposal.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
+
+            if new_sticker_created:
+                proposal.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
+            else:
+                proposal.processing_status = Proposal.PROCESSING_STATUS_APPROVED
+                
             proposal.save()
-            logger.info(f'Status: [{Proposal.PROCESSING_STATUS_PRINTING_STICKER}] has been set to the proposal: [{proposal}]')
+            logger.info(f'Status: [{proposal.processing_status}] has been set to the proposal: [{proposal}]')
 
             return [], stickers_to_be_returned
 
