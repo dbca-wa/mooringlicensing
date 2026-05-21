@@ -4,6 +4,7 @@
             <div class="container-fluid">
                 <alert :show.sync="showError" type="danger"><strong>{{ errorString }}</strong></alert>
                 <alert :show.sync="showWarning" type="warning"><strong>One or more stickers have a postal address set that does not match the postal address on holder's user profile. Use the Create New Sticker option to change the postal address that the sticker should be sent to.</strong></alert>
+                <alert :show.sync="showReplaceInfo" type="info"><strong>{{ replaceInfo }}</strong></alert>
                 <div class="row form-group">
                     <table class="table table-striped table-bordered">
                         <thead>
@@ -203,6 +204,35 @@ export default {
                 }
             }
             return false
+        },
+        replaceInfo: function(){
+
+            if (this.stickers.length == 0) {
+                return "There are no stickers associated with this Licence to replace."
+            }
+
+            let has_unexported = false;
+            let has_current = false;
+            for (let sticker of this.stickers){
+                if (sticker.status.code == "ready" || sticker.status.code == "not_ready") {
+                    has_unexported = true;
+                }
+                if (sticker.status.code == "current") {
+                    has_current = true;
+                }
+            }
+
+            if (!has_current && has_unexported) {
+                return "This licence only has stickers that are awaiting printing, which cannot be replaced."
+            }
+            if (has_current && has_unexported) {
+                return "This licence has some stickers that are awaiting printing, which cannot be replaced."
+            }
+
+            return ""
+        },
+        showReplaceInfo: function(){
+            return this.replaceInfo !== "";
         },
         formEnabled: function(){
             for (let sticker of this.stickers){
