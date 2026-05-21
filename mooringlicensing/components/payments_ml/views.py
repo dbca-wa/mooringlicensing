@@ -276,6 +276,9 @@ class StickerReplacementFeeView(TemplateView):
                     if not applicant and sticker_action_detail and sticker_action_detail.sticker and sticker_action_detail.sticker.approval:
                         applicant = sticker_action_detail.sticker.approval.applicant_obj
                         approval = sticker_action_detail.sticker.approval
+                    elif not applicant and sticker_action_detail and not sticker_action_detail.sticker and sticker_action_detail.approval:
+                        applicant = sticker_action_detail.approval.applicant_obj
+                        approval = sticker_action_detail.approval
                     lines.append(line)
 
 
