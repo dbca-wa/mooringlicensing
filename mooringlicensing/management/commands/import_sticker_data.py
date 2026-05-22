@@ -231,6 +231,8 @@ def process_sticker_printing_response(process_summary):
                                 continue
 
                             try:
+                                if not rows[i][sticker_number_column]:
+                                    continue
 
                                 sticker_number_value = int(rows[i][sticker_number_column])
                                 printing_date_value = rows[i][printing_date_column] if printing_date_column else None
@@ -242,7 +244,7 @@ def process_sticker_printing_response(process_summary):
                                 printing_date_value = make_sure_datetime(printing_date_value)
                                 mailing_date_value = make_sure_datetime(mailing_date_value)
 
-                                if printing_date_value and mailing_date_value and (not status_column or status_value.lower() != "cancelled"):
+                                if printing_date_value and mailing_date_value and (not status_column or not status_value or status_value.lower() != "cancelled"):
                                     # Find a sticker from the Database and change its attributes
                                     sticker = Sticker.objects.get(number=sticker_number_value)
                                     sticker.printing_date = printing_date_value
@@ -252,7 +254,7 @@ def process_sticker_printing_response(process_summary):
                                         # sticker should not be in READY status though.
                                         sticker.status = Sticker.STICKER_STATUS_CURRENT
                                     sticker.save()
-                                elif status_column and status_value.lower() == "cancelled":
+                                elif status_column and status_value and status_value.lower() == "cancelled":
                                     sticker = Sticker.objects.get(number=sticker_number_value)
                                     sticker.sticker_printing_response = response
                                     if sticker.status in (Sticker.STICKER_STATUS_AWAITING_PRINTING, Sticker.STICKER_STATUS_READY, Sticker.STICKER_STATUS_EXPIRED, Sticker.STICKER_STATUS_LOST):
@@ -342,18 +344,21 @@ def process_sticker_printing_response(process_summary):
                         # Found empty row, finish processing rows
                         break
                     try:
-
+                        
+                        if not row[sticker_number_column - 1].value:
+                            continue
+                        
                         sticker_number_value = row[sticker_number_column - 1].value
-                        printing_date_value = row[printing_date_column - 1].value
-                        mailing_date_value = row[mailing_date_column - 1].value
+                        printing_date_value = row[printing_date_column - 1].value if printing_date_column else None
+                        mailing_date_value = row[mailing_date_column - 1].value if mailing_date_column else None
 
-                        status_value = rows[i][status_column] if status_column else None
+                        status_value = row[status_column - 1].value if status_column else None
 
                         sticker_number_value = make_sure_sticker_number(sticker_number_value)
                         printing_date_value = make_sure_datetime(printing_date_value)
                         mailing_date_value = make_sure_datetime(mailing_date_value)
 
-                        if printing_date_value and mailing_date_value and (not status_column or status_value.lower() != "cancelled"):
+                        if printing_date_value and mailing_date_value and (not status_column or not status_value or status_value.lower() != "cancelled"):
                             # Find a sticker from the Database and change its attributes
                             sticker = Sticker.objects.get(number=sticker_number_value)
                             sticker.printing_date = printing_date_value
@@ -363,7 +368,7 @@ def process_sticker_printing_response(process_summary):
                                 # sticker should not be in READY status though.
                                 sticker.status = Sticker.STICKER_STATUS_CURRENT
                             sticker.save()
-                        elif status_column and status_value.lower() == "cancelled":
+                        elif status_column and status_value and status_value.lower() == "cancelled":
                             sticker = Sticker.objects.get(number=sticker_number_value)
                             sticker.sticker_printing_response = response
                             if sticker.status in (Sticker.STICKER_STATUS_AWAITING_PRINTING, Sticker.STICKER_STATUS_READY, Sticker.STICKER_STATUS_EXPIRED, Sticker.STICKER_STATUS_LOST):
