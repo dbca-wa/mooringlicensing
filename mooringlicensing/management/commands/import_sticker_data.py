@@ -212,6 +212,10 @@ def process_sticker_printing_response(process_summary):
                         for i in range(len(rows)):
 
                             for j in range(len(rows[i])):
+
+                                if not rows[i][j]:
+                                    continue
+
                                 if 'sticker' in rows[i][j].strip().lower() and 'number' in rows[i][j].strip().lower():
                                     sticker_number_column = j
                                     header_row = i # 1-based
@@ -318,6 +322,10 @@ def process_sticker_printing_response(process_summary):
                     for row in ws.rows:
 
                         for cell in row:
+                            
+                            if not cell.value:
+                                continue
+
                             if 'sticker' in cell.value.lower() and 'number' in cell.value.lower():
                                 sticker_number_column = cell.column
                                 header_row = cell.row  # 1-based
