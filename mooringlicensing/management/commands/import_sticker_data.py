@@ -211,8 +211,6 @@ def process_sticker_printing_response(process_summary):
                         #determine header row (if it's not the first row for some reason) and cell column positions (batch date, sticker number, printing date, mailing date)
                         for i in range(len(rows)):
 
-                            #TODO add status column (if there is a status column the printed and mailed columns are not required)
-
                             for j in range(len(rows[i])):
                                 if 'sticker' in rows[i][j].strip().lower() and 'number' in rows[i][j].strip().lower():
                                     sticker_number_column = j
@@ -233,8 +231,6 @@ def process_sticker_printing_response(process_summary):
                                 continue
 
                             try:
-
-                                #TODO if there is a status column, handle differently (printing and mailing date not required)
 
                                 sticker_number_value = int(rows[i][sticker_number_column])
                                 printing_date_value = rows[i][printing_date_column] if printing_date_column else None
@@ -319,8 +315,6 @@ def process_sticker_printing_response(process_summary):
 
                     for row in ws.rows:
 
-                        #TODO add status column (if there is a status column the printed and mailed columns are not required)
-
                         for cell in row:
                             if 'sticker' in cell.value.lower() and 'number' in cell.value.lower():
                                 sticker_number_column = cell.column
@@ -348,8 +342,6 @@ def process_sticker_printing_response(process_summary):
                         # Found empty row, finish processing rows
                         break
                     try:
-
-                        #TODO if there is a cancelled column, handle differently (printing and mailing date not required)
 
                         sticker_number_value = row[sticker_number_column - 1].value
                         printing_date_value = row[printing_date_column - 1].value
