@@ -584,9 +584,7 @@ class JobQueue(models.Model):
         return self.job_cmd   
 
 import reversion
-reversion.register(CommunicationsLogEntry, follow=[])
-reversion.register(GlobalSettings, follow=[])
-reversion.register(SystemMaintenance, follow=[])
-reversion.register(VesselSizeCategoryGroup, follow=['vessel_size_categories', 'fee_constructors'])
-reversion.register(VesselSizeCategory, follow=['feeitem_set'])
-reversion.register(NumberOfDaysSetting, follow=[])
+#reversion.register(GlobalSettings, follow=[])
+#reversion.register(VesselSizeCategoryGroup, follow=['vessel_size_categories', 'fee_constructors']) - cannot be changed after use
+#reversion.register(VesselSizeCategory, follow=['feeitem_set']) - cannot be changed after use
+reversion.register(NumberOfDaysSetting)

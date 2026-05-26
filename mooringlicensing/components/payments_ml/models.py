@@ -695,6 +695,3 @@ class FeeCalculation(models.Model):
 
     class Meta:
         app_label = 'mooringlicensing'
-        
-import reversion
-reversion.register(OracleCodeItem)
