@@ -6137,8 +6137,6 @@ def delete_documents(sender, instance, *args, **kwargs):
 
 import reversion
 
-#reversion.register(ProposalDocument)
-
 reversion.register(Proposal, follow=['proposal_applicant'])
 reversion.register(ProposalApplicant)
 

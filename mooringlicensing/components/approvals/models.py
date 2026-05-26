@@ -4097,17 +4097,13 @@ def delete_documents(sender, instance, *args, **kwargs):
                 continue
 
 import reversion
-reversion.register(WaitingListOfferDocument)
-reversion.register(RenewalDocument)
-reversion.register(AuthorisedUserSummaryDocument)
-reversion.register(ApprovalDocument)
 
 reversion.register(MooringOnApproval)
 
 reversion.register(VesselOwnershipOnApproval, follow=['vessel_ownership'])
 
 
-reversion.register(Approval, follow=['current_proposal__proposal_applicant'])
+reversion.register(Approval)
 reversion.register(WaitingListAllocation, follow=[
     'approval'
 ])

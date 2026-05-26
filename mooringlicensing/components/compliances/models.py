@@ -359,10 +359,4 @@ class ComplianceAmendmentRequest(SanitiseMixin):
 
 
 import reversion
-reversion.register(Compliance, follow=['documents', 'action_logs', 'comms_logs'])
-reversion.register(ComplianceDocument, follow=[])
-reversion.register(ComplianceUserAction, follow=[])
-reversion.register(ComplianceLogEntry, follow=['documents'])
-reversion.register(ComplianceLogDocument, follow=[])
-reversion.register(ComplianceAmendmentReason, follow=['complianceamendmentrequest_set'])
-reversion.register(ComplianceAmendmentRequest, follow=[])
+reversion.register(Compliance)
