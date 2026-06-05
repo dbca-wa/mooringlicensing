@@ -334,6 +334,7 @@ class Approval(RevisionedMixin):
     created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
 
     regenerate_documents = models.BooleanField(default=False)
+    regenerate_document_email_notification = JSONField(blank=True,null=True) #{"func":"","params":[]}
 
     class Meta:
         app_label = 'mooringlicensing'

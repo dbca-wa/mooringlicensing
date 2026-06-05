@@ -4303,9 +4303,16 @@ class AuthorisedUserApplication(Proposal):
             # Email to ML holder when new moorings added
             for mooring_licence in mls_to_be_emailed:
                 mooring_licence.regenerate_documents = True
-                mooring_licence.save()
+                
                 if not self.mooring_authorisation_preference == 'ria':
-                    send_au_summary_to_ml_holder(mooring_licence, self)
+                    #TODO run this in management command
+                    #send_au_summary_to_ml_holder(mooring_licence, self)
+
+                    mooring_licence.regenerate_document_email_notification = {
+                        "func": "",
+                        "params": {mooring_licence.id, self.id},
+                    }
+                mooring_licence.save()
 
             # Log proposal action
             if self.auto_approve or not request:
@@ -5123,9 +5130,17 @@ class Mooring(RevisionedMixin):
 
                 active_mooring_on_approval.approval.manage_stickers()  
                 active_mooring_on_approval.approval.regenerate_documents = True
+
+                active_mooring_on_approval.approval.regenerate_document_email_notification = {
+                    "func": "send_aup_revoked_due_to_mooring_swap_email",
+                    "params": [active_mooring_on_approval.approval.child_obj.id, active_mooring_on_approval.mooring.id, active_mooring_on_approval.sticker.id]
+                }
+
                 active_mooring_on_approval.approval.save()
-                send_aup_revoked_due_to_mooring_swap_email(active_mooring_on_approval.approval.child_obj, active_mooring_on_approval.mooring, [active_mooring_on_approval.sticker,])
-        
+                #NOTE we now run this in a management command
+                #send_aup_revoked_due_to_mooring_swap_email(active_mooring_on_approval.approval.child_obj, active_mooring_on_approval.mooring, [active_mooring_on_approval.sticker,])
+                
+
 
     def __str__(self):
         return f'{self.name} (Bay: {self.mooring_bay.name})'
