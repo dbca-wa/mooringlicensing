@@ -334,6 +334,7 @@ class Approval(RevisionedMixin):
     created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
 
     regenerate_documents = models.BooleanField(default=False)
+    regenerate_document_email_notification = JSONField(blank=True,null=True) #{"func":"","params":[]}
 
     class Meta:
         app_label = 'mooringlicensing'
@@ -1123,7 +1124,7 @@ class Approval(RevisionedMixin):
                             moa.regenerate_documents = True
                             moa.save()
 
-                send_approval_reinstate_email_notification(self, request)
+                send_approval_reinstate_email_notification(self)
                 # Log approval action
                 self.log_user_action(ApprovalUserAction.ACTION_REINSTATE_APPROVAL.format(self.id),request)
                 # Log entry for proposal
@@ -1136,8 +1137,10 @@ class Approval(RevisionedMixin):
             try:
                 if not self.can_reissue and self.can_action:
                     raise ValidationError('You cannot surrender approval if it is not current or suspended')
+
+                surrender_date = datetime.datetime.now().date() #NOTE: surrender date will now always be set to current date
                 self.surrender_details = {
-                    'surrender_date' : details.get('surrender_date').strftime('%d/%m/%Y'),
+                    'surrender_date' : surrender_date.strftime('%d/%m/%Y'), 
                     'details': details.get('surrender_details'),
                 }
 
@@ -1145,19 +1148,24 @@ class Approval(RevisionedMixin):
                     raise ValidationError("User not authorised to surrender approval")
                 
                 today = timezone.now().date()
-                surrender_date = datetime.datetime.strptime(self.surrender_details['surrender_date'],'%d/%m/%Y')
-                surrender_date = surrender_date.date()
+                #NOTE: disabled per request
+                #surrender_date = datetime.datetime.strptime(self.surrender_details['surrender_date'],'%d/%m/%Y')
+                #surrender_date = surrender_date.date()
+
                 # Process stickers before sending the surrender email
                 stickers_to_be_returned = self._process_stickers()
-                if surrender_date <= today:
-                    if not self.status == Approval.APPROVAL_STATUS_SURRENDERED:
-                        self.status = Approval.APPROVAL_STATUS_SURRENDERED
-                        self.set_to_surrender = False
-                        self.save()
-                        send_approval_surrender_email_notification(self, stickers_to_be_returned=stickers_to_be_returned)
-                else:
-                    self.set_to_surrender = True
-                    send_approval_surrender_email_notification(self, already_surrendered=False, stickers_to_be_returned=stickers_to_be_returned)
+                #if surrender_date <= today: #NOTE: future surrender disabled per request
+                if not self.status == Approval.APPROVAL_STATUS_SURRENDERED:
+                    self.status = Approval.APPROVAL_STATUS_SURRENDERED
+                    self.set_to_surrender = False
+                    self.save()
+                    send_approval_surrender_email_notification(self, stickers_to_be_returned=stickers_to_be_returned)
+
+                #NOTE: future surrender disabled per request
+                #else:
+                #    self.set_to_surrender = True
+                #    send_approval_surrender_email_notification(self, already_surrendered=False, stickers_to_be_returned=stickers_to_be_returned)
+                
                 self.save()
                 if type(self.child_obj) == WaitingListAllocation:
                     self.child_obj.processes_after_surrender()
@@ -2202,6 +2210,7 @@ class MooringLicence(Approval):
             
             if i.approval:
                 i.approval.regenerate_documents = True
+                #TODO requires email notification?
                 i.approval.save()
 
         #update aup pdf

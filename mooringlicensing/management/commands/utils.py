@@ -20,6 +20,25 @@ from mooringlicensing.components.payments_ml.models import (
 import pytz
 import datetime
 
+def get_expired_approvals_with_active_moas(approvals):
+    
+    expired_approvals = approvals.filter(status=Approval.APPROVAL_STATUS_EXPIRED)
+    expired_approval_moas = MooringOnApproval.objects.filter(approval_id__in=expired_approvals.values_list('id',flat=True)).filter(Q(active=True)|~Q(end_date=None))
+    
+    expired_approvalswith_active_moas = list(set(list(expired_approval_moas.values_list('approval__lodgement_number',flat=True))))
+
+    return ("Expired Approvals with active Mooring On Approval records: ", expired_approvalswith_active_moas)
+
+def get_approval_moas_with_conflicting_active_end_date(approvals):
+
+    approval_moas = MooringOnApproval.objects.filter(approval_id__in=approvals.values_list('id',flat=True))
+
+    approval_moas_inactive_no_end_date = list(approval_moas.filter(active=False).filter(end_date=None).values_list('approval__lodgement_number',flat=True))
+    approval_moas_active_with_end_date = list(approval_moas.filter(active=True).exclude(end_date=None).values_list('approval__lodgement_number',flat=True))
+
+    return ("Approvals with incorrectly set Mooring On Approval records (either inactive no end date or active with end date): ", list(set(approval_moas_inactive_no_end_date+approval_moas_active_with_end_date)))
+
+
 def get_stickers_missing_vessel(stickers):
 
     stickers = stickers.filter(status__in=[Sticker.STICKER_STATUS_CURRENT,Sticker.STICKER_STATUS_AWAITING_PRINTING,Sticker.STICKER_STATUS_NOT_READY_YET,Sticker.STICKER_STATUS_READY])

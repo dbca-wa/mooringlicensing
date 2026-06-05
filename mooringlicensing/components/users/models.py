@@ -17,8 +17,8 @@ class EmailUserLogEntry(CommunicationsLogEntry):
     def __init__(self, *args, **kwargs):
         if 'customer' in kwargs and not isinstance(kwargs.get('customer', 0), int):
             kwargs['customer'] = kwargs['customer'].id
-        if 'staff' in kwargs and not isinstance(kwargs.get('staff', 0), int):
-            kwargs['staff'] = kwargs['staff'].id
+        #if 'staff' in kwargs and not isinstance(kwargs.get('staff', 0), int):
+        #    kwargs['staff'] = kwargs['staff'].id
         if 'email_user_id' in kwargs and not isinstance(kwargs.get('email_user_id', 0), int):
             kwargs['email_user_id'] = kwargs['email_user_id'].id
         super(EmailUserLogEntry, self).__init__(*args, **kwargs)

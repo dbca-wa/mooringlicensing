@@ -110,8 +110,8 @@ def send_confirmation_email_upon_submit(request, proposal, payment_made, attachm
 
     # Configure recipients, contents, etc
     context = {
-        'public_url': get_public_url(request),
-        'dashboard_external_url': get_public_url(request),
+        'public_url': get_public_url(),
+        'dashboard_external_url': get_public_url(),
         'proposal': proposal,
         'recipient': proposal.proposal_applicant,
         'payment_made': payment_made,
@@ -146,7 +146,7 @@ def send_notification_email_upon_submit_to_assessor(request, proposal, attachmen
     url = make_url_for_internal(url)
 
     context = {
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
         'proposal': proposal,
         'recipient': proposal.proposal_applicant,
         'proposal_internal_url': url,
@@ -180,7 +180,7 @@ def send_approver_approve_decline_email_notification(request, proposal):
     url = make_url_for_internal(url)
 
     context = {
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
         'details': proposal.proposed_issuance_approval.get('details') if proposal.proposed_issuance_approval else '',
         'proposal': proposal,
         'proposal_internal_url': url
@@ -212,7 +212,7 @@ def send_amendment_email_notification(amendment_request, request, proposal):
     url = MOORING_LICENSING_EXTERNAL_URL + reverse('external-proposal-detail', kwargs={'proposal_pk': proposal.id})
 
     context = {
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
         'recipient': proposal.proposal_applicant,
         'proposal': proposal,
         'reason': reason,
@@ -254,7 +254,7 @@ def send_create_mooring_licence_application_email_notification(request, waiting_
     details = request.data.get('message_details', '')
 
     context = {
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
         'wla': waiting_list_allocation,
         'recipient': mooring_licence_application.applicant_obj,
         'application_period': days_setting_application_period.number_of_days,
@@ -306,7 +306,7 @@ def send_documents_upload_for_mooring_licence_application_email(request, proposa
 
     # Configure recipients, contents, etc
     context = {
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
         'proposal': proposal,
         'recipient': proposal.proposal_applicant,
         'proposal_external_url': make_http_https(url),
@@ -367,7 +367,7 @@ def send_compliance_overdue_notification(request, approval, compliance,):
     url = url + reverse('external-compliance-detail')
 
     context = {
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
         'approval': approval,
         'compliance': compliance,
         'recipient': compliance.holder_obj,
@@ -407,7 +407,7 @@ def send_invitee_reminder_email(approval, due_date, request=None):
         sender_user = None
         
     context = {
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
         'approval': approval,
         'recipient': proposal.proposal_applicant,
         'due_date': due_date,
@@ -660,7 +660,7 @@ def send_endorser_reminder_email(proposal, request=None):
 
         # Configure recipients, contents, etc
         context = {
-            'public_url': get_public_url(request),
+            'public_url': get_public_url(),
             'proposal': proposal,
             'recipient': proposal.proposal_applicant,
             'endorser': endorser,
@@ -826,7 +826,7 @@ def send_wla_approved_or_declined_email(proposal, decision, request):
     proposal_url = url + reverse('external-proposal-detail', kwargs={'proposal_pk': proposal.id})
 
     context = {
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
         'proposal': proposal,
         'recipient': proposal.proposal_applicant,
         'proposal_type_code': proposal.proposal_type.code,
@@ -899,7 +899,7 @@ def send_aaa_approved_or_declined_email(proposal, decision, request, stickers_to
         logger.warning('ProposalType is unclear when sending AAA approved/declined email for {}'.format(proposal.lodgement_number))
 
     context = {
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
         'proposal': proposal,
         'recipient': proposal.proposal_applicant,
         'decision': decision,
@@ -958,7 +958,7 @@ def send_aua_approved_or_declined_email_new_renewal(proposal, decision, request,
             invoice = Invoice.objects.get(reference=application_fee.invoice_reference)
             if get_invoice_payment_status(invoice.id) not in ('paid', 'over_paid'):
                 # Payment required
-                payment_url = '{}/application_fee_existing/{}/'.format(get_public_url(request), invoice.reference)
+                payment_url = '{}/application_fee_existing/{}/'.format(get_public_url(), invoice.reference)
     elif decision == 'approved_paid':
         # after payment
         html_template += 'email_50a.html'
@@ -990,7 +990,7 @@ def send_aua_approved_or_declined_email_new_renewal(proposal, decision, request,
     )
 
     context = {
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
         'proposal': proposal,
         'recipient': proposal.proposal_applicant,
         'decision': decision,
@@ -1058,7 +1058,7 @@ def send_aua_approved_or_declined_email_amendment_payment_not_required(proposal,
     )
 
     context = {
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
         'proposal': proposal,
         'recipient': proposal.proposal_applicant,
         'decision': decision,
@@ -1111,7 +1111,7 @@ def send_aua_approved_or_declined_email_amendment_payment_required(proposal, dec
             invoice = Invoice.objects.get(reference=application_fee.invoice_reference)
             if get_invoice_payment_status(invoice.id) not in ('paid', 'over_paid'):
                 # Payment required
-                payment_url = '{}/application_fee_existing/{}/'.format(get_public_url(request), invoice.reference)
+                payment_url = '{}/application_fee_existing/{}/'.format(get_public_url(), invoice.reference)
     elif decision == 'approved_paid':
         # after payment
         html_template += 'email_50a.html'
@@ -1141,7 +1141,7 @@ def send_aua_approved_or_declined_email_amendment_payment_required(proposal, dec
     )
 
     context = {
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
         'proposal': proposal,
         'recipient': proposal.proposal_applicant,
         'decision': decision,
@@ -1208,7 +1208,7 @@ def get_attachments(attach_invoice, attach_licence_doc, proposal, attach_au_summ
     return attachments
 
 
-def send_au_summary_to_ml_holder(mooring_licence, request, au_proposal):
+def send_au_summary_to_ml_holder(mooring_licence, au_proposal):
     if au_proposal.no_email_notifications:
         return
     
@@ -1234,9 +1234,9 @@ def send_au_summary_to_ml_holder(mooring_licence, request, au_proposal):
         'mooring_number': mooring_licence.mooring.name,
         'yourself_or_ria': 'ria' if au_proposal.mooring_authorisation_preference == 'RIA' else 'yourself',
         'approval_date': au_proposal.approval.issue_date.strftime('%d/%m/%Y'),
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
         'recipient': mooring_licence.applicant,
-        'url_for_au_dashboard_page': get_public_url(request),
+        'url_for_au_dashboard_page': get_public_url(),
     }
 
     to_address = mooring_licence.applicant_obj.email
@@ -1284,7 +1284,7 @@ def send_mla_approved_or_declined_email_new_renewal(proposal, decision, request,
             invoice = Invoice.objects.get(reference=application_fee.invoice_reference)
             if get_invoice_payment_status(invoice.id) not in ('paid', 'over_paid'):
                 # Payment required
-                payment_url = '{}/application_fee_existing/{}/'.format(get_public_url(request), invoice.reference)
+                payment_url = '{}/application_fee_existing/{}/'.format(get_public_url(), invoice.reference)
     elif decision == 'approved_paid':
         html_template += 'email_51a.html'
         txt_template += 'email_51a.txt'
@@ -1317,7 +1317,7 @@ def send_mla_approved_or_declined_email_new_renewal(proposal, decision, request,
     )
 
     context = {
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
         'proposal': proposal,
         'recipient': proposal.proposal_applicant,
         'decision': decision,
@@ -1374,7 +1374,7 @@ def send_mla_approved_or_declined_email_swap_mooring(proposal, decision, request
             invoice = Invoice.objects.get(reference=application_fee.invoice_reference)
             if get_invoice_payment_status(invoice.id) not in ('paid', 'over_paid'):
                 # Payment required
-                payment_url = '{}/application_fee_existing/{}/'.format(get_public_url(request), invoice.reference)
+                payment_url = '{}/application_fee_existing/{}/'.format(get_public_url(), invoice.reference)
 
     elif decision == 'approved_paid':
         html_template += 'email_51a.html'
@@ -1408,7 +1408,7 @@ def send_mla_approved_or_declined_email_swap_mooring(proposal, decision, request
     )
 
     context = {
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
         'proposal': proposal,
         'recipient': proposal.proposal_applicant,
         'decision': decision,
@@ -1474,7 +1474,7 @@ def send_mla_approved_or_declined_email_amendment_payment_not_required(proposal,
     )
 
     context = {
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
         'proposal': proposal,
         'recipient': proposal.proposal_applicant,
         'decision': decision,
@@ -1525,7 +1525,7 @@ def send_mla_approved_or_declined_email_amendment_payment_required(proposal, dec
             invoice = Invoice.objects.get(reference=application_fee.invoice_reference)
             if get_invoice_payment_status(invoice.id) not in ('paid', 'over_paid'):
                 # Payment required
-                payment_url = '{}/application_fee_existing/{}/'.format(get_public_url(request), invoice.reference)
+                payment_url = '{}/application_fee_existing/{}/'.format(get_public_url(), invoice.reference)
     elif decision == 'approved_paid':
         # after payment
         html_template += 'email_25b.html'
@@ -1557,7 +1557,7 @@ def send_mla_approved_or_declined_email_amendment_payment_required(proposal, dec
     )
 
     context = {
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
         'proposal': proposal,
         'approval': proposal.approval,
         'recipient': proposal.proposal_applicant,
@@ -1602,7 +1602,7 @@ def send_aua_declined_by_endorser_email(proposal, request):
     )
 
     context = {
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
         'proposal': proposal,
         'approval': proposal.approval,
         'recipient': proposal.proposal_applicant,
@@ -1630,7 +1630,7 @@ def send_other_documents_submitted_notification_email(request, proposal):
     url = make_url_for_internal(url)
 
     context = {
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
         'proposal': proposal,
         'url': url,
     }
@@ -1733,7 +1733,7 @@ def send_endorsement_of_authorised_user_application_email(request, proposal):
 
         # Configure recipients, contents, etc
         context = {
-            'public_url': get_public_url(request),
+            'public_url': get_public_url(),
             'proposal': proposal,
             'recipient': proposal.proposal_applicant,
             'endorser': endorser,
@@ -1800,7 +1800,7 @@ def send_proposal_approver_sendback_email_notification(request, proposal):
         approver_comment = proposal.approver_comment
 
     context = {
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
         'proposal': proposal,
         'recipient': proposal.proposal_applicant,
         'url': url,

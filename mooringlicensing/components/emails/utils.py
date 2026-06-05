@@ -43,7 +43,7 @@ def make_url_for_external(url):
     return web_url
 
 
-def get_public_url(request=None):
+def get_public_url():
     if not settings.SITE_URL:
         logger.error("Site URL not set, link cannot be provided")
 

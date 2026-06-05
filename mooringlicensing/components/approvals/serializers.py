@@ -162,7 +162,7 @@ class ApprovalExtensionSerializer(serializers.Serializer):
     extension_details = serializers.CharField()
 
 class ApprovalSurrenderSerializer(serializers.Serializer):
-    surrender_date = serializers.DateField(input_formats=['%d/%m/%Y'])
+    #surrender_date = serializers.DateField(input_formats=['%d/%m/%Y']) NOTE: disable per request
     surrender_details = serializers.CharField()
 
 
