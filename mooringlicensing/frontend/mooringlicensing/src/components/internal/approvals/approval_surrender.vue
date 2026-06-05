@@ -11,7 +11,7 @@
                 <form class="form-horizontal" name="approvalForm">
                     <div class="row">
                         <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
-                        <div class="col-sm-12">
+                        <!--<div class="col-sm-12">
                             <div class="form-group">
                                 <div class="col-sm-3">
                                     <label class="control-label pull-left"  for="Name">Surrender Date</label>
@@ -25,7 +25,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div>-->
 
                         <div class="col-sm-12">
                             <div class="form-group">
@@ -108,7 +108,7 @@ export default {
             this.approval = {};
             this.errors = false;
             $('.has-error').removeClass('has-error');
-            $(this.$refs.surrender_date).data('DateTimePicker').clear();
+            //$(this.$refs.surrender_date).data('DateTimePicker').clear();
             this.validation_form.resetForm();
         },
         fetchContact: function(id){
