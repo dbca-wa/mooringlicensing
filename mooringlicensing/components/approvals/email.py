@@ -577,7 +577,7 @@ def send_swap_moorings_application_created_notification(mooring_licence, request
         _log_user_email(msg, mooring_licence.applicant_obj, proposal.applicant_obj, sender=sender)
 
 
-def send_approval_reinstate_email_notification(approval, request):
+def send_approval_reinstate_email_notification(approval):
     # 31 Reinstated
     # email to licence/permit holder when licence/permit is reinstated or when suspension ends
     email = TemplateEmailBase(
@@ -595,7 +595,7 @@ def send_approval_reinstate_email_notification(approval, request):
     all_ccs = []
     msg = email.send(proposal.applicant_obj.email, cc=all_ccs, context=context)
     if msg:
-        sender = request.user if request else settings.DEFAULT_FROM_EMAIL
+        sender = settings.DEFAULT_FROM_EMAIL
         _log_approval_email(msg, approval, sender=sender)
         _log_user_email(msg, approval.applicant_obj, proposal.applicant_obj, sender=sender)
 
@@ -805,7 +805,7 @@ def send_sticker_replacement_email(request, old_sticker_numbers, approval, invoi
         _log_user_email(msg, approval.applicant_obj, proposal.applicant_obj, sender=sender)
 
 
-def send_aup_revoked_due_to_mooring_swap_email(request, authorised_user_permit, mooring, stickers_to_be_returned):
+def send_aup_revoked_due_to_mooring_swap_email(authorised_user_permit, mooring, stickers_to_be_returned):
     # 37
     # email to authorised user when mooring site authorisation revoked due to licensee mooring swap and to return sticker
     proposal = authorised_user_permit.current_proposal
@@ -833,7 +833,7 @@ def send_aup_revoked_due_to_mooring_swap_email(request, authorised_user_permit, 
     all_ccs = []
     msg = email.send(proposal.applicant_obj.email, cc=all_ccs, context=context, attachments=attachments)
     if msg:
-        sender = request.user if request else settings.DEFAULT_FROM_EMAIL
+        sender = settings.DEFAULT_FROM_EMAIL
         _log_approval_email(msg, approval, sender=sender, attachments=attachments)
         _log_user_email(msg, approval.applicant_obj, proposal.applicant_obj, sender=sender)
 

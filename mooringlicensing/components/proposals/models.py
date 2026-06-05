@@ -4305,7 +4305,7 @@ class AuthorisedUserApplication(Proposal):
                 mooring_licence.regenerate_documents = True
                 mooring_licence.save()
                 if not self.mooring_authorisation_preference == 'ria':
-                    send_au_summary_to_ml_holder(mooring_licence, request, self)
+                    send_au_summary_to_ml_holder(mooring_licence, self)
 
             # Log proposal action
             if self.auto_approve or not request:
@@ -5124,7 +5124,7 @@ class Mooring(RevisionedMixin):
                 active_mooring_on_approval.approval.manage_stickers()  
                 active_mooring_on_approval.approval.regenerate_documents = True
                 active_mooring_on_approval.approval.save()
-                send_aup_revoked_due_to_mooring_swap_email(request, active_mooring_on_approval.approval.child_obj, active_mooring_on_approval.mooring, [active_mooring_on_approval.sticker,])
+                send_aup_revoked_due_to_mooring_swap_email(active_mooring_on_approval.approval.child_obj, active_mooring_on_approval.mooring, [active_mooring_on_approval.sticker,])
         
 
     def __str__(self):

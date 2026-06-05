@@ -1123,7 +1123,7 @@ class Approval(RevisionedMixin):
                             moa.regenerate_documents = True
                             moa.save()
 
-                send_approval_reinstate_email_notification(self, request)
+                send_approval_reinstate_email_notification(self)
                 # Log approval action
                 self.log_user_action(ApprovalUserAction.ACTION_REINSTATE_APPROVAL.format(self.id),request)
                 # Log entry for proposal

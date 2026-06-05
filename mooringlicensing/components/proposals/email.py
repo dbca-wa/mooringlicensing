@@ -1208,7 +1208,7 @@ def get_attachments(attach_invoice, attach_licence_doc, proposal, attach_au_summ
     return attachments
 
 
-def send_au_summary_to_ml_holder(mooring_licence, request, au_proposal):
+def send_au_summary_to_ml_holder(mooring_licence, au_proposal):
     if au_proposal.no_email_notifications:
         return
     

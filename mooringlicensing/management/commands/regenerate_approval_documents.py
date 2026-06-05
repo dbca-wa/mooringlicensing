@@ -38,6 +38,6 @@ class Command(BaseCommand):
 
             #NOTE: may need to add email notifications for instances where an approval document needs to be sent out - further discussion and design will be required, for now aiming for what we have functionally
 
-            #send_approval_reinstate_email_notification(self, request)
-            #send_au_summary_to_ml_holder
-            #send_aup_revoked_due_to_mooring_swap_email
+            #send_approval_reinstate_email_notification(approval)
+            #send_au_summary_to_ml_holder(mooring_license, approval)
+            #send_aup_revoked_due_to_mooring_swap_email(active_mooring_on_approval.approval.child_obj, active_mooring_on_approval.mooring, [active_mooring_on_approval.sticker,])
