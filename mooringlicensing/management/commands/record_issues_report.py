@@ -23,6 +23,7 @@ from mooringlicensing.management.commands.utils import (
     get_invalid_stickers_still_current,
     get_proposals_with_fee_records_missing_vessel_details,
     get_stickers_missing_vessel,
+    get_approval_moas_with_conflicting_active_end_date
 )
 
 from mooringlicensing import settings
@@ -120,6 +121,7 @@ class Command(BaseCommand):
             get_invalid_stickers_still_current: [examination_querysets[Sticker]],
             get_proposals_with_fee_records_missing_vessel_details: [examination_querysets[Proposal]],
             get_stickers_missing_vessel: [examination_querysets[Sticker]],
+            get_approval_moas_with_conflicting_active_end_date: [examination_querysets[Approval]],
         }
 
         reports = []
