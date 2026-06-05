@@ -4309,8 +4309,8 @@ class AuthorisedUserApplication(Proposal):
                     #send_au_summary_to_ml_holder(mooring_licence, self)
 
                     mooring_licence.regenerate_document_email_notification = {
-                        "func": "",
-                        "params": {mooring_licence.id, self.id},
+                        "func": "send_au_summary_to_ml_holder",
+                        "params": [mooring_licence.id, self.id],
                     }
                 mooring_licence.save()
 

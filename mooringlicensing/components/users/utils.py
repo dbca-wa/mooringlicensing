@@ -154,7 +154,7 @@ def _log_user_email(email_message, target_email_user, customer, sender=None, att
         'text': text,
         'email_user_id': target_email_user if target_email_user else customer,
         'customer': customer,
-        'staff': staff,
+        #'staff': staff,
         'to': to,
         'fromm': fromm,
         'cc': all_ccs

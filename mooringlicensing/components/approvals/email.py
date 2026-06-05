@@ -246,7 +246,7 @@ def _log_approval_email(email_message, approval, sender=None, attachments=[]):
         'text': text,
         'approval': approval,
         'customer': customer,
-        'staff': staff.id,
+        #'staff': staff.id,
         'to': to,
         'fromm': fromm,
         'cc': all_ccs
