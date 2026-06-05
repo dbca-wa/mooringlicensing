@@ -5117,6 +5117,7 @@ class Mooring(RevisionedMixin):
 
                 # Set end date.
                 active_mooring_on_approval.end_date = today  
+                active_mooring_on_approval.active = False
                 active_mooring_on_approval.save()
                 logger.info(f'End date: [{today}] has been set to the MooringOnApproval: [{active_mooring_on_approval}] .')
 
