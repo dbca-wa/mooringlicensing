@@ -13,7 +13,7 @@ def send_application_submit_confirmation_email(request, proposal, to_email_addre
     email = ApplicationSubmitConfirmationEmail()
 
     context = {
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
         'proposal': proposal,
     }
 

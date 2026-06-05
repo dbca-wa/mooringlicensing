@@ -2209,6 +2209,7 @@ class MooringLicence(Approval):
             
             if i.approval:
                 i.approval.regenerate_documents = True
+                #TODO requires email notification?
                 i.approval.save()
 
         #update aup pdf

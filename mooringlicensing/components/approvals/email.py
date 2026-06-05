@@ -151,7 +151,7 @@ def send_approval_cancelled_due_to_no_vessels_nominated_mail(approval, request=N
 
     context = {
         'recipient': proposal.proposal_applicant,
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
         'approval': approval,
         'due_date': due_date,
     }
@@ -187,7 +187,7 @@ def send_vessel_nomination_reminder_mail(approval, request=None):
 
     context = {
         'recipient': proposal.proposal_applicant,
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
         'approval': approval,
         'date_to_nominate_new_vessel': approval.current_proposal.vessel_ownership.end_date + relativedelta(months=+6),
         'dashboard_external_url': make_http_https(url),
@@ -334,7 +334,7 @@ def send_dcv_permit_mail(dcv_permit, invoice, request):
     )
 
     context = {
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
         'dcv_permit': dcv_permit,
         'recipient': dcv_permit.submitter,
     }
@@ -392,7 +392,7 @@ def send_dcv_admission_mail(dcv_admission, invoice, request):
     vessel_rego_no = dcv_admission.dcv_vessel.rego_no
 
     context = {
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
         'dcv_admission': dcv_admission,
         'recipient': dcv_admission.submitter_obj if dcv_admission.submitter_obj else dcv_admission.dcv_organisation.name,
         'summary': summary,
@@ -486,7 +486,7 @@ def send_approval_suspend_email_notification(approval, request=None):
 
     context = {
         'recipient': proposal.proposal_applicant,
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
         'approval': approval,
         'details': details,
         'from_date': from_date,
@@ -530,7 +530,7 @@ def send_approval_surrender_email_notification(approval, request=None, already_s
         surrender_date = approval.surrender_details['surrender_date']
 
     context = {
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
         'approval': approval,
         'recipient': proposal.proposal_applicant,
         'details': details,
@@ -561,7 +561,7 @@ def send_swap_moorings_application_created_notification(mooring_licence, request
     proposal = mooring_licence.current_proposal
 
     context = {
-        'dashboard_external_url': get_public_url(request),
+        'dashboard_external_url': get_public_url(),
         'recipient': mooring_licence.applicant_obj,
     }
     all_ccs = []
@@ -588,7 +588,7 @@ def send_approval_reinstate_email_notification(approval, request):
     proposal = approval.current_proposal
 
     context = {
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
         'approval': approval,
         'recipient': proposal.proposal_applicant,
     }
@@ -630,12 +630,12 @@ def send_reissue_ml_after_sale_recorded_email(approval, request, vessel_ownershi
         attachments.append(attachment)
 
     context = {
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
         'recipient': proposal.proposal_applicant,
         'vessel_rego_no': vessel_ownership.vessel.rego_no,
         'stickers_to_be_returned': stickers_to_be_returned,
         'due_date': due_date,
-        'dashboard_external_url': get_public_url(request),
+        'dashboard_external_url': get_public_url(),
     }
     all_ccs = []
     all_bccs = proposal.assessor_recipients
@@ -668,12 +668,12 @@ def send_reissue_wla_after_sale_recorded_email(approval, request, vessel_ownersh
         attachments.append(attachment)
 
     context = {
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
         'recipient': proposal.proposal_applicant,
         'vessel_rego_no': vessel_ownership.vessel.rego_no,
         'stickers_to_be_returned': stickers_to_be_returned,
         'due_date': due_date,
-        'dashboard_external_url': get_public_url(request),
+        'dashboard_external_url': get_public_url(),
     }
     all_ccs = []
     all_bccs = proposal.assessor_recipients
@@ -707,12 +707,12 @@ def send_reissue_aup_after_sale_recorded_email(approval, request, vessel_ownersh
         attachments.append(attachment)
 
     context = {
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
         'recipient': proposal.proposal_applicant,
         'vessel_rego_no': vessel_ownership.vessel.rego_no,
         'stickers_to_be_returned': stickers_to_be_returned,
         'due_date': due_date,
-        'dashboard_external_url': get_public_url(request),
+        'dashboard_external_url': get_public_url(),
         'cancelation_policy_url': settings.CANCELATION_POLICY_URL,
         'approval': approval,
     }
@@ -748,12 +748,12 @@ def send_reissue_aap_after_sale_recorded_email(approval, request, vessel_ownersh
         attachments.append(attachment)
 
     context = {
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
         'recipient': proposal.proposal_applicant,
         'vessel_rego_no': vessel_ownership.vessel.rego_no,
         'stickers_to_be_returned': stickers_to_be_returned,
         'due_date': due_date,
-        'dashboard_external_url': get_public_url(request),
+        'dashboard_external_url': get_public_url(),
         'cancelation_policy_url': settings.CANCELATION_POLICY_URL,
     }
     all_ccs = []
@@ -787,12 +787,12 @@ def send_sticker_replacement_email(request, old_sticker_numbers, approval, invoi
         attachments.append(attachment)
 
     context = {
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
         'recipient': proposal.proposal_applicant,
         'approval': approval,
         'old_sticker_numbers': ','.join(old_sticker_numbers),
         'vessel_rego_no': vessel_rego,
-        'dashboard_external_url': get_public_url(request),
+        'dashboard_external_url': get_public_url(),
     }
 
     all_ccs = []
@@ -823,11 +823,11 @@ def send_aup_revoked_due_to_mooring_swap_email(request, authorised_user_permit, 
         attachments.append(attachment)
 
     context = {
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
         'recipient': authorised_user_permit.applicant_obj,
         'mooring': mooring,
         'stickers_to_be_returned': stickers_to_be_returned,
-        'dashboard_external_url': get_public_url(request),
+        'dashboard_external_url': get_public_url(),
     }
 
     all_ccs = []
@@ -856,11 +856,11 @@ def send_aup_revoked_due_to_relinquishment_email(request, authorised_user_permit
         attachments.append(attachment)
 
     context = {
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
         'recipient': authorised_user_permit.applicant_obj,
         'mooring': mooring,
         'stickers_to_be_returned': stickers_to_be_returned,
-        'dashboard_external_url': get_public_url(request),
+        'dashboard_external_url': get_public_url(),
     }
 
     all_ccs = []

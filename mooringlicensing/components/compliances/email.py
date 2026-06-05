@@ -76,7 +76,7 @@ def send_amendment_email_notification(amendment_request, request, compliance, is
         'reason': reason,
         'amendment_request_text': amendment_request.text,
         'url': make_http_https(url),
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
     }
 
     holder = compliance.holder_obj.email if compliance.holder_obj and compliance.holder_obj.email else compliance.proposal.applicant_obj.email
@@ -217,7 +217,7 @@ def send_compliance_accept_email_notification(compliance,request, is_test=False)
     holder = compliance.holder_obj if compliance.holder_obj else compliance.proposal.applicant_obj
     context = {
         'compliance': compliance,
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
         'recipient': holder,
     }
     all_ccs = []
@@ -241,7 +241,7 @@ def send_external_submit_email_notification(request, compliance, is_test=False):
         'recipient': holder,
         'url': make_http_https(url),
         'due_date': compliance.due_date.strftime('%d/%m/%Y'),
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
     }
     all_ccs = []
     msg = email.send(holder.email,cc=all_ccs, context=context)
@@ -263,7 +263,7 @@ def send_submit_email_notification(request, compliance, is_test=False):
     context = {
         'compliance': compliance,
         'url': make_http_https(url),
-        'public_url': get_public_url(request),
+        'public_url': get_public_url(),
     }
 
     msg = email.send(compliance.proposal.assessor_recipients, context=context)
