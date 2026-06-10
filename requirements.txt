@@ -54,9 +54,10 @@ python-decouple==3.8
 git+https://github.com/dbca-wa/appmonitor_client.git#egg=appmonitor_client
 click==8.1.7
 numpy~=2.1.1
-setuptools~=80.9.0
+setuptools~=82.0.0
 wheel~=0.46.0
 git+https://github.com/dbca-wa/django5-utils-six.git#egg=django5_six
 crispy_bootstrap5==2024.2
 django-summernote~=0.8.20.0
-urllib3~=2.6.0
+urllib3~=2.7.0
+git+https://github.com/dbca-wa/wagov_utils.git#egg=wagov_utils

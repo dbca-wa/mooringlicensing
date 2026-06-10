@@ -125,3 +125,6 @@ reversion_utility_output.txt
 
 # django session files
 session_store
+
+sri-manifest.json
+sri-files/*

@@ -69,6 +69,7 @@ INSTALLED_APPS += [
     'crispy_bootstrap5',
     'crispy_forms',
     'django_summernote',
+    'wagov_utils.components.sri_utils',
 ]
 
 ADD_REVERSION_ADMIN=True
