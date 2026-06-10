@@ -89,7 +89,7 @@ RUN cd /app/mooringlicensing/frontend/mooringlicensing/; npm install
 RUN cd /app/mooringlicensing/frontend/mooringlicensing/; npm run build
 
 RUN python manage_ml.py collectstatic --noinput
-RUN python manage.py script_hash_indexes
+RUN python manage_ml.py script_hash_indexes
 
 RUN mkdir /app/tmp/
 RUN chmod 777 /app/tmp/
