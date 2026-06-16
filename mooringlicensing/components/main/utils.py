@@ -1458,19 +1458,43 @@ def getMooringExportFields(data):
         )
     ).annotate(
         preference_count_ria=Count(
-            Q(mooring_on_approval__approval__status__in=[Approval.APPROVAL_STATUS_CURRENT, Approval.APPROVAL_STATUS_SUSPENDED,])
-            &
-            Q(mooring_on_approval__end_date__gt=datetime.datetime.now(pytz.timezone(TIME_ZONE)).date()) | Q(mooring_on_approval__end_date__isnull=True)
-            &
-            Q(mooring_on_approval__site_licensee=False) & Q(mooring_on_approval__active=True)
+            "mooring_on_approval",
+            distinct=True,
+            filter=(
+                Q(mooring_on_approval__approval__status__in=[
+                    Approval.APPROVAL_STATUS_CURRENT,
+                    Approval.APPROVAL_STATUS_SUSPENDED,
+                ])
+                &
+                (
+                    Q(mooring_on_approval__end_date__gt=datetime.datetime.now(pytz.timezone(TIME_ZONE)).date()) |
+                    Q(mooring_on_approval__end_date__isnull=True)
+                )
+                &
+                Q(mooring_on_approval__site_licensee=False)
+                &
+                Q(mooring_on_approval__active=True)
+            )
         )
     ).annotate(
         preference_count_site_licensee=Count(
-            Q(mooring_on_approval__approval__status__in=[Approval.APPROVAL_STATUS_CURRENT, Approval.APPROVAL_STATUS_SUSPENDED,])
-            &
-            Q(mooring_on_approval__end_date__gt=datetime.datetime.now(pytz.timezone(TIME_ZONE)).date()) | Q(mooring_on_approval__end_date__isnull=True)
-            &
-            Q(mooring_on_approval__site_licensee=False) & Q(mooring_on_approval__active=True)
+            "mooring_on_approval",
+            distinct=True,
+            filter=(
+                Q(mooring_on_approval__approval__status__in=[
+                    Approval.APPROVAL_STATUS_CURRENT,
+                    Approval.APPROVAL_STATUS_SUSPENDED,
+                ])
+                &
+                (
+                    Q(mooring_on_approval__end_date__gt=datetime.datetime.now(pytz.timezone(TIME_ZONE)).date()) |
+                    Q(mooring_on_approval__end_date__isnull=True)
+                )
+                &
+                Q(mooring_on_approval__site_licensee=True)
+                &
+                Q(mooring_on_approval__active=True)
+            )
         )
     ).values_list(
         "name",
@@ -1484,8 +1508,7 @@ def getMooringExportFields(data):
         "preference_count_site_licensee",
         "vessel_size_limit",
         "vessel_draft_limit",
-        )
-    )
+    ))
 
     return header, columns
 
