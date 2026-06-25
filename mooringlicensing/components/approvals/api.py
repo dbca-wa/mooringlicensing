@@ -2098,7 +2098,6 @@ class WaitingListAllocationViewSet(viewsets.GenericViewSet, mixins.RetrieveModel
                     waiting_list_allocation.internal_status = Approval.INTERNAL_STATUS_OFFERED
                     waiting_list_allocation.wla_order = None
                     waiting_list_allocation.save()
-                    waiting_list_allocation.set_wla_order()
 
                 return Response({"proposal_created": new_proposal.lodgement_number})
             else:

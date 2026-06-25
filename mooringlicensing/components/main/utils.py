@@ -35,7 +35,7 @@ from rest_framework import serializers
 from copy import deepcopy
 import logging
 from mooringlicensing.settings import MAX_NUM_ROWS_MODEL_EXPORT
-from django.db.models import Case, Value, When, CharField, Count, OuterRef, Subquery
+from django.db.models import Case, Value, When, CharField, Count, OuterRef, Subquery, Min, Max
 from django.contrib.postgres.fields import ArrayField
 from django.db.models.functions import Concat, Cast
 import csv
@@ -728,10 +728,10 @@ def calculate_max_length(fee_constructor, max_amount_paid, proposal_type):
 
 
 def reorder_wla(target_bay):
-    logger.info(f'Ordering WLAs for the bay: [{target_bay}]...')
+    logger.info(f'Checking WLAs for the bay: [{target_bay}]...')
     place = 1
-    # set wla order per bay for current allocations
-    for w in WaitingListAllocation.objects.filter(
+
+    bay_wlas = WaitingListAllocation.objects.filter(
         wla_queue_date__isnull=False,
         current_proposal__preferred_bay=target_bay,
         status__in=[
@@ -741,7 +741,33 @@ def reorder_wla(target_bay):
         internal_status__in=[
             Approval.INTERNAL_STATUS_WAITING,
         ]
-    ).order_by('wla_queue_date','wla_order'):
+    ).filter(
+        current_proposal__preferred_bay=target_bay
+    )
+
+    duplicates = bay_wlas.values('wla_order').annotate(cnt=Count('id')).filter(cnt__gt=1).exists()
+
+    if not duplicates:
+        sequence_check = bay_wlas.aggregate(
+            count=Count('id'),
+            min_seq=Min('wla_order'),
+            max_seq=Max('wla_order'),
+        )
+        print(sequence_check)
+        is_complete = (
+            sequence_check['min_seq'] == 1 and
+            sequence_check['max_seq'] == sequence_check['count']
+        )
+
+        if is_complete:
+            return
+        else:
+            logger.info(f"{target_bay} has an incomplete sequence of waiting list allocation positions, performing reorder.")
+    else:
+        logger.info(f"{target_bay} has duplicate waiting list allocation positions, performing reorder.")
+
+    # set wla order per bay for current allocations
+    for w in bay_wlas.order_by('wla_queue_date','wla_order'):
         w.wla_order = place
         w.save()
         logger.info(f'Allocation order: [{w.wla_order}] has been set to the WaitingListAllocation: [{w}].')

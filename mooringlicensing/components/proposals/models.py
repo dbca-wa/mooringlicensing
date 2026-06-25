@@ -2040,7 +2040,6 @@ class Proposal(RevisionedMixin):
                     self.waiting_list_allocation.internal_status = WaitingListAllocation.INTERNAL_STATUS_WAITING
                     self.waiting_list_allocation.save()
                     logger.info(f'Internal status: [{WaitingListAllocation.INTERNAL_STATUS_WAITING}] has been set to the WLAllocation: [{self.waiting_list_allocation}.]')
-                    self.waiting_list_allocation.set_wla_order()
                 send_application_approved_or_declined_email(self, 'declined', request)
             except:
                 raise
@@ -2324,7 +2323,6 @@ class Proposal(RevisionedMixin):
                     approval.internal_status = Approval.INTERNAL_STATUS_WAITING
                     approval.wla_queue_date = current_datetime
                     approval.save()
-                    approval = approval.set_wla_order()
 
                 # send Proposal approval email with attachment
                 approval.generate_doc() #NOTE: this is done once per request. This does not need to be delayed but making a note in case things change.

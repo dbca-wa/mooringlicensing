@@ -1112,7 +1112,6 @@ class Approval(RevisionedMixin):
                     wla = self.child_obj
                     wla.internal_status = Approval.INTERNAL_STATUS_WAITING
                     wla.save()
-                    wla.set_wla_order()
 
                 if type(self.child_obj) == AuthorisedUserPermit:
                     #update mooring license pdf
@@ -1461,66 +1460,49 @@ class WaitingListAllocation(Approval):
         proposal.save()
         return None, None
 
-    def set_wla_order(self):
-        from mooringlicensing.components.main.utils import reorder_wla
-        """
-        Renumber all the related allocations with 'current'/'suspended' status from #1 to #n
-        """
-        logger.info(f'Ordering the allocations for the Waiting List Allocation: [{self}], bay: [{self.current_proposal.preferred_bay}]...')
-        reorder_wla(self.current_proposal.preferred_bay)
-        self.refresh_from_db()
-        return self
-
     def processes_after_cancel(self):
         self.internal_status = None
         self.status = Approval.APPROVAL_STATUS_CANCELLED  # Cancelled has been probably set before reaching here.
         self.set_to_cancel = False
-        self.wla_order = None
+        #self.wla_order = None #we now preserve wla_order in case of reinstatement
         self.save()
         logger.info(f'Set attributes as follows: [internal_status=None, status=cancelled, wla_order=None] of the WL Allocation: [{self}].')
-        self.set_wla_order()
 
     def processes_after_surrender(self):
         self.internal_status = None
         self.status = Approval.APPROVAL_STATUS_SURRENDERED  # Surrendered has been probably set before reaching here.
         self.set_to_surrender = False
-        self.wla_order = None
+        #self.wla_order = None #we now preserve wla_order in case of reinstatement
         self.save()
         logger.info(f'Set attributes as follows: [internal_status=None, status=surrendered, wla_order=None] of the WL Allocation: [{self}].')
-        self.set_wla_order()
 
     def process_after_approval(self):
         self.internal_status = Approval.INTERNAL_STATUS_APPROVED
         self.status = Approval.APPROVAL_STATUS_FULFILLED
-        self.wla_order = None
+        #self.wla_order = None #we now preserve wla_order in case of reinstatement
         self.save()
         logger.info(f'Set attributes as follows: [internal_status=approved, status=fulfilled, wla_order=None] of the WL Allocation: [{self}].')
-        self.set_wla_order()
     
     def process_after_withdrawn(self):
-        self.wla_order = None
+        #self.wla_order = None #we now preserve wla_order in case of reinstatement
         self.internal_status = Approval.INTERNAL_STATUS_WAITING
         self.save()
         logger.info(f'Set attributes as follows: [internal_status=waiting, wla_order=None] of the WL Allocation: [{self}].')
-        self.set_wla_order()
 
     def process_after_discarded(self):
-        self.wla_order = None
+        #self.wla_order = None #we now preserve wla_order in case of reinstatement
         self.status = Approval.APPROVAL_STATUS_FULFILLED  # ML application has been discarded, but in terms of WLAllocation perspective, it's regarded as 'fulfilled'.
         self.save()
         logger.info(f'Set attributes as follows: [status=fulfilled, wla_order=None] of the WL Allocation: [{self}].')
-        self.set_wla_order()
 
     def reinstate_wla_order(self):
         """
         This function makes this WL allocation back to the 'waiting' status
         """
-        self.wla_order = None
         self.status = Approval.APPROVAL_STATUS_CURRENT
         self.internal_status = Approval.INTERNAL_STATUS_WAITING
         self.save()
         logger.info(f'Set attributes as follows: [status=current, internal_status=waiting, wla_order=None] of the WL Allocation: [{self}].  These changes make this WL allocation back to the waiting list queue.')
-        self.set_wla_order()
         return self
 
 

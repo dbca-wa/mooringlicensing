@@ -11,3 +11,4 @@
 1 0 * * *  /bin/log_rotate.sh  >> /app/logs/log_rotate.log 2>&1
 30 6 * * * python manage_ml.py record_issues_report >> logs/run_cron_tasks.log 2>&1
 */5 * * * * python manage_ml.py regenerate_approval_documents >> logs/run_cron_tasks.log 2>&1
+*/10 * * * * python manage_ml.py run_wla_reorder >> logs/run_cron_tasks.log 2>&1
