@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.conf import settings
 from mooringlicensing import settings
 from mooringlicensing.components.emails.emails import TemplateEmailBase, _extract_email_headers
+from mooringlicensing.components.main.models import FileExtensionWhitelist
 from ledger_api_client.ledger_models import EmailUserRO as EmailUser, EmailUserRO
 from mooringlicensing.components.emails.utils import get_user_as_email_user, get_public_url, make_http_https
 from django.core.files.base import ContentFile
@@ -257,7 +258,11 @@ def _log_approval_email(email_message, approval, sender=None, attachments=[]):
     for attachment in attachments:
         check = attachment[0].split(".")
         filename = attachment[0]
-        if len(check) < 2 or check[len(check)-1] != "pdf":
+        try:
+            if len(check) < 2 or not FileExtensionWhitelist.objects.filter(name=check[len(check)-1].lower()).exists():
+                filename = attachment[0] + ".pdf"
+        except Exception as e:
+            logger.error(e)
             filename = attachment[0] + ".pdf"
         email_entry_document = email_entry.documents.create(name=filename)
         email_entry_document._file.save(filename, ContentFile(attachment[1]), save=False)

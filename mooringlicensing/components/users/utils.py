@@ -4,6 +4,7 @@ from django.core.mail import EmailMultiAlternatives, EmailMessage
 from django.utils.encoding import smart_str
 
 from mooringlicensing.components.users.models import EmailUserLogEntry, private_storage
+from mooringlicensing.components.main.models import FileExtensionWhitelist
 from ledger_api_client.managed_models import SystemUser, SystemUserAddress
 from ledger_api_client.ledger_models import EmailUserRO
 from ledger_api_client.utils import get_or_create
@@ -165,7 +166,11 @@ def _log_user_email(email_message, target_email_user, customer, sender=None, att
     for attachment in attachments:
         check = attachment[0].split(".")
         filename = attachment[0]
-        if len(check) < 2 or check[len(check)-1] != "pdf":
+        try:
+            if len(check) < 2 or not FileExtensionWhitelist.objects.filter(name=check[len(check)-1].lower()).exists():
+                filename = attachment[0] + ".pdf"
+        except Exception as e:
+            logger.error(e)
             filename = attachment[0] + ".pdf"
         email_entry_document = email_entry.documents.create(name=filename)
         email_entry_document._file.save(filename, ContentFile(attachment[1]), save=False)
