@@ -50,7 +50,6 @@ class Command(BaseCommand):
                 a.processing_status = Proposal.PROCESSING_STATUS_EXPIRED
                 a.save()
                 # reset Waiting List order
-                a.waiting_list_allocation.set_wla_order()
                 due_date = a.lodgement_date + timedelta(days=days_setting.number_of_days)
                 send_expire_mooring_licence_by_no_documents_email(a, MooringLicenceApplication.REASON_FOR_EXPIRY_NO_DOCUMENTS, due_date)
                 send_expire_mla_notification_to_assessor(a, MooringLicenceApplication.REASON_FOR_EXPIRY_NO_DOCUMENTS, due_date)

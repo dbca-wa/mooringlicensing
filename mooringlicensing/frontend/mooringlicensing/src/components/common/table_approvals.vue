@@ -569,7 +569,7 @@ export default {
                         searchable: false,
                         visible: true,
                         'render': function(row, type, full){
-                            if (full.status == "Expired") {
+                            if (full.status == "Expired" || full.status == "Cancelled" || full.status == "Surrendered") {
                                 return ""
                             }
                             return full.wla_order;
