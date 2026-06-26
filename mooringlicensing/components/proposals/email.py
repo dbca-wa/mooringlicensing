@@ -15,7 +15,7 @@ from mooringlicensing.components.compliances.email import _log_compliance_email
 from mooringlicensing.components.emails.emails import TemplateEmailBase
 from datetime import datetime
 
-from mooringlicensing.components.main.models import NumberOfDaysType, NumberOfDaysSetting, private_storage
+from mooringlicensing.components.main.models import NumberOfDaysType, NumberOfDaysSetting, private_storage, FileExtensionWhitelist
 from mooringlicensing.components.emails.utils import get_user_as_email_user, make_url_for_internal, get_public_url, \
     make_http_https
 from mooringlicensing.components.users.utils import _log_user_email
@@ -84,7 +84,11 @@ def _log_proposal_email(email_message, proposal, sender=None, file_bytes=None, f
     for attachment in attachments:
         check = attachment[0].split(".")
         filename = attachment[0]
-        if len(check) < 2 or check[len(check)-1] != "pdf":
+        try:
+            if len(check) < 2 or not FileExtensionWhitelist.objects.filter(name=check[len(check)-1].lower()).exists():
+                filename = attachment[0] + ".pdf"
+        except Exception as e:
+            logger.error(e)
             filename = attachment[0] + ".pdf"
         email_entry_document = email_entry.documents.create(name=filename)
         email_entry_document._file.save(filename, ContentFile(attachment[1]), save=False)
