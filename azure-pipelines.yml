@@ -12,6 +12,8 @@ variables:
   tag: '$(Build.BuildId)'
   tagDate: $[ format('{0:yyyy}.{0:MM}.{0:dd}.{0:HH}.{0:mm}{0:ss}', pipeline.startTime) ]
   isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
+  imageName: 'ghcr.io/dbca-wa/mooringlicensing'
+  devImageName: 'ghcr.io/dbca-wa/docker_app_dev'
 
 stages:
 - stage: Build
@@ -23,27 +25,48 @@ stages:
     pool:
       vmImage: ubuntu-latest
     steps:
+    # 1. Extract the short SHA
+    - script: |
+        SHORT_SHA=$(git rev-parse --short=7 $(Build.SourceVersion))
+        echo "##vso[task.setvariable variable=shortSha]$SHORT_SHA"
+      displayName: 'Generate Short Git SHA'
+    # 2. Authenticate to GHCR natively before running commands
     - task: Docker@2
-      displayName: Build an image and Push
+      displayName: 'Login to GHCR'
       inputs:
-        command: buildAndPush
-        dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
-        tags: |
-              latest
-              $(tagDate)
+        command: login
         containerRegistry: DockerGitHub
-        repository: ghcr.io/dbca-wa/mooringlicensing
-      env:
-        DOCKER_BUILDKIT: 1
-    - task: Docker@2
-      displayName: Dev Build image and Push
-      inputs:
-        command: buildAndPush
-        dockerfile: '$(Build.SourcesDirectory)/dockerdev/Dockerfile'
-        tags: |
-              mooringlicensing_dev_latest
-              mooringlicensing_dev_$(tagDate)
-        containerRegistry: DockerGitHub
-        repository: ghcr.io/dbca-wa/docker_app_dev
-      env:
-        DOCKER_BUILDKIT: 1
+    # 3. FIXED: Build Main Image using native Bash to force arguments parsing
+    - bash: |
+        export DOCKER_BUILDKIT=1
+        docker build \
+          --build-arg IMAGE_TAG="$(tagDate)-$(shortSha)" \
+          --build-arg IMAGE_NAME="$(imageName)" \
+          -t $(imageName):latest \
+          -t $(imageName):$(tagDate)-$(shortSha) \
+          -f $(Build.SourcesDirectory)/Dockerfile .
+      displayName: 'Docker Build Main Image'     
+
+    # 4. Push Main Image tags
+    - bash: |
+        docker push $(imageName):latest
+        docker push $(imageName):$(tagDate)-$(shortSha)
+      displayName: 'Push Main Image'
+
+    # 5. FIXED: Build Dev Image using native Bash
+    - bash: |
+        export DOCKER_BUILDKIT=1
+        docker build \
+          --build-arg IMAGE_TAG="$(tagDate)-$(shortSha)" \
+          --build-arg IMAGE_NAME="$(devImageName)" \
+          -t $(devImageName):mooringlicensing_dev_latest \
+          -t $(devImageName):mooringlicensing_dev_$(tagDate)-$(shortSha) \
+          -f $(Build.SourcesDirectory)/dockerdev/Dockerfile .
+      displayName: 'Docker Build Dev Image'
+
+    # 6. Push Dev Image tags
+    - bash: |
+        docker push $(devImageName):mooringlicensing_dev_latest
+        docker push $(devImageName):mooringlicensing_dev_$(tagDate)-$(shortSha)
+      displayName: 'Push Dev Image'
+              
