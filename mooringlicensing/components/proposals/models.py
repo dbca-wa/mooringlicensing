@@ -3535,7 +3535,18 @@ class AnnualAdmissionApplication(Proposal):
                 if self.proposal_type and (
                 self.proposal_type.code == PROPOSAL_TYPE_AMENDMENT or 
                 self.proposal_type.code == PROPOSAL_TYPE_RENEWAL):
-                    self.auto_approve = True
+                    if (
+                        not self.vessel_on_proposal() or
+                        not self.keeping_current_vessel() or
+                        self.vessel_ownership_changed()
+                    ):
+                        self.auto_approve = False
+                        self.save()
+                    else:
+                        self.auto_approve = True
+                        self.save() 
+                else:
+                    self.auto_approve = False        
                     self.save()
 
     def validate_against_existing_proposals_and_approvals(self,request=None):
