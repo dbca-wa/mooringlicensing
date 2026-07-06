@@ -1,4 +1,10 @@
 {% extends "ledgerui/system_accounts_base_b5.html" %}
 
+{% block accounts_message_top %}
+    {% block accounts_pris_message %}
+    {% include "ledgerui/accounts_pris_message.html" %}
+    {% endblock %}
+{% endblock %}
+
 {% block myaccount_nav %}
 {% endblock %}

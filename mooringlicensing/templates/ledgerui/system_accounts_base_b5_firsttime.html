@@ -1,0 +1,16 @@
+{% extends "ledgerui/system_accounts_base_b5_firsttime.html" %}
+
+{% block accounts_message_top %}
+    <div class='p-3 rounded' style='background: #c4e6fd; border: 1px solid #80beff'>
+        <div >
+            We have detected that this is the first time you have logged into the system.  Please take a moment to provide us with your details (personal details, address details, contact details). Once completed, click Continue to start using the system.
+        </div>
+        <div class='text-end pt-3 pe-3'>
+            <a class="btn btn-primary" href="{% block accounts_message_top_link %}/{% endblock %}">Continue</a>
+        </div>
+    </div>
+    <br>
+    {% block accounts_pris_message %}
+    {% include "ledgerui/accounts_pris_message.html" %}
+    {% endblock %}
+{% endblock %}
