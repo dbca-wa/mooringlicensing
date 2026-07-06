@@ -701,10 +701,11 @@ def send_approval_renewal_email_notification(approval):
     # mooring licences and dcv permits a configurable number of days before the expiry date, including if the status
     # is suspended (technically dcv permits are not renewed, the holder is invited to apply for a new one for the next season)
     
+    current_year = datetime.now().year
+    next_fee_season = f"{current_year} - {current_year + 1}"
     proposal = approval.current_proposal
     email = TemplateEmailBase(
-        #subject='First and final notice: Renewal of your {} {} for {} - vessel {} - Rottnest Island Authority'.format(approval.description, approval.lodgement_number, proposal.fee_season, proposal.vessel_details.vessel.rego_no),
-        subject='Invitation to renew your {} for {} - vessel {} - Rottnest Island Authority'.format(approval.description, proposal.fee_season, proposal.vessel_details.vessel.rego_no),
+        subject='Invitation to renew your {} for {} - vessel {} - Rottnest Island Authority'.format(approval.description, next_fee_season, proposal.vessel_details.vessel.rego_no),
         html_template='mooringlicensing/emails_2/email_16.html',
         txt_template='mooringlicensing/emails_2/email_16.txt',
     )

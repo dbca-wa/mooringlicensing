@@ -1,7 +1,7 @@
 {% extends 'mooringlicensing/emails/base_email-rottnest.txt' %}
 
 {% block content_body %}
-{% include "mooringlicensing/emails_2/sSalutation.txt" %}
+{% include "mooringlicensing/emails_2/salutation.txt" %}
 
 {% if approval.code == 'wla' %}
 <p>Your position on the Rottnest Waiting List requires renewing annually.</p>
@@ -39,5 +39,5 @@ Your {{approval.description}} {{approval.lodgement_number}} for vessel {{vessel_
 <p>For further information and assistance, please visit <a href="https://www.ria.wa.gov.au/boating/licensed-moorings-permits/help-centre">Mooring Licensing & Permits Help Centre | Rottnest Island Authority</a> Licence & Permit Renewals information.</p>
 {% endif %}
 
-{% include "mooringlicensing/emails/signature-rottnest.txt" %}
+{% include "mooringlicensing/emails/signature-rottnest-no-link.html" %}
 {% endblock %}

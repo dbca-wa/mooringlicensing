@@ -39,5 +39,5 @@ For further information and assistance, please visit Mooring Licensing & Permits
 For further information and assistance, please visit Mooring Licensing & Permits Help Centre | Rottnest Island Authority Licence & Permit Renewals information. 
 {% endif %}
 
-{% include "mooringlicensing/emails/signature-rottnest.txt" %}
+{% include "mooringlicensing/emails/signature-rottnest-no-link.txt" %}
 {% endblock %}
