@@ -1,10 +1,43 @@
-{% extends 'mooringlicensing/emails/base_email-rottnest.html' %}
+{% extends 'mooringlicensing/emails/base_email-rottnest.txt' %}
 
 {% block content_body %}
-{% include "mooringlicensing/emails_2/salutation.html" %}
-<p>Your {{ approval.description }} {{ approval.lodgement_number }} for vessel {{ vessel_rego_no }} is due for renewal by {{ expiry_date }}.</p>
-<p>Please click <a href="{{ dashboard_external_url }}">here</a> to log in to the online system to submit your renewal application.</p>
-<p>If you do not submit an application to renew prior to {{ expiry_date }} your {{ approval.description }} {{ approval.lodgement_number }} will expire. Once expired, you will no longer be able to make an application to renew and your {{ approval.description }} {{ approval.lodgement_number }} will be automatically cancelled. This action cannot be reversed, and once cancelled your {{ approval.description }} {{ approval.lodgement_number }} cannot be re-instated.</p>
-<p>This is your first and final notice and no reminders will be provided if a renewal application has not been submitted by you prior to {{ expiry_date }}.</p>
-{% include "mooringlicensing/emails/signature-rottnest.html" %}
+{% include "mooringlicensing/emails_2/sSalutation.txt" %}
+
+{% if approval.code == 'wla' %}
+<p>Your position on the Rottnest Waiting List requires renewing annually.</p>
+{% endif %}
+
+Your {{approval.description}} {{approval.lodgement_number}} for vessel {{vessel_rego_no}} will expire on {{expiry_date}}.
+<p>Please log in to the <a href="https://mooringlicensing-ria.dbca.wa.gov.au/external/">Rottnest Mooring Licensing Portal</a> to start your renewal application before {{expiry_date}}.</p>
+{% if approval.code == 'wla' %}
+<p>In the ‘Waiting List’ section of your dashboard, open the expander and click the “renew” option.</p>
+{% else %}
+<p>In the ‘Permits and Licenses’ section of your dashboard, open the expander and click the “renew” option.</p>
+{% endif %}  
+
+{% if approval.code == 'wla' or approval.code == 'aap' %}
+<p>Please have a copy of the vessel’s registration certificate to refer to during the renewal process.</p>
+{% elif approval.code == 'aup' %}
+<p>Please have a copy of your vessel’s insurance ready to upload to your application, and the vessel’s registration certificate to refer to during the renewal process.</p>
+{% else %}
+<p>Please have copies of your vessel/s insurance ready to upload to your application, and each vessel’s registration certificate to refer to during the renewal process.</p>
+{% endif %}  
+
+{% if approval.code == 'wla' %}
+<p>If your renewal is not submitted, the application for the waiting list will expire and your Waiting List Allocation {{approval.lodgement_number}} will automatically cancel. This action cannot be reversed. If your Waiting List Allocation {{approval.lodgement_number}} is cancelled, it cannot be re-instated.</p>
+{% elif approval.code == 'aup' %}
+<p>If your application expires, you will not be able to renew and your Authorised User Permit {{approval.lodgement_number}} will be cancelled. If your Authorised User Permit {{approval.lodgement_number}} is cancelled, cannot be re-instated.</p>
+{% elif approval.code == 'mla' %}
+<p>If your application expires, you may not be able to renew your Mooring Site Licence.</p>
+{% else %}
+<p>If your renewal is not submitted, the annual admission permit will expire.</p>
+{% endif %}  
+
+{% if approval.code == 'wla' %}
+<p>For further information and assistance, please visit <a href="https://www.ria.wa.gov.au/boating/licensed-moorings-permits/help-centre">Mooring Licensing & Permits Help Centre | Rottnest Island Authority</a> waiting list information.</p>
+{% else %}
+<p>For further information and assistance, please visit <a href="https://www.ria.wa.gov.au/boating/licensed-moorings-permits/help-centre">Mooring Licensing & Permits Help Centre | Rottnest Island Authority</a> Licence & Permit Renewals information.</p>
+{% endif %}
+
+{% include "mooringlicensing/emails/signature-rottnest.txt" %}
 {% endblock %}

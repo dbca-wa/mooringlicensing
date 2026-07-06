@@ -703,7 +703,8 @@ def send_approval_renewal_email_notification(approval):
     
     proposal = approval.current_proposal
     email = TemplateEmailBase(
-        subject='First and final notice: Renewal of your {} {} for {} - vessel {} - Rottnest Island Authority'.format(approval.description, approval.lodgement_number, proposal.fee_season, proposal.vessel_details.vessel.rego_no),
+        #subject='First and final notice: Renewal of your {} {} for {} - vessel {} - Rottnest Island Authority'.format(approval.description, approval.lodgement_number, proposal.fee_season, proposal.vessel_details.vessel.rego_no),
+        subject='Invitation to renew your {} for {} - vessel {} - Rottnest Island Authority'.format(approval.description, proposal.fee_season, proposal.vessel_details.vessel.rego_no),
         html_template='mooringlicensing/emails_2/email_16.html',
         txt_template='mooringlicensing/emails_2/email_16.txt',
     )
