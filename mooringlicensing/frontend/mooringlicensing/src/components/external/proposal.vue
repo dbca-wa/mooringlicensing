@@ -1,5 +1,20 @@
 <template lang="html">
     <div class="container" >
+
+        <div class="alert round-box col-12 px-3 mb-3" style='background: #c4e6fd; border: 1px solid #80beff'>
+            <div>
+            <strong>Privacy Notice</strong>
+            </div>
+            <div>
+            <p>The Rottnest Island Authority (RIA) collects this personal information to issue with you with appropriate licenses permits and authorisations required for utilising moorings within the Rottnest Island Reserve.</p>
+            <p>We may share this information with other organisations/individuals, to assess your applications and undertake compliance and monitoring of your activity on the island and to advise you of any changes to permissions or conditions as they arise. It may also be used to ensure compliance with other relevant legislation.</p>
+            <p>You are required to provide this information/specific personal information to comply with <em>Rottnest Island Regulations 1988 and Rottnest Island Authority Act 1987.</em></p>
+            <p>If you choose not to provide the required information we will be unable to issue you with the required permissions and any mooring use will be unlawful.</p>
+            <p>For further details on how RIA manage your personal information, you can read the <a href="https://www.dbca.wa.gov.au/media/6324/download">Privacy Policy</a>. If you have any questions about how your personal information will be handled, or if you would like to access your personal information, please contact RIA on 08 9432 9300 or email <a href="mailto:privacy.rottnest@dbca.wa.gov.au">privacy.rottnest@dbca.wa.gov.au</a>.</p>
+            </div>
+        </div>
+        <br>
+
         <form :action="proposal_form_url" method="post" name="new_proposal" enctype="multipart/form-data">
             <div v-if="!proposal_readonly">
               <div v-if="hasAmendmentRequest" class="row" style="color:red;">
