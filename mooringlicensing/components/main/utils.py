@@ -1722,7 +1722,7 @@ def getStickerExportFields(data):
         "number",
         "status",
         "approval__lodgement_number",
-        "vessel_ownership__vessel__rego_no",
+        "batch_property_cache__vessel_registration_number",
         "batch_property_cache__moorings",
         "holder",
         "approval__current_proposal__proposal_applicant__email",
