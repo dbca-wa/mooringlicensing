@@ -401,8 +401,8 @@ def sticker_export():
                     if not sticker.postal_address_line1 or not sticker.postal_address_locality or not sticker.postal_address_state or not sticker.postal_address_postcode:
                         logger.warning(f'Postal address not found for the Sticker: [{sticker}].')
                         continue
-
-                    data.append([
+                    
+                    sticker_batch_property_values = [
                         today.strftime('%d/%m/%Y'),
                         sticker.first_name,
                         sticker.last_name,
@@ -419,10 +419,17 @@ def sticker_export():
                         sticker.get_white_info(),
                         sticker.vessel_applicable_length,
                         sticker.fee_season.name if sticker.fee_season and sticker.fee_season.name else ''
-                    ])
+                    ]
+
+                    sticker_batch_properties = {}
+                    for i in range (0,len(sticker_batch_property_values)-1):
+                        sticker_batch_properties[data[0][i].lower().replace(" ","_")] = sticker_batch_property_values[i]
+
+                    sticker.batch_property_cache = sticker_batch_properties
+                    data.append(sticker_batch_property_values)
                     logger.info('Sticker: {} details added to the spreadsheet'.format(sticker.number))
                     updates.append(sticker.number)
-
+                    sticker.save()
                     new_approval_history_entry = ApprovalHistory.objects.create(
                         vessel_ownership=sticker.approval.current_proposal.vessel_ownership,
                         approval=sticker.approval,

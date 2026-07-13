@@ -3837,6 +3837,7 @@ class Sticker(RevisionedMixin):
     postal_address_postcode = models.CharField(max_length=10, null=True, blank=True)
 
     invoice_property_cache = JSONField(null=True, blank=True, default=dict)
+    batch_property_cache = JSONField(null=True, blank=True, default=dict)
 
     class Meta:
         app_label = 'mooringlicensing'
