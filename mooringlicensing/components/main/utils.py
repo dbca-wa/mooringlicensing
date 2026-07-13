@@ -1723,7 +1723,7 @@ def getStickerExportFields(data):
         "status",
         "approval__lodgement_number",
         "vessel_ownership__vessel__rego_no",
-        "moorings",
+        "batch_property_cache__moorings",
         "holder",
         "approval__current_proposal__proposal_applicant__email",
         "approval__current_proposal__proposal_applicant__mobile_number",
@@ -1737,8 +1737,8 @@ def getStickerExportFields(data):
         "printing_date",
         "mailing_date",
         "fee_season__name",
-        "colour",
-        "white_info",
+        "batch_property_cache__length_colour",
+        "batch_property_cache__white_info",
         "invoice_property_cache",
         )
     )
