@@ -196,8 +196,8 @@ export default {
                                 && !full.declined_by_endorser 
                                 && !full.approved_by_endorser
                             ){
-                                links +=  `<a href='#${full.id}' data-approve-endorsement='${full.uuid}' data-approve-endorsement-mooring='${full.mooring_name}'>Endorse</a><br/>`
-                                links +=  `<a href='#${full.id}' data-decline-endorsement='${full.uuid}' data-approve-endorsement-mooring='${full.mooring_name}'>Decline</a><br/>`
+                                links +=  `<a href='#${full.id}' oncontextmenu="return false;" data-approve-endorsement='${full.uuid}' data-approve-endorsement-mooring='${full.mooring_name}'>Endorse</a><br/>`
+                                links +=  `<a href='#${full.id}' oncontextmenu="return false;" data-decline-endorsement='${full.uuid}' data-approve-endorsement-mooring='${full.mooring_name}'>Decline</a><br/>`
                             }
                             return links
                         }

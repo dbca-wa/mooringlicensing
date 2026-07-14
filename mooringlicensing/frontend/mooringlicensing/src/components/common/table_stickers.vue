@@ -414,15 +414,15 @@ export default {
                 case 'printing':
                     break
                 case 'current':
-                    links += `<a href='#${sticker.id}' data-replacement='${sticker.id}'>Request Sticker Replacement</a><br/>`
-                    links += `<a href='#${sticker.id}' data-record-lost='${sticker.id}'>Record Sticker Lost</a><br/>`
+                    links += `<a href='#${sticker.id}' oncontextmenu="return false;" data-replacement='${sticker.id}'>Request Sticker Replacement</a><br/>`
+                    links += `<a href='#${sticker.id}' oncontextmenu="return false;" data-record-lost='${sticker.id}'>Record Sticker Lost</a><br/>`
                     break
                 case 'lost':
                     break
                 case 'to_be_returned':
                     if (sticker.printing_date !== "" && sticker.printing_date !== null) {
-                        links += `<a href='#${sticker.id}' data-record-returned='${sticker.id}'>Record Returned Sticker</a><br/>`
-                        links += `<a href='#${sticker.id}' data-record-lost='${sticker.id}'>Record Sticker Lost</a><br/>`
+                        links += `<a href='#${sticker.id}' oncontextmenu="return false;" data-record-returned='${sticker.id}'>Record Returned Sticker</a><br/>`
+                        links += `<a href='#${sticker.id}' oncontextmenu="return false;" data-record-lost='${sticker.id}'>Record Sticker Lost</a><br/>`
                     }
                     break
                 case 'returned':

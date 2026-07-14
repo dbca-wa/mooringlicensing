@@ -1577,7 +1577,7 @@ class ListVesselOwnershipSerializer(serializers.ModelSerializer):
         return obj.applicable_percentage
 
     def get_record_sale_link(self, obj):
-        return '<a href=# data-id="{}">Record Sale</a><br/>'.format(obj.id, obj.id)
+        return '<a href=# oncontextmenu="return false;" data-id="{}">Record Sale</a><br/>'.format(obj.id, obj.id)
 
     def get_sale_date(self, obj):
         sale_date = ''

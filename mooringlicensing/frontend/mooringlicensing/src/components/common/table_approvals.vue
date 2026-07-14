@@ -454,35 +454,35 @@ export default {
                             if (vm.is_external && full.can_reissue) {
                                 if(full.can_action){
                                     if(full.amend_or_renew === 'amend'){
-                                       links +=  `<a href='#${full.id}' data-amend-approval='${full.current_proposal_id}' data-approval-type-name='${full.approval_type_dict.description}'>Amend</a><br/>`;
+                                       links +=  `<a href='#${full.id}' oncontextmenu="return false;" data-amend-approval='${full.current_proposal_id}' data-approval-type-name='${full.approval_type_dict.description}'>Amend</a><br/>`;
                                     }
                                     if(full.amend_or_renew === 'renew'){
-                                        links +=  `<a href='#${full.id}' data-renew-approval='${full.current_proposal_id}' data-approval-type-name='${full.approval_type_dict.description}'>Renew</a><br/>`;
+                                        links +=  `<a href='#${full.id}' oncontextmenu="return false;" data-renew-approval='${full.current_proposal_id}' data-approval-type-name='${full.approval_type_dict.description}'>Renew</a><br/>`;
                                     }
-                                    links +=  `<a href='#${full.id}' data-surrender-approval='${full.id}' data-approval-type-name='${full.approval_type_dict.description}'>Surrender</a><br/>`;
+                                    links +=  `<a href='#${full.id}' oncontextmenu="return false;" data-surrender-approval='${full.id}' data-approval-type-name='${full.approval_type_dict.description}'>Surrender</a><br/>`;
                                 }
                             } else if (!vm.is_external){
                                 links +=  `<a href='/internal/approval/${full.id}'>View</a><br/>`;
-                                links +=  `<a href='#${full.id}' data-history-approval='${full.id}'>History</a><br/>`;
+                                links +=  `<a href='#${full.id}' oncontextmenu="return false;" data-history-approval='${full.id}'>History</a><br/>`;
                                 if(full.can_reissue && full.current_proposal_id && full.is_assessor && full.current_proposal_approved){
-                                    links +=  `<a href='#${full.id}' data-reissue-approval='${full.current_proposal_id}'>Reissue</a><br/>`;
+                                    links +=  `<a href='#${full.id}' oncontextmenu="return false;" data-reissue-approval='${full.current_proposal_id}'>Reissue</a><br/>`;
                                 }
                                 if (vm.is_internal && vm.wlaDash) {
                                     links += full.offer_link;
                                 }
                                 if (full.allowed_assessors_user) {
                                     if(full.can_reissue && full.can_action){
-                                        links +=  `<a href='#${full.id}' data-cancel-approval='${full.id}'>Cancel</a><br/>`
-                                        links +=  `<a href='#${full.id}' data-surrender-approval='${full.id}' data-approval-type-name='${full.approval_type_dict.description}'>Surrender</a><br/>`
+                                        links +=  `<a href='#${full.id}' oncontextmenu="return false;" data-cancel-approval='${full.id}'>Cancel</a><br/>`
+                                        links +=  `<a href='#${full.id}' oncontextmenu="return false;" data-surrender-approval='${full.id}' data-approval-type-name='${full.approval_type_dict.description}'>Surrender</a><br/>`
                                     }
                                     if(full.status == 'Current' && full.can_action){
-                                        links +=  `<a href='#${full.id}' data-suspend-approval='${full.id}'>Suspend</a><br/>`
+                                        links +=  `<a href='#${full.id}' oncontextmenu="return false;" data-suspend-approval='${full.id}'>Suspend</a><br/>`
                                     }
                                     if(full.can_reinstate){
-                                        links +=  `<a href='#${full.id}' data-reinstate-approval='${full.id}'>Reinstate</a><br/>`
+                                        links +=  `<a href='#${full.id}' oncontextmenu="return false;" data-reinstate-approval='${full.id}'>Reinstate</a><br/>`
                                     }
                                     if(full.can_extend){
-                                        links +=  `<a href='#${full.id}' data-extend-approval='${full.id}'>Extend Expiry</a><br/>`
+                                        links +=  `<a href='#${full.id}' oncontextmenu="return false;" data-extend-approval='${full.id}'>Extend Expiry</a><br/>`
                                     }
                                 }
                                 if(full.renewal_document && full.renewal_sent){
@@ -490,18 +490,18 @@ export default {
                                 }
                                 if(full.approval_type_dict && full.approval_type_dict.code == 'ml'){
                                     if(full.mooring_swappable)
-                                        links += `<a href='#${full.id}' data-swap-moorings-approval='${full.id}' data-swap-moorings-approval-lodgement-number='${full.lodgement_number}'>Swap moorings</a><br/>`
+                                        links += `<a href='#${full.id}' oncontextmenu="return false;" data-swap-moorings-approval='${full.id}' data-swap-moorings-approval-lodgement-number='${full.lodgement_number}'>Swap moorings</a><br/>`
                                 }
                             }
                             if (full.approval_type_dict.code != 'wla' && full.status == 'Current') {
 
                                 if (full.is_missing_sticker) {
                                     if (vm.is_internal) {
-                                        links += `<a href='#${full.id}' data-create-new-sticker='${full.id}' data-missing-sticker-message='${full.missing_sticker_message}'>Create New Sticker</a><br/>`
+                                        links += `<a href='#${full.id}' oncontextmenu="return false;" data-create-new-sticker='${full.id}' data-missing-sticker-message='${full.missing_sticker_message}'>Create New Sticker</a><br/>`
                                     }
                                 } else {
-                                    links += `<a href='#${full.id}' data-request-new-sticker='${full.id}' data-request-new-sticker-proposal='${full.current_proposal_id}'>Request New Sticker</a><br/>`
-                                    links += `<a href='#${full.id}' data-request-sticker-address='${full.id}'>Update Sticker Address</a><br/>`
+                                    links += `<a href='#${full.id}' oncontextmenu="return false;" data-request-new-sticker='${full.id}' data-request-new-sticker-proposal='${full.current_proposal_id}'>Request New Sticker</a><br/>`
+                                    links += `<a href='#${full.id}' oncontextmenu="return false;" data-request-sticker-address='${full.id}'>Update Sticker Address</a><br/>`
                                 }
                             }
 
