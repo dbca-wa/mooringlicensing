@@ -1609,7 +1609,11 @@ def getStickerExportFields(data):
         "Season", 
         "Colour",
         "White Info",
-        "Invoice Properties" 
+        "Batch Vessel Registration", 
+        "Batch Moorings",
+        "Batch Colour",
+        "Batch White Info",
+        "Invoice Properties",
     ]
 
     vessel_length_sq = Subquery(
@@ -1722,8 +1726,8 @@ def getStickerExportFields(data):
         "number",
         "status",
         "approval__lodgement_number",
-        "batch_property_cache__vessel_registration_number",
-        "batch_property_cache__moorings",
+        "vessel_ownership__vessel__rego_no",
+        "moorings",
         "holder",
         "approval__current_proposal__proposal_applicant__email",
         "approval__current_proposal__proposal_applicant__mobile_number",
@@ -1737,6 +1741,10 @@ def getStickerExportFields(data):
         "printing_date",
         "mailing_date",
         "fee_season__name",
+        "colour",
+        "white_info",
+        "batch_property_cache__vessel_registration_number",
+        "batch_property_cache__moorings",
         "batch_property_cache__length_colour",
         "batch_property_cache__white_info",
         "invoice_property_cache",
