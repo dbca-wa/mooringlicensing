@@ -163,7 +163,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         try:
             if is_internal(request):
                 instance = self.get_object()
-                qs = EmailUserLogEntry.objects.filter(email_user_id=instance.id)
+                qs = EmailUserLogEntry.objects.filter(email_user_id=instance.ledger_id_id)
                 serializer = EmailUserCommsSerializer(qs, many=True)
                 return Response(serializer.data)
             return Response()
@@ -180,8 +180,8 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
                     kwargs = {
                         'subject': request.data.get('subject', ''),
                         'text': request.data.get('text', ''),
-                        'email_user_id': instance.id,
-                        'customer': instance.id,
+                        'email_user_id': instance.ledger_id_id,
+                        'customer': instance.ledger_id_id,
                         'staff': request.data.get('staff', request.user.id),
                         'to': request.data.get('to', ''),
                         'fromm': request.data.get('fromm', ''),
