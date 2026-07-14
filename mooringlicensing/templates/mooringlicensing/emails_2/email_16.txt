@@ -7,7 +7,12 @@
 Your position on the Rottnest Waiting List requires renewing annually. 
 {% endif %}
 
+{% if approval.code == 'ml' %}
+Your {{approval.description}} {{approval.lodgement_number}} for {{mooring}} will expire on {{expiry_date}}.
+{% else %}
 Your {{approval.description}} {{approval.lodgement_number}} for vessel {{vessel_rego_no}} will expire on {{expiry_date}}.
+{% endif %}
+
 Please log in to the Rottnest Mooring Licensing Portal to start your renewal application before {{expiry_date}}. 
 {% if approval.code == 'wla' %}
 In the ‘Waiting List’ section of your dashboard, open the expander and click the “renew” option.
@@ -26,7 +31,7 @@ Please have copies of your vessel/s insurance ready to upload to your applicatio
 {% if approval.code == 'wla' %}
 If your renewal is not submitted, the application for the waiting list will expire and your Waiting List Allocation {{approval.lodgement_number}} will automatically cancel. This action cannot be reversed. If your Waiting List Allocation {{approval.lodgement_number}} is cancelled, it cannot be re-instated. 
 {% elif approval.code == 'aup' %}
-If your application expires, you will not be able to renew and your Authorised User Permit {{approval.lodgement_number}} will be cancelled. If your Authorised User Permit {{approval.lodgement_number}} is cancelled, cannot be re-instated.
+If your application expires, you will not be able to renew and your Authorised User Permit {{approval.lodgement_number}} will be cancelled. If your Authorised User Permit {{approval.lodgement_number}} is cancelled, it cannot be re-instated.
 {% elif approval.code == 'ml' %}
 If your application expires, you may not be able to renew your Mooring Site Licence. 
 {% else %}

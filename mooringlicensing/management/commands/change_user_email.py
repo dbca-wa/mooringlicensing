@@ -14,6 +14,8 @@ from mooringlicensing.components.payments_ml.models import (
 from mooringlicensing.components.proposals.models import (
     Proposal, ProposalApplicant, Owner, ProposalUserAction, ProposalLogEntry, MooringLogEntry, VesselLogEntry, VesselOwnership, ProposalSiteLicenseeMooringRequest
 )
+from mooringlicensing.components.users.models import EmailUserLogEntry
+
 from ledger_api_client.utils import get_or_create, change_user_invoice_ownership
 from django.db import transaction
 from mooringlicensing.components.users.utils import get_or_create_system_user_system_user
@@ -434,6 +436,7 @@ class Command(BaseCommand):
             ProposalLogEntry: ["customer"],
             MooringLogEntry: ["customer"],
             VesselLogEntry: ["customer"],
+            EmailUserLogEntry: ["email_user_id", "customer"],
         }
         change_email = {
             ProposalApplicant: ["email"],

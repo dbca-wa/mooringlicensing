@@ -704,8 +704,13 @@ def send_approval_renewal_email_notification(approval):
     current_year = datetime.now().year
     next_fee_season = f"{current_year} - {current_year + 1}"
     proposal = approval.current_proposal
+
+    subject = 'Invitation to renew your {} for {} - vessel {} - Rottnest Island Authority'.format(approval.description, next_fee_season, proposal.vessel_details.vessel.rego_no)
+    if approval.code == 'ml':
+        subject= 'Invitation to renew {} {} for {} season - {} - Rottnest Island Authority'.format(approval.description, approval.child_obj.mooring.name, next_fee_season, proposal.proposal_applicant.get_full_name())
+
     email = TemplateEmailBase(
-        subject='Invitation to renew your {} for {} - vessel {} - Rottnest Island Authority'.format(approval.description, next_fee_season, proposal.vessel_details.vessel.rego_no),
+        subject=subject,
         html_template='mooringlicensing/emails_2/email_16.html',
         txt_template='mooringlicensing/emails_2/email_16.txt',
     )
@@ -719,6 +724,7 @@ def send_approval_renewal_email_notification(approval):
         'recipient': proposal.proposal_applicant,
         'expiry_date': approval.expiry_date,
         'dashboard_external_url': make_http_https(url),
+        'mooring': approval.child_obj.mooring.name if approval.code == 'ml' else None
     }
 
     sender = settings.DEFAULT_FROM_EMAIL
