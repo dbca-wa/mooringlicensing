@@ -257,29 +257,29 @@ export default {
                         }
 
                         if (full.can_user_edit && full.processing_status === 'Draft' && full.application_type_dict.code !== 'mla') {
-                            links +=  `<a href='#${full.id}' data-discard-proposal='${full.id}' data-application-type-code='${full.application_type_dict.code}' data-proposal-type-code='${full.proposal_type.code}'>Discard</a><br/>`;
+                            links +=  `<a href='#${full.id}' oncontextmenu="return false;" data-discard-proposal='${full.id}' data-application-type-code='${full.application_type_dict.code}' data-proposal-type-code='${full.proposal_type.code}'>Discard</a><br/>`;
                         }
                         
                         if (full.application_type_dict.code === 'mla' && full.processing_status === 'Draft'){
                             // Only ML draft application can be withdrawn
-                            links +=  `<a href='#${full.id}' data-withdraw-proposal='${full.id}'>Withdraw</a><br/>`
+                            links +=  `<a href='#${full.id}' oncontextmenu="return false;" data-withdraw-proposal='${full.id}'>Withdraw</a><br/>`
                         }
                         if (full.application_type_dict.code === 'mla' && full.processing_status === 'Discarded'){
                             // Only ML discarded application can make originated WL allocation reinstated
-                            links +=  `<a href='#${full.id}' data-reinstate-wl-allocation='${full.id}'>Reinstate WL allocation</a><br/>`
+                            links +=  `<a href='#${full.id}' oncontextmenu="return false;" data-reinstate-wl-allocation='${full.id}'>Reinstate WL allocation</a><br/>`
                         }
                     }
                     if (vm.is_external){
                         if (full.can_user_edit) {
                             links +=  `<a href='/external/proposal/${full.id}'>Continue</a><br/>`;
-                            links +=  `<a href='#${full.id}' data-discard-proposal='${full.id}' data-application-type-code='${full.application_type_dict.code}' data-proposal-type-code='${full.proposal_type.code}'>Discard</a><br/>`;
+                            links +=  `<a href='#${full.id}' oncontextmenu="return false;" data-discard-proposal='${full.id}' data-application-type-code='${full.application_type_dict.code}' data-proposal-type-code='${full.proposal_type.code}'>Discard</a><br/>`;
                         }
                         else if (full.can_user_view) {
                             links +=  `<a href='/external/proposal/${full.id}'>View</a><br/>`;
                         }                                          
                     }
                     if (full.can_user_cancel_payment) {
-                        links +=  `<a href='#${full.id}' data-discard-proposal='${full.id}' data-application-type-code='${full.application_type_dict.code}' data-proposal-type-code='${full.proposal_type.code}'>Discard</a><br/>`;
+                        links +=  `<a href='#${full.id}' oncontextmenu="return false;" data-discard-proposal='${full.id}' data-application-type-code='${full.application_type_dict.code}' data-proposal-type-code='${full.proposal_type.code}'>Discard</a><br/>`;
                     }
                     for (let invoice of full.invoices){
                             if (
@@ -290,7 +290,7 @@ export default {
                                 links +=  `<a href='/application_fee_existing/${invoice.reference}/'>Pay</a><br/>`    
                             }
                             if (full.processing_status === 'Awaiting Payment' && full.can_user_bypass_payment) {
-                                links +=  `<a href='#${full.id}' data-bypass-payment='${full.id}' data-bypass-payment-invoice-ref='${invoice.reference}'>Bypass Payment</a><br/>`
+                                links +=  `<a href='#${full.id}' oncontextmenu="return false;" data-bypass-payment='${full.id}' data-bypass-payment-invoice-ref='${invoice.reference}'>Bypass Payment</a><br/>`
                             }
                         }     
                     if (full.document_upload_url){

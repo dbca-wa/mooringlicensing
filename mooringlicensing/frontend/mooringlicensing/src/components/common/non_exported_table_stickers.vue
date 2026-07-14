@@ -312,10 +312,10 @@ export default {
 
             switch(sticker.status.code){
                 case 'ready':
-                    links += `<a href='#${sticker.id}' data-cancel='${sticker.id}'>Cancel</a><br/>`
+                    links += `<a href='#${sticker.id}' oncontextmenu="return false;" data-cancel='${sticker.id}'>Cancel</a><br/>`
                     break;
                 case 'not_ready_yet':
-                    links += `<a href='#${sticker.id}' data-cancel='${sticker.id}'>Cancel</a><br/>`
+                    links += `<a href='#${sticker.id}' oncontextmenu="return false;" data-cancel='${sticker.id}'>Cancel</a><br/>`
                     break;
                 case 'cancelled':
                     break;
