@@ -3021,7 +3021,7 @@ class Proposal(RevisionedMixin):
                     if (previous_company_ownership.company.name.strip() != company_name.strip()):
                         return True
                     
-                    if previous_company_ownership.dot_name.lower().strip() != dot_name:
+                    if previous_ownership.dot_name.lower().strip() != dot_name:
                         return True
 
                     if (previous_company_ownership.percentage and company_percentage and
