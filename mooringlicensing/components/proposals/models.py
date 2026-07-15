@@ -3012,6 +3012,7 @@ class Proposal(RevisionedMixin):
             previous_company_ownership = previous_ownership.get_latest_company_ownership()
             company_name = self.company_ownership_name
             company_percentage = self.company_ownership_percentage
+            dot_name = self.dot_name.lower().strip()
 
             if previous_company_ownership:
                 if self.individual_owner:
@@ -3019,12 +3020,18 @@ class Proposal(RevisionedMixin):
                 elif company_name and company_percentage:
                     if (previous_company_ownership.company.name.strip() != company_name.strip()):
                         return True
+                    
+                    if previous_company_ownership.dot_name.lower().strip() != dot_name:
+                        return True
+
                     if (previous_company_ownership.percentage and company_percentage and
                         previous_company_ownership.percentage != company_percentage
                     ):
                         return True
             else: #no previous company ownership
                 if not self.individual_owner: #company ownership
+                    return True
+                if dot_name != previous_ownership.dot_name.lower().strip():
                     return True
                 
         return False
