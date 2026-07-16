@@ -10,7 +10,11 @@ Your position on the Rottnest Waiting List requires renewing annually.
 {% if approval.code == 'ml' %}
 Your {{approval.description}} {{approval.lodgement_number}} for {{mooring}} will expire on {{expiry_date}}.
 {% else %}
+    {% if vessel_owned %}
 Your {{approval.description}} {{approval.lodgement_number}} for vessel {{vessel_rego_no}} will expire on {{expiry_date}}.
+    {% else %}
+Your {{approval.description}} {{approval.lodgement_number}} will expire on {{expiry_date}}.
+    {% endif %}
 {% endif %}
 
 Please log in to the Rottnest Mooring Licensing Portal to start your renewal application before {{expiry_date}}. 

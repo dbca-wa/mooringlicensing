@@ -705,7 +705,15 @@ def send_approval_renewal_email_notification(approval):
     next_fee_season = f"{current_year} - {current_year + 1}"
     proposal = approval.current_proposal
 
-    subject = 'Invitation to renew your {} for {} - vessel {} - Rottnest Island Authority'.format(approval.description, next_fee_season, proposal.vessel_details.vessel.rego_no)
+    vessel_owned = False
+    if proposal.vessel_ownership.end_date == None:
+        vessel_owned = True
+
+    if vessel_owned:
+        subject = 'Invitation to renew your {} for {} - vessel {} - Rottnest Island Authority'.format(approval.description, next_fee_season, proposal.vessel_details.vessel.rego_no)
+    else:
+        subject = 'Invitation to renew your {} for {} - Rottnest Island Authority'.format(approval.description, next_fee_season)
+
     if approval.code == 'ml':
         subject= 'Invitation to renew {} {} for {} season - {} - Rottnest Island Authority'.format(approval.description, approval.child_obj.mooring.name, next_fee_season, proposal.proposal_applicant.get_full_name())
 
@@ -720,6 +728,7 @@ def send_approval_renewal_email_notification(approval):
     context = {
         'public_url': get_public_url(),
         'approval': approval,
+        'vessel_owned': vessel_owned,
         'vessel_rego_no': proposal.vessel_details.vessel.rego_no,
         'recipient': proposal.proposal_applicant,
         'expiry_date': approval.expiry_date,
