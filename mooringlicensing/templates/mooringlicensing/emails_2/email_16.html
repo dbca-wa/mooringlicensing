@@ -10,7 +10,11 @@
 {% if approval.code == 'ml' %}
 <p>Your {{approval.description}} {{approval.lodgement_number}} for {{mooring}} will expire on {{expiry_date}}.</p>
 {% else %}
-<p>Your {{approval.description}} {{approval.lodgement_number}} for vessel {{vessel_rego_no}} will expire on {{expiry_date}}.</p>
+    {% if vessel_owned %}
+    <p>Your {{approval.description}} {{approval.lodgement_number}} for vessel {{vessel_rego_no}} will expire on {{expiry_date}}.</p>
+    {% else %}
+    <p>Your {{approval.description}} {{approval.lodgement_number}} will expire on {{expiry_date}}.</p>
+    {% endif %}
 {% endif %}
 
 <p>Please log in to the <a href="https://mooringlicensing-ria.dbca.wa.gov.au/external/">Rottnest Mooring Licensing Portal</a> to start your renewal application before {{expiry_date}}.</p>
