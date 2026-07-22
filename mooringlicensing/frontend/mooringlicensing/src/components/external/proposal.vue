@@ -457,7 +457,7 @@ export default {
         } catch(err) {
             swal({
                 title: "Please fix following errors before saving",
-                text: helpers.formatError(err),
+            html: helpers.formatErrorHtml(err),
                 type:'error'
             });
             vm.savingProposal=false;
@@ -507,7 +507,7 @@ export default {
             console.log(typeof(err.body))
             await swal({
                 title: 'Submit Error',
-                html: helpers.formatError(err),
+              html: helpers.formatErrorHtml(err),
                 type: "error",
             })
             this.savingProposal=false;
@@ -528,7 +528,7 @@ export default {
         } catch(err) {
             await swal({
                 title: 'Submit Error',
-                html: helpers.formatError(err),
+              html: helpers.formatErrorHtml(err),
                 type: "error",
             })
             this.savingProposal=false;
@@ -657,7 +657,7 @@ export default {
                     console.log(err)
                     await swal({
                         title: 'Submit Error',
-                        html: helpers.formatError(err),
+                      html: helpers.formatErrorHtml(err),
                         type: "error",
                     })
                 }

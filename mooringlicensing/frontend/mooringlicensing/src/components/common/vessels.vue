@@ -23,7 +23,7 @@
                     <div class="row">
                         <div class="col-sm-9">
                             <input 
-                                @change="clearOrgName"
+                                @change="clearOrgName(); setRegisteredOwner(true)"
                                 :disabled="readonly"
                                 type="radio"
                                 id="registered_owner_current_user"
@@ -38,7 +38,7 @@
                     <div class="row">
                         <div class="col-sm-3">
                             <input
-                                @change="clearOrgName"
+                                @change="clearOrgName(); setRegisteredOwner(false)"
                                 :disabled="readonly"
                                 type="radio"
                                 id="registered_owner_company"
@@ -124,13 +124,14 @@
             <!-- Start:new file field -->
             <transition>
                 <div v-if="showDotRegistrationPapers" class="row form-group">
-                    <label for="" class="col-sm-3 control-label">Copy of registration papers</label>
+                    <label for="" class="col-sm-3 control-label">Copy of registration papers <span style="color: red;">*</span></label>
                     <div class="col-sm-9">
                         <FileField
                             :readonly="hinReadonly"
                             ref="vessel_rego_document"
                             name="vessel_rego_document"
                             :isRepeatable="true"
+                            :isRequired="true"
                             :documentActionUrl="vesselRegoDocumentUrl"
                             :replace_button_by_text="true"
                         />
@@ -141,7 +142,7 @@
 
             <transition>
                 <div v-if="showProofOfVesselOwnership" class="row form-group">
-                    <label for="" class="col-sm-3 control-label">A statutory declaration is required as proof of vessel ownership</label>
+                    <label for="" class="col-sm-3 control-label">A statutory declaration is required as proof of vessel ownership <span style="color: red;">*</span></label>
                     <div class="col-sm-9" v-if="proposal && proposal.stat_dec_form">
                         Download form <a target="_blank" :href="proposal.stat_dec_form">here</a>
                     </div>
@@ -151,6 +152,7 @@
                             ref="hull_identification_number_documents"
                             name="hull-identification-number-documents"
                             :isRepeatable="true"
+                            :isRequired="true"
                             :documentActionUrl="hullIdentificationNumberDocumentUrl"
                             :replace_button_by_text="true"
                         />
@@ -343,17 +345,13 @@ export default {
             return retVal;
         },
         companyOwner: function () {
-            if (this.vessel && this.vessel.vessel_ownership && this.vessel.vessel_ownership.individual_owner == false) {
+            if (this.vessel && this.vessel.vessel_ownership && this.vessel.vessel_ownership.individual_owner === false) {
                 return true;
             }
             return false
         },
         individualOwner: function () {
-            if (this.vessel && this.vessel.vessel_ownership && this.vessel.vessel_ownership.individual_owner == undefined) {
-                this.vessel.vessel_ownership.individual_owner = true;
-            }
-
-            if (this.vessel && this.vessel.vessel_ownership && this.vessel.vessel_ownership.individual_owner == true) {
+            if (this.vessel && this.vessel.vessel_ownership && this.vessel.vessel_ownership.individual_owner !== false) {
                 return true;
             }
             return false
@@ -508,6 +506,25 @@ export default {
                     this.vessel.vessel_ownership.org_name = '';
                 }
             })
+        },
+        setRegisteredOwner: function (isIndividualOwner) {
+            if (!this.vessel.vessel_ownership) {
+                this.$set(this.vessel, 'vessel_ownership', {
+                    company_ownership: {
+                        company: {},
+                    },
+                });
+            }
+
+            this.$set(this.vessel.vessel_ownership, 'individual_owner', isIndividualOwner);
+
+            if (!isIndividualOwner && !this.vessel.vessel_ownership.company_ownership) {
+                this.$set(this.vessel.vessel_ownership, 'company_ownership', {
+                    company: {},
+                });
+            }
+
+            this.vessel = Object.assign({}, this.vessel);
         },
         validateRegoNo: function (data) {
             // force uppercase and no whitespace

@@ -17,6 +17,7 @@
                 :key="name" 
                 :name="name" type="file" 
                 :accept="fileTypes" 
+                :required="isRequired && numDocuments === 0"
                 @change="handleChangeWrapper" 
                 :class="ffu_input_element_classname" />
             <div v-if="replace_button_by_text">
@@ -58,6 +59,10 @@ export default {
             }
         },
         isRepeatable:Boolean,
+        isRequired: {
+            type: Boolean,
+            default: false,
+        },
         readonly:Boolean,
         documentActionUrl: String,
         temporaryDocumentCollectionId: Number,
