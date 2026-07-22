@@ -1,19 +1,45 @@
 module.exports = {
+    _cleanErrorString: function(value) {
+        return String(value)
+            .replace(/<br\s*\/?\s*>/gi, '\n')
+            .replace(/\r\n/g, '\n')
+            .replace(/\n{3,}/g, '\n\n')
+            .trim();
+    },
     formatError: function(err) {
-        let returnStr = '';
-        // object {}
+        let messages = [];
+
         if (typeof(err.body) === 'object' && !err.body.hasOwnProperty('length')) {
             for (const key of Object.keys(err.body)) {
-                returnStr += `${key}: ${err.body[key]} <br/>`;
+                const value = err.body[key];
+                const label = key === 'non_field_errors' ? '' : `${key}: `;
+                if (Array.isArray(value)) {
+                    for (const item of value) {
+                        messages.push(`${label}${this._cleanErrorString(item)}`.trim());
+                    }
+                } else {
+                    messages.push(`${label}${this._cleanErrorString(value)}`.trim());
+                }
             }
-        // array
-        } else if (typeof(err.body) === 'object') {
-            returnStr = err.body[0];
-        // string
-        } else {
-            returnStr = err.body;
+        } else if (typeof(err.body) === 'object' && err.body.hasOwnProperty('length')) {
+            for (const item of err.body) {
+                messages.push(this._cleanErrorString(item));
+            }
+        } else if (err && err.body) {
+            messages.push(this._cleanErrorString(err.body));
+        } else if (err) {
+            messages.push(this._cleanErrorString(err));
         }
-        return returnStr;
+
+        const cleanedMessages = messages.filter(Boolean);
+        return cleanedMessages.length ? cleanedMessages[0].trim() : '';
+    },
+    formatErrorHtml: function(err) {
+        const text = this.formatError(err);
+        if (!text) {
+            return '';
+        }
+        return text.replace(/\n/g, '<br/>');
     },
   apiError: function ( resp ) {
     var error_str = '';

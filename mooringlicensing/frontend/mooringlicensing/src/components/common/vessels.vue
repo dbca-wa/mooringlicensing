@@ -124,13 +124,14 @@
             <!-- Start:new file field -->
             <transition>
                 <div v-if="showDotRegistrationPapers" class="row form-group">
-                    <label for="" class="col-sm-3 control-label">Copy of registration papers</label>
+                    <label for="" class="col-sm-3 control-label">Copy of registration papers <span style="color: red;">*</span></label>
                     <div class="col-sm-9">
                         <FileField
                             :readonly="hinReadonly"
                             ref="vessel_rego_document"
                             name="vessel_rego_document"
                             :isRepeatable="true"
+                            :isRequired="true"
                             :documentActionUrl="vesselRegoDocumentUrl"
                             :replace_button_by_text="true"
                         />
@@ -141,7 +142,7 @@
 
             <transition>
                 <div v-if="showProofOfVesselOwnership" class="row form-group">
-                    <label for="" class="col-sm-3 control-label">A statutory declaration is required as proof of vessel ownership</label>
+                    <label for="" class="col-sm-3 control-label">A statutory declaration is required as proof of vessel ownership <span style="color: red;">*</span></label>
                     <div class="col-sm-9" v-if="proposal && proposal.stat_dec_form">
                         Download form <a target="_blank" :href="proposal.stat_dec_form">here</a>
                     </div>
@@ -151,6 +152,7 @@
                             ref="hull_identification_number_documents"
                             name="hull-identification-number-documents"
                             :isRepeatable="true"
+                            :isRequired="true"
                             :documentActionUrl="hullIdentificationNumberDocumentUrl"
                             :replace_button_by_text="true"
                         />

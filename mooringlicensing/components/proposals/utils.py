@@ -451,6 +451,48 @@ def submit_vessel_data(instance, request, vessel_data=None, approving=False):
 
     logger.info(f'submit_vessel_data() is called with the vessel_data: {vessel_data}')
 
+    custom_errors = {}
+
+    def is_missing(value):
+        return value is None or value == ''
+
+    if request and vessel_data and vessel_data.get('rego_no'):
+        vessel_details_data = vessel_data.get('vessel_details') or {}
+        vessel_ownership_data = vessel_data.get('vessel_ownership') or {}
+
+        if is_missing(vessel_details_data.get('vessel_type')):
+            custom_errors["Vessel Type"] = "You must specify the vessel type"
+
+        if is_missing(vessel_details_data.get('vessel_length')):
+            custom_errors["Vessel Length"] = "You must specify the vessel length"
+
+        if is_missing(vessel_details_data.get('vessel_draft')):
+            custom_errors["Vessel Draft"] = "You must specify the vessel draft"
+
+        if is_missing(vessel_details_data.get('vessel_weight')):
+            custom_errors["Displacement Tonnage"] = "You must specify the displacement tonnage"
+
+        if 'individual_owner' not in vessel_ownership_data or vessel_ownership_data.get('individual_owner') is None:
+            custom_errors["Registration Vessel Owner"] = "You must choose either your name or your company"
+        elif vessel_ownership_data.get('individual_owner'):
+            if is_missing(vessel_ownership_data.get('percentage')):
+                custom_errors["Ownership Percentage"] = "You must specify a percentage"
+        else:
+            company_ownership_data = vessel_ownership_data.get('company_ownership') or {}
+            if is_missing(company_ownership_data.get('percentage')):
+                custom_errors["Ownership Percentage"] = "You must specify a percentage"
+
+            has_temp_rego_doc = instance.temp_vessel_registration_documents.exists()
+            has_linked_rego_doc = bool(instance.vessel_ownership and instance.vessel_ownership.vessel_registration_documents.count())
+            if not has_temp_rego_doc and not has_linked_rego_doc:
+                custom_errors["Copy of registration papers"] = "You must provide evidence of this"
+
+            if not instance.hull_identification_number_documents.count():
+                custom_errors["Proof of vessel ownership"] = "You must provide evidence of this"
+
+    if custom_errors:
+        raise serializers.ValidationError(custom_errors)
+
     #only enforce this for requests and if a rego_no has been provided
     if (request and "rego_no" in vessel_data and vessel_data["rego_no"]):
         if (not vessel_data or not vessel_data["vessel_details"] or 
