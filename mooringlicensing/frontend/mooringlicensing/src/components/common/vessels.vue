@@ -23,7 +23,7 @@
                     <div class="row">
                         <div class="col-sm-9">
                             <input 
-                                @change="clearOrgName"
+                                @change="clearOrgName(); setRegisteredOwner(true)"
                                 :disabled="readonly"
                                 type="radio"
                                 id="registered_owner_current_user"
@@ -38,7 +38,7 @@
                     <div class="row">
                         <div class="col-sm-3">
                             <input
-                                @change="clearOrgName"
+                                @change="clearOrgName(); setRegisteredOwner(false)"
                                 :disabled="readonly"
                                 type="radio"
                                 id="registered_owner_company"
@@ -343,17 +343,13 @@ export default {
             return retVal;
         },
         companyOwner: function () {
-            if (this.vessel && this.vessel.vessel_ownership && this.vessel.vessel_ownership.individual_owner == false) {
+            if (this.vessel && this.vessel.vessel_ownership && this.vessel.vessel_ownership.individual_owner === false) {
                 return true;
             }
             return false
         },
         individualOwner: function () {
-            if (this.vessel && this.vessel.vessel_ownership && this.vessel.vessel_ownership.individual_owner == undefined) {
-                this.vessel.vessel_ownership.individual_owner = true;
-            }
-
-            if (this.vessel && this.vessel.vessel_ownership && this.vessel.vessel_ownership.individual_owner == true) {
+            if (this.vessel && this.vessel.vessel_ownership && this.vessel.vessel_ownership.individual_owner !== false) {
                 return true;
             }
             return false
@@ -508,6 +504,25 @@ export default {
                     this.vessel.vessel_ownership.org_name = '';
                 }
             })
+        },
+        setRegisteredOwner: function (isIndividualOwner) {
+            if (!this.vessel.vessel_ownership) {
+                this.$set(this.vessel, 'vessel_ownership', {
+                    company_ownership: {
+                        company: {},
+                    },
+                });
+            }
+
+            this.$set(this.vessel.vessel_ownership, 'individual_owner', isIndividualOwner);
+
+            if (!isIndividualOwner && !this.vessel.vessel_ownership.company_ownership) {
+                this.$set(this.vessel.vessel_ownership, 'company_ownership', {
+                    company: {},
+                });
+            }
+
+            this.vessel = Object.assign({}, this.vessel);
         },
         validateRegoNo: function (data) {
             // force uppercase and no whitespace
