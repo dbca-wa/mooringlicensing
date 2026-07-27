@@ -742,17 +742,12 @@ def send_approval_renewal_email_notification(approval):
     except:
         sender_user = None
 
-    attachments = []
-    attachment = approval.get_licence_document_as_attachment()
-    if attachment:
-        attachments.append(attachment)
-
-    msg = email.send(proposal.applicant_obj.email, cc=[], attachments=attachments, context=context)
+    msg = email.send(proposal.applicant_obj.email, cc=[], attachments=[], context=context)
     if msg:
         from mooringlicensing.components.approvals.models import Approval
         if isinstance(approval, Approval):
             _log_approval_email(msg, approval, sender=sender_user)
-            _log_user_email(msg, approval.applicant_obj, proposal.applicant_obj, sender=sender_user, attachments=attachments)
+            _log_user_email(msg, approval.applicant_obj, proposal.applicant_obj, sender=sender_user, attachments=[])
 
 
 def send_application_approved_or_declined_email(proposal, decision, request, stickers_to_be_returned=[]):
