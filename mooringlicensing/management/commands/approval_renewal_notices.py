@@ -61,7 +61,7 @@ class Command(BaseCommand):
             queries &= Q(status__in=[Approval.APPROVAL_STATUS_CURRENT, Approval.APPROVAL_STATUS_SUSPENDED,])
             if number_of_days_code == CODE_DAYS_FOR_RENEWAL_AUP:
                 queries &= ~Q(current_proposal__vessel_ownership=None)
-                queries &= ~Q(current_proposal__vessel_ownership__end_date=None)
+                queries &= Q(current_proposal__vessel_ownership__end_date=None)
 
         approvals = approval_class.objects.filter(queries).order_by('issue_date')[:max_renewal_notices]
         for a in approvals:
