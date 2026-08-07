@@ -46,13 +46,16 @@ Vue.http.interceptors.push( function ( request, next ) {
   next();
 } );
 
+const appElement = document.getElementById( 'app' );
 
-/* eslint-disable no-new */
-new Vue( {
-  el: '#app',
-  router,
-  template: '<App/>',
-  components: {
-    App
-  }
-} )
+if ( appElement ) {
+  /* eslint-disable no-new */
+  new Vue( {
+    el: '#app',
+    router,
+    template: '<App/>',
+    components: {
+      App
+    }
+  } )
+}
