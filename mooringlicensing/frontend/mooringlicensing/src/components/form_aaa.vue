@@ -147,10 +147,6 @@
                 type: Boolean,
                 default: true
             },
-            keepCurrentVessel:{
-                type: Boolean,
-                default: true, 
-            },
         },
         data:function () {
             return{
