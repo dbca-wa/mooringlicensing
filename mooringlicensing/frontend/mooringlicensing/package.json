@@ -37,6 +37,7 @@
     "brace-expansion": "^1.1.18",
     "fast-uri": "^3.1.5",
     "js-yaml": "^4.3.1",
+    "moment-timezone": "^0.5.48",
     "postcss": "^8.5.26",
     "serialize-javascript": "^7.0.7",
     "shell-quote": "^1.10.0",
