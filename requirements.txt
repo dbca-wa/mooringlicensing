@@ -52,9 +52,9 @@ git+https://github.com/dbca-wa/webtemplate2.git#egg=webtemplate_dbca
 tqdm~=4.66.5
 python-decouple==3.8
 git+https://github.com/dbca-wa/appmonitor_client.git#egg=appmonitor_client
-click==8.1.7
+click==8.3.3
 numpy~=2.1.1
-setuptools~=82.0.0
+setuptools~=83.0.0
 wheel~=0.46.0
 git+https://github.com/dbca-wa/django5-utils-six.git#egg=django5_six
 crispy_bootstrap5==2024.2
