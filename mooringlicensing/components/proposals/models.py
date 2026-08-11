@@ -2642,8 +2642,6 @@ class Proposal(RevisionedMixin):
                         self.copy_mooring_report_documents(proposal)
                         self.copy_written_proof_documents(proposal)
                         self.copy_signed_licence_agreement_documents(proposal)
-
-                        #TODO copy insurance and vessel from proposal which has largest current (not sold) vessel (instead of just from the last proposal) if any
                         self.copy_insurance_document(proposal)
 
                     req=self.requirements.all().exclude(is_deleted=True)
@@ -2702,8 +2700,6 @@ class Proposal(RevisionedMixin):
                         self.copy_mooring_report_documents(proposal)
                         self.copy_written_proof_documents(proposal)
                         self.copy_signed_licence_agreement_documents(proposal)
-
-                        #TODO copy insurance and vessel from proposal which has largest current (not sold) vessel (instead of just from the last proposal) if any
                         self.copy_insurance_document(proposal)
 
                     req=self.requirements.all().exclude(is_deleted=True)
