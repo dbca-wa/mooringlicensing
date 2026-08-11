@@ -1792,6 +1792,7 @@ class AuthorisedUserPermit(Approval):
                 'approval': self,
                 'application': self.current_proposal,
                 'issue_date': self.issue_date.strftime('%d/%m/%Y') if self.issue_date else '',
+                'doc_generated_date': timezone.localtime(timezone.now()).date().strftime('%d/%m/%Y'),
                 'applicant_name': self.current_proposal.proposal_applicant.get_full_name(),
                 'p_address_line1': self.postal_address_line1,
                 'p_address_line2': self.postal_address_line2,
