@@ -2852,7 +2852,7 @@ class Proposal(RevisionedMixin):
         from mooringlicensing.components.approvals.models import MooringLicence
         # Test to see if vessel should be read in from submitted data
         vessel_exists = False
-        if self.approval and type(self.approval) is not MooringLicence:
+        if self.approval and not(type(self.approval) is MooringLicence or type(self.approval.child_obj) is MooringLicence):
             vessel_exists = (True if
                 self.approval and self.approval.current_proposal and 
                 self.approval.current_proposal.vessel_details and
