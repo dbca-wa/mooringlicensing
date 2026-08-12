@@ -1822,10 +1822,6 @@ class AuthorisedUserPermit(Approval):
 
     def internal_reissue(self, mooring_licence=None):
         ## now reissue approval
-        if self.current_proposal.vessel_ownership and not self.current_proposal.vessel_ownership.end_date:
-            # When there is a current vessel
-            self.current_proposal.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
-            self.current_proposal.save()
         self.reissued=True
         self.save()
         # Create a log entry for the proposal and approval
@@ -1834,7 +1830,7 @@ class AuthorisedUserPermit(Approval):
         if mooring_licence:
             self.approval.log_user_action(ApprovalUserAction.ACTION_REISSUE_APPROVAL_ML.format(mooring_licence.lodgement_number))
         ## final approval
-        self.current_proposal.final_approval()
+        self.current_proposal.final_approval(None, None, True)
 
     def update_moorings(self, mooring_licence):
         # The status of the mooring_licence should be in ['expired', 'cancelled', 'surrendered', 'suspended']

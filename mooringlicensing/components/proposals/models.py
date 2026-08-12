@@ -2358,7 +2358,7 @@ class Proposal(RevisionedMixin):
         if self.child_obj:
             self.child_obj.refresh_from_db()
 
-    def final_approval_for_AUA_MLA(self, request=None):
+    def final_approval_for_AUA_MLA(self, request=None, bypass_submit_vessel=False):
         with transaction.atomic():
             try:
                 if self.proposed_decline_status:
@@ -2367,7 +2367,8 @@ class Proposal(RevisionedMixin):
                 from mooringlicensing.components.proposals.utils import submit_vessel_data
                 logger.info(f'Processing final_approval... for the proposal: [{self}].')
 
-                submit_vessel_data(self, request, approving=True)
+                if not bypass_submit_vessel:
+                    submit_vessel_data(self, request, approving=True)
                 self.refresh_from_db()
 
                 # Validation & update proposed_issuance_approval
@@ -2503,11 +2504,11 @@ class Proposal(RevisionedMixin):
                 logger.error(traceback.print_exc())
                 raise e
 
-    def final_approval(self, request=None, details=None):
+    def final_approval(self, request=None, details=None, bypass_submit_vessel=False):
         if self.child_obj.code in (WaitingListApplication.code, AnnualAdmissionApplication.code):
             self.final_approval_for_WLA_AAA(request, details)
         elif self.child_obj.code in (AuthorisedUserApplication.code, MooringLicenceApplication.code):
-            return self.final_approval_for_AUA_MLA(request)
+            return self.final_approval_for_AUA_MLA(request, bypass_submit_vessel)
 
     def generate_compliances(self,approval, request):
         today = timezone.now().date()
