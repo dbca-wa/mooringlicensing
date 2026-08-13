@@ -2194,6 +2194,11 @@ class Proposal(RevisionedMixin):
         from mooringlicensing.components.payments_ml.models import FeeItemApplicationFee
         with transaction.atomic():
             try:
+                # Check approved statuses - if already approved do not continue
+                self.refresh_from_db()
+                if self.processing_status in [Proposal.PROCESSING_STATUS_APPROVED, Proposal.PROCESSING_STATUS_PRINTING_STICKER, Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED]:
+                    raise ValidationError('This Application has already been Approved.')
+
                 if self.proposed_decline_status:
                     raise ValidationError('This Application was proposed to be declined. Send back to assessor if it needs to be approved.')
 
@@ -2293,6 +2298,11 @@ class Proposal(RevisionedMixin):
                 else:
                     # When auto approve
                     self.log_user_action(ProposalUserAction.ACTION_AUTO_APPROVED.format(self.lodgement_number),)
+
+                #additional check to avoid managing stickers
+                self.refresh_from_db()
+                if self.processing_status in [Proposal.PROCESSING_STATUS_APPROVED, Proposal.PROCESSING_STATUS_PRINTING_STICKER, Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED]:
+                    raise ValidationError('This Application has already been Approved.')
 
                 # set proposal status to approved - can change later after manage_stickers
                 self.processing_status = Proposal.PROCESSING_STATUS_APPROVED
@@ -4136,6 +4146,9 @@ class AuthorisedUserApplication(Proposal):
     def update_or_create_approval(self, current_datetime, request=None):
         from mooringlicensing.components.proposals.utils import submit_vessel_data
         logger.info(f'Updating/Creating Authorised User Permit from the application: [{self}]...')
+        self.refresh_from_db()
+        if self.processing_status in [Proposal.PROCESSING_STATUS_APPROVED, Proposal.PROCESSING_STATUS_PRINTING_STICKER, Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED]:
+            raise ValidationError('This Application has already been Approved.')
         try:
             # This function is called after payment success for new/amendment/renewal application
             # Manage approval
@@ -4245,6 +4258,10 @@ class AuthorisedUserApplication(Proposal):
                 
             approval.export_to_mooring_booking = True
             approval.save()
+
+            self.refresh_from_db()
+            if self.processing_status in [Proposal.PROCESSING_STATUS_APPROVED, Proposal.PROCESSING_STATUS_PRINTING_STICKER, Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED]:
+                raise ValidationError('This Application has already been Approved.')
 
             # set proposal status to approved - can change later after manage_stickers
             self.processing_status = Proposal.PROCESSING_STATUS_APPROVED
@@ -4807,6 +4824,9 @@ class MooringLicenceApplication(Proposal):
         from mooringlicensing.components.proposals.utils import submit_vessel_data
         from mooringlicensing.components.approvals.models import Approval
         logger.info(f'Updating/Creating Mooring Site Licence from the application: [{self}]...')
+        self.refresh_from_db()
+        if self.processing_status in [Proposal.PROCESSING_STATUS_APPROVED, Proposal.PROCESSING_STATUS_PRINTING_STICKER, Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED]:
+            raise ValidationError('This Application has already been Approved.')
         try:
             # renewal/amendment/reissue - associated ML must have a mooring
             if self.approval and hasattr(self.approval.child_obj, 'mooring') and self.approval.child_obj.mooring:
@@ -4943,6 +4963,10 @@ class MooringLicenceApplication(Proposal):
 
             approval.export_to_mooring_booking = True
             approval.save()
+
+            self.refresh_from_db()
+            if self.processing_status in [Proposal.PROCESSING_STATUS_APPROVED, Proposal.PROCESSING_STATUS_PRINTING_STICKER, Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED]:
+                raise ValidationError('This Application has already been Approved.')
 
             # set proposal status to approved - can change later after manage_stickers
             self.processing_status = Proposal.PROCESSING_STATUS_APPROVED
