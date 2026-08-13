@@ -2188,7 +2188,6 @@ class MooringLicence(Approval):
             
             if i.approval:
                 i.approval.regenerate_documents = True
-                #TODO requires email notification?
                 i.approval.save()
 
         #update aup pdf
@@ -2444,7 +2443,7 @@ class MooringLicence(Approval):
     def manage_stickers(self, proposal):
         logger.info(f'Managing stickers for the MooringSiteLicence: [{self}]...')
 
-        if proposal.approval and proposal.approval.reissued:
+        if proposal and proposal.approval and proposal.approval.reissued:
             stickers_to_be_kept = []  # Store all the stickers we want to keep
             new_sticker_created = False
             new_sticker_status = Sticker.STICKER_STATUS_READY  # Default to 'ready'
@@ -2460,7 +2459,7 @@ class MooringLicence(Approval):
                 new_sticker_status = Sticker.STICKER_STATUS_NOT_READY_YET
 
             #(potentially) new vessel ownership as of this amendment
-            if proposal.vessel_ownership:
+            if proposal and proposal.vessel_ownership:
                 stickers_not_exported = self.approval.stickers.filter(status__in=[Sticker.STICKER_STATUS_NOT_READY_YET, Sticker.STICKER_STATUS_READY,])
                 if stickers_not_exported:
                     with transaction.atomic():
@@ -2632,7 +2631,7 @@ class MooringLicence(Approval):
 
             return [], stickers_to_be_returned
 
-        elif proposal.proposal_type.code == PROPOSAL_TYPE_NEW:
+        elif proposal and proposal.proposal_type.code == PROPOSAL_TYPE_NEW:
             # New sticker created with status Ready
             new_sticker = self._create_new_sticker_by_proposal(proposal)
             logger.info(f'New Sticker: [{new_sticker}] has been created for the proposal: [{proposal}]')
@@ -2643,7 +2642,7 @@ class MooringLicence(Approval):
             logger.info(f'')
             return [], []
 
-        elif proposal.proposal_type.code == PROPOSAL_TYPE_SWAP_MOORINGS:
+        elif proposal and proposal.proposal_type.code == PROPOSAL_TYPE_SWAP_MOORINGS:
             stickers_to_be_kept = []  # Store all the stickers we want to keep
             new_sticker_created = False
             new_sticker_status = Sticker.STICKER_STATUS_READY  # Default to 'ready'
@@ -2692,7 +2691,7 @@ class MooringLicence(Approval):
 
             return [], stickers_to_be_returned
 
-        elif proposal.proposal_type.code == PROPOSAL_TYPE_AMENDMENT:
+        elif proposal and proposal.proposal_type.code == PROPOSAL_TYPE_AMENDMENT:
             # Amendment (vessel(s) may be changed or added)
             stickers_to_be_kept = []  # Store all the stickers we want to keep
             new_sticker_created = False
@@ -2875,7 +2874,7 @@ class MooringLicence(Approval):
 
             return [], stickers_to_be_returned
 
-        elif proposal.proposal_type.code == PROPOSAL_TYPE_RENEWAL:
+        elif proposal and proposal.proposal_type.code == PROPOSAL_TYPE_RENEWAL:
             # Renewal (vessel changed, null vessel)
             stickers_to_be_kept = []
             stickers_to_be_replaced = []
