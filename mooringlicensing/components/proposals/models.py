@@ -3107,26 +3107,12 @@ class ProposalApplicant(RevisionedMixin):
             last_name = self.last_name,
             dob = self.dob,
 
-            residential_address_line1 = self.residential_address_line1,
-            residential_address_line2 = self.residential_address_line2,
-            residential_address_line3 = self.residential_address_line3,
-            residential_address_locality = self.residential_address_locality,
-            residential_address_state = self.residential_address_state,
-            residential_address_country = self.residential_address_country,
-            residential_address_postcode = self.residential_address_postcode,
-
-            postal_address_line1 = self.postal_address_line1,
-            postal_address_line2 = self.postal_address_line2,
-            postal_address_line3 = self.postal_address_line3,
-            postal_address_locality = self.postal_address_locality,
-            postal_address_state = self.postal_address_state,
-            postal_address_country = self.postal_address_country,
-            postal_address_postcode = self.postal_address_postcode,
-
             email_user_id = self.email_user_id,
             email = self.email,
             phone_number = self.phone_number,
             mobile_number = self.mobile_number,
+
+            #NOTE: we do not copy the user's address, they must re-enter their address
         )
         logger.info(f'ProposalApplicant: [{proposal_applicant}] has been created for the Proposal: [{target_proposal}] by copying the ProposalApplicant: [{self}].')
 
