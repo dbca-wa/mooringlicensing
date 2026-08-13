@@ -1823,10 +1823,6 @@ class AuthorisedUserPermit(Approval):
 
     def internal_reissue(self, mooring_licence=None):
         ## now reissue approval
-        if self.current_proposal.vessel_ownership and not self.current_proposal.vessel_ownership.end_date:
-            # When there is a current vessel
-            self.current_proposal.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
-            self.current_proposal.save()
         self.reissued=True
         self.save()
         # Create a log entry for the proposal and approval
@@ -1835,7 +1831,7 @@ class AuthorisedUserPermit(Approval):
         if mooring_licence:
             self.approval.log_user_action(ApprovalUserAction.ACTION_REISSUE_APPROVAL_ML.format(mooring_licence.lodgement_number))
         ## final approval
-        self.current_proposal.final_approval()
+        self.current_proposal.final_approval(None, None, True)
 
     def update_moorings(self, mooring_licence):
         # The status of the mooring_licence should be in ['expired', 'cancelled', 'surrendered', 'suspended']
@@ -2193,7 +2189,6 @@ class MooringLicence(Approval):
             
             if i.approval:
                 i.approval.regenerate_documents = True
-                #TODO requires email notification?
                 i.approval.save()
 
         #update aup pdf
@@ -2449,7 +2444,7 @@ class MooringLicence(Approval):
     def manage_stickers(self, proposal):
         logger.info(f'Managing stickers for the MooringSiteLicence: [{self}]...')
 
-        if proposal.approval and proposal.approval.reissued:
+        if proposal and proposal.approval and proposal.approval.reissued:
             stickers_to_be_kept = []  # Store all the stickers we want to keep
             new_sticker_created = False
             new_sticker_status = Sticker.STICKER_STATUS_READY  # Default to 'ready'
@@ -2465,7 +2460,7 @@ class MooringLicence(Approval):
                 new_sticker_status = Sticker.STICKER_STATUS_NOT_READY_YET
 
             #(potentially) new vessel ownership as of this amendment
-            if proposal.vessel_ownership:
+            if proposal and proposal.vessel_ownership:
                 stickers_not_exported = self.approval.stickers.filter(status__in=[Sticker.STICKER_STATUS_NOT_READY_YET, Sticker.STICKER_STATUS_READY,])
                 if stickers_not_exported:
                     with transaction.atomic():
@@ -2637,7 +2632,7 @@ class MooringLicence(Approval):
 
             return [], stickers_to_be_returned
 
-        elif proposal.proposal_type.code == PROPOSAL_TYPE_NEW:
+        elif proposal and proposal.proposal_type.code == PROPOSAL_TYPE_NEW:
             # New sticker created with status Ready
             new_sticker = self._create_new_sticker_by_proposal(proposal)
             logger.info(f'New Sticker: [{new_sticker}] has been created for the proposal: [{proposal}]')
@@ -2648,7 +2643,7 @@ class MooringLicence(Approval):
             logger.info(f'')
             return [], []
 
-        elif proposal.proposal_type.code == PROPOSAL_TYPE_SWAP_MOORINGS:
+        elif proposal and proposal.proposal_type.code == PROPOSAL_TYPE_SWAP_MOORINGS:
             stickers_to_be_kept = []  # Store all the stickers we want to keep
             new_sticker_created = False
             new_sticker_status = Sticker.STICKER_STATUS_READY  # Default to 'ready'
@@ -2697,7 +2692,7 @@ class MooringLicence(Approval):
 
             return [], stickers_to_be_returned
 
-        elif proposal.proposal_type.code == PROPOSAL_TYPE_AMENDMENT:
+        elif proposal and proposal.proposal_type.code == PROPOSAL_TYPE_AMENDMENT:
             # Amendment (vessel(s) may be changed or added)
             stickers_to_be_kept = []  # Store all the stickers we want to keep
             new_sticker_created = False
@@ -2880,7 +2875,7 @@ class MooringLicence(Approval):
 
             return [], stickers_to_be_returned
 
-        elif proposal.proposal_type.code == PROPOSAL_TYPE_RENEWAL:
+        elif proposal and proposal.proposal_type.code == PROPOSAL_TYPE_RENEWAL:
             # Renewal (vessel changed, null vessel)
             stickers_to_be_kept = []
             stickers_to_be_replaced = []

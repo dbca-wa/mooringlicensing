@@ -353,7 +353,7 @@ class StickerReplacementFeeSuccessViewPreload(APIView):
                             new_sticker = None
                             if sticker_action_detail.sticker:
                                 old_sticker = sticker_action_detail.sticker
-                                if old_sticker.status in [Sticker.STICKER_STATUS_READY, Sticker.STICKER_STATUS_NOT_READY_YET]:
+                                if old_sticker.status in [Sticker.STICKER_STATUS_READY, Sticker.STICKER_STATUS_NOT_READY_YET, Sticker.STICKER_STATUS_CANCELLED]:
                                     new_sticker = old_sticker.request_replacement(Sticker.STICKER_STATUS_CANCELLED, sticker_action_detail)
                                 else:
                                     new_sticker = old_sticker.request_replacement(Sticker.STICKER_STATUS_LOST, sticker_action_detail)
