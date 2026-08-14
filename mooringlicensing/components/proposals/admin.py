@@ -8,11 +8,47 @@ from mooringlicensing.components.main.models import (
     SystemMaintenance,
     GlobalSettings,
 )
-from reversion.admin import VersionAdmin
+from reversion.admin import VersionAdmin as ReversionVersionAdmin
 from mooringlicensing.components.proposals.models import StickerPrintingBatch, StickerPrintingResponse, \
     StickerPrintingContact, StickerPrintedContact, MooringBay, Mooring
 from mooringlicensing.ledger_api_utils import retrieve_email_userro
 from mooringlicensing.components.payments_ml.models import ApplicationFee
+
+from django.core.exceptions import PermissionDenied
+from django.urls import reverse
+from reversion.models import Version
+from django.contrib.admin.utils import unquote, quote
+
+class VersionAdmin(ReversionVersionAdmin):
+
+    def history_view(self, request, object_id, extra_context=None):
+
+        if hasattr(self, 'has_view_or_change_permission'):
+            if not self.has_view_or_change_permission(request):
+                raise PermissionDenied
+        else:
+            if not self.has_change_permission(request):
+                raise PermissionDenied
+
+        opts = self.model._meta
+        action_list = [
+            {
+                "revision": version.revision,
+                "url": reverse(
+                    f"{self.admin_site.name}:{opts.app_label}_{opts.model_name}_revision",
+                    args=(quote(version.object_id), version.id)
+                ),
+            }
+            for version
+            in self._reversion_order_version_queryset(Version.objects.get_for_object_reference(
+                self.model,
+                unquote(object_id),
+            ))
+        ]
+        # Compile the context.
+        context = {"action_list": action_list}
+        context.update(extra_context or {})
+        return super(ReversionVersionAdmin, self).history_view(request, object_id, context)
 
 class ProposalDocumentInline(admin.TabularInline):
     model = models.ProposalDocument
