@@ -2,6 +2,7 @@
 30 7 * * 1 python manage_ml.py export_and_email_sticker_data >> logs/run_cron_tasks.log 2>&1
 */10 * * * * python manage_ml.py import_sticker_data >> logs/run_cron_tasks.log 2>&1
 */5 * * * * python manage_ml.py run_queue_job >> logs/run_cron_tasks.log 2>&1
+*/5 * * * * python manage_ml.py fix_stuck_proposals >> logs/run_cron_tasks.log 2>&1
 10 * * * * python manage_ml.py import_mooring_bookings_data >> logs/run_import_mooring_bookings_data_cron_task.log 2>&1
 */30 * * * * python manage_ml.py export_to_mooring_booking_cron_task >> logs/run_export_to_mooring_booking_cron_task.log 2>&1
 */5 * * * * python manage_ml.py runcrons >> logs/runcrons.log 2>&1
