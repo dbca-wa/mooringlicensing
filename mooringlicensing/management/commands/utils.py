@@ -2,6 +2,8 @@ from django.db.models import F, CharField, Q, Value
 from django.db.models.functions import Cast, Concat
 
 from ledger_api_client.settings_base import TIME_ZONE
+from ledger_api_client.utils import get_invoice_properties
+from ledger_api_client.ledger_models import Invoice
 
 from mooringlicensing.components.main.models import GlobalSettings
 
@@ -10,11 +12,11 @@ from mooringlicensing.components.approvals.models import (
 )
 
 from mooringlicensing.components.proposals.models import (
-    Proposal, VesselOwnership
+    Proposal, VesselOwnership, Vessel, VesselDetails
 )
 
 from mooringlicensing.components.payments_ml.models import (
-    FeeConstructor, FeeItemApplicationFee
+    FeeConstructor, FeeItemApplicationFee, ApplicationFee
 )
 
 import pytz
@@ -338,3 +340,38 @@ def construct_email_message(cmd_name, errors, updates):
 
     msg = '<div style="margin: 0 0 1em 0;">' + cmd_str + '<div style="margin:0 0 0 1em;">' + err_str + updates_str + '</div></div>'
     return msg
+
+def update_fee_item_application_fee_record(proposal, vessel_details):
+    #get FeeItemApplicationFee record tied to proposal (only if invoice is paid or cancelled)
+    application_fees = ApplicationFee.objects.filter(proposal=proposal).exclude(handled_in_preload=None)
+    invoices = Invoice.objects.filter(reference__in=list(application_fees.values_list("invoice_reference", flat=True)))
+
+    id_list = []
+    for i in application_fees:
+        invoice = invoices.filter(reference=i.invoice_reference).first()
+        invoice_properties = get_invoice_properties(invoice.id)
+        invoice_payment_status = invoice_properties['data']['invoice']['payment_status']
+        if (invoice_payment_status in ['paid', 'over_paid', 'cancelled']):
+            id_list.append(i.id)
+
+    fiaf_records = FeeItemApplicationFee.objects.filter(application_fee_id__in=id_list).filter(vessel_details=None)
+    fiaf_records.update(vessel_details=vessel_details)
+
+def update_missing_vessel_details(proposal):
+
+    rego_no = proposal.rego_no
+    owner = proposal.proposal_applicant.email_user_id if proposal.proposal_applicant else None
+
+    if not rego_no or not owner:
+        return
+    #get latest vessel and vessel details
+    vessel = Vessel.objects.filter(rego_no=rego_no).order_by('id').last()
+    vessel_details = VesselDetails.objects.filter(vessel=vessel).order_by('id').last()
+    #get latest relevant vessel ownership record with Owner and Rego No
+    vessel_ownership = VesselOwnership.objects.filter(end_date=None).filter(owner__emailuser=owner).filter(vessel=vessel).order_by("id").last()
+
+    proposal.vessel_details = vessel_details
+    proposal.vessel_ownership = vessel_ownership
+    proposal.save()
+
+    update_fee_item_application_fee_record(proposal, vessel_details)
