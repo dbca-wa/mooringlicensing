@@ -23,6 +23,9 @@ class Command(BaseCommand):
         # get all stickers that have an originating proposal with incorrect status (all except printing sticker, sticker to be returned, or approved) unless the approval has been reissued (in which case we only correct if stuck in draft or discarded, we cancel the reissue if that does happen)
         # a reissue could potentially be declined or expire - those are the only circumstance where sticker records may exist for such proposals
         # a reissue should never result in a new invoice so we operate on the assumption that if a proposal is in awaiting payment but has a sticker record - that needs to be fixed
+
+        # TODO we also need to check for and potential restore vessel_ownership, vessel_details, and fee_season on affected records
+
         stickers_with_stuck_proposals = Sticker.objects.exclude(
             proposal_initiated__processing_status__in=[
                 Proposal.PROCESSING_STATUS_APPROVED, 

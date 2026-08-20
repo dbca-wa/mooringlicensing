@@ -85,9 +85,11 @@ def get_invalid_stickers_still_current(stickers):
     #are attached to a no longer valid vessel? 
     current_stickers_with_sold_vessel = stickers.exclude(vessel_ownership__end_date=None)
 
+    stickers_being_replaced = Sticker.objects.filter(status__in=[Sticker.STICKER_STATUS_READY,Sticker.STICKER_STATUS_NOT_READY_YET,Sticker.STICKER_STATUS_AWAITING_PRINTING])
+
     #For non-AUPs, there should only be one sticker per vessel per approval 
-    aup_stickers = stickers.filter(approval__lodgement_number__startswith="AUP")
-    non_aup_stickers = stickers.exclude(approval__lodgement_number__startswith="AUP")
+    aup_stickers = stickers.filter(approval__lodgement_number__startswith="AUP").exclude(id__in=list(stickers_being_replaced.values_list("sticker_to_replace_id", flat=True)))
+    non_aup_stickers = stickers.exclude(approval__lodgement_number__startswith="AUP").exclude(id__in=list(stickers_being_replaced.values_list("sticker_to_replace_id", flat=True)))
 
     latest_distinct_stickers = list(non_aup_stickers.order_by("approval_id","vessel_ownership__vessel__rego_no","-proposal_initiated__id","-number").distinct("approval_id","vessel_ownership__vessel__rego_no").values_list('id',flat=True))
     replaced_stickers = non_aup_stickers.exclude(id__in=latest_distinct_stickers)
@@ -163,6 +165,10 @@ def get_approvals_due_for_renewal_without_notice(approvals):
 def get_stickers_not_on_MOAs(stickers):
 
     stickers = stickers.filter(approval__lodgement_number__startswith="AUP",status__in=Sticker.STATUSES_AS_CURRENT)
+
+    stickers_being_replaced = Sticker.objects.filter(status__in=[Sticker.STICKER_STATUS_READY,Sticker.STICKER_STATUS_NOT_READY_YET,Sticker.STICKER_STATUS_AWAITING_PRINTING])
+    stickers = stickers.exclude(id__in=list(stickers_being_replaced.values_list("sticker_to_replace_id", flat=True)))
+
     moas = MooringOnApproval.objects.filter(sticker_id__in=list(stickers.values_list('id', flat=True)))
     moa_stickers = list(moas.values_list('sticker_id',flat=True))
 
@@ -174,6 +180,9 @@ def get_incorrect_sticker_seasons(stickers):
     """Get stickers that have a fee season that does not match the approval they are on (or is missing a fee season)"""
 
     stickers = stickers.filter(status__in=Sticker.STATUSES_AS_CURRENT)
+
+    stickers_being_replaced = Sticker.objects.filter(status__in=[Sticker.STICKER_STATUS_READY,Sticker.STICKER_STATUS_NOT_READY_YET,Sticker.STICKER_STATUS_AWAITING_PRINTING])
+    stickers = stickers.exclude(id__in=list(stickers_being_replaced.values_list("sticker_to_replace_id", flat=True)))
 
     missing_fee_season = list(stickers.filter(fee_season=None).values_list('id',flat=True))
     mismatched_fee_season = []
