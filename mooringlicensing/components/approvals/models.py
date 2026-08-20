@@ -923,7 +923,7 @@ class Approval(RevisionedMixin):
                     ProposalUserAction.log_action(proposal, ProposalUserAction.ACTION_EXPIRED_APPROVAL_.format(proposal.id), user)
 
                     for sticker in stickers:
-                        if sticker.status in [Sticker.STICKER_STATUS_NOT_READY_YET, Sticker.STICKER_STATUS_READY]:
+                        if sticker.status in [Sticker.STICKER_STATUS_NOT_READY_YET, Sticker.STICKER_STATUS_READY, Sticker.STICKER_STATUS_CANCELLED]:
                             sticker.status = Sticker.STICKER_STATUS_CANCELLED
                         else:
                             sticker.status = Sticker.STICKER_STATUS_EXPIRED
@@ -2156,7 +2156,7 @@ class AuthorisedUserPermit(Approval):
             #if renewing and the sticker is not being replaced, simply expire it now
             for sticker in stickers_to_be_replaced_for_renewal:
                 if not sticker in stickers_replaced_for_renewal:
-                    if sticker.status in [Sticker.STICKER_STATUS_NOT_READY_YET, Sticker.STICKER_STATUS_READY]:
+                    if sticker.status in [Sticker.STICKER_STATUS_NOT_READY_YET, Sticker.STICKER_STATUS_READY,Sticker.STICKER_STATUS_CANCELLED]:
                         sticker.status = Sticker.STICKER_STATUS_CANCELLED
                     else:
                         sticker.status = Sticker.STICKER_STATUS_EXPIRED

@@ -2,6 +2,7 @@
 from django.core.management.base import BaseCommand
 from mooringlicensing.components.approvals.models import Sticker, Approval
 from mooringlicensing.components.proposals.models import Proposal
+from mooringlicensing.management.commands.utils import update_missing_vessel_details
 from django.db.models import Q
 
 class Command(BaseCommand):
@@ -23,6 +24,12 @@ class Command(BaseCommand):
         # get all stickers that have an originating proposal with incorrect status (all except printing sticker, sticker to be returned, or approved) unless the approval has been reissued (in which case we only correct if stuck in draft or discarded, we cancel the reissue if that does happen)
         # a reissue could potentially be declined or expire - those are the only circumstance where sticker records may exist for such proposals
         # a reissue should never result in a new invoice so we operate on the assumption that if a proposal is in awaiting payment but has a sticker record - that needs to be fixed
+
+        # we also need to check for and potential restore vessel_ownership and vessel_details on affected records
+        # get latest VO for submitted rego_no
+        # get appropriate VD record that corresponds with relevant vessel details
+        # get FeeItemApplicationFee record tied to proposal (only if invoice is paid)
+
         stickers_with_stuck_proposals = Sticker.objects.exclude(
             proposal_initiated__processing_status__in=[
                 Proposal.PROCESSING_STATUS_APPROVED, 
@@ -52,6 +59,7 @@ class Command(BaseCommand):
                 proposal.processing_status = Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED
                 proposal.save()
                 proposal.log_user_action(f'Proposal: {proposal} status corrected from {incorrect_status} to {proposal.processing_status}')
+                update_missing_vessel_details(proposal)
                 continue
 
             # any check approval stickers, any in to_be_returned -> sticker_to_be_returned (unless proposal already approved, though that won't reach here)
@@ -59,6 +67,7 @@ class Command(BaseCommand):
                 proposal.processing_status = Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED
                 proposal.save()
                 proposal.log_user_action(f'Proposal: {proposal} status corrected from {incorrect_status} to {proposal.processing_status}')
+                update_missing_vessel_details(proposal)
                 continue
 
             # any proposal stickers in status ready or awaiting_printing and none above -> printing_sticker
@@ -66,6 +75,7 @@ class Command(BaseCommand):
                 proposal.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
                 proposal.save()
                 proposal.log_user_action(f'Proposal: {proposal} status corrected from {incorrect_status} to {proposal.processing_status}')
+                update_missing_vessel_details(proposal)
                 continue
 
             # all stickers cancelled -> printing_sticker
@@ -73,9 +83,11 @@ class Command(BaseCommand):
                 proposal.processing_status = Proposal.PROCESSING_STATUS_PRINTING_STICKER
                 proposal.save()
                 proposal.log_user_action(f'Proposal: {proposal} status corrected from {incorrect_status} to {proposal.processing_status}')
+                update_missing_vessel_details(proposal)
                 continue
 
             # all proposal stickers in status printed, lost, or returned even if some cancelled -> approved (some cancelled stickers may still need to be replaced but this can be fixed)
             proposal.processing_status = Proposal.PROCESSING_STATUS_APPROVED #we default to approved 
             proposal.log_user_action(f'Proposal: {proposal} status corrected from {incorrect_status} to {proposal.processing_status}')
+            update_missing_vessel_details(proposal)
             proposal.save()

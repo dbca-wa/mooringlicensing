@@ -500,7 +500,7 @@ def email_stickers_document():
                     if sticker.sticker_to_replace:
                         # new sticker has the old sticker here if it's created for renewal
                         # When this sticker is created for renewal, set 'expired' status to the old sticker.
-                        if sticker.sticker_to_replace.status in [Sticker.STICKER_STATUS_NOT_READY_YET, Sticker.STICKER_STATUS_READY]:
+                        if sticker.sticker_to_replace.status in [Sticker.STICKER_STATUS_NOT_READY_YET, Sticker.STICKER_STATUS_READY,Sticker.STICKER_STATUS_EXPIRED]:
                             sticker.sticker_to_replace.status = Sticker.STICKER_STATUS_CANCELLED
                         else:
                             sticker.sticker_to_replace.status = Sticker.STICKER_STATUS_EXPIRED
