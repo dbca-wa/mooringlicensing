@@ -636,15 +636,6 @@ def send_endorser_reminder_email(proposal, request=None):
 
     if proposal.no_email_notifications:
         return
-    
-    allocated_mooring = proposal.allocated_mooring
-    # 15
-    # email to authorised user application endorser if application is not endorsed or declined within configurable number of days
-    email = TemplateEmailBase(
-        subject='Endorsement request: Application for authorised use of {} - Rottnest Island Authority'.format(allocated_mooring.name),
-        html_template='mooringlicensing/emails_2/email_15.html',
-        txt_template='mooringlicensing/emails_2/email_15.txt',
-    )
 
     url = settings.SITE_URL if settings.SITE_URL else ''
     endorse_url = url + reverse('endorse-url', kwargs={'uuid_str': proposal.uuid})
@@ -659,7 +650,14 @@ def send_endorser_reminder_email(proposal, request=None):
             # Should not reach here
             continue
 
-        mooring_name = site_licensee_mooring.mooring.name if proposal.mooring else ''
+        mooring_name = site_licensee_mooring.mooring.name if site_licensee_mooring.mooring else ''
+
+        email = TemplateEmailBase(
+            subject='Endorsement request: Application for authorised use of {} - Rottnest Island Authority'.format(mooring_name),
+            html_template='mooringlicensing/emails_2/email_15.html',
+            txt_template='mooringlicensing/emails_2/email_15.txt',
+        )
+
         due_date = proposal.get_due_date_for_endorsement_by_target_date()
 
         # Configure recipients, contents, etc

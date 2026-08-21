@@ -186,11 +186,22 @@ def send_vessel_nomination_reminder_mail(approval, request=None):
 
     proposal = approval.current_proposal
 
+    #TODO this won't work for ML, they may not have a vessel ownership on their last proposal and that might not be the last vessel even if it does
+    vessel_ownership = proposal.vessel_ownership if proposal else None
+    date_to_nominate_new_vessel = vessel_ownership.end_date + relativedelta(months=+6) if vessel_ownership else None
+
+    if proposal.child_obj.code == 'mla':
+        from mooringlicensing.components.approvals.models import VesselOwnershipOnApproval
+        #get vooa for ML with the latest VO end_date
+        vooa = VesselOwnershipOnApproval.objects.filter(approval=approval).exclude(vessel_ownership__end_date=None).order_by("vessel_ownership__end_date").last()
+        vessel_ownership = vooa.vessel_ownership if vooa else None
+        date_to_nominate_new_vessel = vessel_ownership.end_date + relativedelta(months=+6) if vessel_ownership else None
+
     context = {
         'recipient': proposal.proposal_applicant,
         'public_url': get_public_url(),
         'approval': approval,
-        'date_to_nominate_new_vessel': approval.current_proposal.vessel_ownership.end_date + relativedelta(months=+6),
+        'date_to_nominate_new_vessel': date_to_nominate_new_vessel,
         'dashboard_external_url': make_http_https(url),
     }
 
