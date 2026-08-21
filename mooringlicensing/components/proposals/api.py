@@ -468,10 +468,7 @@ class GetApplicationTypeDict(views.APIView):
     def get(self, request, format=None):
         apply_page = request.GET.get('apply_page', 'false')
         apply_page = True if apply_page.lower() in ['true', 'yes', 'y', ] else False
-        data = cache.get('application_type_dict')
-        if not data:
-            cache.set('application_type_dict',Proposal.application_types_dict(apply_page=apply_page), settings.LOV_CACHE_TIMEOUT)
-            data = cache.get('application_type_dict')
+        data = Proposal.application_types_dict(apply_page=apply_page)
         return Response(data)
 
 
@@ -480,10 +477,7 @@ class GetApplicationCategoryDict(views.APIView):
     def get(self, request, format=None):
         apply_page = request.GET.get('apply_page', 'false')
         apply_page = True if apply_page.lower() in ['true', 'yes', 'y', ] else False
-        data = cache.get('application_category_dict')
-        if not data:
-            cache.set('application_category_dict',Proposal.application_categories_dict(apply_page=apply_page), settings.LOV_CACHE_TIMEOUT)
-            data = cache.get('application_category_dict')
+        data = Proposal.application_categories_dict(apply_page=apply_page)
         return Response(data)
 
 
