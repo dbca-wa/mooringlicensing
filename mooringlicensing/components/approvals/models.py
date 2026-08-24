@@ -845,7 +845,6 @@ class Approval(RevisionedMixin):
         self.licence_document = create_approval_doc(self)  # Update the attribute to the latest doc
 
         self.save(version_comment='Created Approval PDF: {}'.format(self.licence_document.name))
-        self.current_proposal.save(version_comment='Created Approval PDF: {}'.format(self.licence_document.name))
         logger.info(f'Licence document: [{self.licence_document._file.url}] for the approval: [{self}] has been created.')
 
         if hasattr(self, 'approval') and self.approval:
@@ -893,13 +892,12 @@ class Approval(RevisionedMixin):
 
             self.authorised_user_summary_document = document  # Update to the latest doc
             self.save(version_comment='Created Authorised User Summary PDF: {}'.format(self.authorised_user_summary_document.name))
-            self.current_proposal.save(version_comment='Created Authorised User Summary PDF: {}'.format(self.authorised_user_summary_document.name))
 
+            
     def generate_renewal_doc(self):
         self.renewal_document = create_renewal_doc(self, self.current_proposal)
         self.save(version_comment='Created Renewal PDF: {}'.format(self.renewal_document.name))
-        self.current_proposal.save(version_comment='Created Renewal PDF: {}'.format(self.renewal_document.name))
-
+        
     def log_user_action(self, action, request=None):
         if request:
             return ApprovalUserAction.log_action(self, action, request.user)
