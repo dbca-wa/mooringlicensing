@@ -302,6 +302,23 @@ def check_proposal_stuck_at_printing(proposals):
 
     return ("Proposals with a Printing Sticker status but with no Sticker records awaiting printing or awaiting export.", non_printing_stuck)
 
+def get_duplicate_invoices_for_non_finalised_proposals(proposal):
+
+    proposal = proposal.filter(Q(lodgement_number__startswith='AU')|Q(lodgement_number__startswith='ML')).exclude(processing_status=[Proposal.PROCESSING_STATUS_APPROVED,Proposal.PROCESSING_STATUS_DISCARDED,Proposal.PROCESSING_STATUS_DECLINED,Proposal.PROCESSING_STATUS_EXPIRED])
+
+    applicable_references = list(ApplicationFee.objects.exclude(cost=0).filter(proposal_id__in=list(proposal.values_list('id', flat=True))).values_list('invoice_reference', flat=True))
+    distinct_applicable_references = list(ApplicationFee.objects.exclude(cost=0).filter(proposal_id__in=list(proposal.values_list('id', flat=True))).distinct('proposal_id').values_list('invoice_reference', flat=True))
+
+    all = Invoice.objects.filter(reference__in=applicable_references).filter(voided=False)
+    all_distinct = Invoice.objects.filter(reference__in=distinct_applicable_references).filter(voided=False)
+
+    duplicate_invoices = all.exclude(id__in=list(all_distinct.values_list('id', flat=True)))
+
+    duplicate_application_fees = ApplicationFee.objects.filter(invoice_reference__in=list(duplicate_invoices.values_list('reference', flat=True)))
+    proposal = proposal.filter(id__in=list(duplicate_application_fees.values_list('proposal_id', flat=True)))
+
+    return ("Unfinished AU and ML Proposals with duplicate invoices:", list(proposal.values_list("lodgement_number", flat=True)))
+
 def check_invalid_expired_approval(approvals):
     """reporting function to get all expired approvals that have a later expiry date"""
     current_time = datetime.datetime.now()
@@ -375,3 +392,4 @@ def update_missing_vessel_details(proposal):
     proposal.save()
 
     update_fee_item_application_fee_record(proposal, vessel_details)
+
