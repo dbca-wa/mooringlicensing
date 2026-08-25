@@ -381,6 +381,7 @@ class Approval(RevisionedMixin):
             if aaps.count() == 1:
                 aap = aaps[0]
                 aap.status = Approval.APPROVAL_STATUS_CANCELLED
+                aap.export_to_mooring_booking = True
                 aap.save()
                 logger.info(f'Approval: {aap.lodgement_number} for the vessel: [{target_vessel}] has been cancelled because the AUP: [{self}] for the same vessel has been created.')
 
@@ -956,6 +957,7 @@ class Approval(RevisionedMixin):
                 if cancellation_date <= today:
                     if not self.status == Approval.APPROVAL_STATUS_CANCELLED:
                         self.status = Approval.APPROVAL_STATUS_CANCELLED
+                        self.export_to_mooring_booking = True
                         self.set_to_cancel = False
                         self.save()
                         logger.info(f'Status: [{Approval.APPROVAL_STATUS_CANCELLED}] has been set to the approval: [{self}]')
@@ -1154,6 +1156,7 @@ class Approval(RevisionedMixin):
                 #if surrender_date <= today: #NOTE: future surrender disabled per request
                 if not self.status == Approval.APPROVAL_STATUS_SURRENDERED:
                     self.status = Approval.APPROVAL_STATUS_SURRENDERED
+                    self.export_to_mooring_booking = True
                     self.set_to_surrender = False
                     self.save()
                     send_approval_surrender_email_notification(self, stickers_to_be_returned=stickers_to_be_returned)
@@ -1469,6 +1472,7 @@ class WaitingListAllocation(Approval):
     def processes_after_surrender(self):
         self.internal_status = None
         self.status = Approval.APPROVAL_STATUS_SURRENDERED  # Surrendered has been probably set before reaching here.
+        self.export_to_mooring_booking = True
         self.set_to_surrender = False
         #self.wla_order = None #we now preserve wla_order in case of reinstatement
         self.save()

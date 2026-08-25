@@ -68,6 +68,7 @@ class Command(BaseCommand):
                 if AUTO_CANCEL_APPROVAL_WHEN_GRACE_PERIOD_EXPIRED:
                     send_approval_cancelled_due_to_no_vessels_nominated_mail(a)
                     a.status = Approval.APPROVAL_STATUS_CANCELLED
+                    a.export_to_mooring_booking = True
                     a.save()
                     logger.info(f'Grace period of the Approval: [{a}] has been expired.  The approval has been cancelled.')
                     logger.info('Cancel notification to permission holder sent for Approval {}'.format(a.lodgement_number))

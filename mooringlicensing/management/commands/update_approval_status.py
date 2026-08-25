@@ -74,6 +74,7 @@ class Command(BaseCommand):
                 if a.cancellation_date <= today:
                     try:
                         a.status = Approval.APPROVAL_STATUS_CANCELLED
+                        a.export_to_mooring_booking = True
                         a.set_to_cancel = False
                         a.save()
 
@@ -103,6 +104,7 @@ class Command(BaseCommand):
                 if surrender_date <= today:
                     try:
                         a.status = Approval.APPROVAL_STATUS_SURRENDERED
+                        a.export_to_mooring_booking = True
                         a.set_to_surrender = False
                         a.save()
 
@@ -154,6 +156,7 @@ class Command(BaseCommand):
                     try:
                         a.status = Approval.APPROVAL_STATUS_CANCELLED
                         a.set_to_cancel = False
+                        a.export_to_mooring_booking = True
                         a.save()
 
                         if hasattr(a, 'child_obj') and (
@@ -181,6 +184,7 @@ class Command(BaseCommand):
                 if surrender_date <= today:
                     try:
                         a.status = Approval.APPROVAL_STATUS_SURRENDERED
+                        a.export_to_mooring_booking = True
                         a.set_to_surrender = False
                         a.save()
 
