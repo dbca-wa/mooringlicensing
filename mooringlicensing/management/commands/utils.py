@@ -304,7 +304,7 @@ def check_proposal_stuck_at_printing(proposals):
 
 def get_duplicate_invoices_for_non_finalised_proposals(proposal):
 
-    proposal = proposal.filter(Q(lodgement_number__startswith='AU')|Q(lodgement_number__startswith='ML')).exclude(processing_status=[Proposal.PROCESSING_STATUS_APPROVED,Proposal.PROCESSING_STATUS_DISCARDED,Proposal.PROCESSING_STATUS_DECLINED,Proposal.PROCESSING_STATUS_EXPIRED])
+    proposal = proposal.filter(Q(lodgement_number__startswith='AU')|Q(lodgement_number__startswith='ML')).exclude(processing_status__in=[Proposal.PROCESSING_STATUS_APPROVED,Proposal.PROCESSING_STATUS_DISCARDED,Proposal.PROCESSING_STATUS_DECLINED,Proposal.PROCESSING_STATUS_EXPIRED])
 
     applicable_references = list(ApplicationFee.objects.exclude(cost=0).filter(proposal_id__in=list(proposal.values_list('id', flat=True))).values_list('invoice_reference', flat=True))
     distinct_applicable_references = list(ApplicationFee.objects.exclude(cost=0).filter(proposal_id__in=list(proposal.values_list('id', flat=True))).distinct('proposal_id').values_list('invoice_reference', flat=True))

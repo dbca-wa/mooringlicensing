@@ -4,6 +4,8 @@ from mooringlicensing.components.approvals.models import Sticker, Approval
 from mooringlicensing.components.proposals.models import Proposal
 from mooringlicensing.management.commands.utils import update_missing_vessel_details
 from django.db.models import Q
+from mooringlicensing.components.payments_ml.models import FeeItemApplicationFee
+
 
 class Command(BaseCommand):
     help = 'Fix proposals stuck in draft or with assessor status when they have already put sticker through to print'
@@ -91,3 +93,39 @@ class Command(BaseCommand):
             proposal.log_user_action(f'Proposal: {proposal} status corrected from {incorrect_status} to {proposal.processing_status}')
             update_missing_vessel_details(proposal)
             proposal.save()
+
+        #Also check for proposals that had been approved but are stuck with approver
+        application_fees_with_stuck_proposals = FeeItemApplicationFee.objects.filter( 
+            Q(amount_paid=0)|Q(amount_paid__isnull=True) #partial payments are not likely to factor under the conditions we are looking for
+        ).exclude(
+            Q(amount_to_be_paid=0)|Q(amount_to_be_paid__isnull=True) #if there is nothing to be paid then this type of application is probably already covered or resubmission is of little consequence
+        ).exclude(
+            application_fee__proposal__processing_status__in=[
+                Proposal.PROCESSING_STATUS_APPROVED, 
+                Proposal.PROCESSING_STATUS_PRINTING_STICKER,
+                Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED,
+                Proposal.PROCESSING_STATUS_DECLINED, #in case it was reissued and then declined
+                Proposal.PROCESSING_STATUS_EXPIRED, #in case it was reissued and then expired
+                Proposal.PROCESSING_STATUS_AWAITING_PAYMENT, 
+                Proposal.PROCESSING_STATUS_DISCARDED, #if discarded the invoice should be cancelled, if not that is a problem that should handled manually 
+            ]
+        ).exclude(
+            application_fee__proposal__lodgement_number__startswith="WL"
+        ).exclude(
+            application_fee__proposal__lodgement_number__startswith="AA"
+        ).exclude(
+            application_fee__proposal__approval__reissued=True #ignore if reissued, reissued proposals should not incur payments 
+        ).exclude(
+            application_fee__cancelled=True
+        )
+
+        stuck_proposals_requiring_payment = Proposal.objects.filter(id__in=list(application_fees_with_stuck_proposals.values_list('application_fee__proposal_id', flat=True)))
+
+        #if not in any of the excluded statuses or part of a reissue, the application should always be back to awaiting payment
+        for proposal in stuck_proposals_requiring_payment:
+            incorrect_status = proposal.processing_status
+            proposal.processing_status = Proposal.PROCESSING_STATUS_AWAITING_PAYMENT
+            proposal.save()
+            proposal.log_user_action(f'Proposal: {proposal} status corrected from {incorrect_status} to {proposal.processing_status}')
+            update_missing_vessel_details(proposal)
+            continue
