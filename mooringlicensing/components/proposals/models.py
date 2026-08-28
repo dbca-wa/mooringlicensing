@@ -1352,7 +1352,7 @@ class Proposal(RevisionedMixin):
             }
             
         if save:
-           self.save()
+           self.save(update_fields=["invoice_property_cache"])
         return self.invoice_property_cache
 
     def invoices_display(self):
