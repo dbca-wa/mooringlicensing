@@ -2324,6 +2324,7 @@ class Proposal(RevisionedMixin):
 
                 # set wla order
                 from mooringlicensing.components.approvals.models import WaitingListAllocation
+                from mooringlicensing.components.main.utils import get_available_allocation_num
                 if (type(approval) == WaitingListAllocation and 
                         (self.proposal_type.code == PROPOSAL_TYPE_NEW or 
                             (self.previous_application.preferred_bay != self.preferred_bay)
@@ -2331,6 +2332,7 @@ class Proposal(RevisionedMixin):
                         ):
                     from mooringlicensing.components.approvals.models import Approval
                     approval.internal_status = Approval.INTERNAL_STATUS_WAITING
+                    approval.wla_order = get_available_allocation_num(self.preferred_bay)
                     approval.wla_queue_date = current_datetime
                     approval.save()
 
@@ -2353,6 +2355,7 @@ class Proposal(RevisionedMixin):
 
                 # Reset flag
                 if self.approval:
+                    self.approval.refresh_from_db()
                     self.approval.reissued = False
                     self.approval.save()
 

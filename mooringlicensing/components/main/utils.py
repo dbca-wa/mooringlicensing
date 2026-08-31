@@ -735,6 +735,26 @@ def calculate_max_length(fee_constructor, max_amount_paid, proposal_type):
     return max_length
 
 
+def get_available_allocation_num(target_bay):
+
+    last_allocation_num_for_bay = WaitingListAllocation.objects.filter(
+        wla_queue_date__isnull=False,
+        current_proposal__preferred_bay=target_bay,
+        status__in=[
+            Approval.APPROVAL_STATUS_CURRENT,
+            Approval.APPROVAL_STATUS_SUSPENDED,
+        ],
+        internal_status__in=[
+            Approval.INTERNAL_STATUS_WAITING,
+        ]
+    ).filter(
+        current_proposal__preferred_bay=target_bay
+    ).exclude(
+        wla_order=None
+    ).order_by('-wla_order').first().wla_order
+
+    return last_allocation_num_for_bay+1
+
 def reorder_wla(target_bay):
     logger.info(f'Checking WLAs for the bay: [{target_bay}]...')
     place = 1

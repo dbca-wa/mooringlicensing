@@ -20,6 +20,7 @@ ENV NODE_MAJOR=20
 RUN apt-get clean
 RUN apt-get update
 RUN apt-get upgrade -y
+RUN apt-get install -y run-one
 
 RUN apt remove -y libnode-dev
 RUN apt remove -y libnode72
