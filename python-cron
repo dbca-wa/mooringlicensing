@@ -8,7 +8,7 @@
 */30 * * * * python manage_ml.py fix_fee_item_application_fee_vessel_details >> logs/run_cron_tasks.log 2>&1
 */5 * * * * python manage_ml.py runcrons >> logs/runcrons.log 2>&1
 */4 * * * * python manage_ml.py approval_renewal_notices >> logs/run_approval_renewal_notices_cron_task.log 2>&1
-0 */1 * * * python manage_ml.py clearsessions >> logs/clearsessions.log 2>&1
+0 */1 * * * run-one python manage_ml.py clearsessions >> logs/clearsessions.log 2>&1
 30 * * * * python manage_ml.py auto_lock_system_account >> logs/auto_lock_system_account.log 2>&1
 1 0 * * *  /bin/log_rotate.sh  >> /app/logs/log_rotate.log 2>&1
 30 6 * * * python manage_ml.py record_issues_report >> logs/run_cron_tasks.log 2>&1
