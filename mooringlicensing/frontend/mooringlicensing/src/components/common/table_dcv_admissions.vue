@@ -237,7 +237,12 @@ export default {
                 language: {
                     processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>"
                 },
-                responsive: true,
+                responsive: false,
+                scrollX: true,
+                fixedColumns: {
+                    leftColumns: 1,
+                    rightColumns: 1
+                },
                 serverSide: true,
                 searching: search,
                 ajax: {

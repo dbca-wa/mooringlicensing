@@ -225,7 +225,12 @@ export default {
 
         moorings_datatable_options: {
             autoWidth: false,
-            responsive: true,
+            responsive: false,
+            scrollX: true,
+            fixedColumns: {
+                leftColumns: 1,
+                rightColumns: 1
+            },
             columns: [
                 {
                     data: "mooring_name",
@@ -266,7 +271,12 @@ export default {
 
         ml_vessels_datatable_options: {
             autoWidth: false,
-            responsive: true,
+            responsive: false,
+            scrollX: true,
+            fixedColumns: {
+                leftColumns: 1,
+                rightColumns: 1
+            },
             columns: [
                 {
                     data: "vessel_name",
@@ -299,7 +309,12 @@ export default {
 
         ml_authorised_users_datatable_options: {
             autoWidth: false,
-            responsive: true,
+            responsive: false,
+            scrollX: true,
+            fixedColumns: {
+                leftColumns: 1,
+                rightColumns: 1
+            },
             columns: [
                 {
                     data: "lodgement_number",

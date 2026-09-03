@@ -9,6 +9,7 @@ import { extendMoment } from 'moment-range';
 
 import 'datatables.net-buttons-bs';
 import 'datatables.net-responsive-bs';
+import 'datatables.net-fixedcolumns-bs';
 
 import jsZip from 'jszip';
 window.JSZip = jsZip;
@@ -30,6 +31,7 @@ require('../node_modules/font-awesome/css/font-awesome.min.css' )
 import '@/../node_modules/datatables.net-bs/css/dataTables.bootstrap.min.css';
 import '@/../node_modules/datatables.net-responsive-bs/css/responsive.bootstrap.min.css';
 import '@/../node_modules/datatables.net-buttons-bs/css/buttons.bootstrap.min.css';
+import 'datatables.net-fixedcolumns-bs/css/fixedColumns.bootstrap.min.css';
 
 Vue.config.devtools = true;
 Vue.config.productionTip = false
