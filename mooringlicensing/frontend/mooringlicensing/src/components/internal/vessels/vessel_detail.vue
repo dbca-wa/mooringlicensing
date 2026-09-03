@@ -165,7 +165,12 @@ from '@/utils/hooks'
                     language: {
                         processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>"
                     },
-                    responsive: true,
+                    responsive: false,
+                    scrollX: true,
+                    fixedColumns: {
+                        leftColumns: 1,
+                        rightColumns: 1
+                    },
                     ajax: {
                         "url": vm.ownersUrl,
                         "dataSrc": 'data',

@@ -65,7 +65,12 @@ export default {
                 language: {
                     processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>"
                 },
-                responsive: true,
+                responsive: false,
+                scrollX: true,
+                fixedColumns: {
+                    leftColumns: 1,
+                    rightColumns: 1
+                },
                 searching: true,
                 ajax: {
                     "url": api_endpoints.vessel_internal_list + '?format=datatables&target_email_user_id=' + vm.target_email_user_id,

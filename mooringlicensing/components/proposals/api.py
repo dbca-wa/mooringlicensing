@@ -1738,7 +1738,14 @@ class ProposalViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin):
         }
         existing_proposal_qs=Proposal.objects.filter(**renew_amend_conditions)
         if (existing_proposal_qs and 
-            existing_proposal_qs[0].customer_status in [Proposal.CUSTOMER_STATUS_WITH_ASSESSOR, Proposal.CUSTOMER_STATUS_DRAFT,] and
+            existing_proposal_qs[0].customer_status in [
+                Proposal.CUSTOMER_STATUS_AWAITING_PAYMENT,
+                Proposal.CUSTOMER_STATUS_AWAITING_DOCUMENTS,
+                Proposal.CUSTOMER_STATUS_AWAITING_ENDORSEMENT,
+                Proposal.CUSTOMER_STATUS_WITH_APPROVER, 
+                Proposal.CUSTOMER_STATUS_WITH_ASSESSOR, 
+                Proposal.CUSTOMER_STATUS_DRAFT,
+            ] and
             existing_proposal_qs[0].proposal_type in ProposalType.objects.filter(code__in=[PROPOSAL_TYPE_AMENDMENT, PROPOSAL_TYPE_RENEWAL,])
         ):
             raise ValidationError('A renewal/amendment for this licence has already been lodged.')

@@ -334,7 +334,12 @@ export default {
 
                 },
                 autoWidth: true,
-                responsive: true,
+                responsive: false,
+                scrollX: true,
+                fixedColumns: {
+                    leftColumns: 1,
+                    rightColumns: 1
+                },
                 serverSide: true,
                 paging: true,
                 lengthMenu: [ [10, 25, 50, 100], [10, 25, 50, 100] ],
