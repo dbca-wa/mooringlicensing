@@ -124,7 +124,8 @@ export default {
                 await this.$emit('update-parent');
             },
             deep: true
-        },            
+        },
+        //TODO determine whether or not we want to run the deletion            
         keepCurrentVessel: { 
             handler: function() {
                 if(!this.keepCurrentVessel){
