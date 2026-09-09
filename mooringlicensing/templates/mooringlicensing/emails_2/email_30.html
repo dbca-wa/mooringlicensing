@@ -17,7 +17,7 @@ to the Rottnest Island Authority. Failure to return current boating season stick
     {% for sticker in stickers_to_be_returned %}
     {{ sticker.number }}{% if forloop.last %}{% else %},{% endif %}
     {% endfor %}
-to the Rottnest Island Authority. Failure to return stickers to RIA upon request can result in the cancellation of your {{ approval.description }}. Once revoked, it cannot be reinstated.</p>
+to the Rottnest Island Authority. Failure to return current boating season stickers to RIA will affect applicable refunds. If you have already returned your sticker(s), your refund will be processed shortly.</p>
 {% endif %}
 {% endif %}
 {% if details %}<p>Details: {{ details }}</p>{% endif %}
