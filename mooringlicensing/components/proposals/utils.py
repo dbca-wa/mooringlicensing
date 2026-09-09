@@ -48,7 +48,7 @@ from mooringlicensing.ledger_api_utils import get_invoice_payment_status
 from mooringlicensing.settings import PROPOSAL_TYPE_AMENDMENT, PROPOSAL_TYPE_RENEWAL, PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_SWAP_MOORINGS
 from copy import deepcopy
 from rest_framework import serializers
-from mooringlicensing.helpers import is_system_admin
+from mooringlicensing.helpers import is_system_admin, is_applicant_address_set
 import logging
 from django.db.models import Q
 
@@ -114,6 +114,8 @@ def save_proponent_data_aaa(instance, request, action):
 
     update_proposal_applicant(instance.child_obj, request)
     instance.refresh_from_db()
+    if action == 'submit':
+        is_applicant_address_set(instance)
     instance.child_obj.set_auto_approve(request)
     instance.refresh_from_db()   
 
@@ -153,6 +155,8 @@ def save_proponent_data_wla(instance, request, action):
 
     update_proposal_applicant(instance.child_obj, request)
     instance.refresh_from_db()
+    if action == 'submit':
+        is_applicant_address_set(instance)
     instance.child_obj.set_auto_approve(request)
 
     if ('bypass_auto_approval' in request.data and 
@@ -200,6 +204,8 @@ def save_proponent_data_mla(instance, request, action):
 
     update_proposal_applicant(instance.child_obj, request)
     instance.refresh_from_db()
+    if action == 'submit':
+        is_applicant_address_set(instance)
     instance.child_obj.set_auto_approve(request)
 
     if ('bypass_auto_approval' in request.data and 
@@ -297,6 +303,8 @@ def save_proponent_data_aua(instance, request, action):
 
     update_proposal_applicant(instance.child_obj, request)
     instance.refresh_from_db()
+    if action == 'submit':
+        is_applicant_address_set(instance)
     instance.child_obj.set_auto_approve(request)
 
     if ('bypass_auto_approval' in request.data and 
@@ -611,7 +619,7 @@ def submit_vessel_data(instance, request, vessel_data=None, approving=False):
 
         # record ownership data
         vessel_ownership = store_vessel_ownership(request, vessel, instance)
-        instance.vessel_ownership = vessel_ownership #TODO investigate why this would ever be None
+        instance.vessel_ownership = vessel_ownership
         instance.save()
 
     if request:

@@ -632,6 +632,13 @@ class Proposal(RevisionedMixin):
                 return self.previous_application.get_latest_vessel_ownership_by_vessel(vessel)
         else:
             # No previous application exists
+            # if migrated and an ML - proposals might not have the vessel ownership but it may still exist
+            if self.migrated and self.application_type_code == 'mla':
+                from mooringlicensing.components.approvals.models import VesselOwnershipOnApproval
+                #if no vessel ownership matching vessel on any proposals but the proposal was migrated and an ML, check the active VOOA records
+                vooas = VesselOwnershipOnApproval.objects.filter(vessel_ownership__vessel=vessel,approval_id=self.approval_id,end_date=None).order_by("created_at")
+                if vooas.exists():
+                    return vooas.last().vessel_ownership
             return None
 
     def copy_proof_of_identity_documents(self, proposal):
