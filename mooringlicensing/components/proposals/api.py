@@ -111,7 +111,7 @@ from mooringlicensing.components.main.decorators import (
 from mooringlicensing.components.approvals.utils import get_wla_allowed
 from mooringlicensing.helpers import (
     is_authorised_to_modify, is_customer, is_internal, 
-    is_applicant_address_set, is_authorised_to_submit_documents, is_system_admin
+    is_authorised_to_submit_documents, is_system_admin
 )
 from rest_framework_datatables.pagination import DatatablesPageNumberPagination
 from rest_framework_datatables.filters import DatatablesFilterBackend
@@ -1852,7 +1852,6 @@ class ProposalViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin):
             save_proponent_data(instance, request, self.action)
 
             instance = self.get_object()
-            is_applicant_address_set(instance)
 
             serializer = self.serializer_class(instance, context={'request':request})
             return Response(serializer.data)
