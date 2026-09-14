@@ -619,7 +619,7 @@ export default {
             let allow_add_new_vessel = !vm.keep_current_vessel
 
             $(vm.$refs.vessel_rego_nos).select2({
-                minimumInputLength: 2,
+                minimumInputLength: 1,
                 "theme": "bootstrap",
                 placeholder: "",
                 allowClear: true,

@@ -35,7 +35,7 @@ def log_proposal_email(msg, proposal, sender, attachments=[]):
         sender_user = None
 
     _log_proposal_email(msg, proposal, sender=sender_user, attachments=attachments)
-    _log_user_email(msg, proposal.applicant_obj, proposal.applicant_obj, sender=sender_user, attachments=attachments)
+    #_log_user_email(msg, proposal.applicant_obj, proposal.applicant_obj, sender=sender_user, attachments=attachments)
 
 
 def _log_proposal_email(email_message, proposal, sender=None, file_bytes=None, filename=None, attachments=[]):
@@ -231,7 +231,7 @@ def send_amendment_email_notification(amendment_request, request, proposal):
         sender = get_user_as_email_user(msg.from_email)
 
         _log_proposal_email(msg, proposal, sender=sender)
-        _log_user_email(msg, proposal.applicant_obj, proposal.applicant_obj, sender=sender)
+        #_log_user_email(msg, proposal.applicant_obj, proposal.applicant_obj, sender=sender)
 
 
 def send_create_mooring_licence_application_email_notification(request, waiting_list_allocation, mooring_licence_application):
@@ -287,7 +287,7 @@ def send_create_mooring_licence_application_email_notification(request, waiting_
     if msg:
         sender = settings.DEFAULT_FROM_EMAIL
         log_mla_created_proposal_email(msg, ria_generated_proposal, sender=sender_user)
-        _log_user_email(msg, mooring_licence_application.applicant_obj.id, mooring_licence_application.applicant_obj.id, sender=sender_user, attachments=attachments)
+        #_log_user_email(msg, mooring_licence_application.applicant_obj.id, mooring_licence_application.applicant_obj.id, sender=sender_user, attachments=attachments)
 
 
 def send_documents_upload_for_mooring_licence_application_email(request, proposal):
@@ -325,7 +325,7 @@ def send_documents_upload_for_mooring_licence_application_email(request, proposa
     if msg:
         sender = get_user_as_email_user(msg.from_email)
         _log_proposal_email(msg, proposal, sender=sender)
-        _log_user_email(msg, proposal.applicant_obj, proposal.applicant_obj, sender=sender)
+        #_log_user_email(msg, proposal.applicant_obj, proposal.applicant_obj, sender=sender)
 
     return msg
 
@@ -356,7 +356,7 @@ def send_compliance_due_date_notification(approval, compliance,):
     if msg:
         sender = get_user_as_email_user(msg.from_email)
         _log_compliance_email(msg, compliance, sender=sender)
-        _log_user_email(msg, compliance.proposal.applicant_obj, compliance.submitter, sender=sender)
+        #_log_user_email(msg, compliance.proposal.applicant_obj, compliance.submitter, sender=sender)
     return msg
 
 
@@ -386,7 +386,7 @@ def send_compliance_overdue_notification(request, approval, compliance,):
     if msg:
         sender = get_user_as_email_user(msg.from_email)
         _log_compliance_email(msg, compliance, sender=sender)
-        _log_user_email(msg, compliance.proposal.applicant_obj, compliance.submitter, sender=sender)
+        #_log_user_email(msg, compliance.proposal.applicant_obj, compliance.submitter, sender=sender)
     return msg
 
 # 10
@@ -423,7 +423,7 @@ def send_invitee_reminder_email(approval, due_date, request=None):
     msg = email.send(to_address, context=context, attachments=[], cc=all_ccs, bcc=bcc,)
     if msg:
         _log_approval_email(msg, approval, sender=sender_user)
-        _log_user_email(msg, approval.applicant_obj, proposal.applicant_obj, sender=sender_user)
+        #_log_user_email(msg, approval.applicant_obj, proposal.applicant_obj, sender=sender_user)
 
 def send_expire_application_email(proposal, due_date,):
     if proposal.no_email_notifications:
@@ -745,7 +745,7 @@ def send_approval_renewal_email_notification(approval):
         from mooringlicensing.components.approvals.models import Approval
         if isinstance(approval, Approval):
             _log_approval_email(msg, approval, sender=sender_user)
-            _log_user_email(msg, approval.applicant_obj, proposal.applicant_obj, sender=sender_user, attachments=[])
+            #_log_user_email(msg, approval.applicant_obj, proposal.applicant_obj, sender=sender_user, attachments=[])
 
 
 def send_application_approved_or_declined_email(proposal, decision, request, stickers_to_be_returned=[]):
@@ -1667,7 +1667,7 @@ def send_other_documents_submitted_notification_email(request, proposal):
     if msg:
         sender = get_user_as_email_user(msg.from_email)
         log_proposal_email(msg, proposal, sender, attachments=attachments)
-        _log_user_email(msg, proposal.applicant_obj, proposal.applicant_obj, sender=sender, attachments=attachments)
+        #_log_user_email(msg, proposal.applicant_obj, proposal.applicant_obj, sender=sender, attachments=attachments)
 
     return msg
 

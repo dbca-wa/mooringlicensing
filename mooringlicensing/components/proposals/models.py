@@ -2626,7 +2626,11 @@ class Proposal(RevisionedMixin):
                 proposal.previous_application = self
                 proposal.approval = self.approval
                 proposal.mooring_authorisation_preference = self.mooring_authorisation_preference
-                proposal.null_vessel_on_create = not self.vessel_on_proposal()
+
+                if self.approval and  self.approval.vessel_ownerships and self.application_type_code == 'mla':
+                    proposal.null_vessel_on_create = not self.approval.vessel_ownerships.count() > 0
+                else:
+                    proposal.null_vessel_on_create = not self.vessel_on_proposal()
 
                 logger.info(f'Cloning the proposal: [{self}] to the proposal: [{proposal}]...')
 
@@ -4657,7 +4661,7 @@ class MooringLicenceApplication(Proposal):
                 })
                 line_items.append(generate_line_item(annual_admission_type, fee_amount_adjusted_additional, fee_constructor_for_aa, self, current_datetime, vessel_details.vessel.rego_no))
             #for when a new vessel is submitted on a renewal
-            if not submitted_vessel_processed:
+            if not submitted_vessel_processed and self.rego_no:
                 vessel_length = self.vessel_length
                 fee_item_for_aa = fee_constructor_for_aa.get_fee_item(vessel_length, self.proposal_type, target_date)
                 logger.info(f'FeeItem (for AA component): [{fee_item_for_aa}] has been retrieved for calculation.')

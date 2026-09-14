@@ -87,7 +87,7 @@ def send_amendment_email_notification(amendment_request, request, compliance, is
     if msg:
         sender = request.user if request else settings.DEFAULT_FROM_EMAIL
         _log_compliance_email(msg, compliance, sender=sender)
-        _log_user_email(msg, compliance.proposal.applicant_obj, compliance.holder_id, sender=sender)
+        #_log_user_email(msg, compliance.proposal.applicant_obj, compliance.holder_id, sender=sender)
 
 
 #send reminder emails if Compliance has not been lodged by due date. Used in Cron job so cannot use 'request' parameter
@@ -124,7 +124,7 @@ def send_reminder_email_notification(compliance, is_test=False):
             sender_user = None
 
         _log_compliance_email(msg, compliance, sender=sender_user)
-        _log_user_email(msg, compliance.proposal.applicant_obj, compliance.holder_obj, sender=sender_user)
+        #_log_user_email(msg, compliance.proposal.applicant_obj, compliance.holder_obj, sender=sender_user)
 
 
 def send_internal_reminder_email_notification(compliance, is_test=False):
@@ -151,7 +151,7 @@ def send_internal_reminder_email_notification(compliance, is_test=False):
             sender_user = None
 
         _log_compliance_email(msg, compliance, sender=sender_user)
-        _log_user_email(msg, compliance.proposal.applicant_obj, compliance.holder_id, sender=sender_user)
+        #_log_user_email(msg, compliance.proposal.applicant_obj, compliance.holder_id, sender=sender_user)
 
 
 def send_due_email_notification(compliance, is_test=False):
@@ -181,7 +181,7 @@ def send_due_email_notification(compliance, is_test=False):
             sender_user = None
 
         _log_compliance_email(msg, compliance, sender=sender_user)
-        _log_user_email(msg, compliance.proposal.applicant_obj, compliance.holder_id, sender=sender_user)
+        #_log_user_email(msg, compliance.proposal.applicant_obj, compliance.holder_id, sender=sender_user)
 
 
 def send_internal_due_email_notification(compliance, is_test=False):
@@ -208,7 +208,7 @@ def send_internal_due_email_notification(compliance, is_test=False):
         except:
             sender_user = None
         _log_compliance_email(msg, compliance, sender=sender_user)
-        _log_user_email(msg, compliance.proposal.applicant_obj, compliance.holder_id, sender=sender_user)
+        #_log_user_email(msg, compliance.proposal.applicant_obj, compliance.holder_id, sender=sender_user)
 
 
 def send_compliance_accept_email_notification(compliance,request, is_test=False):
@@ -227,7 +227,7 @@ def send_compliance_accept_email_notification(compliance,request, is_test=False)
     if msg:
         sender = request.user if request else settings.DEFAULT_FROM_EMAIL
         _log_compliance_email(msg, compliance, sender=sender)
-        _log_user_email(msg, compliance.proposal.applicant_obj, compliance.holder_id, sender=sender)
+        #_log_user_email(msg, compliance.proposal.applicant_obj, compliance.holder_id, sender=sender)
 
 
 def send_external_submit_email_notification(request, compliance, is_test=False):
@@ -250,7 +250,7 @@ def send_external_submit_email_notification(request, compliance, is_test=False):
     if msg:
         sender = request.user if request else settings.DEFAULT_FROM_EMAIL
         _log_compliance_email(msg, compliance, sender=sender)
-        _log_user_email(msg, compliance.proposal.applicant_obj, compliance.holder_id, sender=sender)
+        #_log_user_email(msg, compliance.proposal.applicant_obj, compliance.holder_id, sender=sender)
 
 
 def send_submit_email_notification(request, compliance, is_test=False):
@@ -272,7 +272,7 @@ def send_submit_email_notification(request, compliance, is_test=False):
     if msg:
         sender = request.user if request else settings.DEFAULT_FROM_EMAIL
         _log_compliance_email(msg, compliance, sender=sender)
-        _log_user_email(msg, compliance.proposal.applicant_obj, compliance.holder_id, sender=sender)
+        #_log_user_email(msg, compliance.proposal.applicant_obj, compliance.holder_id, sender=sender)
 
 
 def _log_compliance_email(email_message, compliance, sender=None):

@@ -332,7 +332,9 @@ class FeeConstructor(models.Model):
                 logger.error(msg)
                 raise ValueError(msg)
         else:
-            vessel_size_category = self.vessel_size_category_group.vessel_size_categories.filter(start_size__lte=vessel_length, null_vessel=False).order_by('start_size').last()
+            vessel_size_category = None
+            if vessel_length:
+                vessel_size_category = self.vessel_size_category_group.vessel_size_categories.filter(start_size__lte=vessel_length, null_vessel=False).order_by('start_size').last()
             if not vessel_size_category:
                 raise ValueError("Provided vessel dimensions do not fit any existing vessel size categories.")
             if float(vessel_size_category.start_size) == vessel_length and not vessel_size_category.include_start_size:
