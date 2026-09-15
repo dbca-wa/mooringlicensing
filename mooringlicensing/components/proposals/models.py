@@ -2047,7 +2047,12 @@ class Proposal(RevisionedMixin):
                     self.waiting_list_allocation.internal_status = WaitingListAllocation.INTERNAL_STATUS_WAITING
                     self.waiting_list_allocation.save()
                     logger.info(f'Internal status: [{WaitingListAllocation.INTERNAL_STATUS_WAITING}] has been set to the WLAllocation: [{self.waiting_list_allocation}.]')
-                send_application_approved_or_declined_email(self, 'declined', request)
+                try:
+                    send_application_approved_or_declined_email(self, 'declined')
+                except Exception as e:
+                    print("send_application_approved_or_declined_email failed:",str(e))
+                    logger.error("send_application_approved_or_declined_email failed:",str(e))
+
             except:
                 raise
 
@@ -2196,14 +2201,14 @@ class Proposal(RevisionedMixin):
             except:
                 raise
 
-    def final_approval_for_WLA_AAA(self, request, details=None):
+    def final_approval_for_WLA_AAA(self, request=None, details=None):
         from mooringlicensing.components.proposals.utils import submit_vessel_data
         from mooringlicensing.components.payments_ml.models import FeeItemApplicationFee
         with transaction.atomic():
             try:
                 # Check approved statuses - if already approved do not continue
                 self.refresh_from_db()
-                if request and self.processing_status in [Proposal.PROCESSING_STATUS_APPROVED, Proposal.PROCESSING_STATUS_PRINTING_STICKER, Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED]:
+                if (not self.approval or not self.approval.reissued) and self.processing_status in [Proposal.PROCESSING_STATUS_APPROVED, Proposal.PROCESSING_STATUS_PRINTING_STICKER, Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED]:
                     raise ValidationError('This Application has already been Approved.')
 
                 if self.proposed_decline_status:
@@ -2308,7 +2313,7 @@ class Proposal(RevisionedMixin):
 
                 #additional check to avoid managing stickers
                 self.refresh_from_db()
-                if request and self.processing_status in [Proposal.PROCESSING_STATUS_APPROVED, Proposal.PROCESSING_STATUS_PRINTING_STICKER, Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED]:
+                if (not self.approval or not self.approval.reissued) and self.processing_status in [Proposal.PROCESSING_STATUS_APPROVED, Proposal.PROCESSING_STATUS_PRINTING_STICKER, Proposal.PROCESSING_STATUS_STICKER_TO_BE_RETURNED]:
                     raise ValidationError('This Application has already been Approved.')
 
                 # set proposal status to approved - can change later after manage_stickers
@@ -2345,8 +2350,12 @@ class Proposal(RevisionedMixin):
 
                 # send Proposal approval email with attachment
                 approval.generate_doc() #NOTE: this is done once per request. This does not need to be delayed but making a note in case things change.
-                if request:
-                    send_application_approved_or_declined_email(self, 'approved', request, [sticker_to_be_returned,])
+                if (not self.approval or not self.approval.reissued):
+                    try:
+                        send_application_approved_or_declined_email(self, 'approved', [sticker_to_be_returned,])
+                    except Exception as e:
+                        print("send_application_approved_or_declined_email failed:",str(e))
+                        logger.error("send_application_approved_or_declined_email failed:",str(e))
                 self.save(version_comment='Final Approval: {}'.format(self.approval.lodgement_number))
                 self.approval.approval_documents.all().update(can_delete=False)
 
@@ -2501,8 +2510,12 @@ class Proposal(RevisionedMixin):
                   
                             if not self.proposal_type.code == settings.PROPOSAL_TYPE_SWAP_MOORINGS and not self.payment_required():
                                 self.approval.generate_doc() #NOTE: this is done once per request. This does not need to be delayed but making a note in case things change.
-                            
-                            send_application_approved_or_declined_email(self, 'approved', request)
+
+                            try:
+                                send_application_approved_or_declined_email(self, 'approved')
+                            except Exception as e:
+                                print("send_application_approved_or_declined_email failed:",str(e))
+                                logger.error("send_application_approved_or_declined_email failed:",str(e))
                             self.log_user_action(ProposalUserAction.ACTION_APPROVE_APPLICATION.format(self.lodgement_number), request)
 
                         except Exception as e:
@@ -4333,7 +4346,11 @@ class AuthorisedUserApplication(Proposal):
 
             # Email - do not send if internal reissue (i.e. only send if there is a request)
             if request:
-                send_application_approved_or_declined_email(self.proposal, 'approved_paid', request, stickers_to_be_returned)
+                try:
+                    send_application_approved_or_declined_email(self.proposal, 'approved_paid', stickers_to_be_returned)
+                except Exception as e:
+                    print("send_application_approved_or_declined_email failed:",str(e))
+                    logger.error("send_application_approved_or_declined_email failed:",str(e))
 
             # Email to ML holder when new moorings added
             for mooring_licence in mls_to_be_emailed:
@@ -5000,8 +5017,12 @@ class MooringLicenceApplication(Proposal):
                 approval.generate_au_summary_doc() #NOTE: this is done once per request. This does not need to be delayed but making a note in case things change.
 
             # Email with attachments
-            send_application_approved_or_declined_email(self, 'approved_paid', request, stickers_to_be_returned)
-
+            try:
+                send_application_approved_or_declined_email(self, 'approved_paid', stickers_to_be_returned)
+            except Exception as e:
+                print("send_application_approved_or_declined_email failed:",str(e))
+                logger.error("send_application_approved_or_declined_email failed:",str(e))
+            
             # Log proposal action
             if self.auto_approve or not request:
                 self.log_user_action(ProposalUserAction.ACTION_AUTO_APPROVED.format(self.id))

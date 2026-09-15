@@ -748,7 +748,7 @@ def send_approval_renewal_email_notification(approval):
             #_log_user_email(msg, approval.applicant_obj, proposal.applicant_obj, sender=sender_user, attachments=[])
 
 
-def send_application_approved_or_declined_email(proposal, decision, request, stickers_to_be_returned=[]):
+def send_application_approved_or_declined_email(proposal, decision, stickers_to_be_returned=[]):
     # 17 --- 25
     # email to applicant when application is issued or declined (waiting list allocation application)
 
@@ -759,28 +759,28 @@ def send_application_approved_or_declined_email(proposal, decision, request, sti
 
     if proposal.application_type.code == WaitingListApplication.code:
         # 17
-        send_wla_approved_or_declined_email(proposal, decision, request)  # require_payment should be always False for WLA because it should be paid at this stage.
+        send_wla_approved_or_declined_email(proposal, decision)  # require_payment should be always False for WLA because it should be paid at this stage.
     elif proposal.application_type.code == AnnualAdmissionApplication.code:
         # 18, 19
-        send_aaa_approved_or_declined_email(proposal, decision, request, stickers_to_be_returned)  # require_payment should be always False for AAA because it should be paid at this stage.
+        send_aaa_approved_or_declined_email(proposal, decision, stickers_to_be_returned)  # require_payment should be always False for AAA because it should be paid at this stage.
     elif proposal.application_type.code == AuthorisedUserApplication.code:
         if proposal.proposal_type.code in [PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL]:
             # 20
-            send_aua_approved_or_declined_email_new_renewal(proposal, decision, request, stickers_to_be_returned)
+            send_aua_approved_or_declined_email_new_renewal(proposal, decision, stickers_to_be_returned)
         elif proposal.proposal_type.code == PROPOSAL_TYPE_AMENDMENT:
             payment_required = proposal.payment_required()
             if payment_required:
                 # 22 (22a, 22b, 50a)
-                send_aua_approved_or_declined_email_amendment_payment_required(proposal, decision, request, stickers_to_be_returned)
+                send_aua_approved_or_declined_email_amendment_payment_required(proposal, decision, stickers_to_be_returned)
             else:
                 # 21
-                send_aua_approved_or_declined_email_amendment_payment_not_required(proposal, decision, request, stickers_to_be_returned)
+                send_aua_approved_or_declined_email_amendment_payment_not_required(proposal, decision, stickers_to_be_returned)
         else:
             pass
     elif proposal.application_type.code == MooringLicenceApplication.code:
         if proposal.proposal_type.code in [PROPOSAL_TYPE_NEW, PROPOSAL_TYPE_RENEWAL]:
             # 23
-            send_mla_approved_or_declined_email_new_renewal(proposal, decision, request, stickers_to_be_returned)
+            send_mla_approved_or_declined_email_new_renewal(proposal, decision, stickers_to_be_returned)
         elif proposal.proposal_type.code == PROPOSAL_TYPE_AMENDMENT:
             payment_required = False
             if proposal.application_fees.filter(cancelled=False).count() and proposal.get_main_application_fee():
@@ -790,18 +790,18 @@ def send_application_approved_or_declined_email(proposal, decision, request, sti
                     payment_required = True
             if payment_required:
                 # 25
-                send_mla_approved_or_declined_email_amendment_payment_required(proposal, decision, request, stickers_to_be_returned)
+                send_mla_approved_or_declined_email_amendment_payment_required(proposal, decision, stickers_to_be_returned)
             else:
                 # 24
-                send_mla_approved_or_declined_email_amendment_payment_not_required(proposal, decision, request, stickers_to_be_returned)
+                send_mla_approved_or_declined_email_amendment_payment_not_required(proposal, decision, stickers_to_be_returned)
         elif proposal.proposal_type.code == PROPOSAL_TYPE_SWAP_MOORINGS:
-            send_mla_approved_or_declined_email_swap_mooring(proposal, decision, request, stickers_to_be_returned)
+            send_mla_approved_or_declined_email_swap_mooring(proposal, decision, stickers_to_be_returned)
     else:
         # Should not reach here
         logger.warning('The type of the proposal {} is unknown'.format(proposal.lodgement_number))
 
 
-def send_wla_approved_or_declined_email(proposal, decision, request):
+def send_wla_approved_or_declined_email(proposal, decision):
     # 17 a and b
     # email to applicant when application is issued or declined (waiting list allocation application)
     if proposal.no_email_notifications:
@@ -865,7 +865,7 @@ def send_wla_approved_or_declined_email(proposal, decision, request):
     return msg
 
 
-def send_aaa_approved_or_declined_email(proposal, decision, request, stickers_to_be_returned=[]):
+def send_aaa_approved_or_declined_email(proposal, decision, stickers_to_be_returned=[]):
     # 18 a and b new/renewal, approval/decline
     # email to applicant when application is issued or declined (annual admission application, new and renewal)
     # 19 a and b amendment, approval/decline
@@ -936,7 +936,7 @@ def send_aaa_approved_or_declined_email(proposal, decision, request, stickers_to
     return msg
 
 
-def send_aua_approved_or_declined_email_new_renewal(proposal, decision, request, stickers_to_be_returned):
+def send_aua_approved_or_declined_email_new_renewal(proposal, decision, stickers_to_be_returned):
     # 20 AUA new/renewal, approval/decline
     # email to applicant when application is issued or declined (authorised user application, new and renewal)
     if proposal.no_email_notifications:
@@ -1023,7 +1023,7 @@ def send_aua_approved_or_declined_email_new_renewal(proposal, decision, request,
     return msg
 
 
-def send_aua_approved_or_declined_email_amendment_payment_not_required(proposal, decision, request, stickers_to_be_returned):
+def send_aua_approved_or_declined_email_amendment_payment_not_required(proposal, decision, stickers_to_be_returned):
     #21 a and b
     # email to applicant when application is issued or declined (authorised user application, amendment where no payment is required)
     if proposal.no_email_notifications:
@@ -1090,7 +1090,7 @@ def send_aua_approved_or_declined_email_amendment_payment_not_required(proposal,
     return msg
 
 
-def send_aua_approved_or_declined_email_amendment_payment_required(proposal, decision, request, stickers_to_be_returned):
+def send_aua_approved_or_declined_email_amendment_payment_required(proposal, decision, stickers_to_be_returned):
     #22
     # email to applicant when application is issued or declined (authorised user application, amendment where payment is required)
     if proposal.no_email_notifications:
@@ -1263,7 +1263,7 @@ def send_au_summary_to_ml_holder(mooring_licence, au_proposal):
     return msg
 
 
-def send_mla_approved_or_declined_email_new_renewal(proposal, decision, request, stickers_to_be_returned):
+def send_mla_approved_or_declined_email_new_renewal(proposal, decision, stickers_to_be_returned):
     # 23 ML new/renewal, approval/decline
     # email to applicant when application is issued or declined (mooring licence application, new and renewal)
     if proposal.no_email_notifications:
@@ -1351,7 +1351,7 @@ def send_mla_approved_or_declined_email_new_renewal(proposal, decision, request,
     return msg
 
 
-def send_mla_approved_or_declined_email_swap_mooring(proposal, decision, request, stickers_to_be_returned):
+def send_mla_approved_or_declined_email_swap_mooring(proposal, decision, stickers_to_be_returned):
     # ML swap mooring, approval/decline
     # email to applicant when application is issued or declined (mooring licence application, swap mooring)
     if proposal.no_email_notifications:
@@ -1442,7 +1442,7 @@ def send_mla_approved_or_declined_email_swap_mooring(proposal, decision, request
     return msg
 
 
-def send_mla_approved_or_declined_email_amendment_payment_not_required(proposal, decision, request, stickers_to_be_returned):
+def send_mla_approved_or_declined_email_amendment_payment_not_required(proposal, decision, stickers_to_be_returned):
     # 24 a and b ML amendment(no payment), approval/decline
     # email to applicant when application is issued or declined (mooring licence application, amendment where no payment is required)
     if proposal.no_email_notifications:
@@ -1506,7 +1506,7 @@ def send_mla_approved_or_declined_email_amendment_payment_not_required(proposal,
     return msg
 
 
-def send_mla_approved_or_declined_email_amendment_payment_required(proposal, decision, request, stickers_to_be_returned):
+def send_mla_approved_or_declined_email_amendment_payment_required(proposal, decision, stickers_to_be_returned):
     # 25 ML amendment(payment), approval/decline
     # email to applicant when application is issued or declined (mooring licence application, amendment where payment is required) 
     if proposal.no_email_notifications:

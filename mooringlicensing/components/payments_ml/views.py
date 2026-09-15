@@ -1021,6 +1021,10 @@ class ApplicationFeeSuccessViewPreload(APIView):
                             proposal.save()
                             logger.info(f'Processing status: [{Proposal.PROCESSING_STATUS_WITH_ASSESSOR}] has been set to the proposal: [{proposal}]')
 
+                            if proposal.application_type.code in [WaitingListApplication.code, AnnualAdmissionApplication.code]:
+                                if proposal.auto_approve:
+                                    proposal.final_approval_for_WLA_AAA()
+
                     else:
                         msg = 'Invoice: {} payment status is {}.  It should be either paid or over_paid'.format(invoice.reference, get_invoice_payment_status(invoice.id))
                         logger.error(msg)
@@ -1028,6 +1032,10 @@ class ApplicationFeeSuccessViewPreload(APIView):
 
                     application_fee.handled_in_preload = datetime.datetime.now()
                     application_fee.save()
+                    proposal.refresh_from_db()
+                    #update FeeItemApplicationFee with vessel details
+                    fee_item_application_fees = FeeItemApplicationFee.objects.filter(application_fee=application_fee)
+                    fee_item_application_fees.update(vessel_details=proposal.vessel_details)
 
                 logger.info(
                     "Returning status.HTTP_200_OK. Order created successfully.",
@@ -1050,16 +1058,6 @@ class ApplicationFeeSuccessView(TemplateView):
             applicant = proposal.applicant_obj
 
             if (is_internal(request) or applicant.id == request.user.id):
-                if type(proposal.child_obj) in [WaitingListApplication, AnnualAdmissionApplication]:
-                    if proposal.auto_approve:
-                        proposal.final_approval_for_WLA_AAA(request, details={})
-
-                proposal.refresh_from_db()
-
-                #update FeeItemApplicationFee with vessel details
-                fee_item_application_fees = FeeItemApplicationFee.objects.filter(application_fee=application_fee)
-                fee_item_application_fees.update(vessel_details=proposal.vessel_details)
-
                 wla_or_aaa = True if proposal.application_type.code in [WaitingListApplication.code, AnnualAdmissionApplication.code,] else False
                 invoice = Invoice.objects.get(reference=application_fee.invoice_reference)
                 invoice_url = f'/ledger-toolkit-api/invoice-pdf/{invoice.reference}/'

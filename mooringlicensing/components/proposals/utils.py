@@ -784,7 +784,7 @@ def store_vessel_ownership(request, vessel, instance):
     q_for_approvals_check = Q()  # We want to check if there is a current approval which links to the vessel_ownership retrieved below
     if instance.proposal_type.code in [PROPOSAL_TYPE_NEW,]:
         vessel_ownerships = VesselOwnership.objects.filter(
-            owner=owner,  # Owner is actually the accessing user (request.user) as above.
+            owner=owner,
             vessel=vessel,
             company_ownerships=company_ownership,
             end_date=None
@@ -833,7 +833,7 @@ def store_vessel_ownership(request, vessel, instance):
 
         if vessel_ownership_to_be_created:
             vessel_ownership = VesselOwnership.objects.create(
-                owner=owner,  # Owner is actually the accessing user (request.user) as above.
+                owner=owner,
                 vessel=vessel,
             )
             if company_ownership:
