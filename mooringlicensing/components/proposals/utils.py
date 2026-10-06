@@ -389,7 +389,7 @@ def dot_check_wrapper(request, payload, vessel_lookup_errors, vessel_data):
                 vessel_lookup_errors[vessel_data.get("rego_no")] += " Boat not found."
             if not boat_owner_match:
                 vessel_lookup_errors[vessel_data.get("rego_no")] += " Provided Owner name does not match existing records."
-            if not float(dot_boat_length) == float(ml_boat_length):
+            if not float(dot_boat_length) or float(dot_boat_length) != float(ml_boat_length):
                 vessel_lookup_errors[vessel_data.get("rego_no")] += " Provided vessel length does not match records."
     except:
         raise serializers.ValidationError("Issue verifying your DoT vessel information. Please try again later, or if the problem persists, please contact us.")
