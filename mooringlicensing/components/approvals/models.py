@@ -3904,6 +3904,7 @@ class Sticker(RevisionedMixin):
             self.status = Sticker.STICKER_STATUS_CANCELLED
             self.save()
             logger.info(f'Status: [{Sticker.STICKER_STATUS_CANCELLED}] has been set to the sticker: [{self}].')
+            MooringOnApproval.objects.filter(sticker=self).update(sticker=None)
 
     def record_lost(self):
         if (self.status == "current" or self.status == "to_be_returned") and self.printing_date:
@@ -3911,6 +3912,7 @@ class Sticker(RevisionedMixin):
             self.status = Sticker.STICKER_STATUS_LOST
             self.save()
             logger.info(f'Status: [{Sticker.STICKER_STATUS_LOST}] has been set to the sticker: [{self}].')
+            MooringOnApproval.objects.filter(sticker=self).update(sticker=None)
 
     def record_returned(self):
         if (self.status == "to_be_returned") and self.printing_date:
