@@ -2096,9 +2096,18 @@ class AuthorisedUserPermit(Approval):
                 if not proposal:
                     sub_vessel_ownership = self.current_proposal.vessel_ownership if self.current_proposal and self.current_proposal.vessel_ownership and not self.current_proposal.vessel_ownership.end_date else None
 
+                #there are some uncommon circumstances where an approval has a valid MOA without a sticker but the approval itself has no vessels
+                #if an approval has no vessels, it does not need a sticker - skip the sticker creation
+                vessel_ownership = proposal.vessel_ownership if proposal and proposal.vessel_ownership else moa_to_be_on_new_sticker.sticker.vessel_ownership if moa_to_be_on_new_sticker.sticker else sub_vessel_ownership if sub_vessel_ownership else None
+                #alternatively if there is a vessel ownership but the vessel ownership has been ended, skip
+
+                if not vessel_ownership or vessel_ownership.end_date:
+                    logger.info(f'No valid vessel for sticker to be created for on approval [{self}].')
+                    continue
+
                 new_sticker = Sticker.objects.create(
                     approval=self,
-                    vessel_ownership=proposal.vessel_ownership if proposal and proposal.vessel_ownership else moa_to_be_on_new_sticker.sticker.vessel_ownership if moa_to_be_on_new_sticker.sticker else sub_vessel_ownership if sub_vessel_ownership else None,
+                    vessel_ownership=vessel_ownership,
                     fee_constructor=proposal.fee_constructor if proposal and proposal.fee_constructor else moa_to_be_on_new_sticker.sticker.fee_constructor if moa_to_be_on_new_sticker.sticker else None,
                     proposal_initiated=proposal,
                     fee_season=self.latest_applied_season,
