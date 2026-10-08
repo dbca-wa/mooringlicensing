@@ -1164,7 +1164,7 @@ def send_aua_approved_or_declined_email_amendment_payment_required(proposal, dec
         'payment_url': make_http_https(payment_url),
     }
 
-    to_address = retrieve_email_userro(proposal.submitter).email
+    to_address = proposal.applicant_obj.email
 
     # Send email
     msg = email.send(to_address, context=context, attachments=attachments, cc=all_ccs, bcc=all_bccs,)
