@@ -25,13 +25,17 @@ class Command(BaseCommand):
 
             approval.refresh_from_db() #in case the cron job run crosses over so we avoid doing this more than once (not critical but preferable)
             if approval.regenerate_documents:
-                approval.generate_doc()
-                approval.refresh_from_db()
-                if approval.child_obj and approval.child_obj.code == 'ml':
-                    #ML regen authorised user summary as as approval doc
-                    approval.child_obj.generate_au_summary_doc()
-                    approval.refresh_from_db()
+                try:
+                    approval.generate_doc()
 
+                    approval.refresh_from_db()
+                    if approval.child_obj and approval.child_obj.code == 'ml':
+                        #ML regen authorised user summary as as approval doc
+                        approval.child_obj.generate_au_summary_doc()
+                        approval.refresh_from_db()
+                except Exception as e:
+                    logger.error(f"document regen for {approval} failed - possible that relationships no longer exist - msg: {e}")
+                
                 #create history record
                 approval.write_approval_history("Documents Regenerated")
 
