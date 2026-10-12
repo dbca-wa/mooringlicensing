@@ -267,17 +267,20 @@ def _log_approval_email(email_message, approval, sender=None, attachments=[]):
     email_entry = ApprovalLogEntry.objects.create(**kwargs)
 
     for attachment in attachments:
-        check = attachment[0].split(".")
-        filename = attachment[0]
         try:
-            if len(check) < 2 or not FileExtensionWhitelist.objects.filter(name=check[len(check)-1].lower()).exists():
+            check = attachment[0].split(".")
+            filename = attachment[0]
+            try:
+                if len(check) < 2 or not FileExtensionWhitelist.objects.filter(name=check[len(check)-1].lower()).exists():
+                    filename = attachment[0] + ".pdf"
+            except Exception as e:
+                logger.error(e)
                 filename = attachment[0] + ".pdf"
+            email_entry_document = email_entry.documents.create(name=filename)
+            email_entry_document._file.save(filename, ContentFile(attachment[1]), save=False)
+            email_entry_document.save()
         except Exception as e:
             logger.error(e)
-            filename = attachment[0] + ".pdf"
-        email_entry_document = email_entry.documents.create(name=filename)
-        email_entry_document._file.save(filename, ContentFile(attachment[1]), save=False)
-        email_entry_document.save()
 
     return email_entry
 
