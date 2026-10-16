@@ -1,5 +1,5 @@
 # Prepare the base environment.
-FROM ghcr.io/dbca-wa/docker-apps-dev:ubuntu_2510_base_python as builder_base_mooringlicensing
+FROM ghcr.io/dbca-wa/docker-apps-dev:ubuntu_2604_base_python_node as builder_base_mooringlicensing
 MAINTAINER asi@dbca.wa.gov.au
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -15,7 +15,7 @@ ENV SITE_PREFIX='mls-dev'
 ENV SITE_DOMAIN='dbca.wa.gov.au'
 ENV OSCAR_SHOP_NAME='No Name'
 ENV BPAY_ALLOWED=False
-ENV NODE_MAJOR=20
+ENV NODE_MAJOR=24
 
 RUN apt-get clean
 RUN apt-get update
@@ -26,14 +26,14 @@ RUN apt remove -y libnode-dev
 RUN apt remove -y libnode72
 
 # Install nodejs
-RUN update-ca-certificates
+#RUN update-ca-certificates
 
-RUN mkdir -p /etc/apt/keyrings && \
-    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg && \
-    echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" \
-    | tee /etc/apt/sources.list.d/nodesource.list && \
-    apt-get update && \
-    apt-get install -y nodejs
+#RUN mkdir -p /etc/apt/keyrings && \
+#    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg && \
+#    echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" \
+#    | tee /etc/apt/sources.list.d/nodesource.list && \
+#    apt-get update && \
+#    apt-get install -y nodejs
 
 # Install nodejs
 COPY startup.sh pre_startup.sh /
@@ -59,8 +59,11 @@ RUN chmod 755 /pre_startup.sh
 FROM builder_base_mooringlicensing as python_libs_ml
 WORKDIR /app
 USER oim
-RUN virtualenv /app/venv
-ENV PATH=/app/venv/bin:$PATH
+
+ENV VIRTUAL_ENV=/app/venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH=$VIRTUAL_ENV/bin:$PATH
+
 RUN git config --global --add safe.directory /app
 COPY python-cron ./
 #RUN PATH=/app/.local/bin:$PATH
