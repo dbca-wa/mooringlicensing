@@ -20,22 +20,7 @@ ENV NODE_MAJOR=24
 RUN apt-get clean
 RUN apt-get update
 RUN apt-get upgrade -y
-RUN apt-get install -y run-one
 
-RUN apt remove -y libnode-dev
-RUN apt remove -y libnode72
-
-# Install nodejs
-#RUN update-ca-certificates
-
-#RUN mkdir -p /etc/apt/keyrings && \
-#    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg && \
-#    echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" \
-#    | tee /etc/apt/sources.list.d/nodesource.list && \
-#    apt-get update && \
-#    apt-get install -y nodejs
-
-# Install nodejs
 COPY startup.sh pre_startup.sh /
 COPY ./timezone /etc/timezone
 RUN chmod 755 /startup.sh && \
@@ -44,8 +29,6 @@ RUN chmod 755 /startup.sh && \
     chmod +s /pre_startup.sh && \
     groupadd -g 5000 oim && \
     useradd -g 5000 -u 5000 oim -s /bin/bash -d /app && \
-    usermod -a -G sudo oim && \
-    echo "oim  ALL=(ALL)  NOPASSWD: /startup.sh" > /etc/sudoers.d/oim && \
     mkdir /app && \
     chown -R oim.oim /app && \
     mkdir /container-config/ && \
@@ -72,15 +55,10 @@ COPY --chown=oim:oim requirements.txt ./
 RUN pip install -r requirements.txt 
 #  && rm -rf /var/lib/{apt,dpkg,cache,log}/ /tmp/* /var/tmp/*
 RUN pip install --upgrade pip
-#RUN wget -O /tmp/GDAL-3.8.3-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl https://github.com/girder/large_image_wheels/raw/wheelhouse/GDAL-3.8.3-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=e2fe6cfbab02d535bc52c77cdbe1e860304347f16d30a4708dc342a231412c57
-#RUN pip install /tmp/GDAL-3.8.3-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
-# Install the project (ensure that frontend projects have been built prior to this step).
+
 FROM python_libs_ml
 COPY  --chown=oim:oim gunicorn.ini manage_ml.py ./
-#COPY timezone /etc/timezone
-#RUN echo "Australia/Perth" > /etc/timezone
-#ENV TZ=Australia/Perth
-#RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 RUN touch /app/.env
 COPY  --chown=oim:oim .git ./.git
 COPY  --chown=oim:oim mooringlicensing ./mooringlicensing
@@ -105,6 +83,13 @@ RUN chmod 777 /app/tmp/
 RUN mkdir /app/logs/.ipython
 RUN export IPYTHONDIR=/app/logs/.ipython/
 #RUN python profile create 
+
+# Cleanup
+USER root
+RUN wget https://raw.githubusercontent.com/dbca-wa/wagov_utils/refs/heads/main/wagov_utils/bin/package_cleanup_2604.sh -O /tmp/package_cleanup_2604.sh
+RUN chmod 755 /tmp/package_cleanup_2604.sh
+RUN /tmp/package_cleanup_2604.sh
+USER oim
 
 EXPOSE 8080
 HEALTHCHECK --interval=1m --timeout=5s --start-period=10s --retries=3 CMD ["wget", "-q", "-O", "-", "http://localhost:8080/"]
