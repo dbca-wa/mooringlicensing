@@ -2350,6 +2350,7 @@ class Proposal(RevisionedMixin):
 
                 # send Proposal approval email with attachment
                 approval.generate_doc() #NOTE: this is done once per request. This does not need to be delayed but making a note in case things change.
+                self.refresh_from_db()
                 if (not self.approval or not self.approval.reissued):
                     try:
                         send_application_approved_or_declined_email(self, 'approved', [sticker_to_be_returned,])
