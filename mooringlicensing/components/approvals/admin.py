@@ -13,6 +13,13 @@ class StickerAdmin(admin.ModelAdmin):
     list_display_links = ['id', 'number',]
     ordering = ['-id', ]
 
+@admin.register(models.StickerActionDetail)
+class StickerActionDetailAdmin(admin.ModelAdmin):
+    list_display = ['id', 'sticker', 'reason', 'approval', 'date_created', 'date_updated', 'action', 'user']
+    search_fields = ['id', 'sticker__number', 'approval__lodgement_number',]
+    readonly_fields = ['approval','sticker','reason','date_created','date_updated','date_of_returned_sticker','action','user','sticker_action_fee',]
+    list_display_links = ['id', 'sticker', 'approval']
+    ordering = ['-id', ]
 
 @admin.register(models.Approval)
 class ApprovalAdmin(admin.ModelAdmin):

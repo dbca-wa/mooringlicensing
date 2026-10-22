@@ -22,7 +22,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
 from django.views.generic import TemplateView
 
-from ledger_api_client.ledger_models import Invoice
+from ledger_api_client.ledger_models import Invoice, Basket
 
 from mooringlicensing.helpers import is_authorised_to_modify, is_applicant_address_set, is_authorised_to_pay_auto_approved
 from mooringlicensing import settings
@@ -334,6 +334,20 @@ class StickerReplacementFeeSuccessViewPreload(APIView):
                         logger.info(f'Invoice with invoice_reference: {invoice_reference} exist.')
                     invoice = Invoice.objects.get(reference=invoice_reference)
 
+                    booking_reference = "NoApproval"
+                    #get approval from sticker_action_details
+                    for sticker_action_detail in sticker_action_details.all():
+                        if sticker_action_detail.sticker and sticker_action_detail.sticker.approval:
+                            booking_reference = sticker_action_detail.sticker.approval.lodgement_number
+                        elif not sticker_action_detail.sticker and sticker_action_detail.approval:
+                            booking_reference = sticker_action_detail.approval.lodgement_number
+                        if booking_reference != "NoApproval":
+                            break 
+
+                    #validate approval (or noapproval) reference with invoice reference
+                    if not ledger_api_client.utils.validate_booking_and_invoice_references(booking_reference, invoice_reference):
+                        raise serializers.ValidationError(f"Invoice: {invoice_reference} and Booking Reference: {booking_reference} are not part of the same order/basket.")
+
                     sticker_action_fee.invoice_reference = invoice.reference
                     sticker_action_fee.save()
                     
@@ -504,14 +518,28 @@ class StickerReplacementFeeSuccessView(TemplateView):
     template_name = 'mooringlicensing/payments_ml/success_sticker_action_fee.html'
     LAST_STICKER_ACTION_FEE_ID = 'mooringlicensing_last_dcv_admission_invoice'
 
+    def valid_token_payment_session(self, request, invoice_reference):
+        if 'token_payment_session' in request.session:
+            basket = Basket.objects.filter(status='Submitted', id=request.session['token_payment_session']).order_by('-id').first()
+            del request.session['token_payment_session']
+            return ledger_api_client.utils.validate_booking_and_invoice_references(basket.booking_reference, invoice_reference)
+
     def get(self, request, uuid):
         logger.info(f'{StickerReplacementFeeSuccessView.__name__} get method is called.')
 
         try:
             sticker_action_fee = StickerActionFee.objects.get(uuid=uuid)
-            invoice = Invoice.objects.get(reference=sticker_action_fee.invoice_reference)
 
-            if is_internal(request) or invoice.owner.id == request.user.id:
+            invoice_reference = request.GET.get("invoice", "")
+            if not invoice_reference:
+                invoice = Invoice.objects.get(reference=sticker_action_fee.invoice_reference)
+            else:
+                invoice = Invoice.objects.get(reference=invoice_reference)
+
+            if (request.user and (
+                is_internal(request) or 
+                invoice.owner.id == request.user.id
+            )) or self.valid_token_payment_session(request, invoice_reference):
                 invoice_url = f'/ledger-toolkit-api/invoice-pdf/{invoice.reference}/'
                 applicant = retrieve_email_userro(sticker_action_fee.created_by) if sticker_action_fee.created_by else ''
                 context = {
@@ -909,6 +937,10 @@ class ApplicationFeeSuccessViewPreload(APIView):
                 db_operations = fee_calculation.data
                 proposal = application_fee.proposal
 
+                #validate invoice reference with basket reference (proposal lodgement number)
+                booking_reference = proposal.lodgement_number
+                if not ledger_api_client.utils.validate_booking_and_invoice_references(booking_reference, invoice_reference):
+                    raise serializers.ValidationError(f"Invoice: {invoice_reference} and Booking Reference: {booking_reference} are not part of the same order/basket.")
                 
                 #NOTE first changes made here fee item application fees are updated or created here
                 #check application fee again - if is already has a preload return 200
@@ -1045,10 +1077,15 @@ class ApplicationFeeSuccessViewPreload(APIView):
 
 
 class ApplicationFeeSuccessView(TemplateView):
-    permission_classes=[IsAuthenticated]
     template_name = 'mooringlicensing/payments_ml/success_application_fee.html'
     LAST_APPLICATION_FEE_ID = 'mooringlicensing_last_app_invoice'
 
+    def valid_token_payment_session(self, request, invoice_reference):
+        if 'token_payment_session' in request.session:
+            basket = Basket.objects.filter(status='Submitted', id=request.session['token_payment_session']).order_by('-id').first()
+            del request.session['token_payment_session']
+            return ledger_api_client.utils.validate_booking_and_invoice_references(basket.booking_reference, invoice_reference)
+            
     def get(self, request, uuid, *args, **kwargs):
         logger.info(f'{ApplicationFeeSuccessView.__name__} get method is called.')
 
@@ -1057,7 +1094,10 @@ class ApplicationFeeSuccessView(TemplateView):
             proposal = application_fee.proposal
             applicant = proposal.applicant_obj
 
-            if (is_internal(request) or applicant.id == request.user.id):
+            if (request.user and (
+                is_internal(request) or 
+                applicant.id == request.user.id
+            )) or self.valid_token_payment_session(request, application_fee.invoice_reference):
                 wla_or_aaa = True if proposal.application_type.code in [WaitingListApplication.code, AnnualAdmissionApplication.code,] else False
                 invoice = Invoice.objects.get(reference=application_fee.invoice_reference)
                 invoice_url = f'/ledger-toolkit-api/invoice-pdf/{invoice.reference}/'
