@@ -93,6 +93,21 @@ class PaymentSessionMiddleware(object):
 
         redirect_path = 'internal' if is_internal(request) else 'external'
 
+        if 'token_payment_session' in request.session and (
+            request.path.startswith("/ledger-api/process-payment") 
+            or request.path.startswith('/ledger-api/payment-details')
+        ):
+            if request.path.startswith("/ledger-api/process-payment"):
+                checkouthash =  hashlib.sha256(str(str(request.session["token_payment_session"])).encode('utf-8')).hexdigest()
+                checkouthash_cookie = request.COOKIES.get('checkouthash')
+                validation_cookie = request.COOKIES.get(request.POST['payment-csrfmiddlewaretoken'])
+
+                if checkouthash_cookie != checkouthash or checkouthash_cookie != validation_cookie:                         
+                    url_redirect = reverse(redirect_path)
+                    response = HttpResponse("<script> window.location='"+url_redirect+"';</script> <center><div class='container'><div class='alert alert-primary' role='alert'><a href='"+url_redirect+"'> Redirecting please wait: "+url_redirect+"</a><div></div></center>")
+                    return response
+            return response  
+
         if (request.user.is_authenticated 
         and (CHECKOUT_PATH.match(request.path)
         or request.path.startswith("/ledger-api/process-payment") 
@@ -132,6 +147,20 @@ class PaymentSessionMiddleware(object):
         
         response= self.get_response(request)
         redirect_path = 'internal' if is_internal(request) else 'external'
+
+        if 'token_payment_session' in request.session and (
+            request.path.startswith("/ledger-api/process-payment") 
+            or request.path.startswith('/ledger-api/payment-details')
+        ):
+            checkouthash =  hashlib.sha256(str(str(request.session["token_payment_session"])).encode('utf-8')).hexdigest() 
+            checkouthash_cookie = request.COOKIES.get('checkouthash')
+            validation_cookie = request.COOKIES.get(request.POST['payment-csrfmiddlewaretoken'])
+
+            if checkouthash_cookie != checkouthash or checkouthash_cookie != validation_cookie:                         
+                url_redirect = reverse(redirect_path)
+                response = HttpResponse("<script> window.location='"+url_redirect+"';</script> <center><div class='container'><div class='alert alert-primary' role='alert'><a href='"+url_redirect+"'> Redirecting please wait: "+url_redirect+"</a><div></div></center>")
+                return response
+            return response  
         
         if (request.user.is_authenticated 
         and (CHECKOUT_PATH.match(request.path)
@@ -192,5 +221,15 @@ class PaymentSessionMiddleware(object):
                 url_redirect = reverse(redirect_path)
                 response = HttpResponse("<script> window.location='"+url_redirect+"';</script> <center><div class='container'><div class='alert alert-primary' role='alert'><a href='"+url_redirect+"'> Redirecting please wait: "+url_redirect+"</a><div></div></center>")
                 return response
-                
+
+        #if not authenticated and no token_payment_session, redirect
+        if not request.user.is_authenticated and (
+            (CHECKOUT_PATH.match(request.path)
+            or request.path.startswith("/ledger-api/process-payment") 
+            or request.path.startswith('/ledger-api/payment-details'))
+        ) and not 'token_payment_session' in request.session:
+            url_redirect = reverse(redirect_path)
+            response = HttpResponse("<script> window.location='"+url_redirect+"';</script> <center><div class='container'><div class='alert alert-primary' role='alert'><a href='"+url_redirect+"'> Redirecting please wait: "+url_redirect+"</a><div></div></center>")
+            return response
+        
         return response
