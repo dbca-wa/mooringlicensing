@@ -41,10 +41,11 @@
     createCookie('checkouthash', "{{ checkouthash }}");
 
     if (window.location.href.indexOf("payment-details") != -1) {
-        setInterval(function() {
+        var checkoutInterval = setInterval(function() {
             createCookie(document.getElementById('payment-csrfmiddlewaretoken').value, "{{ checkouthash }}");
             var checkouthash_cookie = readCookie("checkouthash");
             if (payment_processing.var.checkouthash != checkouthash_cookie) {
+                clearInterval(checkoutInterval);
                 if ("{{is_internal_login}}" == "True") {
                     window.location = "/internal"
                 } else {
