@@ -334,7 +334,7 @@ def ml_meet_vessel_requirement(mooring_licence, boundary_date):
     for vo in mooring_licence.vessel_ownerships.filter(Q(end_date=None)|Q(end_date__gt=boundary_date)):
         #check if vessel meets the length requirement
         vessel_details = vo.vessel.latest_vessel_details if vo.vessel else None
-        if vessel_details and vessel_details.vessel_length >= min_length:
+        if vessel_details and float(vessel_details.vessel_length) >= min_length:
             return True
 
     # All the vessels have been sold more than X months ago

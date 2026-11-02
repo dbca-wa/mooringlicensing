@@ -201,7 +201,7 @@ def send_vessel_nomination_reminder_mail(approval, request=None):
         'public_url': get_public_url(),
         'approval': approval,
         'date_to_nominate_new_vessel': date_to_nominate_new_vessel,
-        'dashboard_external_url': make_http_https(url),
+        'dashboard_external_url': get_public_url(),
     }
 
     sender = settings.DEFAULT_FROM_EMAIL
