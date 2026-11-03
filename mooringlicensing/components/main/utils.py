@@ -388,6 +388,7 @@ def sticker_export():
                 'Vessel Length',
                 'Season',
             ])
+            batch_sticker_ids = []
             for sticker in stickers:
                 try:
                     # Sticker is being printed.  We assign a new number here.
@@ -430,6 +431,7 @@ def sticker_export():
                     logger.info('Sticker: {} details added to the spreadsheet'.format(sticker.number))
                     updates.append(sticker.number)
                     sticker.save()
+                    batch_sticker_ids.append(sticker.id)
                     new_approval_history_entry = ApprovalHistory.objects.create(
                         vessel_ownership=sticker.approval.current_proposal.vessel_ownership,
                         approval=sticker.approval,
@@ -460,8 +462,9 @@ def sticker_export():
                 batch_obj.save()
                 logger.info('Sticker printing batch file {} generated successfully.'.format(batch_obj.name))
 
+            batch_stickers = Sticker.objects.filter(id__in=batch_sticker_ids)
             # Update sticker objects
-            stickers.update(
+            batch_stickers.update(
                 sticker_printing_batch=batch_obj,  # Keep status 'printing' because we still have to wait for the sticker printed.
             )
         except Exception as e:

@@ -1341,17 +1341,10 @@ class Approval(RevisionedMixin):
                     sticker.status = Sticker.STICKER_STATUS_TO_BE_RETURNED
                     sticker.save()
                     logger.info(f'Sticker: [{sticker}] status has been changed to [{sticker.status}]')
-            elif sticker and sticker.status in [Sticker.STICKER_STATUS_READY,]:
+            elif sticker and sticker.status in [Sticker.STICKER_STATUS_READY,Sticker.STICKER_STATUS_NOT_READY]:
                 # These sticker objects were created, but not sent to the printing company
                 # So we just make it 'cancelled'
-                if sticker.number:
-                    # Should not reach here.
-                    # But if this is the case, we assign 'cancelled' status so that it is shown in the sticker table.
-                    sticker.status = Sticker.STICKER_STATUS_CANCELLED
-                else:
-                    # This sticker object was created, but no longer needed before being printed.
-                    # Therefore, assign not_ready_yet status not to be picked up for printing
-                    sticker.status = Sticker.STICKER_STATUS_NOT_READY_YET  
+                sticker.status = Sticker.STICKER_STATUS_CANCELLED
                 sticker.save()
                 logger.info(f'Sticker: [{sticker}] status has been changed to [{sticker.status}]')
 

@@ -730,7 +730,7 @@ def send_approval_renewal_email_notification(approval):
         'vessel_rego_no': proposal.vessel_details.vessel.rego_no,
         'recipient': proposal.proposal_applicant,
         'expiry_date': approval.expiry_date,
-        'dashboard_external_url': make_http_https(url),
+        'dashboard_external_url': get_public_url(),
         'mooring': approval.child_obj.mooring.name if approval.code == 'ml' else None
     }
 
