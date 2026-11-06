@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
     <div id="current_vessels" v-if="vesselExists && !forEndorser">
         <FormSection v-if="mooringLicenceCurrentVesselDisplayText || currentVesselDisplayText" label="Current Vessel" Index="current_vessel">
             <div v-if="mooringLicenceCurrentVesselDisplayText" class="row form-group">

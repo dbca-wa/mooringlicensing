@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
     <div class="container" >
 
         <div class="alert round-box col-12 px-3 mb-3" style='background: #c4e6fd; border: 1px solid #80beff'>

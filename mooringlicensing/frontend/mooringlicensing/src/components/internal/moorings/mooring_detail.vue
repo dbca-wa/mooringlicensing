@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
     <div v-if="mooring" class="container" id="internalMooring">
         <div class="row">
             <h3>{{ mooring.name}}</h3>

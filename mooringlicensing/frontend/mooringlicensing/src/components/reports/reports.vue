@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
   <div class="container">
     <div id="report-form">
         <form  method="get" id="payments-form" action="/ledger/payments/api/report">
@@ -134,6 +134,7 @@
 </template>
 
 <script>
+import $ from 'jquery'
 import {api_endpoints,helpers} from "@/utils/hooks.js"
 export default {
     name:"reports",

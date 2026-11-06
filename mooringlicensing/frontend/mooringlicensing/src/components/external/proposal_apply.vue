@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
     <div class="container">
         <FormSection label="Select Applicant" v-if="is_internal">
             <div>

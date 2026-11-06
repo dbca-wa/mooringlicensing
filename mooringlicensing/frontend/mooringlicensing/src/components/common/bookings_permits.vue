@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
     <div id="bookingsPermits">
         <div class="row form-group">
             <div class="col-sm-12">

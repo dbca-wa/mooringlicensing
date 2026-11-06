@@ -1,9 +1,18 @@
 import Vue from 'vue'
 import resource from 'vue-resource'
-import App from './App'
+import 'vite/modulepreload-polyfill';
+import App from './App.vue'
 import router from './router'
 import bs from 'bootstrap'
 import helpers from '@/utils/helpers'
+
+import moment from 'moment'
+extendMoment(moment);
+window.moment = moment
+import _ from 'lodash'
+window._ = _
+import swal from 'sweetalert2'
+window.swal = swal
 
 import { extendMoment } from 'moment-range';
 
@@ -21,12 +30,10 @@ import 'sweetalert2/dist/sweetalert2.css';
 import 'select2/dist/css/select2.min.css';
 import 'select2-bootstrap-theme/dist/select2-bootstrap.min.css';
 
-extendMoment(moment);
 
 import api_endpoints from './api'
-//require('../node_modules/bootstrap/dist/css/bootstrap.css' );
-require('../node_modules/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css')
-require('../node_modules/font-awesome/css/font-awesome.min.css' )
+import 'eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css'
+import 'font-awesome/css/font-awesome.min.css'
 
 import '@/../node_modules/datatables.net-bs/css/dataTables.bootstrap.min.css';
 import '@/../node_modules/datatables.net-responsive-bs/css/responsive.bootstrap.min.css';

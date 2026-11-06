@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
     <div id="vessels">
         <FormSection label="Registration Details" Index="registration_details" v-if="!forEndorser">
             <div class="row form-group">

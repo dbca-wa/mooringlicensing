@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
     <div id="current_moorings">
         <FormSection v-if="currentMooringDisplayText" label="Current Moorings" Index="current_mooring">
             <div class="row form-group">

@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
     <FormSection label="Search Sticker" Index="search_sticker">
         <div class="row form-group">
             <label for="sticker_lookup" class="col-sm-3 control-label">Sticker</label>

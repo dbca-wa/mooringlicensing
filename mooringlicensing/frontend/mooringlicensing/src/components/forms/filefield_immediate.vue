@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
     <div :class="headerCSS">
         <div v-if="numDocuments > 0">
             <div v-for="v in documents">

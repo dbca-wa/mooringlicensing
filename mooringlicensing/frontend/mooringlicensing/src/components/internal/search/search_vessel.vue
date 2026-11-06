@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
     <FormSection label="Search Vessels" Index="search_vessel">
         <div class="row form-group">
                 <label for="vessel_lookup" class="col-sm-3 control-label">Search Vessel by registration number or name</label>

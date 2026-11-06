@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
     <FormSection label="Search Mooring" Index="search_mooring">
         <div class="row form-group">
             <label for="mooring_lookup" class="col-sm-3 control-label">Mooring</label>

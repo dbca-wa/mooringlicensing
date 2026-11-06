@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
     <FormSection label="Search Person" Index="search_person">
         <div class="row form-group">
             <label for="person_lookup" class="col-sm-3 control-label">Person</label>

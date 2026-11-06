@@ -1,4 +1,4 @@
-module.exports = {
+export default {
     WL_PROPOSAL: 'wla',
     AA_PROPOSAL: 'aaa',
     AU_PROPOSAL: 'aua',

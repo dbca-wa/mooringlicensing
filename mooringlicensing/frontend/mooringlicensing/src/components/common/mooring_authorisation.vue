@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
     <div v-if="newAua || changeMooring || (changeMooring && noMoorings)" id="mooring_authorisation">
         <FormSection label="Mooring details" Index="mooring_authorisation">
             <div class="row form-group">

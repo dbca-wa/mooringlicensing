@@ -95,11 +95,11 @@
 <script>
 import FormSection from "@/components/forms/section_toggle.vue"
 import Applicant from '@/components/common/applicant.vue'
-import ApplicationsTable from "@/components/common/table_proposals"
-import WaitingListTable from "@/components/common/table_approvals"
-import LicencesAndPermitsTable from "@/components/common/table_approvals"
-import CompliancesTable from "@/components/common/table_compliances"
-import VesselsTable from "@/components/common/table_vessels"
+import ApplicationsTable from "@/components/common/table_proposals.vue"
+import WaitingListTable from "@/components/common/table_approvals.vue"
+import LicencesAndPermitsTable from "@/components/common/table_approvals.vue"
+import CompliancesTable from "@/components/common/table_compliances.vue"
+import VesselsTable from "@/components/common/table_vessels.vue"
 import { api_endpoints, helpers } from '@/utils/hooks'
 import CommsLogs from '@common-utils/comms_logs.vue'
 

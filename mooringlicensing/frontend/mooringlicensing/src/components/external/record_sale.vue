@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
     <div id="recordSale">
         <modal transition="modal fade" @ok="ok()" @cancel="cancel()" title="Record Sale" large>
             <div class="container-fluid">

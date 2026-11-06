@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
     <div v-if="proposal" class="container" id="internalProposal">
         <alert v-if="proposal.affected_by_fee_constructor_change" type="warning">{{proposal.affected_by_fee_constructor_change}}</alert>
         <alert v-if="proposal.proposal_type.code=='swap_moorings'" type="warning">Vessel Details cannot be altered on a Mooring Swap Application, only submitted as is or removed.</alert>
