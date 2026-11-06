@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import { createVuePlugin } from 'vite-plugin-vue2'
 import path from 'path'
 
-const port = process.env.PORT ? parseInt(process.env.PORT) : 9122
+const port = process.env.PORT ? parseInt(process.env.PORT) : 5173
 const host = process.env.HOST || '0.0.0.0'
 
 export default defineConfig({
