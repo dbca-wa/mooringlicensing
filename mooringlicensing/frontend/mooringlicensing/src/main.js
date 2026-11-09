@@ -10,7 +10,7 @@ import $ from 'jquery'
 window.$ = $
 window.jQuery = $
 
-import('bootstrap')
+await import('bootstrap')
 
 import moment from 'moment'
 extendMoment(moment);
@@ -29,7 +29,8 @@ import 'datatables.net-fixedcolumns-bs';
 import jsZip from 'jszip';
 window.JSZip = jsZip;
 
-import 'select2';
+import select2 from 'select2';
+select2();
 import 'jquery-validation';
 
 import 'sweetalert2/dist/sweetalert2.css';
