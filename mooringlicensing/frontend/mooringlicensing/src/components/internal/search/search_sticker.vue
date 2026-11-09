@@ -24,8 +24,8 @@
 
 <script>
 import FormSection from '@/components/forms/section_toggle.vue'
-require("select2/dist/css/select2.min.css");
-require("select2-bootstrap-theme/dist/select2-bootstrap.min.css");
+import "select2/dist/css/select2.min.css";
+import "select2-bootstrap-theme/dist/select2-bootstrap.min.css";
 import {
   api_endpoints,
 }

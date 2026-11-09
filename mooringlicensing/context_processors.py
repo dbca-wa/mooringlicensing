@@ -32,4 +32,5 @@ def mooringlicensing_processor(request):
         'QUEUE_ACTIVE_HOSTS' : settings.QUEUE_ACTIVE_HOSTS,
         'QUEUE_GROUP_NAME' : settings.QUEUE_GROUP_NAME,
         'management_commands_enabled': settings.ENABLE_MANAGEMENT_COMMANDS,
+        'vue3_entry_script': settings.VUE3_ENTRY_SCRIPT,
     }

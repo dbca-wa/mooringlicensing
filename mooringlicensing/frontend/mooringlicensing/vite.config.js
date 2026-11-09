@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import { createVuePlugin } from 'vite-plugin-vue2'
+import { viteStaticCopy } from 'vite-plugin-static-copy'
 import path from 'path'
 
 const port = process.env.PORT ? parseInt(process.env.PORT) : 5173
@@ -8,6 +9,14 @@ const host = process.env.HOST || '0.0.0.0'
 export default defineConfig({
     plugins: [
         createVuePlugin(),
+        viteStaticCopy({
+            targets: [
+                {
+                    src: 'node_modules/font-awesome/fonts/*',
+                    dest: 'node_modules/font-awesome/fonts',
+                },
+            ],
+        })
     ],
 
     resolve: {
@@ -25,6 +34,10 @@ export default defineConfig({
             datetimepicker: path.resolve(
                 __dirname,
                 'eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js'
+            ),
+            moment: path.resolve(
+                __dirname,
+                'node_modules/moment/moment.js'
             ),
         },
     },

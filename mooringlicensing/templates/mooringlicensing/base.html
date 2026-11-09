@@ -1,6 +1,7 @@
 <!--bootstrap3-->
 
 {% load static %}
+{% load django_vite %}
 
 {% load users %}
 {% load utils %}
@@ -23,22 +24,20 @@
     <head>
         <meta charset="UTF-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-            <!--bootstrap_css-->
-                <link type="text/css" href="{% static 'mooringlicensing/css/bootstrap.min.css' %}" rel="stylesheet">
-                <link type="text/css" href="{% static 'mooringlicensing/css/base.css' %}" rel="stylesheet">
-            {% if not dev %}
-	            <link rel="stylesheet" href="{% static 'mooringlicensing_vue/css/app.css' %}?v={{GIT_COMMIT_HASH}}">
-                <link rel="stylesheet" href="{% static 'mooringlicensing_vue/css/chunk-vendors.css' %}?v={{GIT_COMMIT_HASH}}">
-            {% endif %}
-            {% block extra_css %}
+        <link type="text/css" href="{% static 'mooringlicensing/css/bootstrap.min.css' %}" rel="stylesheet">
+        <link type="text/css" href="{% static 'mooringlicensing/css/base.css' %}" rel="stylesheet">
+        {% vite_hmr_client app='default' %}
+        {% vite_asset vue3_entry_script app='default' %}
+
+        {% block extra_css %}
+        {% endblock %}
+        {% block extra_js %}
+        {% endblock %}
+        <title>
+            {% block title %}
+            {{ short_name }} - {{ department_name }}
             {% endblock %}
-            {% block extra_js %}
-            {% endblock %}
-            <title>
-                {% block title %}
-                {{ short_name }} - {{ department_name }}
-                {% endblock %}
-            </title>
+        </title>
 
         </meta>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -195,22 +194,18 @@
         {% endblock %}
         {% block modals %}
         {% endblock %}
-        {% if not dev %}
-            <script type="text/javascript" src="{% static 'mooringlicensing_vue/js/chunk-vendors.js' %}?v={{GIT_COMMIT_HASH}}"></script>
-            <script type="text/javascript" src="{% static 'mooringlicensing_vue/js/app.js' %}?v={{GIT_COMMIT_HASH}}"></script>
-            <script type="text/javascript" src="{% static 'jquery.js' %}?v={{GIT_COMMIT_HASH}}"></script>
-	    {% if DJANGO_SETTINGS.WAITING_QUEUE_ENABLED is True %}
-		    <!-- load queue after jquery -->
-	            <script src="{{ QUEUE_URL }}/static/js/django_queue_manager/site-queue-manager.js?ver={{ GIT_COMMIT_HASH }}"></script>
-	            <script>
-	                if (typeof sitequeuemanager !== "undefined") {
-	                    sitequeuemanager.init('{{ QUEUE_DOMAIN }}','{{ QUEUE_URL }}','{{ QUEUE_GROUP_NAME }}','{{ QUEUE_ACTIVE_HOSTS }}');
-	                }
-	            </script>	    
-	    {% endif %}
-        {% else %}
-            <script type="text/javascript" src="{{ dev_url }}"></script>
+
+        <script type="text/javascript" src="{% static 'jquery.js' %}?v={{GIT_COMMIT_HASH}}"></script>
+        {% if DJANGO_SETTINGS.WAITING_QUEUE_ENABLED is True %}
+        <!-- load queue after jquery -->
+        <script src="{{ QUEUE_URL }}/static/js/django_queue_manager/site-queue-manager.js?ver={{ GIT_COMMIT_HASH }}"></script>
+        <script>
+            if (typeof sitequeuemanager !== "undefined") {
+                sitequeuemanager.init('{{ QUEUE_DOMAIN }}','{{ QUEUE_URL }}','{{ QUEUE_GROUP_NAME }}','{{ QUEUE_ACTIVE_HOSTS }}');
+            }
+        </script>	    
         {% endif %}
+
 	<!-- Google Tag Manager -->
 	<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],

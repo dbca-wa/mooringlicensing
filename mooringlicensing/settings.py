@@ -70,6 +70,7 @@ INSTALLED_APPS += [
     'crispy_forms',
     'django_summernote',
     'wagov_utils.components.sri_utils',
+    'django_vite',
 ]
 
 ADD_REVERSION_ADMIN=True

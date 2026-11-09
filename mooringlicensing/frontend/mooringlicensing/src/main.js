@@ -3,7 +3,7 @@ import resource from 'vue-resource'
 import 'vite/modulepreload-polyfill';
 import App from './App.vue'
 import router from './router'
-import bs from 'bootstrap'
+import 'bootstrap'
 import helpers from '@/utils/helpers'
 
 import moment from 'moment'
@@ -33,12 +33,12 @@ import 'select2-bootstrap-theme/dist/select2-bootstrap.min.css';
 
 import api_endpoints from './api'
 import 'eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css'
-import 'font-awesome/css/font-awesome.min.css'
+import "font-awesome/css/font-awesome.min.css"
 
-import '@/../node_modules/datatables.net-bs/css/dataTables.bootstrap.min.css';
-import '@/../node_modules/datatables.net-responsive-bs/css/responsive.bootstrap.min.css';
-import '@/../node_modules/datatables.net-buttons-bs/css/buttons.bootstrap.min.css';
-import 'datatables.net-fixedcolumns-bs/css/fixedColumns.bootstrap.min.css';
+import 'datatables.net-bs/css/dataTables.bootstrap.min.css'
+import 'datatables.net-responsive-bs/css/responsive.bootstrap.min.css'
+import 'datatables.net-buttons-bs/css/buttons.bootstrap.min.css'
+import 'datatables.net-fixedcolumns-bs/css/fixedColumns.bootstrap.min.css'
 
 Vue.config.devtools = true;
 Vue.config.productionTip = false
@@ -58,13 +58,8 @@ Vue.http.interceptors.push( function ( request, next ) {
 const appElement = document.getElementById( 'app' );
 
 if ( appElement ) {
-  /* eslint-disable no-new */
-  new Vue( {
-    el: '#app',
+  new Vue({
     router,
-    template: '<App/>',
-    components: {
-      App
-    }
-  } )
+    render: h => h(App)
+  }).$mount('#app')
 }
