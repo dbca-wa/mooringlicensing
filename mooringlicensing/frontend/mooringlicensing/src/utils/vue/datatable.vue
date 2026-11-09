@@ -13,7 +13,7 @@
 
 </template>
 <script>
-import $ from 'jquery'
+//import $ from 'jquery'
 export default {
    name : 'DataTable',
    props:{

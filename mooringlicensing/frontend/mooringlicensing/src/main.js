@@ -3,8 +3,14 @@ import resource from 'vue-resource'
 import 'vite/modulepreload-polyfill';
 import App from './App.vue'
 import router from './router'
-import 'bootstrap'
 import helpers from '@/utils/helpers'
+
+import $ from 'jquery'
+
+window.$ = $
+window.jQuery = $
+
+import('bootstrap')
 
 import moment from 'moment'
 extendMoment(moment);

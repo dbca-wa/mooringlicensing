@@ -195,7 +195,6 @@
         {% block modals %}
         {% endblock %}
 
-        <script type="text/javascript" src="{% static 'jquery.js' %}?v={{GIT_COMMIT_HASH}}"></script>
         {% if DJANGO_SETTINGS.WAITING_QUEUE_ENABLED is True %}
         <!-- load queue after jquery -->
         <script src="{{ QUEUE_URL }}/static/js/django_queue_manager/site-queue-manager.js?ver={{ GIT_COMMIT_HASH }}"></script>

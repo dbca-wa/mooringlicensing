@@ -51,6 +51,8 @@
 </template>
 
 <script>
+//import $ from 'jquery'
+import 'eonasdan-bootstrap-datetimepicker'
 import modal from '@vue-utils/bootstrap-modal.vue'
 import alert from '@vue-utils/alert.vue'
 

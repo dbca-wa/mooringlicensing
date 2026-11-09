@@ -134,7 +134,8 @@
 </template>
 
 <script>
-import $ from 'jquery'
+//import $ from 'jquery'
+import 'eonasdan-bootstrap-datetimepicker'
 import {api_endpoints,helpers} from "@/utils/hooks.js"
 export default {
     name:"reports",

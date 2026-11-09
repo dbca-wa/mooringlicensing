@@ -68,6 +68,8 @@
 </template>
 
 <script>
+//import $ from 'jquery'
+import 'eonasdan-bootstrap-datetimepicker'
 import FormSection from '@/components/forms/section_toggle.vue'
 
 export default {

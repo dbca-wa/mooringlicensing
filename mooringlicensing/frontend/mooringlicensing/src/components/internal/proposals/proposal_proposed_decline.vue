@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import $ from 'jquery'
+//import $ from 'jquery'
 import modal from '@vue-utils/bootstrap-modal.vue'
 import alert from '@vue-utils/alert.vue'
 import { helpers, api_endpoints, constants } from "@/utils/hooks.js"

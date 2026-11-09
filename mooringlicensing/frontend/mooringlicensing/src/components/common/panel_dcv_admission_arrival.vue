@@ -106,7 +106,8 @@
 </template>
 
 <script>
-import 'eonasdan-bootstrap-datetimepicker';
+//import $ from 'jquery'
+import 'eonasdan-bootstrap-datetimepicker'
 import moment from "moment";
 import 'eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css';
 import 'eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js';
