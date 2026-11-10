@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
     <div>
 
         <div v-if="proposal && show_application_title" id="scrollspy-heading">

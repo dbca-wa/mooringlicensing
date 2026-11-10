@@ -70,6 +70,7 @@ INSTALLED_APPS += [
     'crispy_forms',
     'django_summernote',
     'wagov_utils.components.sri_utils',
+    'django_vite',
 ]
 
 ADD_REVERSION_ADMIN=True
@@ -571,3 +572,55 @@ if ENABLE_QUEUE_MIDDLEWARE is True or ENABLE_QUEUE_MIDDLEWARE == 'True':
     ]
 
 ENABLE_MANAGEMENT_COMMANDS = env('ENABLE_MANAGEMENT_COMMANDS', False)
+
+# 1. Detect if runserver is being executed
+RUNNING_DEVSERVER = "runserver" in sys.argv
+
+# 2. Detect if this is an active developer container vs a production/staging AKS pod
+# Check if "userdev" is in the hostname (e.g. mooringlicensing-userdev-8dbb5cb9c-mfwv7)
+IS_USERDEV_CONTAINER = "userdev" in os.environ.get("HOSTNAME", "").lower()
+
+# 3. Default to True ONLY in dev pods with runserver and DEBUG
+DEFAULT_VITE_DEV_MODE = (
+    RUNNING_DEVSERVER and DEBUG and EMAIL_INSTANCE == "DEV" and IS_USERDEV_CONTAINER
+)
+
+# 4. Allow manual override via environment variable
+raw_vite_mode = env("DJANGO_VITE_DEV_MODE", DEFAULT_VITE_DEV_MODE)
+DJANGO_VITE_DEV_MODE = (
+    raw_vite_mode
+    if isinstance(raw_vite_mode, bool)
+    else str(raw_vite_mode).lower() in ("true", "1", "yes", "t")
+)
+
+# 5. Clean notification (using print with RUN_MAIN so it displays once on startup)
+if RUNNING_DEVSERVER and os.environ.get("RUN_MAIN") == "true":
+    if DJANGO_VITE_DEV_MODE:
+        print("\n⚡ [Vite] Dev mode is ON (Hot Module Reloading) 🔥\n")
+    else:
+        print("\n📦 [Vite] Dev mode is OFF (Serving built bundle)\n")
+
+# 6. Django Vite configuration
+STATIC_URL_PREFIX = (
+    "/static/mooringlicensing_vue/"
+    if DJANGO_VITE_DEV_MODE
+    else "mooringlicensing_vue/"
+)
+
+DJANGO_VITE = {
+    "default": {
+        "dev_mode": DJANGO_VITE_DEV_MODE,
+        "manifest_path": os.path.join(
+            BASE_DIR,
+            "mooringlicensing",
+            "static",
+            "mooringlicensing_vue",
+            "manifest.json",
+        ),
+        "dev_server_host": "localhost",
+        "dev_server_port": int(env("DEV_SERVER_PORT", 5173)),
+        "static_url_prefix": STATIC_URL_PREFIX,
+    }
+}
+
+VUE3_ENTRY_SCRIPT = env("VUE3_ENTRY_SCRIPT", "src/main.js")

@@ -20,7 +20,7 @@
  */
 
 'use strict';
- import $ from 'jquery'
+ //import $ from 'jquery'
 
 /**
  * Constructor for responsive datables helper.
@@ -650,4 +650,4 @@ ResponsiveDatatablesHelper.prototype.difference = function (a, b) {
     return arr;
 };
 
-module.exports = ResponsiveDatatablesHelper;
+export default ResponsiveDatatablesHelper;

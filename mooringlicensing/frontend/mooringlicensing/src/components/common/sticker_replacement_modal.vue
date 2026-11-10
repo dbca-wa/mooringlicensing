@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
     <div id="change-contact">
         <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :title="title" large>
             <div class="container-fluid">
@@ -51,6 +51,8 @@
 </template>
 
 <script>
+//import $ from 'jquery'
+import 'eonasdan-bootstrap-datetimepicker'
 import modal from '@vue-utils/bootstrap-modal.vue'
 import alert from '@vue-utils/alert.vue'
 

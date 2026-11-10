@@ -1,5 +1,5 @@
 
-module.exports = {
+export default {
     application_types:"/api/application_types",
     application_types_dict:"/api/application_types_dict",
     application_categories:"/api/application_categories",

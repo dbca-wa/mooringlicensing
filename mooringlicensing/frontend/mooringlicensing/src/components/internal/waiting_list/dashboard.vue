@@ -11,7 +11,7 @@
 
 <script>
 import FormSection from "@/components/forms/section_toggle.vue"
-import WaitingListTable from "@/components/common/table_approvals"
+import WaitingListTable from "@/components/common/table_approvals.vue"
 
 export default {
     name: 'InternalWaitingListDashboard',

@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
     <div class="container" >
         <Vessel
         :profile=profile

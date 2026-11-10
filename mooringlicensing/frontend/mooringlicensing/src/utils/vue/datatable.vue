@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
    <div id="DataTable" >
       <table class="hover table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%" :id="id">
             <thead>
@@ -13,7 +13,8 @@
 
 </template>
 <script>
-module.exports = {
+//import $ from 'jquery'
+export default {
    name : 'DataTable',
    props:{
       dtHeaders:{

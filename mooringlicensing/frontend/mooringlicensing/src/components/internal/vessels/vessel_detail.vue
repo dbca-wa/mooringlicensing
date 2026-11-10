@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
     <div v-if="vessel.vessel_details" class="container" id="internalVessel">
         <div class="row">
             <h3>{{ vessel.vessel_details.vessel_name}} - {{ vessel.rego_no }}</h3>

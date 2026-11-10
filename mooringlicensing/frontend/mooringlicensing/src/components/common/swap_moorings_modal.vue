@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
     <div id="change-contact">
         <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :title="title" large>
             <p>Please select a Mooring Site License to exchange with the mooring of Mooring Site License: <strong>{{ approval_lodgement_number }}</strong>.</p>

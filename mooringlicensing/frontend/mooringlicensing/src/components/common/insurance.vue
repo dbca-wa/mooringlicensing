@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
     <FormSection label="Insurance details" Index="insurance_details">
         <div class="row form-group">
             <label for="" class="col-sm-9 control-label">The nominated vessel has

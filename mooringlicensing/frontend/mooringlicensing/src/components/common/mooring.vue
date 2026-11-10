@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
     <FormSection label="Preferred mooring area" Index="preferred_mooring_area">
         <div class="row form-group">
             <label for="" class="col-sm-9 control-label">Select one preferred mooring area. Preference cannot be changed without losing your original application date.</label>

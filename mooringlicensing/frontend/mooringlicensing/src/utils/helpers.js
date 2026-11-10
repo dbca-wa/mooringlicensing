@@ -1,4 +1,4 @@
-module.exports = {
+export default {
     _cleanErrorString: function(value) {
         return String(value)
             .replace(/<br\s*\/?\s*>/gi, '\n')

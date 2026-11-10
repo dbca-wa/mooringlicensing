@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
     <div id="bypassPayment">
         <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :title="title" large>
             <div class="container-fluid">
@@ -54,6 +54,7 @@
 </template>
 
 <script>
+//import $ from 'jquery'
 import modal from '@vue-utils/bootstrap-modal.vue'
 import alert from '@vue-utils/alert.vue'
 import {helpers,api_endpoints} from "@/utils/hooks.js"

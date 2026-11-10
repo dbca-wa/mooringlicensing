@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
     <div id="current_vessels" v-if="vesselExists && !forEndorser">
         <FormSection v-if="mooringLicenceCurrentVesselDisplayText || currentVesselDisplayText" label="Current Vessel" Index="current_vessel">
             <div v-if="mooringLicenceCurrentVesselDisplayText" class="row form-group">
@@ -70,8 +70,8 @@
 </template>
 <script>
 import FormSection from '@/components/forms/section_toggle.vue'
-require("select2/dist/css/select2.min.css");
-require("select2-bootstrap-theme/dist/select2-bootstrap.min.css");
+import "select2/dist/css/select2.min.css";
+import "select2-bootstrap-theme/dist/select2-bootstrap.min.css";
 
 export default {
     name:'current_vessels',

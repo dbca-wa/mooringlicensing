@@ -10,7 +10,7 @@
 
 <script>
 import FormSection from "@/components/forms/section_toggle.vue"
-import ApplicationsTable from "@/components/common/table_proposals"
+import ApplicationsTable from "@/components/common/table_proposals.vue"
 import { api_endpoints, helpers } from '@/utils/hooks'
 
 export default {

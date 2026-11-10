@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
     <FormSection label="Search Mooring" Index="search_mooring">
         <div class="row form-group">
             <label for="mooring_lookup" class="col-sm-3 control-label">Mooring</label>
@@ -25,8 +25,8 @@
 
 <script>
 import FormSection from '@/components/forms/section_toggle.vue'
-require("select2/dist/css/select2.min.css");
-require("select2-bootstrap-theme/dist/select2-bootstrap.min.css");
+import "select2/dist/css/select2.min.css";
+import "select2-bootstrap-theme/dist/select2-bootstrap.min.css";
 import {
   api_endpoints
 }

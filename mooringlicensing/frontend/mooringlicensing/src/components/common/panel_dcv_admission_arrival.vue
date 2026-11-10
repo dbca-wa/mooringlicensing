@@ -106,10 +106,11 @@
 </template>
 
 <script>
-import 'eonasdan-bootstrap-datetimepicker';
-require("moment");
-require('eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css');
-require('eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js');
+//import $ from 'jquery'
+import 'eonasdan-bootstrap-datetimepicker'
+import moment from "moment";
+import 'eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css';
+import 'eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js';
 import FormSection from "@/components/forms/section_toggle.vue"
 import { api_endpoints, helpers } from '@/utils/hooks'
 

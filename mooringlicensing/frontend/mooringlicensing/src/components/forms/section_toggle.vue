@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
     <div class="panel panel-default" >
         <div v-if="!hideHeader" class="panel-heading">
             <h3 class="panel-title">{{label}} <span :class=subtitle_class_name>{{ subtitle }}</span>
