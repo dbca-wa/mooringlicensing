@@ -1,5 +1,4 @@
 import Vue from 'vue'
-import resource from 'vue-resource'
 import 'vite/modulepreload-polyfill';
 import App from './App.vue'
 import router from './router'

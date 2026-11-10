@@ -59,9 +59,44 @@ function buildOptions(method, body, options = {}) {
         ...options
     };
 
-    if (body !== undefined && body !== null) {
-        config.body = body;
+    if (body === undefined || body === null) {
+        return config;
     }
+
+    // FormData uploads
+    if (body instanceof FormData) {
+        config.body = body;
+        return config;
+    }
+
+    // Legacy vue-resource compatibility:
+    // vm.$http.post(url, JSON.stringify(data))
+    if (typeof body === 'string') {
+        config.body = body;
+
+        config.headers = {
+            ...(config.headers || {}),
+            'Content-Type': 'application/json'
+        };
+
+        return config;
+    }
+
+    // Legacy vue-resource compatibility:
+    // vm.$http.post(url, {})
+    // vm.$http.post(url, { foo: 'bar' })
+    if (typeof body === 'object') {
+        config.body = JSON.stringify(body);
+
+        config.headers = {
+            ...(config.headers || {}),
+            'Content-Type': 'application/json'
+        };
+
+        return config;
+    }
+
+    config.body = body;
 
     return config;
 }
