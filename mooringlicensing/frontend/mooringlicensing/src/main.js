@@ -10,8 +10,6 @@ import $ from 'jquery'
 window.$ = $
 window.jQuery = $
 
-//await import('bootstrap')
-
 import moment from 'moment'
 extendMoment(moment);
 window.moment = moment
@@ -49,10 +47,14 @@ import 'datatables.net-fixedcolumns-bs/css/fixedColumns.bootstrap.min.css'
 
 Vue.config.devtools = true;
 Vue.config.productionTip = false
-Vue.use( resource );
+
+//NOTE/TODO temporary compatibility layer
+import http from '@/utils/vue-resource-shim';
+Vue.http = http;
+Vue.prototype.$http = http;
 
 // Add CSRF Token to every request
-Vue.http.interceptors.push( function ( request, next ) {
+/*Vue.http.interceptors.push( function ( request, next ) {
   // modify headers
   if ( request.url != api_endpoints.countries ) {
     request.headers.set( 'X-CSRFToken', helpers.getCookie( 'csrftoken' ) );
@@ -60,7 +62,7 @@ Vue.http.interceptors.push( function ( request, next ) {
 
   // continue to next interceptor
   next();
-} );
+} );*/
 
 const appElement = document.getElementById( 'app' );
 
