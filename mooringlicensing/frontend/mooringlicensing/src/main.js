@@ -10,7 +10,7 @@ import $ from 'jquery'
 window.$ = $
 window.jQuery = $
 
-await import('bootstrap')
+//await import('bootstrap')
 
 import moment from 'moment'
 extendMoment(moment);
@@ -64,9 +64,15 @@ Vue.http.interceptors.push( function ( request, next ) {
 
 const appElement = document.getElementById( 'app' );
 
+//NOTE/TODO: we should not have to do this once bootstrap has been upgraded to 5 and jquery has been made non-global
+async function bootstrap() {
+    await import('bootstrap');
+    new Vue({
+      router,
+      render: h => h(App)
+    }).$mount('#app')
+}
+
 if ( appElement ) {
-  new Vue({
-    router,
-    render: h => h(App)
-  }).$mount('#app')
+  bootstrap();
 }
