@@ -652,7 +652,7 @@ class ApplicationFeeView(TemplateView):
 
                 return_url = request.build_absolute_uri(reverse('fee_success', kwargs={"uuid": application_fee.uuid}))
                 return_preload_url = settings.MOORING_LICENSING_EXTERNAL_URL + reverse("ledger-api-success-callback", kwargs={"uuid": application_fee.uuid})
-                reference = proposal.previous_application.lodgement_number if proposal.previous_application else proposal.lodgement_number
+                reference = proposal.lodgement_number
                 checkout_response = checkout(
                     request,
                     proposal.applicant_obj,

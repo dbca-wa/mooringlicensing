@@ -2453,7 +2453,7 @@ class Proposal(RevisionedMixin):
                         try:
                             logger.info(f'Creating future invoice for the application: [{self}]...')
                             ### Future Invoice ###
-                            reference = self.previous_application.lodgement_number if self.previous_application else self.lodgement_number
+                            reference = self.lodgement_number
                             invoice_text = 'Payment Invoice'
                             basket_params = {
                                 'products': line_items,
