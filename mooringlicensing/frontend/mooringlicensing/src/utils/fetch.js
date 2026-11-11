@@ -55,10 +55,12 @@ async function request(url, options = {}) {
         ok: response.ok,
         status: response.status,
         statusText: response.statusText,
-        url: response.url,
+        headers: response.headers,
 
         body: data,
         bodyText,
+        responseText: bodyText,
+
         data
     };
 
