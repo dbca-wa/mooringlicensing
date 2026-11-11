@@ -28,24 +28,44 @@ async function request(url, options = {}) {
     let data = null;
 
     try {
-        data = await response.json();
+        const text = await response.text();
+
+        if (text) {
+            try {
+                data = JSON.parse(text);
+            } catch {
+                data = text;
+            }
+        }
+    } catch {
+        data = null;
     }
-    catch {
-        try {
-            data = await response.text();
-        }
-        catch {
-            data = null;
-        }
+
+    let bodyText = '';
+
+    if (Array.isArray(data)) {
+        bodyText = data.join('\n');
+    } else if (typeof data === 'string') {
+        bodyText = data;
+    } else if (data) {
+        bodyText = JSON.stringify(data);
     }
 
     const result = {
+        ok: response.ok,
         status: response.status,
-        body: data, // NOTE/TODO vue-resource compatibility
-        data        // NOTE/TODO future API
+        statusText: response.statusText,
+        headers: response.headers,
+
+        body: data,
+        bodyText,
+        responseText: bodyText,
+
+        data
     };
 
     if (!response.ok) {
+        console.log('THROWING', result);
         throw result;
     }
 
