@@ -1695,7 +1695,14 @@ class VesselFullOwnershipSerializer(serializers.ModelSerializer):
 
     def get_owner_full_name(self, obj):
         owner = obj.owner.emailuser_obj
-        return owner.get_full_name()
+        try:
+            system_user = retrieve_system_user(owner.id)
+            if system_user.legal_first_name or system_user.first_name:
+                return system_user.__str__()
+            else:
+                return owner.get_full_name()
+        except:
+            return owner.get_full_name()
 
     def get_applicable_percentage(self, obj):
         return obj.applicable_percentage
@@ -1714,7 +1721,8 @@ class VesselFullOwnershipSerializer(serializers.ModelSerializer):
 
     def get_owner_phone_number(self, obj):
         owner = obj.owner.emailuser_obj
-        return owner.phone_number if owner.phone_number else owner.mobile_number
+        system_user = retrieve_system_user(owner.id)
+        return system_user.phone_number if system_user.phone_number else system_user.mobile_number
 
     def get_individual_owner(self, obj):
         return obj.individual_owner
