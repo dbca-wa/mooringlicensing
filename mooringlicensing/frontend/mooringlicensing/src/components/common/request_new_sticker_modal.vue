@@ -188,15 +188,19 @@ export default {
             for (let sticker of this.stickers){
                 if (sticker.checked === true){
 
-                    if (this.holder.postal_address_list.length > 0) {
+                    if (this.holder.postal_address_list !== undefined && this.holder.postal_address_list.length > 0) {
                         let holder_address = this.holder.postal_address_list[0];
-                        
+                        console.log(holder_address.country,sticker.postal_address_country,
+                            holder_address.line1,sticker.postal_address_line1,
+                            holder_address.locality,sticker.postal_address_locality,
+                            holder_address.postcode,sticker.postal_address_postcode,
+                            holder_address.state,sticker.postal_address_state)
                         if (
-                            holder_address.country != this.postal_address_country ||
-                            holder_address.line1 != this.postal_address_line1 ||
-                            holder_address.locality != this.postal_address_locality ||
-                            holder_address.postcode != this.postal_address_postcode ||
-                            holder_address.state != this.postal_address_state
+                            holder_address.country != sticker.postal_address_country ||
+                            holder_address.line1 != sticker.postal_address_line1 ||
+                            holder_address.locality != sticker.postal_address_locality ||
+                            holder_address.postcode != sticker.postal_address_postcode ||
+                            holder_address.state != sticker.postal_address_state
                         ) {
                             return true
                         }   
