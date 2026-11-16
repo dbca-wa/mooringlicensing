@@ -19,7 +19,7 @@
                                                 class="form-control"
                                                 name="expiry_date"
                                                 v-model="approval.expiry_date"
-                                                :min="approval.expiry_date"
+                                                :min="today"
                                             >
                                         </div>
                                     </div>
@@ -82,6 +82,9 @@ export default {
         },
         title: function(){
             return 'Extend Approval Expiry Date';
+        },
+        today() {
+            return new Date().toISOString().split('T')[0];
         }
     },
     methods:{
@@ -157,27 +160,11 @@ export default {
                 }
             });
        },
-       eventListeners:function () {
-            //let vm = this;
-            //// Initialise Date Picker
-            //$(vm.$refs.expiry_date).datetimepicker(vm.datepickerOptions);
-            //$(vm.$refs.expiry_date).on('dp.change', function(e){
-            //    if ($(vm.$refs.expiry_date).data('DateTimePicker').date()) {
-            //        vm.approval.expiry_date =  e.date.format('DD/MM/YYYY');
-            //    }
-            //    else if ($(vm.$refs.expiry_date).data('date') === "") {
-            //        vm.approval.expiry_date = "";
-            //    }
-            // });
-       }
    },
    mounted:function () {
         let vm =this;
         vm.form = document.forms.approvalForm;
         vm.addFormValidations();
-        this.$nextTick(()=>{
-            //vm.eventListeners();
-        });
    }
 }
 </script>

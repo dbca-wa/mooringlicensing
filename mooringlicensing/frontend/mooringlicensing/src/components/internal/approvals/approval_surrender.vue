@@ -11,22 +11,6 @@
                 <form class="form-horizontal" name="approvalForm">
                     <div class="row">
                         <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
-                        <!--<div class="col-sm-12">
-                            <div class="form-group">
-                                <div class="col-sm-3">
-                                    <label class="control-label pull-left"  for="Name">Surrender Date</label>
-                                </div>
-                                <div class="col-sm-9">
-                                    <div class="input-group date" ref="surrender_date" style="width: 70%;">
-                                        <input type="text" class="form-control" name="surrender_date" placeholder="DD/MM/YYYY" v-model="approval.surrender_date">
-                                        <span class="input-group-addon">
-                                            <span class="glyphicon glyphicon-calendar"></span>
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>-->
-
                         <div class="col-sm-12">
                             <div class="form-group">
                                 <div class="col-sm-3">
@@ -76,13 +60,6 @@ export default {
             errorString: '',
             successString: '',
             success:false,
-            datepickerOptions:{
-                format: 'DD/MM/YYYY',
-                showClear:true,
-                useCurrent:false,
-                keepInvalid:true,
-                allowInputToggle:true
-            },
         }
     },
     computed: {
@@ -92,6 +69,9 @@ export default {
         },
         title: function(){
             return 'Surrender Approval';
+        },
+        today() {
+            return new Date().toISOString().split('T')[0];
         }
     },
     methods:{
@@ -109,7 +89,6 @@ export default {
             this.approval = {};
             this.errors = false;
             $('.has-error').removeClass('has-error');
-            //$(this.$refs.surrender_date).data('DateTimePicker').clear();
             this.validation_form.resetForm();
         },
         fetchContact: function(id){
@@ -177,29 +156,11 @@ export default {
                 }
             });
        },
-       eventListeners:function () {
-            let vm = this;
-            // Initialise Date Picker
-            $(vm.$refs.surrender_date).datetimepicker(vm.datepickerOptions);
-            $(vm.$refs.surrender_date).on('dp.change', function(e){
-                if ($(vm.$refs.surrender_date).data('DateTimePicker').date()) {
-                    vm.approval.surrender_date =  e.date.format('DD/MM/YYYY');
-                }
-                else if ($(vm.$refs.surrender_date).data('date') === "") {
-                    vm.approval.surrender_date = "";
-                }
-             });
-
-
-       }
    },
    mounted:function () {
         let vm =this;
         vm.form = document.forms.approvalForm;
         vm.addFormValidations();
-        this.$nextTick(()=>{
-            vm.eventListeners();
-        });
    }
 }
 </script>

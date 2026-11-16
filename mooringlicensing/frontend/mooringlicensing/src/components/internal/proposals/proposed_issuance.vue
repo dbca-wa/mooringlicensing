@@ -224,13 +224,6 @@ export default {
             startDateErrorString: '',
             successString: '',
             success: false,
-            datepickerOptions: {
-                format: 'DD/MM/YYYY',
-                showClear: true,
-                useCurrent: false,
-                keepInvalid: true,
-                allowInputToggle: true
-            },
             warningString: 'Please attach Level of Approval document before issuing Approval',
             mooringsTableId: 'moorings_table' + vm._uid,
             requestedMooringsTableId: 'requested_moorings_table' + vm._uid,

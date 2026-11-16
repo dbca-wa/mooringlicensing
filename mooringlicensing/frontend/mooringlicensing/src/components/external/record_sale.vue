@@ -19,11 +19,14 @@
                                         <label class="control-label pull-left"  for="Name">Sale Date</label>
                                     </div>
                                     <div class="col-sm-9">
-                                        <div class="input-group date" ref="sale_date" style="width: 70%;">
-                                            <input type="text" class="form-control" name="due_date" placeholder="DD/MM/YYYY" v-model="saleDate">
-                                            <span class="input-group-addon">
-                                                <span class="glyphicon glyphicon-calendar"></span>
-                                            </span>
+                                        <div style="width: 70%;">
+                                            <input
+                                                type="date"
+                                                class="form-control"
+                                                name="saleDate"
+                                                v-model="saleDate"
+                                                :max="today"
+                                            >
                                         </div>
                                     </div>
                                 </div>
@@ -77,12 +80,6 @@ export default {
             errorString: '',
             successString: '',
             success:false,
-            datepickerOptions:{
-                format: 'DD/MM/YYYY',
-                showClear:true,
-                useCurrent:false,
-                maxDate: moment().endOf('day'),
-            },
             saving: false,
             saleDate: null,
         }
@@ -96,6 +93,9 @@ export default {
             var vm = this;
             return vm.level == "internal";
         },
+        today() {
+            return new Date().toISOString().split('T')[0];
+        }
     },
     methods:{
         ok:function () {
@@ -150,24 +150,10 @@ export default {
                 this.errorString = helpers.apiVueResourceError(error);
             }
         },
-        eventListeners:function () {
-            let vm = this;
-            // Initialise Date Picker
-            $(vm.$refs.sale_date).datetimepicker(vm.datepickerOptions);
-            $(vm.$refs.sale_date).on('dp.change', function(e){
-                if ($(vm.$refs.sale_date).data('DateTimePicker').date()) {
-                    vm.saleDate =  e.date.format('DD/MM/YYYY');
-                }
-                else if ($(vm.$refs.sale_date).data('date') === "") {
-                    vm.saleDate = "";
-                }
-             });
-        },
     },
     mounted:function async () {
         this.$nextTick(async ()=>{
             await this.fetchSaleDate();
-            this.eventListeners();
         });
     },
     created: async function() {

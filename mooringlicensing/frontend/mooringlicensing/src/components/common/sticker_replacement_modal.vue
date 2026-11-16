@@ -12,22 +12,28 @@
                 <div v-show="showDateOfLost" class="row form-group">
                     <label class="col-sm-2 control-label">Date of Lost</label>
                     <div class="col-sm-3">
-                        <div class="input-group date" id="lost_date_elem" ref="lostDatePicker">
-                            <input type="text" class="form-control text-center" placeholder="DD/MM/YYYY" />
-                            <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-calendar"></span>
-                            </span>
+                        <div style="width: 70%;">
+                            <input
+                                type="date"
+                                class="form-control"
+                                name="lostDatePicker"
+                                v-model="details.date_of_lost_sticker"
+                                :max="today"
+                            >
                         </div>
                     </div>
                 </div>
                 <div v-show="showDateOfReturned" class="row form-group">
                     <label class="col-sm-2 control-label">Date of Returned</label>
                     <div class="col-sm-3">
-                        <div class="input-group date" id="returned_date_elem" ref="returnedDatePicker">
-                            <input type="text" class="form-control text-center" placeholder="DD/MM/YYYY" />
-                            <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-calendar"></span>
-                            </span>
+                        <div style="width: 70%;">
+                            <input
+                                type="date"
+                                class="form-control"
+                                name="returnedDatePicker"
+                                v-model="details.date_of_returned_sticker"
+                                :max="today"
+                            >
                         </div>
                     </div>
                 </div>
@@ -139,6 +145,9 @@ export default {
             }
             return false
         },
+        today() {
+            return new Date().toISOString().split('T')[0];
+        }
     },
     methods:{
         getDefaultDetails: function(){
@@ -164,52 +173,10 @@ export default {
         },
         close:function () {
             this.details = this.getDefaultDetails()
-            $('#returned_date_elem').data('DateTimePicker').clear();
-            $('#lost_date_elem').data('DateTimePicker').clear();
             this.errors = false
             this.processing = false
             this.isModalOpen = false
         },
-        addEventListeners: function () {
-            let vm = this;
-            let options = {
-                format: "DD/MM/YYYY",
-                showClear: true ,
-                useCurrent: false,
-            };
-
-            // Date of Lost
-            let el_lost = $(vm.$refs.lostDatePicker);
-            el_lost.datetimepicker(options);
-            el_lost.on("dp.change", function(e) {
-                let selected_date = null;
-                if (e.date){
-                    // Date selected
-                    selected_date = e.date.format('DD/MM/YYYY')  // e.date is moment object
-                }
-                vm.details.date_of_lost_sticker = selected_date;
-            });
-
-            // Date of Returned
-            let el_returned = $(vm.$refs.returnedDatePicker)
-            el_returned.datetimepicker(options);
-            el_returned.on("dp.change", function(e) {
-                let selected_date = null;
-                if (e.date){
-                    // Date selected
-                    selected_date = e.date.format('DD/MM/YYYY')  // e.date is moment object
-                    vm.details.date_of_returned_sticker = selected_date;
-                } else {
-                    // Date not selected
-                    vm.details.date_of_returned_sticker = selected_date;
-                }
-            });
-        },
     },
-    created:function () {
-        this.$nextTick(() => {
-            this.addEventListeners();
-        });
-    }
 }
 </script>

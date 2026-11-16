@@ -13,11 +13,14 @@
                                         <label class="control-label pull-left"  for="Name">Cancellation Date</label>
                                     </div>
                                     <div class="col-sm-9">
-                                        <div class="input-group date" ref="cancellation_date" style="width: 70%;">
-                                            <input type="text" class="form-control" name="cancellation_date" placeholder="DD/MM/YYYY" v-model="approval.cancellation_date">
-                                            <span class="input-group-addon">
-                                                <span class="glyphicon glyphicon-calendar"></span>
-                                            </span>
+                                        <div style="width: 70%;">
+                                            <input
+                                                type="date"
+                                                class="form-control"
+                                                name="cancellation_date"
+                                                v-model="approval.cancellation_date"
+                                                :min="today"
+                                            >
                                         </div>
                                     </div>
                                 </div>
@@ -73,13 +76,6 @@ export default {
             errorString: '',
             successString: '',
             success:false,
-            datepickerOptions:{
-                format: 'DD/MM/YYYY',
-                showClear:true,
-                useCurrent:false,
-                keepInvalid:true,
-                allowInputToggle:true
-            },
         }
     },
     computed: {
@@ -89,6 +85,9 @@ export default {
         },
         title: function(){
             return 'Cancel Approval';
+        },
+        today() {
+            return new Date().toISOString().split('T')[0];
         }
     },
     methods:{
@@ -107,7 +106,7 @@ export default {
             this.approval = {};
             this.errors = false;
             $('.has-error').removeClass('has-error');
-            $(this.$refs.cancellation_date).data('DateTimePicker').clear();
+            this.approval.cancellation_date = '';
             this.validation_form.resetForm();
         },
         fetchContact: function(id){
@@ -174,28 +173,11 @@ export default {
                 }
             });
        },
-       eventListeners:function () {
-            let vm = this;
-            // Initialise Date Picker
-
-            $(vm.$refs.cancellation_date).datetimepicker(vm.datepickerOptions);
-            $(vm.$refs.cancellation_date).on('dp.change', function(e){
-                if ($(vm.$refs.cancellation_date).data('DateTimePicker').date()) {
-                    vm.approval.cancellation_date =  e.date.format('DD/MM/YYYY');
-                }
-                else if ($(vm.$refs.cancellation_date).data('date') === "") {
-                    vm.approval.cancellation_date = "";
-                }
-             });
-       }
    },
    mounted:function () {
         let vm =this;
         vm.form = document.forms.approvalForm;
         vm.addFormValidations();
-        this.$nextTick(()=>{
-            vm.eventListeners();
-        });
    }
 }
 </script>
