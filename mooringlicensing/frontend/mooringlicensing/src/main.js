@@ -4,6 +4,8 @@ import App from './App.vue'
 import router from './router'
 import helpers from '@/utils/helpers'
 
+import 'bootstrap/dist/js/bootstrap.bundle'
+
 import $ from 'jquery'
 
 window.$ = $
@@ -36,7 +38,6 @@ import 'select2-bootstrap-theme/dist/select2-bootstrap.min.css';
 
 
 import api_endpoints from './api'
-import 'eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css'
 import "font-awesome/css/font-awesome.min.css"
 
 import 'datatables.net-bs/css/dataTables.bootstrap.min.css'

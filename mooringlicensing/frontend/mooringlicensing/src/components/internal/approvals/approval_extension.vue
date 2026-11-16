@@ -13,11 +13,14 @@
                                         <label class="control-label pull-left" for="Name">New Expiry Date</label>
                                     </div>
                                     <div class="col-sm-9">
-                                        <div class="input-group date" ref="expiry_date" style="width: 70%;">
-                                            <input type="text" class="form-control" name="expiry_date" placeholder="DD/MM/YYYY" v-model="approval.expiry_date" :min="approval.expiry_date">
-                                            <span class="input-group-addon">
-                                                <span class="glyphicon glyphicon-calendar"></span>
-                                            </span>
+                                        <div style="width: 70%;">
+                                            <input
+                                                type="date"
+                                                class="form-control"
+                                                name="expiry_date"
+                                                v-model="approval.expiry_date"
+                                                :min="approval.expiry_date"
+                                            >
                                         </div>
                                     </div>
                                 </div>
@@ -49,7 +52,6 @@
 
 <script>
 //import $ from 'jquery'
-import 'eonasdan-bootstrap-datetimepicker'
 import modal from '@vue-utils/bootstrap-modal.vue'
 import alert from '@vue-utils/alert.vue'
 import {helpers,api_endpoints} from "@/utils/hooks.js"
@@ -71,13 +73,6 @@ export default {
             errors: false,
             errorString: '',
             success:false,
-            datepickerOptions:{
-                format: 'DD/MM/YYYY',
-                showClear:true,
-                useCurrent:false,
-                keepInvalid:true,
-                allowInputToggle:true
-            },
         }
     },
     computed: {
@@ -105,7 +100,7 @@ export default {
             this.approval = {};
             this.errors = false;
             $('.has-error').removeClass('has-error');
-            $(this.$refs.expiry_date).data('DateTimePicker').clear();
+            this.approval.expiry_date = '';
             this.validation_form.resetForm();
         },
         sendData:function(){
@@ -163,17 +158,17 @@ export default {
             });
        },
        eventListeners:function () {
-            let vm = this;
-            // Initialise Date Picker
-            $(vm.$refs.expiry_date).datetimepicker(vm.datepickerOptions);
-            $(vm.$refs.expiry_date).on('dp.change', function(e){
-                if ($(vm.$refs.expiry_date).data('DateTimePicker').date()) {
-                    vm.approval.expiry_date =  e.date.format('DD/MM/YYYY');
-                }
-                else if ($(vm.$refs.expiry_date).data('date') === "") {
-                    vm.approval.expiry_date = "";
-                }
-             });
+            //let vm = this;
+            //// Initialise Date Picker
+            //$(vm.$refs.expiry_date).datetimepicker(vm.datepickerOptions);
+            //$(vm.$refs.expiry_date).on('dp.change', function(e){
+            //    if ($(vm.$refs.expiry_date).data('DateTimePicker').date()) {
+            //        vm.approval.expiry_date =  e.date.format('DD/MM/YYYY');
+            //    }
+            //    else if ($(vm.$refs.expiry_date).data('date') === "") {
+            //        vm.approval.expiry_date = "";
+            //    }
+            // });
        }
    },
    mounted:function () {
@@ -181,7 +176,7 @@ export default {
         vm.form = document.forms.approvalForm;
         vm.addFormValidations();
         this.$nextTick(()=>{
-            vm.eventListeners();
+            //vm.eventListeners();
         });
    }
 }

@@ -60,7 +60,6 @@
 
 <script>
 //import $ from 'jquery'
-import 'eonasdan-bootstrap-datetimepicker'
 import datatable from '@/utils/vue/datatable.vue'
 import { api_endpoints } from '@/utils/hooks'
 
