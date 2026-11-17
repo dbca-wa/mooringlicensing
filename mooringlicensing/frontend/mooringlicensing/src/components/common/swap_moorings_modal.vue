@@ -161,7 +161,6 @@ export default {
                     vm.columnMooring,
                     vm.columnVesselRegos,
             ]
-            let buttons = []
 
             return {
                 autoWidth: false,
@@ -184,7 +183,6 @@ export default {
                     }
                 },
                 dom: 'lBfrtip',
-                buttons: buttons,
                 columns: selectedColumns,
                 processing: true,
                 initComplete: function() {

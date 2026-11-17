@@ -73,7 +73,7 @@
 </template>
 
 <script>
-//import $ from 'jquery'
+import $ from 'jquery'
 import FormSection from '@/components/forms/section_toggle.vue'
 
 export default {

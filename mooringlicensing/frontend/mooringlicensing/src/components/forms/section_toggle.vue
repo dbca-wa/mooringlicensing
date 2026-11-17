@@ -1,112 +1,156 @@
 <template>
-    <div class="panel panel-default" >
-        <div v-if="!hideHeader" class="panel-heading">
-            <h3 class="panel-title">{{label}} <span :class=subtitle_class_name>{{ subtitle }}</span>
-                <a :href="'#'+section_id" class="panelClicker" :id="custom_id" data-toggle="collapse" expanded="true" :aria-controls="section_id">
-                    <span v-if="!noChevron" :class="panel_chevron_class"></span>
-                </a>
-            </h3>
+  <div :id="custom_id" class="card section-wrapper">
+    <div class="card-header h4 fw-bold p-4">
+      <div
+        :id="'show_hide_switch_' + section_body_id"
+        class="row show_hide_switch"
+        :class="{ collapsed: isCollapsed }"
+        :aria-expanded="(!isCollapsed).toString()"
+        :aria-controls="section_body_id"
+        @click="toggle_show_hide"
+      >
+        <div class="col-11" :style="'color:' + customColor">
+          {{ label }}
+          <span v-if="subtitle" class="h6" :class="subtitleClass">{{
+            subtitle
+          }}</span>
+          <!-- to display the assessor and referral comments textboxes -->
+          <template v-if="displayCommentSection">
+            <template v-if="!isShowComment">
+              <a
+                v-if="has_comment_value"
+                href=""
+                @click.stop.prevent="toggleComment"
+                ><i style="color: red" class="far fa-comment">&nbsp;</i></a
+              >
+              <a v-else href="" @click.stop.prevent="toggleComment"
+                ><i class="far fa-comment">&nbsp;</i></a
+              >
+            </template>
+            <a
+              v-else-if="isShowComment"
+              href=""
+              @click.stop.prevent="toggleComment"
+              ><i class="fa fa-ban">&nbsp;</i></a
+            >
+          </template>
         </div>
-        <div :class="panel_collapse_class" :id="section_id">
-            <slot></slot>
+        <div class="col-1 text-end">
+          <i
+            :id="chevron_elem_id"
+            class="bi fw-bold chevron-toggle"
+            :class="isCollapsed ? 'bi-chevron-down' : 'bi-chevron-up'"
+          >
+          </i>
         </div>
+      </div>
     </div>
+    <div
+      :id="section_body_id"
+      :class="detailsClass"
+      :style="'color:' + customColor"
+    >
+      <slot></slot>
+    </div>
+  </div>
 </template>
 
 <script>
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuid } from "uuid";
 
 export default {
-    name:"FormSection",
-    props: {
-        label: {}, 
-        subtitle: {
-            type: String,
-            default: '',
-        },
-        subtitle_class_name: {
-            type: String,
-            default: 'subtitle',
-        },
-        Index: {}, 
-        formCollapse: {}, 
-        hideHeader: {},
-        treeHeight: {},
-        noChevron: {
-            default: false,
-        },
+  name: "FormSection",
+  props: {
+    label: {
+      type: String,
+      default: "",
     },
-    data:function () {
-        return {
-            title:"Section title",
-            panel_chevron_class: null,
-            custom_id: uuidv4(),
-        }
+    subtitle: {
+      type: String,
+      default: "",
     },
-    computed:{
-        section_id: function () {
-            return "section_"+this.Index
-        },
-        panel_collapse_class: function() {
-            if (this.formCollapse) {
-                this.panel_chevron_class = "glyphicon glyphicon-chevron-down pull-right";
-                return "panel-body collapse";
-            } else {
-                if (this.treeHeight) {
-                    this.panel_chevron_class = "glyphicon glyphicon-chevron-up pull-right";
-                    return "panel-body collapse in flex-container";
-                } else {
-                    this.panel_chevron_class = "glyphicon glyphicon-chevron-up pull-right";
-                    return "panel-body collapse in";
-                }
-            }
-        },
+    subtitleClass: {
+      type: String,
+      default: "text-muted",
     },
-    methods: {
-        switchPanelChevronClass: function() {
-            console.log(this.panel_chevron_class)
-            if (this.panel_chevron_class == "glyphicon glyphicon-chevron-down pull-right") {
-                this.panel_chevron_class = "glyphicon glyphicon-chevron-up pull-right";
-            } else {
-                this.panel_chevron_class = "glyphicon glyphicon-chevron-down pull-right";
-            }
-        },
+    Index: {
+      type: String,
+      default: "",
     },
-    mounted: function() {
-        let vm = this;
-        $('#' + vm.custom_id).on('click',function () {
-            vm.switchPanelChevronClass();
-        });
-        $('#'+vm.section_id).on('show.bs.collapse', function(){
-            $('#' + this.id + ' table').each(function(){ 
-                // Select the table inside the expander, then redraw it.
-                $(this).trigger('drawDatatable');
-            });
-        })
+    hideHeader: {
+      type: Boolean,
+      default: false,
     },
-    updated:function () {
+    customColor: {
+      type: String,
+      default: "",
     },
-}
+    formCollapse: {
+      type: Boolean,
+      default: false,
+    },
+    isShowComment: {
+      type: Boolean,
+      required: false,
+    },
+    has_comment_value: {
+      type: Boolean,
+      required: false,
+    },
+    displayCommentSection: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  data: function () {
+    return {
+      custom_id: uuid(),
+      chevron_elem_id: "chevron_elem_" + uuid(),
+      isCollapsed: this.formCollapse,
+    };
+  },
+  computed: {
+    detailsClass: function () {
+      return {
+        "card-body": true,
+        collapse: true,
+        show: !this.isCollapsed,
+      };
+    },
+    section_header_id: function () {
+      return "section_header_" + this.Index;
+    },
+    section_body_id: function () {
+      return "section_body_" + this.Index;
+    },
+  },
+  methods: {
+    toggle_show_hide: function () {
+      this.isCollapsed = !this.isCollapsed;
+      this.$emit("toggle-collapse");
+    },
+    toggleComment: function () {
+      this.$emit("toggleComment", !this.isShowComment);
+    },
+  },
+};
 </script>
 
-<style lang="css">
-    h3.panel-title{
-        font-weight: bold;
-        font-size: 25px;
-        padding:20px;
-    }
-    .flex-container {
-        display: flex;
-        flex-direction: column;
-        min-height: 325px;
-    }
-    .subtitle {
-        font-size: 0.6em;
-    }
-    .subtitle-l {
-        font-size: 0.7em;
-    }
-    .subtitle-xl {
-        font-size: 0.8em;
-    }
+<style scoped>
+.section-wrapper {
+  margin-bottom: 20px;
+  padding: 0;
+}
+
+.show_hide_switch {
+  cursor: pointer;
+}
+
+.rotate_icon {
+  transition: 0.5s;
+}
+
+.chev_rotated {
+  transform: rotate(90deg);
+}
 </style>

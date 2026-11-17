@@ -13,7 +13,7 @@
 
 </template>
 <script>
-//import $ from 'jquery'
+import $ from 'jquery'
 export default {
    name : 'DataTable',
    props:{
@@ -158,10 +158,7 @@ export default {
              float:right;
         }
     }
-    .dataTables_wrapper .dt-buttons{
-    float: right;
-  }
-  .html-header {
-    text-align: center;
-  }
+    .html-header {
+        text-align: center;
+    }
 </style>

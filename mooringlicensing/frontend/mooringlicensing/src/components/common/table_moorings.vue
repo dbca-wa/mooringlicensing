@@ -274,14 +274,6 @@ export default {
                     }
                 },
                 dom: 'lBfrtip',
-                buttons: [
-                    {
-                        extend: 'excel',
-                    },
-                    {
-                        extend: 'csv',
-                    },
-                ],
                 processing: true,
                 initComplete: function () {
                     console.log('in initComplete')

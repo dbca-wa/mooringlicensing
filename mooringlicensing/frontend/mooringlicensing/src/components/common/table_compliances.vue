@@ -242,17 +242,6 @@ export default {
         },
         compliancesOptions: function() {
             let vm = this;
-            let buttons = []
-            if (this.level === 'internal'){
-                buttons = [
-                    {
-                        extend: 'excel',
-                    },
-                    {
-                        extend: 'csv',
-                    },
-                ]
-            }
 
             return {
                 autoWidth: false,
@@ -317,7 +306,6 @@ export default {
                     }
                 },
                 dom: 'lBfrtip',
-                buttons: buttons,
                 columns: vm.applicableColumns,
                 processing: true,
             }

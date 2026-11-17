@@ -61,8 +61,6 @@ export default {
                 },
                 order: [],
                 dom: 'lBfrtip',
-                buttons:[
-                'excel', 'csv', ],
                 columns: [
                     {
                         data: "requirement",
@@ -305,8 +303,3 @@ export default {
     }
 }
 </script>
-<style scoped>
-.dataTables_wrapper .dt-buttons{
-    float: right;
-}
-</style>

@@ -362,7 +362,6 @@ export default {
 
             let columns = []
             let search = null
-            let buttons = []
             if(vm.is_external){
                 columns = [
                     vm.column_id,
@@ -375,7 +374,6 @@ export default {
                     vm.column_action,
                 ]
                 search = false
-                buttons = []
             }
             if(vm.is_internal){
                 columns = [
@@ -391,14 +389,6 @@ export default {
                     vm.column_action,
                 ]
                 search = true
-                buttons = [
-                    {
-                        extend: 'excel',
-                    },
-                    {
-                        extend: 'csv',
-                    },
-                ]
             }
 
             return {
@@ -460,8 +450,6 @@ export default {
                     }
                 },
                 dom: 'lBfrtip',
-                buttons: buttons,
-
                 columns: columns,
                 processing: true,
                 initComplete: function() {

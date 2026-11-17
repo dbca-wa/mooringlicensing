@@ -784,17 +784,6 @@ export default {
                     vm.columnAction,
                 ]
             }
-            let buttons = []
-            if (vm.is_internal){
-                buttons = [
-                    {
-                        extend: 'excel',
-                    },
-                    {
-                        extend: 'csv',
-                    },
-                ]
-            }
 
             return {
                 autoWidth: false,
@@ -864,7 +853,6 @@ export default {
                     }
                 },
                 dom: 'lBfrtip',
-                buttons: buttons,
                 columns: selectedColumns,
                 processing: true,
                 initComplete: function() {

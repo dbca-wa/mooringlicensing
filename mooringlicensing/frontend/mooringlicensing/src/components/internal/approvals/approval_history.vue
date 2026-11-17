@@ -221,7 +221,6 @@ export default {
                     "dataSrc": 'data',
                 },
                 dom: 'lBfrtip',
-                buttons:[ ],
                 columns: columns,
                 processing: true,
             }

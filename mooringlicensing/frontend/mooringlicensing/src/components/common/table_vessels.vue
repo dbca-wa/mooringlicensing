@@ -77,7 +77,6 @@ export default {
                     "dataSrc": 'data',
                 },
                 dom: 'lBfrtip',
-                buttons:[],
                 columns: [
                     {
                         data: "vessel_details.vessel_name",

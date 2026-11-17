@@ -392,15 +392,6 @@ export default {
                     }
                 },
                 dom: 'lBfrtip',
-                buttons:[
-                    {
-                        extend: 'excel',
-                    },
-                    {
-                        extend: 'csv',
-                    },
-                ],
-
                 columns: columns,
                 processing: true,
                 initComplete: function() {
