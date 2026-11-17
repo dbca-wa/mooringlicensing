@@ -13,7 +13,6 @@ import VesselDetail from '@/components/internal/vessels/vessel_detail.vue'
 import Search from '@/components/internal/search/dashboard.vue'
 import PersonDetail from '@/components/internal/person/person_detail.vue'
 import Compliance from '../compliances/access.vue'
-import Reports from '@/components/reports/reports.vue'
 import Approval from '@/components/internal/approvals/approval.vue'
 import ManageVessel from '@/components/internal/manage_vessel.vue'
 import ProposalApply from '@/components/external/proposal_apply.vue'
@@ -140,11 +139,6 @@ export default
             component: DcvPermit,
             name:"internal_dcv_permit",
             props: {is_internal:true},    
-        },
-        {
-            path:'reports',
-            name:'reports',
-            component:Reports
         },
         {
             path: 'dcv',
