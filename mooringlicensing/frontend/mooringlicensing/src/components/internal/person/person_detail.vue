@@ -171,7 +171,7 @@ export default {
 }
 </script>
 
-<style>
+<style lang="css" scoped>
     .section{
         text-transform: capitalize;
     }
@@ -182,7 +182,10 @@ export default {
         position: fixed;
         top:56px;
     }
-
+    .nav-item {
+        background-color: rgb(200,200,200,0.8) !important;
+        margin-bottom: 2px;
+    }
     .nav-item>li>a {
         background-color: yellow !important;
         color: #fff;
