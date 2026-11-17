@@ -110,7 +110,7 @@ export default {
             this.isModalOpen = false;
             this.errors = false;
             $('.has-error').removeClass('has-error');
-            $(this.$refs.sale_date).data('DateTimePicker').clear();
+            this.saleDate = "";
             this.$emit('closeModal');
         },
         sendData: async function(){
