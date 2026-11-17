@@ -204,44 +204,6 @@ export default {
             this.processing = false
             this.dcv_permit_id = null
         },
-        addEventListeners: function () {
-            let vm = this;
-            let options = {
-                format: "DD/MM/YYYY",
-                showClear: true ,
-                useCurrent: false,
-            };
-
-            // Date of Lost
-            let el_lost = $(vm.$refs.lostDatePicker);
-            el_lost.datetimepicker(options);
-            el_lost.on("dp.change", function(e) {
-                let selected_date = null;
-                if (e.date){
-                    // Date selected
-                    selected_date = e.date.format('DD/MM/YYYY')  // e.date is moment object
-                    vm.details.date_of_lost_sticker = selected_date;
-                } else {
-                    // Date not selected
-                    vm.details.date_of_lost_sticker = selected_date;
-                }
-            });
-
-            // Date of Returned
-            let el_returned = $(vm.$refs.returnedDatePicker)
-            el_returned.datetimepicker(options);
-            el_returned.on("dp.change", function(e) {
-                let selected_date = null;
-                if (e.date){
-                    // Date selected
-                    selected_date = e.date.format('DD/MM/YYYY')  // e.date is moment object
-                    vm.details.date_of_returned_sticker = selected_date;
-                } else {
-                    // Date not selected
-                    vm.details.date_of_returned_sticker = selected_date;
-                }
-            });
-        },
         fetchCountries: function () {
             let vm = this;
             vm.$http.get(api_endpoints.countries).then((response) => {
@@ -252,10 +214,5 @@ export default {
     mounted: function () {
         this.fetchCountries();
     },
-    created:function () {
-        this.$nextTick(() => {
-            this.addEventListeners();
-        });
-    }
 }
 </script>

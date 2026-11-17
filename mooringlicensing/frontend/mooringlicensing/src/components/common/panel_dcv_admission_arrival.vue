@@ -8,21 +8,15 @@
 
                 <div class="row form-group">
                     <label for="" class="col-sm-2 control-label">Arrival</label>
-                    <div class="col-sm-3 input-group date" ref="arrivalDatePicker">
-                        <input type="text" class="form-control text-center" placeholder="DD/MM/YYYY"/>
-                        <span class="input-group-addon">
-                            <span class="glyphicon glyphicon-calendar"></span>
-                        </span>
+                    <div class="col-sm-3 input-group date">
+                        <input type="date" class="form-control text-center" placeholder="DD/MM/YYYY" v-model="arrival.arrival_date" @change="calculate_column_extended_stay_inputability"/>
                     </div>
                 </div>
 
                 <div class="row form-group">
                     <label for="" class="col-sm-2 control-label">Departure</label>
-                    <div class="col-sm-3 input-group date" ref="departureDatePicker">
-                        <input type="text" class="form-control text-center" placeholder="DD/MM/YYYY"/>
-                        <span class="input-group-addon">
-                            <span class="glyphicon glyphicon-calendar"></span>
-                        </span>
+                    <div class="col-sm-3 input-group date">
+                        <input type="date" class="form-control text-center" placeholder="DD/MM/YYYY" v-model="arrival.departure_date" @change="calculate_column_extended_stay_inputability"/>
                     </div>
                 </div>
 
@@ -283,59 +277,12 @@ export default {
             this.shown = false
             this.$emit('delete_arrival', this.arrival.uuid)
         },
-        addEventListeners: function () {
-            let vm = this;
-            let el_fr = $(vm.$refs.arrivalDatePicker);
-            let el_to = $(vm.$refs.departureDatePicker);
-
-            let options = {
-                format: "DD/MM/YYYY",
-                showClear: true ,
-                useCurrent: false,
-            };
-
-            el_fr.datetimepicker(options)
-            el_to.datetimepicker(options)
-
-            el_fr.on("dp.change", function(e) {
-                let selected_date = null;
-                if (e.date){
-                    // Date selected
-                    selected_date = e.date.format('DD/MM/YYYY')  // e.date is moment object
-                    vm.arrival.arrival_date = selected_date;
-                    el_to.data('DateTimePicker').minDate(selected_date)
-                } else {
-                    // Date not selected
-                    vm.arrival.arrival_date = selected_date;
-                    el_to.data('DateTimePicker').minDate(false)
-                }
-                vm.calculate_column_extended_stay_inputability()
-            })
-
-            el_to.on("dp.change", function(e){
-                let selected_date = null;
-                if (e.date){
-                    // Date selected
-                    selected_date = e.date.format('DD/MM/YYYY')  // e.date is moment object
-                    vm.arrival.departure_date = selected_date;
-                    el_fr.data('DateTimePicker').maxDate(selected_date)
-                } else {
-                    // Date not selected
-                    vm.arrival.departure_date = selected_date;
-                    el_fr.data('DateTimePicker').maxDate(false)
-                }
-                vm.calculate_column_extended_stay_inputability()
-            })
-        },
     },
     mounted: function () {
         this.shown = true  // Show the panel once
     },
     created: async function() {
         await this.fetchData();
-        this.$nextTick(() => {
-            this.addEventListeners();
-        });
     },
 }
 </script>
