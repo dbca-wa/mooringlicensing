@@ -16,19 +16,19 @@
             <div class="col-md-8">
                 <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
                   <li class="nav-item">
-                    <a class="nav-link active" id="pills-mooring-details-tab" data-toggle="pill" href="#pills-mooring-details" role="tab" aria-controls="pills-mooring-details" aria-selected="true">
+                    <a class="nav-link show active" id="pills-mooring-details-tab" data-bs-toggle="pill" href="#pills-mooring-details" role="tab" aria-controls="pills-mooring-details" aria-selected="true">
                       Details
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link" id="pills-bookings-permits-tab" data-toggle="pill" href="#pills-bookings-permits" role="tab" aria-controls="pills-bookings-permits" aria-selected="false">
+                    <a class="nav-link" id="pills-bookings-permits-tab" data-bs-toggle="pill" href="#pills-bookings-permits" role="tab" aria-controls="pills-bookings-permits" aria-selected="false">
                       Bookings/Permits
                     </a>
                   </li>
                 </ul>
 
                 <div class="tab-content" id="pills-tabContent">
-                    <div class="tab-pane fade" id="pills-mooring-details" role="tabpanel" aria-labelledby="pills-mooring-details-tab">
+                    <div class="tab-pane fade show active" id="pills-mooring-details" role="tabpanel" aria-labelledby="pills-mooring-details-tab">
                         <FormSection label="Mooring details" Index="mooring_details">
                             <div class="row form-group">
                                 <div class="col-sm-3">
