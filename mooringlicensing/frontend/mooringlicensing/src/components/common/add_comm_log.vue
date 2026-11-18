@@ -1,285 +1,421 @@
 <template>
-    <div id="AddComms">
-        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" title="Communication log - Add entry" large>
-            <div class="container-fluid">
-                <div class="row">
-                    <form class="form-horizontal" name="commsForm">
-                        <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
-                        <div class="col-sm-12">
-                            <div class="form-group">
-                                <div class="row">
-                                    <div class="col-sm-3">
-                                        <label class="control-label pull-left"  for="Name">To</label>
-                                    </div>
-                                    <div class="col-sm-4">
-                                        <input type="text" class="form-control" name="to" v-model="comms.to">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <div class="row">
-                                    <div class="col-sm-3">
-                                        <label class="control-label pull-left"  for="Name">From</label>
-                                    </div>
-                                    <div class="col-sm-4">
-                                        <input type="text" class="form-control" name="fromm" v-model="comms.fromm">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <div class="row">
-                                    <div class="col-sm-3">
-                                        <label class="control-label pull-left"  for="Name">Type</label>
-                                    </div>
-                                    <div class="col-sm-4">
-                                        <select class="form-control" name="type" v-model="comms.type">
-                                            <option value="">Select Type</option>
-                                            <option value="email">Email</option>
-                                            <option value="mail">Mail</option>
-                                            <option value="phone">Phone</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <div class="row">
-                                    <div class="col-sm-3">
-                                        <label class="control-label pull-left"  for="Name">Subject/Description</label>
-                                    </div>
-                                    <div class="col-sm-9">
-                                        <input type="text" class="form-control" name="subject" style="width:70%;" v-model="comms.subject">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <div class="row">
-                                    <div class="col-sm-3">
-                                        <label class="control-label pull-left"  for="Name">Text</label>
-                                    </div>
-                                    <div class="col-sm-9">
-                                        <textarea name="text" class="form-control" style="width:70%;" v-model="comms.text"></textarea>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <div class="row">
-                                    <div class="col-sm-3">
-                                        <label class="control-label pull-left"  for="Name">Attachments</label>
-                                    </div>
-                                    <div class="col-sm-9">
-                                        <template v-for="(f,i) in files">
-                                            <div :class="'row top-buffer file-row-'+i">
-                                                <div class="col-sm-4">
-                                                    <span v-if="f.file == null" class="btn btn-info btn-file pull-left">
-                                                        Attach File <input type="file" :name="'file-upload-'+i" :class="'file-upload-'+i" @change="uploadFile('file-upload-'+i,f)"/>
-                                                    </span>
-                                                    <span v-else class="btn btn-info btn-file pull-left">
-                                                        Update File <input type="file" :name="'file-upload-'+i" :class="'file-upload-'+i" @change="uploadFile('file-upload-'+i,f)"/>
-                                                    </span>
-                                                </div>
-                                                <div class="col-sm-4">
-                                                    <span>{{f.name}}</span>
-                                                </div>
-                                                <div class="col-sm-4">
-                                                    <button @click="removeFile(i)" class="btn btn-danger">Remove</button>
-                                                </div>
-                                            </div>
-                                        </template>
-                                        <a href="" @click.prevent="attachAnother"><i class="fa fa-lg fa-plus top-buffer-2x"></i></a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
+  <div id="AddComms">
+    <modal
+      transition="modal fade"
+      @ok="ok()"
+      @cancel="cancel()"
+      title="Communication Log - Add Entry"
+      large
+    >
+      <div class="container-fluid">
+        <div class="row">
+          <form
+            class="form-horizontal needs-validation"
+            name="commsForm"
+            @submit.prevent
+          >
+            <alert v-if="showError" type="danger"
+              ><strong>{{ errorString }}</strong></alert
+            >
+            <div class="col-sm-12">
+              <div class="form-group">
+                <div class="row mb-3">
+                  <div class="col-sm-3">
+                    <label class="control-label pull-left" for="Name">To</label>
+                  </div>
+                  <div class="col">
+                    <input
+                      ref="to"
+                      type="text"
+                      class="form-control"
+                      name="to"
+                      v-model="to"
+                      required
+                    />
+                  </div>
                 </div>
+              </div>
+              <div class="form-group">
+                <div class="row mb-3">
+                  <div class="col-sm-3">
+                    <label class="control-label pull-left" for="Name"
+                      >From</label
+                    >
+                  </div>
+                  <div class="col">
+                    <textarea
+                      class="form-control"
+                      name="from"
+                      maxlength="200"
+                      v-model="from"
+                      required
+                    ></textarea>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="row mb-3">
+                  <div class="col-sm-3">
+                    <label class="control-label pull-left" for="Name"
+                      >Type</label
+                    >
+                  </div>
+                  <div class="col">
+                    <select
+                      class="form-select"
+                      name="type"
+                      v-model="log_type"
+                      required
+                    >
+                      <option value="">Select Type</option>
+                      <option value="email">Email</option>
+                      <option value="mail">Mail</option>
+                      <option value="phone">Phone</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="row mb-3">
+                  <div class="col-sm-3">
+                    <label class="control-label pull-left" for="Name"
+                      >Subject/Description</label
+                    >
+                  </div>
+                  <div class="col">
+                    <textarea
+                      class="form-control"
+                      name="subject"
+                      maxlength="200"
+                      v-model="subject"
+                      required
+                    ></textarea>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="row mb-3">
+                  <div class="col-sm-3">
+                    <label class="control-label pull-left" for="Name"
+                      >Text</label
+                    >
+                  </div>
+                  <div class="col">
+                    <textarea
+                      name="text"
+                      class="form-control"
+                      v-model="text"
+                      required
+                    ></textarea>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="row mb-3 border-top pt-3">
+                  <div class="col-sm-3">
+                    <label class="control-label pull-left" for="Name"
+                      >Attachments</label
+                    >
+                  </div>
+                  <div class="col-sm-9">
+                    <button
+                      class="btn btn-primary btn-sm"
+                      @click.prevent="attachAnother"
+                    >
+                      <i class="bi bi-plus-lg"></i> Add Another File
+                    </button>
+                    <hr class="my-3" />
+                    <div v-for="(f, i) in files" :key="f.id">
+                      <div class="input-group mb-2">
+                        <span
+                          class="btn btn-primary btn-file"
+                          :title="f.file ? 'Change file' : 'Select file'"
+                        >
+                          <i class="bi bi-upload"></i>
+                          {{ f.file ? "Change" : "Attach" }}
+                          <input type="file" @change="uploadFile($event, f)" />
+                        </span>
+                        <input
+                          type="text"
+                          class="form-control"
+                          :value="f.name"
+                          readonly
+                          placeholder="No file selected"
+                        />
+                        <button
+                          v-if="i > 0 || f.file"
+                          class="btn btn-danger"
+                          type="button"
+                          @click="removeFile(i)"
+                          title="Remove file"
+                        >
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div slot="footer">
-                <button type="button" v-if="addingComms" disabled class="btn btn-default" @click="ok"><i class="fa fa-spinner fa-spin"></i> Adding</button>
-                <button type="button" v-else class="btn btn-default" @click="ok">Add</button>
-                <button type="button" class="btn btn-default" @click="cancel">Cancel</button>
-            </div>
-        </modal>
-    </div>
+          </form>
+        </div>
+      </div>
+      <div>
+        <button
+          type="button"
+          v-if="addingComms"
+          disabled
+          class="btn btn-primary"
+          @click="ok"
+        >
+          <i class="fa fa-spinner fa-spin"></i> Adding
+        </button>
+        <button type="button" v-else class="btn btn-primary" @click="ok">
+          Add
+        </button>
+        <button type="button" class="btn btn-secondary" @click="cancel">
+          Cancel
+        </button>
+      </div>
+    </modal>
+  </div>
 </template>
 
 <script>
-import $ from 'jquery'
-import modal from '@vue-utils/bootstrap-modal.vue'
-import alert from '@vue-utils/alert.vue'
-import {helpers,api_endpoints} from "@/utils/hooks.js"
+import $ from "jquery";
+import modal from "@vue-utils/bootstrap-modal.vue";
+import alert from "@vue-utils/alert.vue";
+import { helpers } from "@/utils/hooks";
 export default {
-    name:'Add-Comms',
-    components:{
-        modal,
-        alert
+  name: "Add-Comms",
+  components: {
+    modal,
+    alert,
+  },
+  props: {
+    url: {
+      type: String,
+      required: true,
     },
-    props:{
-        url: {
-            type: String,
-            required: true
-        }
-    },
-    data:function () {
-        return {
-            isModalOpen:false,
-            form:null,
-            comms: {},
-            state: 'proposed_approval',
-            addingComms: false,
-            validation_form: null,
-            errors: false,
-            errorString: '',
-            successString: '',
-            success:false,
-            files: [
-                {
-                    'file': null,
-                    'name': ''
-                }
-            ]
-        }
-    },
-    computed: {
-        showError: function() {
-            var vm = this;
-            return vm.errors;
+  },
+  data: function () {
+    return {
+      isModalOpen: false,
+      form: null,
+      comms: {},
+      state: "proposed_approval",
+      addingComms: false,
+      validation_form: null,
+      errors: false,
+      errorString: "",
+      successString: "",
+      success: false,
+      datepickerOptions: {
+        format: "DD/MM/YYYY",
+        showClear: true,
+        useCurrent: false,
+        keepInvalid: true,
+        allowInputToggle: true,
+      },
+      to: "",
+      from: "",
+      log_type: "",
+      subject: "",
+      text: "",
+      files: [
+        {
+          id: 1,
+          file: null,
+          name: "",
         },
-        title: function(){
-            return this.processing_status == 'With Approver' ? 'Issue Comms' : 'Propose to issue approval';
+      ],
+      fileIdCounter: 1,
+    };
+  },
+  watch: {
+    isModalOpen: function () {
+      this.$nextTick(function () {
+        if (this.isModalOpen) {
+          this.$refs.to.focus();
         }
+      });
     },
-    methods:{
-        ok:function () {
-            let vm =this;
-            if($(vm.form).valid()){
-                vm.sendData();
+  },
+  computed: {
+    showError: function () {
+      var vm = this;
+      return vm.errors;
+    },
+    title: function () {
+      return this.processing_status == "With Approver"
+        ? "Issue Comms"
+        : "Propose to issue approval";
+    },
+  },
+  methods: {
+    ok: function () {
+      let vm = this;
+      if (vm.addingComms) {
+        return;
+      }
+      if ($(vm.form).valid()) {
+        vm.errors = false;
+        vm.sendData();
+      } else {
+        vm.errorString = "Missing required fields.";
+        vm.errors = true;
+      }
+    },
+    uploadFile(e, file_obj) {
+      let _file = null;
+      var input = e.target;
+      if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.readAsDataURL(input.files[0]);
+        reader.onload = function (e) {
+          _file = e.target.result;
+        };
+        _file = input.files[0];
+      }
+      file_obj.file = _file;
+      file_obj.name = _file ? _file.name : "";
+    },
+    removeFile(index) {
+      if (index === 0) {
+        this.fileIdCounter += 1;
+        this.files[0] = {
+          id: this.fileIdCounter,
+          file: null,
+          name: "",
+        };
+        return;
+      }
+      this.files.splice(index, 1);
+      if (this.files.length === 0) {
+        this.attachAnother();
+      }
+    },
+    attachAnother() {
+      this.fileIdCounter += 1;
+      this.files.push({
+        id: this.fileIdCounter,
+        file: null,
+        name: "",
+      });
+    },
+    cancel: function () {
+      this.close();
+    },
+    close: function () {
+      this.isModalOpen = false;
+      this.comms = {};
+      this.errors = false;
+      $(".has-error").removeClass("has-error");
+      this.validation_form.resetForm();
+
+      this.to = "";
+      this.from = "";
+      this.log_type = "";
+      this.subject = "";
+      this.text = "";
+
+      this.files = [];
+      this.attachAnother();
+    },
+    sendData: function () {
+        let vm = this;
+        vm.errors = false;
+
+        let comms = new FormData();
+        comms.append("to", this.to);
+        comms.append("fromm", this.from);
+        comms.append("type", this.log_type);
+        comms.append("subject", this.subject);
+        comms.append("text", this.text);
+
+        for (let i = 0; i < vm.files.length; i++) {
+            if (vm.files[i].file) {
+                comms.append("files", vm.files[i].file);
             }
-        },
-        uploadFile(target,file_obj){
-            let vm = this;
-            let _file = null;
-            var input = $('.'+target)[0];
-            if (input.files && input.files[0]) {
-                var reader = new FileReader();
-                reader.readAsDataURL(input.files[0]); 
-                reader.onload = function(e) {
-                    _file = e.target.result;
-                };
-                _file = input.files[0];
-            }
-            file_obj.file = _file;
-            file_obj.name = _file.name;
-        },
-        removeFile(index){
-            let length = this.files.length;
-            $('.file-row-'+index).remove();
-            this.files.splice(index,1);
-            this.$nextTick(() => {
-                length == 1 ? this.attachAnother() : '';
+        }
+
+        vm.addingComms = true;
+
+        vm.$http.post(vm.url, comms)
+            .then((response) => {
+                vm.addingComms = false;
+                vm.close();
+                vm.$emit("added");
+            }, (error) => {
+                vm.errors = true;
+                vm.addingComms = false;
+                vm.errorString = helpers.apiVueResourceError(error);
             });
+    },
+    addFormValidations: function () {
+      let vm = this;
+      vm.validation_form = $(vm.form).validate({
+        rules: {
+          to: "required",
+          from: "required",
+          type: "required",
+          subject: "required",
+          text: "required",
         },
-        attachAnother(){
-            this.files.push({
-                'file': null,
-                'name': ''
-            })
-        },
-        cancel:function () {
-            this.close()
-        },
-        close:function () {
-            let vm = this;
-            this.isModalOpen = false;
-            this.comms = {};
-            this.errors = false;
-            $('.has-error').removeClass('has-error');
-            this.validation_form.resetForm();
-            let file_length = vm.files.length;
-            this.files = [];
-            for (var i = 0; i < file_length;i++){
-                vm.$nextTick(() => {
-                    $('.file-row-'+i).remove();
-                });
-            }
-            this.attachAnother();
-        },
-        sendData:function(){
-            let vm = this;
-            vm.errors = false;
-            let comms = new FormData(vm.form); 
-            vm.addingComms = true;
-            vm.$http.post(vm.url,comms,{
-                }).then((response)=>{
-                    vm.addingComms = false;
-                    vm.close();
-                },(error)=>{
-                    vm.errors = true;
-                    vm.addingComms = false;
-                    vm.errorString = helpers.apiVueResourceError(error);
-                });
-            
-        },
-        addFormValidations: function() {
-            let vm = this;
-            vm.validation_form = $(vm.form).validate({
-                rules: {
-                    to:"required",
-                    fromm:"required",
-                    type:"required",
-                    subject:"required",
-                    text:"required",
-                },
-                messages: {
-                },
-                showErrors: function(errorMap, errorList) {
-                    $.each(this.validElements(), function(index, element) {
-                        var $element = $(element);
-                        $element.attr("data-original-title", "").parents('.form-group').removeClass('has-error');
-                    });
-                    // destroy tooltips on valid elements
-                    $("." + this.settings.validClass).tooltip("destroy");
-                    // add or update tooltips
-                    for (var i = 0; i < errorList.length; i++) {
-                        var error = errorList[i];
-                        $(error.element)
-                            .tooltip({
-                                trigger: "focus"
-                            })
-                            .attr("data-original-title", error.message)
-                            .parents('.form-group').addClass('has-error');
-                    }
-                }
-            });
-       },
-   },
-   mounted:function () {
-        let vm =this;
-        vm.form = document.forms.commsForm;
-        vm.addFormValidations();
-   }
-}
+      });
+    },
+  },
+  mounted: function () {
+    let vm = this;
+    vm.form = document.forms.commsForm;
+    vm.addFormValidations();
+  },
+};
 </script>
 
 <style lang="css">
 .btn-file {
-    position: relative;
-    overflow: hidden;
+  position: relative;
+  overflow: hidden;
 }
-.btn-file input[type=file] {
-    position: absolute;
-    top: 0;
-    right: 0;
-    min-width: 100%;
-    min-height: 100%;
-    font-size: 100px;
-    text-align: right;
-    filter: alpha(opacity=0);
-    opacity: 0;
-    outline: none;
-    background: white;
-    cursor: inherit;
-    display: block;
+.btn-file input[type="file"] {
+  position: absolute;
+  top: 0;
+  right: 0;
+  min-width: 100%;
+  min-height: 100%;
+  font-size: 100px;
+  text-align: right;
+  filter: alpha(opacity=0);
+  opacity: 0;
+  outline: none;
+  background: white;
+  cursor: inherit;
+  display: block;
 }
-.top-buffer{margin-top: 5px;}
-.top-buffer-2x{margin-top: 10px;}
+.top-buffer {
+  margin-top: 5px;
+}
+.top-buffer-2x {
+  margin-top: 10px;
+}
+
+input[type="text"],
+select {
+  width: 100%;
+  padding: 0.375rem 2.25rem 0.375rem 0.75rem;
+}
+
+.truncate-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+
+label.error {
+  color: red;
+  margin-top: 8px;
+  font-weight: normal;
+}
 </style>

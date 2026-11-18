@@ -989,7 +989,7 @@ export default {
                 vm.mooringBayId = parseInt($(this).attr('data-mooring-bay'));
                 await vm.offerMooringLicence(id);
             }).on('responsive-display.dt', function () {
-                var tablePopover = $(this).find('[data-toggle="popover"]');
+                var tablePopover = $(this).find('[data-bs-toggle="popover"]');
                 if (tablePopover.length > 0) {
                     tablePopover.popover();
                     // the next line prevents from scrolling up to the top after clicking on the popover.
@@ -999,7 +999,7 @@ export default {
                     });
                 }
             }).on('draw.dt', function () {
-                var tablePopover = $(this).find('[data-toggle="popover"]');
+                var tablePopover = $(this).find('[data-bs-toggle="popover"]');
                 if (tablePopover.length > 0) {
                     tablePopover.popover();
                     // the next line prevents from scrolling up to the top after clicking on the popover.

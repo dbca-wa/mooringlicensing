@@ -147,7 +147,7 @@ export default {
         result = '<span>' + truncated + '</span>',
         popTemplate = _.template('<a href="#" ' +
             'role="button" ' +
-            'data-toggle="popover" ' +
+            'data-bs-toggle="popover" ' +
             'data-trigger="'+trigger+'" ' +
             'data-placement="top auto"' +
             'data-html="true" ' +
@@ -161,7 +161,7 @@ export default {
         return result;
     },
     dtPopoverCellFn: function(cell){
-        $(cell).find('[data-toggle="popover"]')
+        $(cell).find('[data-bs-toggle="popover"]')
             .popover()
             .on('click', function (e) {
                 e.preventDefault();
@@ -212,5 +212,27 @@ export default {
         var formElement = $(postFormStr);
         $('body').append(formElement);
         $(formElement).submit();
+    },
+    escapeAttr(value) {
+        // Normalize first so objects/arrays become readable JSON not [object Object]
+        let str;
+        if (value == null) {
+            str = '';
+        } else if (typeof value === 'string') {
+            str = value;
+        } else if (typeof value === 'number' || typeof value === 'boolean') {
+            str = String(value);
+        } else {
+            try {
+                str = JSON.stringify(value);
+            } catch {
+                str = String(value);
+            }
+        }
+        return str
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
     },
 };
