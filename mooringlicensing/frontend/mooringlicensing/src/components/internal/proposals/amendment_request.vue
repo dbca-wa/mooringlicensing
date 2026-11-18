@@ -200,7 +200,8 @@ export default {
             $(vm.$refs.reason).select2({
                 "theme": "bootstrap",
                 allowClear: true,
-                placeholder:"Select Reason"
+                placeholder:"Select Reason",
+                dropdownParent: $(vm.$refs.reason).parent(),
             }).
             on("select2:select",function (e) {
                 var selected = $(e.currentTarget);

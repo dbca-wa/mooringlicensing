@@ -316,7 +316,8 @@ export default {
             $(vm.$refs.standard_req).select2({
                 "theme": "bootstrap",
                 allowClear: true,
-                placeholder:"Select Requirement"
+                placeholder:"Select Requirement",
+                dropdownParent: $(vm.$refs.standard_req).parent(),
             }).
             on("select2:select",function (e) {
                 var selected = $(e.currentTarget);

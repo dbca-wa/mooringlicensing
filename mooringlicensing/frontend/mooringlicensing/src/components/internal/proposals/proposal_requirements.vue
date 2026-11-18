@@ -6,11 +6,27 @@
             :Index="panelBody"
         >
             <form class="form-horizontal" action="index.html" method="post">
-                <div class="col-sm-12">
-                    <button v-if="hasAssessorMode" @click.prevent="addRequirement()" style="margin-bottom:10px;" class="btn btn-primary pull-right">Add Condition</button>
+                <div class="row mb-2">
+                    <div class="col-12 text-end">
+                        <button
+                            v-if="hasAssessorMode"
+                            @click.prevent="addRequirement()"
+                            class="btn btn-primary"
+                        >
+                            Add Condition
+                        </button>
+                    </div>
                 </div>
-                <div class="col-sm-12">
-                <datatable ref="requirements_datatable" :id="'requirements-datatable-'+_uid" :dtOptions="requirement_options" :dtHeaders="requirement_headers"/>
+
+                <div class="row">
+                    <div class="col-12">
+                        <datatable
+                            ref="requirements_datatable"
+                            :id="'requirements-datatable-'+_uid"
+                            :dtOptions="requirement_options"
+                            :dtHeaders="requirement_headers"
+                        />
+                    </div>
                 </div>
             </form>
         </FormSection>

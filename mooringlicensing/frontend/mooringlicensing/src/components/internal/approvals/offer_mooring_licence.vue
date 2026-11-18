@@ -211,6 +211,7 @@ export default {
                 "theme": "bootstrap",
                 allowClear: true,
                 placeholder:"Select Mooring",
+                dropdownParent: $(vm.$refs.mooring_lookup).parent(),
                 ajax: {
                     url: api_endpoints.mooring_lookup_per_bay,
                     dataType: 'json',
