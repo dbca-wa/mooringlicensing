@@ -1,6 +1,6 @@
 <template>
     <div id="change-contact">
-        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :title="title" large>
+        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :processing="processing" :okButtonDisabled="!okButtonEnabled" :title="title" large>
             <p>Please select a Mooring Site License to exchange with the mooring of Mooring Site License: <strong>{{ approval_lodgement_number }}</strong>.</p>
             <div class="container-fluid">
                 <alert :show.sync="showError" type="danger"><strong>{{ errorString }}</strong></alert>
@@ -11,15 +11,6 @@
                         :dtOptions="datatable_options"
                         :dtHeaders="datatable_headers"
                     />
-                </div>
-            </div>
-            <div slot="footer">
-                <div class="row">
-                    <div class="col-md-12">
-                        <button type="button" v-if="processing" disabled class="btn btn-default" @click="ok"><i class="fa fa-spinner fa-spin"></i> Processing</button>
-                        <button type="button" v-else class="btn btn-default" @click="ok" :disabled="!okButtonEnabled">Ok</button>
-                        <button type="button" class="btn btn-default" @click="cancel">Cancel</button>
-                    </div>
                 </div>
             </div>
         </modal>
@@ -161,7 +152,6 @@ export default {
                     vm.columnMooring,
                     vm.columnVesselRegos,
             ]
-            let buttons = []
 
             return {
                 autoWidth: false,
@@ -184,7 +174,6 @@ export default {
                     }
                 },
                 dom: 'lBfrtip',
-                buttons: buttons,
                 columns: selectedColumns,
                 processing: true,
                 initComplete: function() {

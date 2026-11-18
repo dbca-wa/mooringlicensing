@@ -1,22 +1,35 @@
 <template id="proposal_requirements">
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <h3 class="panel-title">Conditions
-                <a class="panelClicker" :href="'#'+panelBody" data-toggle="collapse"  data-parent="#userInfo" expanded="false" :aria-controls="panelBody">
-                    <span class="glyphicon glyphicon-chevron-down pull-right "></span>
-                </a>
-            </h3>
-        </div>
-        <div class="panel-body panel-collapse collapse in" :id="panelBody">
+    <div>
+        <FormSection
+            label="Conditions"
+            :formCollapse="false"
+            :Index="panelBody"
+        >
             <form class="form-horizontal" action="index.html" method="post">
-                <div class="col-sm-12">
-                    <button v-if="hasAssessorMode" @click.prevent="addRequirement()" style="margin-bottom:10px;" class="btn btn-primary pull-right">Add Condition</button>
+                <div class="row mb-2">
+                    <div class="col-12 text-end">
+                        <button
+                            v-if="hasAssessorMode"
+                            @click.prevent="addRequirement()"
+                            class="btn btn-primary"
+                        >
+                            Add Condition
+                        </button>
+                    </div>
                 </div>
-                <div class="col-sm-12">
-                <datatable ref="requirements_datatable" :id="'requirements-datatable-'+_uid" :dtOptions="requirement_options" :dtHeaders="requirement_headers"/>
+
+                <div class="row">
+                    <div class="col-12">
+                        <datatable
+                            ref="requirements_datatable"
+                            :id="'requirements-datatable-'+_uid"
+                            :dtOptions="requirement_options"
+                            :dtHeaders="requirement_headers"
+                        />
+                    </div>
                 </div>
             </form>
-        </div>
+        </FormSection>
         <RequirementDetail
             ref="requirement_detail"
             :proposal_id="proposal.id"
@@ -32,7 +45,7 @@ import {
 from '@/utils/hooks'
 import datatable from '@vue-utils/datatable.vue'
 import RequirementDetail from '@/components/internal/proposals/proposal_add_requirement.vue'
-
+import FormSection from "@/components/forms/section_toggle.vue"
 export default {
     name: 'InternalProposalRequirements',
     props: {
@@ -61,8 +74,6 @@ export default {
                 },
                 order: [],
                 dom: 'lBfrtip',
-                buttons:[
-                'excel', 'csv', ],
                 columns: [
                     {
                         data: "requirement",
@@ -76,7 +87,7 @@ export default {
                                 result = '<span>' + truncated + '</span>',
                                 popTemplate = _.template('<a href="#" ' +
                                     'role="button" ' +
-                                    'data-toggle="popover" ' +
+                                    'data-bs-toggle="popover" ' +
                                     'data-trigger="click" ' +
                                     'data-placement="top auto"' +
                                     'data-html="true" ' +
@@ -179,7 +190,8 @@ export default {
     },
     components:{
         datatable,
-        RequirementDetail
+        RequirementDetail,
+        FormSection,
     },
     computed:{
         hasAssessorMode(){
@@ -305,8 +317,3 @@ export default {
     }
 }
 </script>
-<style scoped>
-.dataTables_wrapper .dt-buttons{
-    float: right;
-}
-</style>

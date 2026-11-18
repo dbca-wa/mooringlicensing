@@ -70,15 +70,6 @@
                     </div>
                 </div>
             </div>
-            <div slot="footer">
-                <div class="row">
-                    <div class="col-md-12">
-                        <button type="button" v-if="processing" disabled class="btn btn-default" @click="ok"><i class="fa fa-spinner fa-spin"></i> Processing</button>
-                        <button type="button" v-else class="btn btn-default" @click="ok" :disabled="!okButtonEnabled">Ok</button>
-                        <button type="button" class="btn btn-default" @click="cancel">Cancel</button>
-                    </div>
-                </div>
-            </div>
         </modal>
     </div>
 </template>

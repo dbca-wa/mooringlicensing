@@ -8,38 +8,38 @@
         <div class="">
             <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
                 <li class="nav-item">
-                    <a class="nav-link active" id="pills-applicant-tab" data-toggle="pill" href="#pills-applicant"
+                    <a class="nav-link show active" id="pills-applicant-tab" data-bs-toggle="pill" href="#pills-applicant"
                         role="tab" aria-controls="pills-applicant" aria-selected="true">
                         Applicant
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" id="pills-vessels-tab" data-toggle="pill" href="#pills-vessels" role="tab"
+                    <a class="nav-link" id="pills-vessels-tab" data-bs-toggle="pill" href="#pills-vessels" role="tab"
                         aria-controls="pills-vessels" aria-selected="false">
                         Vessel
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" id="pills-mooring-tab" data-toggle="pill" href="#pills-mooring" role="tab"
+                    <a class="nav-link" id="pills-mooring-tab" data-bs-toggle="pill" href="#pills-mooring" role="tab"
                         aria-controls="pills-mooring" aria-selected="false">
                         Mooring Bay
                     </a>
                 </li>
                 <li v-show="showPaymentTab" class="nav-item" id="li-payment">
-                    <a class="nav-link disabled" id="pills-payment-tab" data-toggle="pill" href="" role="tab"
+                    <a class="nav-link disabled" id="pills-payment-tab" data-bs-toggle="pill" href="" role="tab"
                         aria-controls="pills-payment" aria-selected="false">
                         Payment
                     </a>
                 </li>
                 <li v-if="is_external" class="nav-item" id="li-confirm">
-                    <a class="nav-link disabled" id="pills-confirm-tab" data-toggle="pill" href="" role="tab"
+                    <a class="nav-link disabled" id="pills-confirm-tab" data-bs-toggle="pill" href="" role="tab"
                         aria-controls="pills-confirm" aria-selected="false">
                         Confirmation
                     </a>
                 </li>
             </ul>
             <div class="tab-content" id="pills-tabContent">
-                <div class="tab-pane fade" id="pills-applicant" role="tabpanel" aria-labelledby="pills-applicant-tab">
+                <div class="tab-pane fade show active" id="pills-applicant" role="tabpanel" aria-labelledby="pills-applicant-tab">
                     <Profile 
                         ref="profile"
                         :isApplication="true"
@@ -280,9 +280,6 @@ export default {
         },
         set_tabs: function () {
             let vm = this;
-
-            /* set Applicant tab Active */
-            $('#pills-tab a[href="#pills-applicant"]').tab('show');
             /* Confirmation tab - Always Disabled */
             $('#pills-confirm-tab').attr('style', 'background-color:#E5E8E8 !important; color: #99A3A4;');
             $('#li-confirm').attr('class', 'nav-item disabled');

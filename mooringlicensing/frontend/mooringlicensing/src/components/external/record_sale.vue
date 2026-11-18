@@ -19,11 +19,14 @@
                                         <label class="control-label pull-left"  for="Name">Sale Date</label>
                                     </div>
                                     <div class="col-sm-9">
-                                        <div class="input-group date" ref="sale_date" style="width: 70%;">
-                                            <input type="text" class="form-control" name="due_date" placeholder="DD/MM/YYYY" v-model="saleDate">
-                                            <span class="input-group-addon">
-                                                <span class="glyphicon glyphicon-calendar"></span>
-                                            </span>
+                                        <div style="width: 70%;">
+                                            <input
+                                                type="date"
+                                                class="form-control"
+                                                name="saleDate"
+                                                v-model="saleDate"
+                                                :max="today"
+                                            >
                                         </div>
                                     </div>
                                 </div>
@@ -39,17 +42,16 @@
                     &nbsp;Do not send email notification for this record of sale &nbsp;
                 </label>
 
-                <button type="button" v-if="saving" disabled class="btn btn-default" @click="ok"><i class="fa fa-spinner fa-spin"></i> Saving</button>
-                <button type="button" v-else class="btn btn-default" @click="ok">Save</button>
-                <button type="button" class="btn btn-default" @click="cancel">Cancel</button>
+                <button type="button" v-if="saving" disabled class="btn btn-primary me-3" @click="ok"><i class="fa fa-spinner fa-spin"></i> Saving</button>
+                <button type="button" v-else class="btn btn-primary me-2" @click="ok">Save</button>
+                <button type="button" class="btn btn-secondary me-2" @click="cancel">Cancel</button>
             </div>
         </modal>
     </div>
 </template>
 
 <script>
-//import $ from 'jquery'
-import 'eonasdan-bootstrap-datetimepicker'
+import $ from 'jquery'
 import modal from '@vue-utils/bootstrap-modal.vue'
 import alert from '@vue-utils/alert.vue'
 import {helpers,api_endpoints} from "@/utils/hooks.js"
@@ -78,12 +80,6 @@ export default {
             errorString: '',
             successString: '',
             success:false,
-            datepickerOptions:{
-                format: 'DD/MM/YYYY',
-                showClear:true,
-                useCurrent:false,
-                maxDate: moment().endOf('day'),
-            },
             saving: false,
             saleDate: null,
         }
@@ -97,6 +93,9 @@ export default {
             var vm = this;
             return vm.level == "internal";
         },
+        today() {
+            return new Date().toISOString().split('T')[0];
+        }
     },
     methods:{
         ok:function () {
@@ -111,7 +110,7 @@ export default {
             this.isModalOpen = false;
             this.errors = false;
             $('.has-error').removeClass('has-error');
-            $(this.$refs.sale_date).data('DateTimePicker').clear();
+            this.saleDate = "";
             this.$emit('closeModal');
         },
         sendData: async function(){
@@ -151,24 +150,10 @@ export default {
                 this.errorString = helpers.apiVueResourceError(error);
             }
         },
-        eventListeners:function () {
-            let vm = this;
-            // Initialise Date Picker
-            $(vm.$refs.sale_date).datetimepicker(vm.datepickerOptions);
-            $(vm.$refs.sale_date).on('dp.change', function(e){
-                if ($(vm.$refs.sale_date).data('DateTimePicker').date()) {
-                    vm.saleDate =  e.date.format('DD/MM/YYYY');
-                }
-                else if ($(vm.$refs.sale_date).data('date') === "") {
-                    vm.saleDate = "";
-                }
-             });
-        },
     },
     mounted:function async () {
         this.$nextTick(async ()=>{
             await this.fetchSaleDate();
-            this.eventListeners();
         });
     },
     created: async function() {

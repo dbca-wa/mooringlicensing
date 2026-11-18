@@ -12,37 +12,43 @@
                 <div v-show="showDateOfLost" class="row form-group">
                     <label class="col-sm-2 control-label">Date of Lost</label>
                     <div class="col-sm-3">
-                        <div class="input-group date" id="lost_date_elem" ref="lostDatePicker">
-                            <input type="text" class="form-control text-center" placeholder="DD/MM/YYYY" />
-                            <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-calendar"></span>
-                            </span>
+                        <div style="width: 70%;">
+                            <input
+                                type="date"
+                                class="form-control"
+                                name="lostDatePicker"
+                                v-model="details.date_of_lost_sticker"
+                                :max="today"
+                            >
                         </div>
                     </div>
                 </div>
                 <div v-show="showDateOfReturned" class="row form-group">
                     <label class="col-sm-2 control-label">Date of Returned</label>
                     <div class="col-sm-3">
-                        <div class="input-group date" id="returned_date_elem" ref="returnedDatePicker">
-                            <input type="text" class="form-control text-center" placeholder="DD/MM/YYYY" />
-                            <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-calendar"></span>
-                            </span>
+                        <div style="width: 70%;">
+                            <input
+                                type="date"
+                                class="form-control"
+                                name="returnedDatePicker"
+                                v-model="details.date_of_returned_sticker"
+                                :max="today"
+                            >
                         </div>
                     </div>
                 </div>
             </div>
             <div slot="footer">
-                <div class="row">
-                    <div class="col-md-7">
+                <div class="row w-100">
+                    <div class="col-md-6 text-end">
                         <span v-if="showWaiveFeeCheckbox">
                             <strong><input type="checkbox" v-model="waive_the_fee" /> Waive the fee</strong>
                         </span>
                     </div>
-                    <div class="col-md-5">
-                        <button type="button" v-if="processing" disabled class="btn btn-default" @click="ok"><i class="fa fa-spinner fa-spin"></i> Processing</button>
-                        <button type="button" v-else class="btn btn-default" @click="ok" :disabled="!okButtonEnabled">Ok</button>
-                        <button type="button" class="btn btn-default" @click="cancel">Cancel</button>
+                    <div class="col-md-6 text-end">
+                        <button type="button" v-if="processing" disabled class="btn btn-primary me-2" @click="ok"><i class="fa fa-spinner fa-spin"></i> Processing</button>
+                        <button type="button" v-else class="btn btn-primary me-2" @click="ok" :disabled="!okButtonEnabled">Ok</button>
+                        <button type="button" class="btn btn-secondary me-2" @click="cancel">Cancel</button>
                     </div>
                 </div>
             </div>
@@ -51,8 +57,7 @@
 </template>
 
 <script>
-//import $ from 'jquery'
-import 'eonasdan-bootstrap-datetimepicker'
+import $ from 'jquery'
 import modal from '@vue-utils/bootstrap-modal.vue'
 import alert from '@vue-utils/alert.vue'
 
@@ -140,6 +145,9 @@ export default {
             }
             return false
         },
+        today() {
+            return new Date().toISOString().split('T')[0];
+        }
     },
     methods:{
         getDefaultDetails: function(){
@@ -165,52 +173,16 @@ export default {
         },
         close:function () {
             this.details = this.getDefaultDetails()
-            $('#returned_date_elem').data('DateTimePicker').clear();
-            $('#lost_date_elem').data('DateTimePicker').clear();
             this.errors = false
             this.processing = false
             this.isModalOpen = false
         },
-        addEventListeners: function () {
-            let vm = this;
-            let options = {
-                format: "DD/MM/YYYY",
-                showClear: true ,
-                useCurrent: false,
-            };
-
-            // Date of Lost
-            let el_lost = $(vm.$refs.lostDatePicker);
-            el_lost.datetimepicker(options);
-            el_lost.on("dp.change", function(e) {
-                let selected_date = null;
-                if (e.date){
-                    // Date selected
-                    selected_date = e.date.format('DD/MM/YYYY')  // e.date is moment object
-                }
-                vm.details.date_of_lost_sticker = selected_date;
-            });
-
-            // Date of Returned
-            let el_returned = $(vm.$refs.returnedDatePicker)
-            el_returned.datetimepicker(options);
-            el_returned.on("dp.change", function(e) {
-                let selected_date = null;
-                if (e.date){
-                    // Date selected
-                    selected_date = e.date.format('DD/MM/YYYY')  // e.date is moment object
-                    vm.details.date_of_returned_sticker = selected_date;
-                } else {
-                    // Date not selected
-                    vm.details.date_of_returned_sticker = selected_date;
-                }
-            });
-        },
     },
-    created:function () {
-        this.$nextTick(() => {
-            this.addEventListeners();
-        });
-    }
 }
 </script>
+
+<style scoped>
+.modal-footer > * {
+    width: 100%;
+}
+</style>

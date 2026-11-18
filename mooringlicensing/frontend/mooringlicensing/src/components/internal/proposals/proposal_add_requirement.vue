@@ -35,11 +35,14 @@
                                         <label class="control-label pull-left"  for="Name">Due Date</label>
                                     </div>
                                     <div class="col-sm-9">
-                                        <div class="input-group date" ref="due_date" style="width: 70%;">
-                                            <input type="text" class="form-control" name="due_date" placeholder="DD/MM/YYYY" v-model="requirement.due_date">
-                                            <span class="input-group-addon">
-                                                <span class="glyphicon glyphicon-calendar"></span>
-                                            </span>
+                                        <div style="width: 70%;">
+                                            <input
+                                                type="date"
+                                                class="form-control"
+                                                name="due_date"
+                                                v-model="requirement.due_date"
+                                                :min="today"
+                                            >
                                         </div>
                                     </div>
                                 </div>
@@ -89,22 +92,21 @@
             </div>
             <div slot="footer">
                 <template v-if="requirement.id">
-                    <button type="button" v-if="updatingRequirement" disabled class="btn btn-default" @click="ok"><i class="fa fa-spinnner fa-spin"></i> Updating</button>
-                    <button type="button" v-else class="btn btn-default" @click="ok">Update</button>
+                    <button type="button" v-if="updatingRequirement" disabled class="btn btn-primary me-2" @click="ok"><i class="fa fa-spinnner fa-spin"></i> Updating</button>
+                    <button type="button" v-else class="btn btn-primary me-2" @click="ok">Update</button>
                 </template>
                 <template v-else>
-                    <button type="button" v-if="addingRequirement" disabled class="btn btn-default" @click="ok"><i class="fa fa-spinner fa-spin"></i> Adding</button>
-                    <button type="button" v-else class="btn btn-default" @click="ok">Add</button>
+                    <button type="button" v-if="addingRequirement" disabled class="btn btn-primary me-2" @click="ok"><i class="fa fa-spinner fa-spin"></i> Adding</button>
+                    <button type="button" v-else class="btn btn-primary me-2" @click="ok">Add</button>
                 </template>
-                <button type="button" class="btn btn-default" @click="cancel">Cancel</button>
+                <button type="button" class="btn btn-secondary me-2" @click="cancel">Cancel</button>
             </div>
         </modal>
     </div>
 </template>
 
 <script>
-//import $ from 'jquery'
-import 'eonasdan-bootstrap-datetimepicker'
+import $ from 'jquery'
 import modal from '@vue-utils/bootstrap-modal.vue'
 import alert from '@vue-utils/alert.vue'
 import {helpers,api_endpoints} from "@/utils/hooks.js"
@@ -153,14 +155,6 @@ export default {
             errorString: '',
             successString: '',
             success:false,
-            datepickerOptions:{
-                format: 'DD/MM/YYYY',
-                showClear:true,
-                useCurrent:false,
-                keepInvalid:true,
-                allowInputToggle:true,
-                minDate: tomorrow,
-            },
             validDate: false
         }
     },
@@ -179,6 +173,9 @@ export default {
                     return this.requirement.due_date;
                 }
             }
+        },
+        today() {
+            return new Date().toISOString().split('T')[0];
         }
     },
     watch: {
@@ -217,7 +214,6 @@ export default {
             };
             this.errors = false;
             $('.has-error').removeClass('has-error');
-            $(this.$refs.due_date).data('DateTimePicker').clear();
             this.validation_form.resetForm();
         },
         fetchContact: function(id){
@@ -306,43 +302,22 @@ export default {
                     campsite:"field is required"
                 },
                 showErrors: function(errorMap, errorList) {
-                    $.each(this.validElements(), function(index, element) {
-                        var $element = $(element);
-                        $element.attr("data-original-title", "").parents('.form-group').removeClass('has-error');
-                    });
-                    // destroy tooltips on valid elements
-                    $("." + this.settings.validClass).tooltip("destroy");
-                    // add or update tooltips
-                    for (var i = 0; i < errorList.length; i++) {
-                        var error = errorList[i];
-                        $(error.element)
-                            .tooltip({
-                                trigger: "focus"
-                            })
-                            .attr("data-original-title", error.message)
-                            .parents('.form-group').addClass('has-error');
-                    }
-                }
+                    helpers.showValidationErrors.call(
+                        this,
+                        errorMap,
+                        errorList
+                    );
+                },
             });
        },
        eventListeners:function () {
             let vm = this;
-            // Initialise Date Picker
-            $(vm.$refs.due_date).datetimepicker(vm.datepickerOptions);
-            $(vm.$refs.due_date).on('dp.change', function(e){
-                if ($(vm.$refs.due_date).data('DateTimePicker').date()) {
-                    vm.requirement.due_date =  e.date.format('DD/MM/YYYY');
-                }
-                else if ($(vm.$refs.due_date).data('date') === "") {
-                    vm.requirement.due_date = "";
-                }
-             });
-
             // Intialise select2
             $(vm.$refs.standard_req).select2({
                 "theme": "bootstrap",
                 allowClear: true,
-                placeholder:"Select Requirement"
+                placeholder:"Select Requirement",
+                dropdownParent: $(vm.$refs.standard_req).parent(),
             }).
             on("select2:select",function (e) {
                 var selected = $(e.currentTarget);

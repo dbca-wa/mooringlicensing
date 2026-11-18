@@ -1,6 +1,6 @@
 <template>
     <div id="change-contact">
-        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :title="title" large>
+        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :processing="processing" :title="title" large>
             <div class="container-fluid">
                 <alert :show.sync="showError" type="danger"><strong>{{ errorString }}</strong></alert>
                 <div class="row form-group">
@@ -76,22 +76,12 @@
                     </div>
                 </div>
             </div>
-            <div slot="footer">
-                <div class="row">
-                    <div class="col-md-5">
-                        <button type="button" v-if="processing" disabled class="btn btn-default" @click="ok"><i class="fa fa-spinner fa-spin"></i> Processing</button>
-                        <button type="button" v-else class="btn btn-default" @click="ok" :disabled="!okButtonEnabled">Ok</button>
-                        <button type="button" class="btn btn-default" @click="cancel">Cancel</button>
-                    </div>
-                </div>
-            </div>
         </modal>
     </div>
 </template>
 
 <script>
-//import $ from 'jquery'
-import 'eonasdan-bootstrap-datetimepicker'
+import $ from 'jquery'
 import modal from '@vue-utils/bootstrap-modal.vue'
 import alert from '@vue-utils/alert.vue'
 import { helpers, api_endpoints } from "@/utils/hooks.js"
@@ -205,44 +195,6 @@ export default {
             this.processing = false
             this.dcv_permit_id = null
         },
-        addEventListeners: function () {
-            let vm = this;
-            let options = {
-                format: "DD/MM/YYYY",
-                showClear: true ,
-                useCurrent: false,
-            };
-
-            // Date of Lost
-            let el_lost = $(vm.$refs.lostDatePicker);
-            el_lost.datetimepicker(options);
-            el_lost.on("dp.change", function(e) {
-                let selected_date = null;
-                if (e.date){
-                    // Date selected
-                    selected_date = e.date.format('DD/MM/YYYY')  // e.date is moment object
-                    vm.details.date_of_lost_sticker = selected_date;
-                } else {
-                    // Date not selected
-                    vm.details.date_of_lost_sticker = selected_date;
-                }
-            });
-
-            // Date of Returned
-            let el_returned = $(vm.$refs.returnedDatePicker)
-            el_returned.datetimepicker(options);
-            el_returned.on("dp.change", function(e) {
-                let selected_date = null;
-                if (e.date){
-                    // Date selected
-                    selected_date = e.date.format('DD/MM/YYYY')  // e.date is moment object
-                    vm.details.date_of_returned_sticker = selected_date;
-                } else {
-                    // Date not selected
-                    vm.details.date_of_returned_sticker = selected_date;
-                }
-            });
-        },
         fetchCountries: function () {
             let vm = this;
             vm.$http.get(api_endpoints.countries).then((response) => {
@@ -253,10 +205,5 @@ export default {
     mounted: function () {
         this.fetchCountries();
     },
-    created:function () {
-        this.$nextTick(() => {
-            this.addEventListeners();
-        });
-    }
 }
 </script>

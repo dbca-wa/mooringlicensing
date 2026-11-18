@@ -62,15 +62,12 @@
 
             <div class="row">
 
-                <div class="panel panel-default">
-                  <div class="panel-heading">
-                      <h3 class="panel-title">{{ approvalLabel }}
-                        <a class="panelClicker" :href="'#'+oBody" data-toggle="collapse" expanded="true"  data-parent="#userInfo" :aria-controls="oBody">
-                            <span class="glyphicon glyphicon-chevron-down pull-right "></span>
-                        </a>
-                    </h3>
-                  </div>
-                  <div v-if="loading.length == 0" class="panel-body collapse" :id="oBody">
+                <FormSection
+                    :label="approvalLabel"
+                    :formCollapse="true"
+                    :Index="oBody"
+                >
+                    <div v-if="loading.length == 0">
                       <form class="form-horizontal" action="index.html" method="post">
                           <div v-if="mooringLicence" class="form-group">
                             <label for="" class="col-sm-3 control-label">Mooring</label>
@@ -104,8 +101,8 @@
                             </div>
                           </div>
                        </form>
-                  </div>
-                </div>
+                    </div>
+                </FormSection>
             </div>
             <div class="row" v-if="approval && approval.applicant && approval.current_proposal && annualAdmissionPermit">
                   <Vessels

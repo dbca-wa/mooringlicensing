@@ -3,252 +3,239 @@
       <div class="col-sm-12">
         <div class="row">
             <div class="col-sm-12">
-                <div class="panel panel-default" v-if="!readonly && is_internal && proposal.proposal_type.code == 'new' && proposal.processing_status == 'Draft'">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Applicant
-                        <a class="panelClicker" :href="'#'+appBody" data-toggle="collapse" expanded="true" data-parent="#userInfo" :aria-controls="appBody">
-                            <span class="glyphicon glyphicon-chevron-up pull-right "></span>
-                        </a>
-                        </h3>
-                    </div>
-                    <div class="panel-body collapse in" :id="appBody">
-                        <form class="form-horizontal">
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label">Applicant</label>
-                                <div class="col-sm-6">
-                                    <select 
-                                        id="person_lookup"  
-                                        name="person_lookup"  
-                                        ref="person_lookup" 
-                                        class="form-control" 
-                                    />
-                                </div>
-                            </div>
-                            <div>
-                                <div class="col-sm-12">
-                                    <button v-if="changingApplicant" type="button" class="btn btn-primary pull-right" disabled>
-                                    Change Applicant&nbsp;<i class="fa fa-circle-o-notch fa-spin fa-fw"></i>
-                                    </button>
-                                    <button v-else type="button" @click.prevent="changeApplicant" class="btn btn-primary pull-right"
-                                    :disabled="applicant_system_id == null || applicant_system_id == original_applicant_system_id">
-                                    Change Applicant
-                                    </button>
-                                </div>
-                            </div>                        
-                        </form>
-                    </div>
-                </div>
-                <div class="panel panel-default">
-                  <div class="panel-heading">
-                    <h3 class="panel-title">Personal Details
-                        <a class="panelClicker" :href="'#'+pBody" data-toggle="collapse"  data-parent="#userInfo" expanded="false" :aria-controls="pBody">
-                            <span class="glyphicon glyphicon-chevron-down pull-right "></span>
-                        </a>
-                    </h3>
-                  </div>
-                  <div class="panel-body collapse" :id="pBody">
-                      <form class="form-horizontal">
-                        <div v-if="!proposalApplicant" class="form-group">
-                            <label for="" class="col-sm-3 control-label"></label>
-                            <div v-if="!is_internal" class="col-sm-12">
-                                <div class="alert alert-info"><b>To update the legal name of the permit holder, contact moorings@rottnestisland.com</b></div>
-                            </div>
-                            <div v-else class="col-sm-12">
-                                <div class="alert alert-info"><b>To update the legal name of the permit holder go to Accounts Management: <u><a :href="'/ledger-ui/accounts-management/'+profile.id+'/change'">Edit System Account</a></u></b></div>
-                            </div>
-                        </div>
+                <FormSection
+                    v-if="!readonly && is_internal && proposal.proposal_type.code == 'new' && proposal.processing_status == 'Draft'"
+                    label="Applicant"
+                    :formCollapse="false"
+                    :Index="appBody"
+                >
+                    <form class="form-horizontal">
                         <div class="form-group">
-                          <label for="" class="col-sm-3 control-label">Legal Given name(s)</label>
-                          <div class="col-sm-6" v-if="profile.legal_first_name">
-                              <input readonly type="text" class="form-control" id="first_name" name="Given name" placeholder="" v-model="profile.legal_first_name" required="">
-                          </div>
-                          <div class="col-sm-6" v-else>
-                              <input readonly type="text" class="form-control" id="first_name" name="Given name" placeholder="" v-model="profile.first_name" required="">
-                          </div>
+                            <label class="col-sm-3 control-label">Applicant</label>
+                            <div class="col-sm-6">
+                                <select 
+                                    id="person_lookup"  
+                                    name="person_lookup"  
+                                    ref="person_lookup" 
+                                    class="form-control" 
+                                />
+                            </div>
                         </div>
-                        <div class="form-group">
-                          <label for="" class="col-sm-3 control-label" >Legal Surname</label>
-                          <div class="col-sm-6" v-if="profile.legal_first_name">
-                              <input readonly type="text" class="form-control" id="surname" name="Surname" placeholder="" v-model="profile.legal_last_name">
-                          </div>
-                          <div class="col-sm-6" v-else>
-                              <input readonly type="text" class="form-control" id="first_name" name="Surname" placeholder="" v-model="profile.last_name" required="">
-                          </div>
+                        <div>
+                            <div class="col-sm-12">
+                                <button v-if="changingApplicant" type="button" class="btn btn-primary pull-right" disabled>
+                                Change Applicant&nbsp;<i class="fa fa-circle-o-notch fa-spin fa-fw"></i>
+                                </button>
+                                <button v-else type="button" @click.prevent="changeApplicant" class="btn btn-primary pull-right"
+                                :disabled="applicant_system_id == null || applicant_system_id == original_applicant_system_id">
+                                Change Applicant
+                                </button>
+                            </div>
+                        </div>                        
+                    </form>
+                </FormSection>
+                <FormSection
+                    label="Personal Details"
+                    :formCollapse="true"
+                    :Index="pBody"
+                >
+                    <form class="form-horizontal">
+                    <div v-if="!proposalApplicant" class="form-group">
+                        <label for="" class="col-sm-3 control-label"></label>
+                        <div v-if="!is_internal" class="col-sm-12">
+                            <div class="alert alert-info"><b>To update the legal name of the permit holder, contact moorings@rottnestisland.com</b></div>
                         </div>
-                        <div class="row form-group" v-if="!forEndorser">
-                            <label for="" class="col-sm-3 control-label" >Date of Birth</label>
-                          <div class="col-sm-6">
-                              <input readonly type="text" class="form-control" id="dob" name="Date of Birth" placeholder="" v-model="profile.legal_dob">
-                          </div>
+                        <div v-else class="col-sm-12">
+                            <div class="alert alert-info"><b>To update the legal name of the permit holder go to Accounts Management: <u><a :href="'/ledger-ui/accounts-management/'+profile.id+'/change'">Edit System Account</a></u></b></div>
                         </div>
-                       </form>
-                  </div>
-                </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="" class="col-sm-3 control-label">Legal Given name(s)</label>
+                        <div class="col-sm-6" v-if="profile.legal_first_name">
+                            <input readonly type="text" class="form-control" id="first_name" name="Given name" placeholder="" v-model="profile.legal_first_name" required="">
+                        </div>
+                        <div class="col-sm-6" v-else>
+                            <input readonly type="text" class="form-control" id="first_name" name="Given name" placeholder="" v-model="profile.first_name" required="">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="" class="col-sm-3 control-label" >Legal Surname</label>
+                        <div class="col-sm-6" v-if="profile.legal_first_name">
+                            <input readonly type="text" class="form-control" id="surname" name="Surname" placeholder="" v-model="profile.legal_last_name">
+                        </div>
+                        <div class="col-sm-6" v-else>
+                            <input readonly type="text" class="form-control" id="first_name" name="Surname" placeholder="" v-model="profile.last_name" required="">
+                        </div>
+                    </div>
+                    <div class="row form-group" v-if="!forEndorser">
+                        <label for="" class="col-sm-3 control-label" >Date of Birth</label>
+                        <div class="col-sm-6">
+                            <input readonly type="text" class="form-control" id="dob" name="Date of Birth" placeholder="" v-model="profile.legal_dob">
+                        </div>
+                    </div>
+                    </form>
+                </FormSection>
             </div>
         </div>
 
         <div class="row" v-if="!forEndorser">
             <div class="col-sm-12">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Address Details <small>Select address details for this application</small>
-                        <a class="panelClicker" :href="'#'+adBody" data-toggle="collapse" expanded="true" data-parent="#userInfo" :aria-controls="adBody">
-                            <span class="glyphicon glyphicon-chevron-up pull-right "></span>
-                        </a>
-                        </h3>
-                    </div>
-                    <div v-if="!readonly" class="panel-body collapse in" :id="adBody">
+                <FormSection
+                    label="Address Details"
+                    subtitle="Select address details for this application"
+                    :formCollapse="false"
+                    :Index="adBody"
+                >
+
+                    <div v-if="!readonly">
                         <form class="form-horizontal">
-                        <div class="form-group">
-                            <label for="" class="col-sm-3 control-label" >
-                                <strong>
-                                Residential Address
-                                </strong>
-                            </label>
-                            <div class="col-sm-6">
-                            <select v-model="residential_address" class="form-control">
-                                <option selected disabled hidden value>Select residential address...</option>
-                                <option v-for="option in profile.residential_address_list" :value="option">
-                                    {{ option.line1 }}, {{ option.locality }}, {{ option.state }}, {{ option.postcode }}, {{ option.country }}
-                                </option>
-                            </select>
+                            <div class="form-group">
+                                <label for="" class="col-sm-3 control-label" >
+                                    <strong>
+                                    Residential Address
+                                    </strong>
+                                </label>
+                                <div class="col-sm-6">
+                                <select v-model="residential_address" class="form-control">
+                                    <option selected disabled hidden value>Select residential address...</option>
+                                    <option v-for="option in profile.residential_address_list" :value="option">
+                                        {{ option.line1 }}, {{ option.locality }}, {{ option.state }}, {{ option.postcode }}, {{ option.country }}
+                                    </option>
+                                </select>
+                                </div>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="" class="col-sm-3 control-label" >
-                                <strong>
-                                Postal Address
-                                </strong>
-                            </label>
-                            <div class="col-sm-6">
-                            <select v-model="postal_address" class="form-control">
-                                <option selected disabled hidden value>Select postal address...</option>
-                                <option v-for="option in profile.postal_address_list" :value="option">
-                                    {{ option.line1 }}, {{ option.locality }}, {{ option.state }}, {{ option.postcode }}, {{ option.country }}
-                                </option>
-                            </select>
+                            <div class="form-group">
+                                <label for="" class="col-sm-3 control-label" >
+                                    <strong>
+                                    Postal Address
+                                    </strong>
+                                </label>
+                                <div class="col-sm-6">
+                                <select v-model="postal_address" class="form-control">
+                                    <option selected disabled hidden value>Select postal address...</option>
+                                    <option v-for="option in profile.postal_address_list" :value="option">
+                                        {{ option.line1 }}, {{ option.locality }}, {{ option.state }}, {{ option.postcode }}, {{ option.country }}
+                                    </option>
+                                </select>
+                                </div>
                             </div>
-                        </div>
-                    </form>
-                  </div>
-                  <div v-else-if="proposal.proposal_applicant" class="panel-body collapse in" :id="adBody">
-                    <form class="form-horizontal">
-                        <div class="form-group">
-                            <label for="" class="col-sm-3 control-label" >
-                                <strong>
-                                Residential Address
-                                </strong>
-                            </label>
-                        </div>
-                        <div class="row">
-                          <div class="form-group">
-                            <label for="" class="col-sm-3 control-label" >Street</label>
-                            <div class="col-sm-6">
-                                <input readonly type="text" class="form-control" v-model="proposal.proposal_applicant.residential_address_line1">
+                        </form>
+                    </div>
+                    <div v-else-if="proposal.proposal_applicant">
+                        <form class="form-horizontal">
+                            <div class="form-group">
+                                <label for="" class="col-sm-3 control-label" >
+                                    <strong>
+                                    Residential Address
+                                    </strong>
+                                </label>
                             </div>
-                          </div>
-                          <div class="form-group">
-                            <label for="" class="col-sm-3 control-label" >Town/Suburb</label>
-                            <div class="col-sm-6">
-                                <input readonly type="text" class="form-control" v-model="proposal.proposal_applicant.residential_address_locality">
+                            <div class="row">
+                            <div class="form-group">
+                                <label for="" class="col-sm-3 control-label" >Street</label>
+                                <div class="col-sm-6">
+                                    <input readonly type="text" class="form-control" v-model="proposal.proposal_applicant.residential_address_line1">
+                                </div>
                             </div>
-                          </div>
-                          <div class="form-group">
-                            <label for="" class="col-sm-3 control-label" >State</label>
-                            <div class="col-sm-6">
-                                <input readonly type="text" class="form-control" v-model="proposal.proposal_applicant.residential_address_state">
+                            <div class="form-group">
+                                <label for="" class="col-sm-3 control-label" >Town/Suburb</label>
+                                <div class="col-sm-6">
+                                    <input readonly type="text" class="form-control" v-model="proposal.proposal_applicant.residential_address_locality">
+                                </div>
                             </div>
-                          </div>
-                          <div class="form-group">
-                            <label for="" class="col-sm-3 control-label" >Postcode</label>
-                            <div class="col-sm-6">
-                                <input readonly type="text" class="form-control" v-model="proposal.proposal_applicant.residential_address_postcode">
+                            <div class="form-group">
+                                <label for="" class="col-sm-3 control-label" >State</label>
+                                <div class="col-sm-6">
+                                    <input readonly type="text" class="form-control" v-model="proposal.proposal_applicant.residential_address_state">
+                                </div>
                             </div>
-                          </div>
-                          <div class="form-group">
-                            <label for="" class="col-sm-3 control-label" >Country</label>
-                            <div class="col-sm-6">
-                                <input readonly type="text" class="form-control" v-model="proposal.proposal_applicant.residential_address_country">
+                            <div class="form-group">
+                                <label for="" class="col-sm-3 control-label" >Postcode</label>
+                                <div class="col-sm-6">
+                                    <input readonly type="text" class="form-control" v-model="proposal.proposal_applicant.residential_address_postcode">
+                                </div>
                             </div>
-                          </div> 
-                        </div>
-                        <div class="form-group">
-                            <label for="" class="col-sm-3 control-label" >
-                                <strong>
-                                Postal Address
-                                </strong>
-                            </label>
-                        </div>
-                        <div class="row">
-                          <div class="form-group">
-                            <label for="" class="col-sm-3 control-label" >Street</label>
-                            <div class="col-sm-6">
-                                <input readonly type="text" class="form-control" v-model="proposal.proposal_applicant.postal_address_line1">
+                            <div class="form-group">
+                                <label for="" class="col-sm-3 control-label" >Country</label>
+                                <div class="col-sm-6">
+                                    <input readonly type="text" class="form-control" v-model="proposal.proposal_applicant.residential_address_country">
+                                </div>
+                            </div> 
                             </div>
-                          </div>
-                          <div class="form-group">
-                            <label for="" class="col-sm-3 control-label" >Town/Suburb</label>
-                            <div class="col-sm-6">
-                                <input readonly type="text" class="form-control" v-model="proposal.proposal_applicant.postal_address_locality">
+                            <div class="form-group">
+                                <label for="" class="col-sm-3 control-label" >
+                                    <strong>
+                                    Postal Address
+                                    </strong>
+                                </label>
                             </div>
-                          </div>
-                          <div class="form-group">
-                            <label for="" class="col-sm-3 control-label" >State</label>
-                            <div class="col-sm-6">
-                                <input readonly type="text" class="form-control" v-model="proposal.proposal_applicant.postal_address_state">
+                            <div class="row">
+                            <div class="form-group">
+                                <label for="" class="col-sm-3 control-label" >Street</label>
+                                <div class="col-sm-6">
+                                    <input readonly type="text" class="form-control" v-model="proposal.proposal_applicant.postal_address_line1">
+                                </div>
                             </div>
-                          </div>
-                          <div class="form-group">
-                            <label for="" class="col-sm-3 control-label" >Postcode</label>
-                            <div class="col-sm-6">
-                                <input readonly type="text" class="form-control" v-model="proposal.proposal_applicant.postal_address_postcode">
+                            <div class="form-group">
+                                <label for="" class="col-sm-3 control-label" >Town/Suburb</label>
+                                <div class="col-sm-6">
+                                    <input readonly type="text" class="form-control" v-model="proposal.proposal_applicant.postal_address_locality">
+                                </div>
                             </div>
-                          </div>
-                          <div class="form-group">
-                            <label for="" class="col-sm-3 control-label" >Country</label>
-                            <div class="col-sm-6">
-                                <input readonly type="text" class="form-control" v-model="proposal.proposal_applicant.postal_address_country">
+                            <div class="form-group">
+                                <label for="" class="col-sm-3 control-label" >State</label>
+                                <div class="col-sm-6">
+                                    <input readonly type="text" class="form-control" v-model="proposal.proposal_applicant.postal_address_state">
+                                </div>
                             </div>
-                          </div> 
-                        </div>
-                    </form>
-                  </div>
-                </div>
+                            <div class="form-group">
+                                <label for="" class="col-sm-3 control-label" >Postcode</label>
+                                <div class="col-sm-6">
+                                    <input readonly type="text" class="form-control" v-model="proposal.proposal_applicant.postal_address_postcode">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="" class="col-sm-3 control-label" >Country</label>
+                                <div class="col-sm-6">
+                                    <input readonly type="text" class="form-control" v-model="proposal.proposal_applicant.postal_address_country">
+                                </div>
+                            </div> 
+                            </div>
+                        </form>
+                    </div>
+                </FormSection>
             </div>
         </div>
         <div class="row">
             <div class="col-sm-12">
-                <div class="panel panel-default">
-                  <div class="panel-heading">
-                    <h3 class="panel-title">Contact Details
-                        <a class="panelClicker" :href="'#'+cBody" data-toggle="collapse" data-parent="#userInfo" expanded="false" :aria-controls="cBody">
-                            <span class="glyphicon glyphicon-chevron-down pull-right "></span>
-                        </a>
-                    </h3>
-                  </div>
-                  <div class="panel-body collapse" :id="cBody">
-                      <form class="form-horizontal">
-                          <div class="form-group">
+                <FormSection
+                    label="Contact Details"
+                    :formCollapse="true"
+                    :Index="cBody"
+                >
+                    <form class="form-horizontal">
+                        <div class="form-group">
                             <label for="" class="col-sm-3 control-label">Phone (work)</label>
                             <div class="col-sm-6">
-                               <input readonly type="text" class="form-control" id="phone" name="Phone" placeholder="" v-model="profile.phone_number">
+                                <input readonly type="text" class="form-control" id="phone" name="Phone" placeholder="" v-model="profile.phone_number">
                             </div>
-                          </div>
-                          <div class="form-group" v-if="!forEndorser">
-                            <label for="" class="col-sm-3 control-label" >Mobile</label>
+                        </div>
+
+                        <div class="form-group" v-if="!forEndorser">
+                            <label for="" class="col-sm-3 control-label">Mobile</label>
                             <div class="col-sm-6">
                                 <input readonly type="text" class="form-control" id="mobile" name="Mobile" placeholder="" v-model="profile.mobile_number">
                             </div>
-                          </div>
-                          <div class="form-group">
-                            <label for="" class="col-sm-3 control-label" >Email</label>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="" class="col-sm-3 control-label">Email</label>
                             <div class="col-sm-6">
                                 <input readonly type="email" class="form-control" id="email" name="Email" placeholder="" v-model="profile.email">
                             </div>
-                          </div>
-                       </form>
-                  </div>
-                </div>
+                        </div>
+                    </form>
+                </FormSection>
             </div>
         </div>
         <FormSection v-if="showElectoralRoll" label="WA State Electoral Roll" :Index="electoralRollSectionIndex">
@@ -291,7 +278,7 @@
 
 <script>
 import Vue from 'vue'
-//import $ from 'jquery'
+import $ from 'jquery'
 import { api_endpoints, helpers } from '@/utils/hooks'
 import FormSection from '@/components/forms/section_toggle.vue'
 import FileField from '@/components/forms/filefield_immediate.vue'
@@ -497,15 +484,6 @@ export default {
             }
             vm.uploadedFile = _file;
         },       
-        toggleSection: function (e) {
-            let el = e.target;
-            let chev = null;
-            $(el).on('click', function (event) {
-                chev = $(this);
-                $(chev).toggleClass('glyphicon-chevron-down glyphicon-chevron-up');
-            })
-        },
-
         fetchProfile: async function(){
             console.log('in fetchProfile')
             let response = null;
@@ -584,12 +562,6 @@ export default {
                     this.getApplicantDisplay();
                 });
             }
-        });
-        $('.panelClicker[data-toggle="collapse"]').on('click', function () {
-            var chev = $(this).children()[0];
-            window.setTimeout(function () {
-                $(chev).toggleClass("glyphicon-chevron-down glyphicon-chevron-up");
-            },100);
         });
         this.silentElector = this.storedSilentElector;
     }

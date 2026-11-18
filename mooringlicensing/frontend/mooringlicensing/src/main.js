@@ -3,11 +3,8 @@ import 'vite/modulepreload-polyfill';
 import App from './App.vue'
 import router from './router'
 import helpers from '@/utils/helpers'
-
-import $ from 'jquery'
-
-window.$ = $
-window.jQuery = $
+//import "bootstrap";
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 import moment from 'moment'
 extendMoment(moment);
@@ -18,10 +15,6 @@ import swal from 'sweetalert2'
 window.swal = swal
 
 import { extendMoment } from 'moment-range';
-
-import 'datatables.net-buttons-bs';
-import 'datatables.net-responsive-bs';
-import 'datatables.net-fixedcolumns-bs';
 
 import jsZip from 'jszip';
 window.JSZip = jsZip;
@@ -34,15 +27,23 @@ import 'sweetalert2/dist/sweetalert2.css';
 import 'select2/dist/css/select2.min.css';
 import 'select2-bootstrap-theme/dist/select2-bootstrap.min.css';
 
+import "datatables.net";
+import "datatables.net-bs5";
+
+//import "datatables.net-buttons/js/dataTables.buttons.js";
+//import "datatables.net-buttons-bs5";
+//import "datatables.net-buttons/js/buttons.html5.js";
+
+import "datatables.net-responsive";
+import "datatables.net-responsive-bs5";
+import "datatables.net-fixedcolumns-bs5";
+
+import "@/../node_modules/datatables.net-bs5/css/dataTables.bootstrap5.min.css";
+import "@/../node_modules/datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css";
+import "@/../node_modules/datatables.net-fixedcolumns-bs5/css/fixedColumns.bootstrap5.min.css";
 
 import api_endpoints from './api'
-import 'eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css'
 import "font-awesome/css/font-awesome.min.css"
-
-import 'datatables.net-bs/css/dataTables.bootstrap.min.css'
-import 'datatables.net-responsive-bs/css/responsive.bootstrap.min.css'
-import 'datatables.net-buttons-bs/css/buttons.bootstrap.min.css'
-import 'datatables.net-fixedcolumns-bs/css/fixedColumns.bootstrap.min.css'
 
 Vue.config.devtools = true;
 Vue.config.productionTip = false
@@ -52,28 +53,11 @@ import http from '@/utils/vue-resource-shim';
 Vue.http = http;
 Vue.prototype.$http = http;
 
-// Add CSRF Token to every request
-/*Vue.http.interceptors.push( function ( request, next ) {
-  // modify headers
-  if ( request.url != api_endpoints.countries ) {
-    request.headers.set( 'X-CSRFToken', helpers.getCookie( 'csrftoken' ) );
-  }
-
-  // continue to next interceptor
-  next();
-} );*/
-
 const appElement = document.getElementById( 'app' );
 
-//NOTE/TODO: we should not have to do this once bootstrap has been upgraded to 5 and jquery has been made non-global
-async function bootstrap() {
-    await import('bootstrap');
-    new Vue({
-      router,
-      render: h => h(App)
-    }).$mount('#app')
-}
-
-if ( appElement ) {
-  bootstrap();
+if (appElement) {
+  new Vue({
+    router,
+    render: h => h(App)
+  }).$mount('#app');
 }

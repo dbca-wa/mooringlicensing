@@ -77,9 +77,9 @@
                     <label for="noEmails">
                         &nbsp;Do not send email notifications for this application &nbsp;
                     </label>
-                <button type="button" v-if="savingOffer" disabled class="btn btn-default" @click="ok"><i class="fa fa-spinner fa-spin"></i> Processing</button>
-                <button type="button" v-else class="btn btn-default" @click="ok" :disabled="!ok_button_enabled">Ok</button>
-                <button type="button" class="btn btn-default" @click="cancel">Cancel</button>
+                <button type="button" v-if="savingOffer" disabled class="btn btn-primary me-2" @click="ok"><i class="fa fa-spinner fa-spin"></i> Processing</button>
+                <button type="button" v-else class="btn btn-primary me-2" @click="ok" :disabled="!ok_button_enabled">Ok</button>
+                <button type="button" class="btn btn-secondary me-2" @click="cancel">Cancel</button>
                 </p>
             </div>
         </modal>
@@ -87,6 +87,7 @@
 </template>
 
 <script>
+import $ from 'jquery'
 import modal from '@vue-utils/bootstrap-modal.vue'
 import FileField from '@/components/forms/filefield_immediate.vue'
 import alert from '@vue-utils/alert.vue'
@@ -210,6 +211,7 @@ export default {
                 "theme": "bootstrap",
                 allowClear: true,
                 placeholder:"Select Mooring",
+                dropdownParent: $(vm.$refs.mooring_lookup).parent(),
                 ajax: {
                     url: api_endpoints.mooring_lookup_per_bay,
                     dataType: 'json',

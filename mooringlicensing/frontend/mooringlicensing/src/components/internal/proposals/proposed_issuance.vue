@@ -1,6 +1,6 @@
 <template>
     <div id="proposedIssuanceApproval">
-        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :title="title" large>
+        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :processing="issuingApproval" :title="title" large>
             <div class="container-fluid">
                 <div class="row">
                     <form class="form-horizontal" name="approvalForm">
@@ -141,19 +141,12 @@
                     </form>
                 </div>
             </div>
-
-            <div slot="footer">
-                <button type="button" v-if="issuingApproval" disabled class="btn btn-default" @click="ok"><i
-                        class="fa fa-spinner fa-spin"></i> Processing</button>
-                <button type="button" v-else class="btn btn-default" @click="ok">Ok</button>
-                <button type="button" class="btn btn-default" @click="cancel">Cancel</button>
-            </div>
         </modal>
     </div>
 </template>
 
 <script>
-//import $ from 'jquery'
+import $ from 'jquery'
 import modal from '@vue-utils/bootstrap-modal.vue'
 import alert from '@vue-utils/alert.vue'
 import datatable from '@vue-utils/datatable.vue'
@@ -224,13 +217,6 @@ export default {
             startDateErrorString: '',
             successString: '',
             success: false,
-            datepickerOptions: {
-                format: 'DD/MM/YYYY',
-                showClear: true,
-                useCurrent: false,
-                keepInvalid: true,
-                allowInputToggle: true
-            },
             warningString: 'Please attach Level of Approval document before issuing Approval',
             mooringsTableId: 'moorings_table' + vm._uid,
             requestedMooringsTableId: 'requested_moorings_table' + vm._uid,
@@ -742,23 +728,12 @@ export default {
         addFormValidations: function () {
             let vm = this;
             vm.validation_form = $(vm.form).validate({
-                showErrors: function (errorMap, errorList) {
-                    $.each(this.validElements(), function (index, element) {
-                        var $element = $(element);
-                        $element.attr("data-original-title", "").parents('.form-group').removeClass('has-error');
-                    });
-                    // destroy tooltips on valid elements
-                    $("." + this.settings.validClass).tooltip("destroy");
-                    // add or update tooltips
-                    for (var i = 0; i < errorList.length; i++) {
-                        var error = errorList[i];
-                        $(error.element)
-                            .tooltip({
-                                trigger: "focus"
-                            })
-                            .attr("data-original-title", error.message)
-                            .parents('.form-group').addClass('has-error');
-                    }
+                showErrors: function(errorMap, errorList) {
+                    helpers.showValidationErrors.call(
+                        this,
+                        errorMap,
+                        errorList
+                    );
                 }
             });
         },
@@ -922,6 +897,7 @@ export default {
                 "theme": "bootstrap",
                 allowClear: true,
                 placeholder: "Select Mooring",
+                dropdownParent: $(vm.$refs.mooring_lookup).parent(),
                 ajax: {
                     url: api_endpoints.mooring_lookup_per_bay,
                     dataType: 'json',

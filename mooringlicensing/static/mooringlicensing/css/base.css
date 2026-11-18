@@ -89,3 +89,30 @@
     margin-top: -30px; 
     width:92%; 
 }
+
+/*bs3 to bs5 compatibility*/
+
+.pull-right { float: right !important; }
+.pull-left  { float: left !important; }
+
+.text-left   { text-align: left; }
+.text-right  { text-align: right; }
+
+.center-block {
+    display:block;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+.panel {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.panel-heading {
+    padding: 10px 15px;
+}
+
+.panel-body {
+    padding: 15px;
+}

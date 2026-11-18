@@ -18,22 +18,16 @@
             <div class="col-md-3">
                 <div class="form-group">
                     <label for="">Date from</label>
-                    <div class="input-group date" ref="dateFromPicker">
-                        <input type="text" class="form-control text-center" placeholder="DD/MM/YYYY" v-model="filterDateFrom" id="dateFromField"/>
-                        <span class="input-group-addon">
-                            <span class="glyphicon glyphicon-calendar"></span>
-                        </span>
+                    <div class="input-group date">
+                        <input type="date" class="form-control text-center" placeholder="DD/MM/YYYY" v-model="filterDateFrom" id="dateFromField"/>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="form-group">
                     <label for="">Date to</label>
-                    <div class="input-group date" ref="dateToPicker">
-                        <input type="text" class="form-control text-center" placeholder="DD/MM/YYYY" v-model="filterDateTo" id="dateToField"/>
-                        <span class="input-group-addon">
-                            <span class="glyphicon glyphicon-calendar"></span>
-                        </span>
+                    <div class="input-group date">
+                        <input type="date" class="form-control text-center" placeholder="DD/MM/YYYY" v-model="filterDateTo" id="dateToField"/>
                     </div>
                 </div>
             </div>
@@ -59,8 +53,7 @@
 </template>
 
 <script>
-//import $ from 'jquery'
-import 'eonasdan-bootstrap-datetimepicker'
+import $ from 'jquery'
 import datatable from '@/utils/vue/datatable.vue'
 import { api_endpoints } from '@/utils/hooks'
 
@@ -291,21 +284,6 @@ export default {
                     }
                 },
                 dom: 'lBfrtip',
-                buttons:[
-                    {
-                        extend: 'excel',
-                        exportOptions: {
-                            columns: ':visible'
-                        }
-                    },
-                    {
-                        extend: 'csv',
-                        exportOptions: {
-                            columns: ':visible'
-                        }
-                    },
-                ],
-
                 columns: columns,
                 processing: true,
                 initComplete: function() {
@@ -364,54 +342,10 @@ export default {
             })
         }
         },
-        addEventListeners: function(){
-            let vm = this
-
-            let el_fr = $(vm.$refs.dateFromPicker);
-            let el_to = $(vm.$refs.dateToPicker);
-
-            let options = {
-                format: "DD/MM/YYYY",
-                showClear: true ,
-                useCurrent: false,
-            };
-
-            el_fr.datetimepicker(options)
-            el_to.datetimepicker(options)
-
-            el_fr.on("dp.change", function(e) {
-                let selected_date = null;
-                if (e.date){
-                    // Date selected
-                    selected_date = e.date.format('DD/MM/YYYY')  // e.date is moment object
-                    vm.filterDateFrom = selected_date;
-                    el_to.data('DateTimePicker').minDate(selected_date)
-                } else {
-                    // Date not selected
-                    vm.filterDateFrom = selected_date;
-                    el_to.data('DateTimePicker').minDate(false)
-                }
-            })
-
-            el_to.on("dp.change", function(e){
-                let selected_date = null;
-                if (e.date){
-                    // Date selected
-                    selected_date = e.date.format('DD/MM/YYYY')  // e.date is moment object
-                    vm.filterDateTo = selected_date;
-                    el_fr.data('DateTimePicker').maxDate(selected_date)
-                } else {
-                    // Date not selected
-                    vm.filterDateTo = selected_date;
-                    el_fr.data('DateTimePicker').maxDate(false)
-                }
-            })
-        },
     },
     mounted: function(){
         let vm = this;
         this.$nextTick(() => {
-            vm.addEventListeners();
             vm.initialiseOrganisationLookup();
         });
     }

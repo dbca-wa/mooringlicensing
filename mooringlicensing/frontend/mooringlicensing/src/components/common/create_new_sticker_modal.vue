@@ -3,18 +3,7 @@
         <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :title="title" large>
             <div class="container-fluid">
                 <alert :show.sync="showError" type="danger"><strong>{{ errorString }}</strong></alert>
-                <alert v-if="missing_sticker_message" type="warning"><strong>{{ missing_sticker_message }}</strong></alert>
-                <div v-if="!replacementFee" class="row form-group">
-                    <label class="col-sm-2 control-label">Mailed Date</label>
-                    <div class="col-sm-3">
-                        <div class="input-group date" ref="mailedDatePicker">
-                            <input type="text" class="form-control text-center" placeholder="DD/MM/YYYY" id="mailed_date_elem"/>
-                            <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-calendar"></span>
-                            </span>
-                        </div>
-                    </div>
-                </div>    
+                <alert v-if="missing_sticker_message" type="warning"><strong>{{ missing_sticker_message }}</strong></alert>   
                 <div class="row form-group">
                     <label class="col-sm-5 control-label" for="change_sticker_address">Change Sticker Address</label>
                     <div class="col-md-6">
@@ -60,15 +49,16 @@
                 </div>
             </div>
             <div slot="footer">
-                <div class="row">
-                    <div class="col-md-7" v-if="replacementFee">
-                        <span v-if="is_internal"><strong><input type="checkbox" v-model="waive_the_fee" /> Waive the fee</strong></span>
+                <div class="row w-100">
+                    <div class="col-md-6 text-end">
+                        <span v-if="replacementFee">
+                            <strong><input type="checkbox" v-model="waive_the_fee" /> Waive the fee</strong>
+                        </span>
                     </div>
-                    <div class="col-md-5">
-                        <span v-if="replacementFee"><strong>Sticker replacement cost ${{ total_fee }}</strong></span>
-                        <button type="button" v-if="processing" disabled class="btn btn-default" @click="ok"><i class="fa fa-spinner fa-spin"></i> Processing</button>
-                        <button type="button" v-else class="btn btn-default" @click="ok" :disabled="!okButtonEnabled">Ok</button>
-                        <button type="button" class="btn btn-default" @click="cancel">Cancel</button>
+                    <div class="col-md-6 text-end">
+                        <button type="button" v-if="processing" disabled class="btn btn-primary me-2" @click="ok"><i class="fa fa-spinner fa-spin"></i> Processing</button>
+                        <button type="button" v-else class="btn btn-primary me-2" @click="ok" :disabled="!okButtonEnabled">Ok</button>
+                        <button type="button" class="btn btn-secondary me-2" @click="cancel">Cancel</button>
                     </div>
                 </div>
             </div>
@@ -77,8 +67,7 @@
 </template>
 
 <script>
-//import $ from 'jquery'
-import 'eonasdan-bootstrap-datetimepicker'
+import $ from 'jquery'
 import modal from '@vue-utils/bootstrap-modal.vue'
 import alert from '@vue-utils/alert.vue'
 import { api_endpoints } from "@/utils/hooks.js"
@@ -182,25 +171,6 @@ export default {
             this.processing = false
             this.approval_id = null
         },
-        addEventListeners: function () {
-            let vm = this;
-            let options = {
-                format: "DD/MM/YYYY",
-                showClear: true ,
-                useCurrent: false,
-            };
-
-            // Mailed Date
-            let el_mailed = $(vm.$refs.mailedDatePicker);
-            el_mailed.datetimepicker(options);
-            el_mailed.on("dp.change", function(e) {
-                let selected_date = null;
-                if (e.date){
-                    selected_date = e.date.format('DD/MM/YYYY')
-                }
-                vm.mailed_date = selected_date;
-            });
-        },
         fetchData: function(){
             let vm = this
 
@@ -225,9 +195,12 @@ export default {
     },
     created:function () {
         this.fetchData();
-        this.$nextTick(() => {
-            this.addEventListeners();
-        });
     }
 }
 </script>
+
+<style scoped>
+.modal-footer > * {
+    width: 100%;
+}
+</style>

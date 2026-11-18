@@ -3,11 +3,16 @@
         <div class="row form-group">
             <div class="col-sm-12">
                 <label for="" class="col-sm-2 control-label">Date</label>
-                <div class="col-sm-3 input-group date" ref="datePicker">
-                    <input type="text" class="form-control text-center" placeholder="DD/MM/YYYY" v-model="selectedDate" id="dateField"/>
-                    <span class="input-group-addon">
-                        <span class="glyphicon glyphicon-calendar"></span>
-                    </span>
+                <div class="col-sm-3 input-group date">
+                    <div style="width: 70%;">
+                        <input
+                            type="date"
+                            class="form-control"
+                            name="selectedDate"
+                            v-model="selectedDate"
+                            :max="today"
+                        >
+                    </div>
                 </div>
             </div>
         </div>
@@ -68,8 +73,7 @@
 </template>
 
 <script>
-//import $ from 'jquery'
-import 'eonasdan-bootstrap-datetimepicker'
+import $ from 'jquery'
 import FormSection from '@/components/forms/section_toggle.vue'
 
 export default {
@@ -93,29 +97,6 @@ export default {
             }
     },
     methods:{
-        addEventListeners: async function () {
-            let vm = this;
-            let el_fr = $(vm.$refs.datePicker);
-            let options = {
-                format: "DD/MM/YYYY",
-                showClear: true ,
-            };
-
-            el_fr.datetimepicker(options);
-
-            el_fr.on("dp.change", function(e) {
-                if (e.date) {
-                    // Date selected
-                    vm.selectedDate = e.date.format('DD/MM/YYYY')
-                } else {
-                    // Date not selected
-                    vm.selectedDate = null;
-                }
-            });
-            $("#dateField").on("blur", async function(e) {
-                vm.lookupEntities();
-            });
-        },
         lookupEntities: async function() {
             this.$nextTick(async () => {
                 console.log("lookupEntities");
@@ -188,14 +169,10 @@ export default {
             })
         },
     },
-    mounted: function () {
-        this.$nextTick(async () => {
-            let vm = this;
-            this.addEventListeners();
-            var dateNow = new Date();
-            let el_fr = $(vm.$refs.datePicker);
-            el_fr.data("DateTimePicker").date(dateNow);
-        });
+    computed: {
+        today() {
+            return new Date().toISOString().split('T')[0];
+        }
     },
     created: async function() {
         await this.lookupEntities()

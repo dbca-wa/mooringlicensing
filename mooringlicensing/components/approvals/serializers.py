@@ -148,21 +148,21 @@ class DcvVesselSerializer(serializers.ModelSerializer):
 
 
 class ApprovalCancellationSerializer(serializers.Serializer):
-    cancellation_date = serializers.DateField(input_formats=['%d/%m/%Y'])
+    cancellation_date = serializers.DateField(input_formats=['%d/%m/%Y', '%Y-%m-%d'])
     cancellation_details = serializers.CharField()
 
 
 class ApprovalSuspensionSerializer(serializers.Serializer):
-    from_date = serializers.DateField(input_formats=['%d/%m/%Y'])
-    to_date = serializers.DateField(input_formats=['%d/%m/%Y'], required=False, allow_null=True)
+    from_date = serializers.DateField(input_formats=['%d/%m/%Y', '%Y-%m-%d'])
+    to_date = serializers.DateField(input_formats=['%d/%m/%Y', '%Y-%m-%d'], required=False, allow_null=True)
     suspension_details = serializers.CharField()
 
 class ApprovalExtensionSerializer(serializers.Serializer):
-    expiry_date = serializers.DateField(input_formats=['%d/%m/%Y'])
+    expiry_date = serializers.DateField(input_formats=['%d/%m/%Y', '%Y-%m-%d'])
     extension_details = serializers.CharField()
 
 class ApprovalSurrenderSerializer(serializers.Serializer):
-    #surrender_date = serializers.DateField(input_formats=['%d/%m/%Y']) NOTE: disable per request
+    #surrender_date = serializers.DateField(input_formats=['%d/%m/%Y', '%Y-%m-%d']) NOTE: disable per request
     surrender_details = serializers.CharField()
 
 
@@ -1256,8 +1256,8 @@ class ApprovalSimpleSerializer(serializers.ModelSerializer):
 
 
 class StickerActionDetailSerializer(serializers.ModelSerializer):
-    date_of_lost_sticker = serializers.DateField(input_formats=['%d/%m/%Y'], required=False, allow_null=True)
-    date_of_returned_sticker = serializers.DateField(input_formats=['%d/%m/%Y'], required=False, allow_null=True)
+    date_of_lost_sticker = serializers.DateField(input_formats=['%d/%m/%Y', '%Y-%m-%d'], required=False, allow_null=True)
+    date_of_returned_sticker = serializers.DateField(input_formats=['%d/%m/%Y', '%Y-%m-%d'], required=False, allow_null=True)
     date_created = serializers.DateTimeField(read_only=True)
     date_updated = serializers.DateTimeField(read_only=True)
     user_detail = serializers.SerializerMethodField()

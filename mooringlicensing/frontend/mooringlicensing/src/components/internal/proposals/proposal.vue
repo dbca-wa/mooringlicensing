@@ -194,6 +194,7 @@
 </template>
 
 <script>
+import $ from 'jquery'
 import Vue from 'vue'
 import ProposedDecline from '@/components/internal/proposals/proposal_proposed_decline.vue'
 import AmendmentRequest from '@/components/internal/proposals/amendment_request.vue'
@@ -284,7 +285,6 @@ export default {
             comms_url: helpers.add_endpoint_json(api_endpoints.proposal, vm.$route.params.proposal_id + '/comms_log'),
             comms_add_url: helpers.add_endpoint_json(api_endpoints.proposal, vm.$route.params.proposal_id + '/add_comms_log'),
             logs_url: helpers.add_endpoint_json(api_endpoints.proposal, vm.$route.params.proposal_id + '/action_log'),
-            panelClickersInitialised: false,
             uuid: 0,
             mooringBays: [],
             siteLicenseeMooring: {},
@@ -926,7 +926,6 @@ export default {
 
             let vm = this;
             if(vm.proposal.processing_status == 'With Assessor' && status == 'with_assessor_requirements'){
-                let formData = new FormData(vm.form);
                 let data = {'status': status, 'approver_comment': vm.approver_comment}
                 vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposal, (vm.proposal.id + '/switch_status')), JSON.stringify(data),{
                     emulateJSON:true,
@@ -1052,15 +1051,6 @@ export default {
     },
     updated: function(){
         let vm = this;
-        if (!vm.panelClickersInitialised){
-            $('.panelClicker[data-toggle="collapse"]').on('click', function () {
-                var chev = $(this).children()[0];
-                window.setTimeout(function () {
-                    $(chev).toggleClass("glyphicon-chevron-down glyphicon-chevron-up");
-                },100);
-            });
-            vm.panelClickersInitialised = true;
-        }
         this.$nextTick(() => {
             vm.initialiseSelects();
             vm.form = document.forms.new_proposal;

@@ -984,7 +984,7 @@ class Approval(RevisionedMixin):
                 if not request.user in self.allowed_assessors:
                     raise ValidationError('You do not have access to suspend this approval')
                 if not self.can_reissue and self.can_action:
-                    raise ValidationError('You cannot suspend approval if it is not current or suspended')
+                    raise ValidationError('You cannot suspend approval if it is not current or suspended or has an active amendment/renewal application')
                 if details.get('to_date'):
                     to_date= details.get('to_date').strftime('%d/%m/%Y')
                 else:

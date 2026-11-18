@@ -31,10 +31,6 @@ export default defineConfig({
                 __dirname,
                 '../../../staticfiles_ml'
             ),
-            datetimepicker: path.resolve(
-                __dirname,
-                'eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js'
-            ),
             moment: path.resolve(
                 __dirname,
                 'node_modules/moment/moment.js'

@@ -14,24 +14,24 @@
             <div class="col-md-8">
                 <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
                   <li class="nav-item">
-                    <a class="nav-link active" id="pills-vessel-details-tab" data-toggle="pill" href="#pills-vessel-details" role="tab" aria-controls="pills-vessel-details" aria-selected="true">
+                    <a class="nav-link show active" id="pills-vessel-details-tab" data-bs-toggle="pill" href="#pills-vessel-details" role="tab" aria-controls="pills-vessel-details" aria-selected="true">
                       Details
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link" id="pills-owners-tab" data-toggle="pill" href="#pills-owners" role="tab" aria-controls="pills-owners" aria-selected="false">
+                    <a class="nav-link" id="pills-owners-tab" data-bs-toggle="pill" href="#pills-owners" role="tab" aria-controls="pills-owners" aria-selected="false">
                       Owner(s)
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link" id="pills-bookings-permits-tab" data-toggle="pill" href="#pills-bookings-permits" role="tab" aria-controls="pills-bookings-permits" aria-selected="false">
+                    <a class="nav-link" id="pills-bookings-permits-tab" data-bs-toggle="pill" href="#pills-bookings-permits" role="tab" aria-controls="pills-bookings-permits" aria-selected="false">
                       Bookings/Permits
                     </a>
                   </li>
                 </ul>
 
                 <div class="tab-content" id="pills-tabContent">
-                    <div class="tab-pane fade" id="pills-vessel-details" role="tabpanel" aria-labelledby="pills-vessel-details-tab">
+                    <div class="tab-pane fade show active" id="pills-vessel-details" role="tabpanel" aria-labelledby="pills-vessel-details-tab">
                         <FormSection label="Registration details" Index="registration_details">
                             <div class="row form-group">
                                 <div class="col-sm-3">
@@ -176,7 +176,6 @@ from '@/utils/hooks'
                         "dataSrc": 'data',
                     },
                     dom: 'lBfrtip',
-                    buttons:[],
                     columns: [
                         {
                             // 1. Name
@@ -264,8 +263,6 @@ from '@/utils/hooks'
         methods:{
             setTabs:function(){
                 let vm = this;
-                /* set Applicant tab Active */
-                $('#pills-tab a[href="#pills-vessel-details"]').tab('show');
                 // ensure datatables in tabs are responsive
                 $('#pills-owners-tab').on('shown.bs.tab', function (e) {
                     vm.$refs.owners_datatable.vmDataTable.columns.adjust().responsive.recalc();

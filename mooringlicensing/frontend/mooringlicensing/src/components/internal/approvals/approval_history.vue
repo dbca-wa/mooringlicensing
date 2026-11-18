@@ -1,6 +1,6 @@
 <template>
     <div id="approvalHistory">
-        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :title="title" large>
+        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :showOK="false" :showCancel="false" :title="title" large>
             <div class="container-fluid">
                 <div class="row">
                     <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
@@ -19,11 +19,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <div slot="footer">
-                <button type="button" class="btn btn-default" @click="ok">Ok</button>
-                <button type="button" class="btn btn-default" @click="cancel">Cancel</button>
             </div>
         </modal>
     </div>
@@ -221,7 +216,6 @@ export default {
                     "dataSrc": 'data',
                 },
                 dom: 'lBfrtip',
-                buttons:[ ],
                 columns: columns,
                 processing: true,
             }

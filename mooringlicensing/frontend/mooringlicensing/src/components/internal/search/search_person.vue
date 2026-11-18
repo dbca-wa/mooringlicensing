@@ -23,6 +23,7 @@
 </template>
 
 <script>
+import $ from "jquery";
 import FormSection from '@/components/forms/section_toggle.vue'
 import "select2/dist/css/select2.min.css";
 import "select2-bootstrap-theme/dist/select2-bootstrap.min.css";
@@ -55,7 +56,6 @@ from '@/utils/hooks'
                     "theme": "bootstrap",
                     allowClear: true,
                     placeholder:"Select Person",
-                    pagination: true,
                     ajax: {
                         url: api_endpoints.person_lookup,
                         dataType: 'json',
@@ -67,7 +67,6 @@ from '@/utils/hooks'
                             }
                         },
                         processResults: function(data){
-                            console.log({data})
                             return {
                                 'results': data.results,
                                 'pagination': {

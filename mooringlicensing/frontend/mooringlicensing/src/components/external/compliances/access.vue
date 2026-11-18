@@ -7,21 +7,16 @@
         <div v-if="!isFinalised">
             <div v-if="hasAmendmentRequest" class="row" style="color:red;">
                 <div class="col-lg-12 pull-right">
-                  <div class="panel panel-default">
-                      <div class="panel-heading">
-                        <h3 class="panel-title" style="color:red;">An amendment has been requested for this Compliance with Requirements
-                            <a class="panelClicker" :href="'#'+oBody" data-toggle="collapse"  data-parent="#userInfo" expanded="true" :aria-controls="oBody">
-                                <span class="glyphicon glyphicon-chevron-down pull-right "></span>
-                            </a>
-                        </h3>
-                      </div>
-                      <div class="panel-body collapse in" :id="oBody">
-                        <div v-for="a in amendment_request">                      
-                          <p>Reason: {{a.reason}}</p>
-                          <p>Details: {{a.text}}</p>                        
+                  <FormSection
+                        label="An amendment has been requested for this Compliance with Requirements"
+                        :formCollapse="false"
+                        :Index="oBody"
+                    >
+                        <div v-for="a in amendment_request">
+                            <p>Reason: {{a.reason}}</p>
+                            <p>Details: {{a.text}}</p>
                         </div>
-                      </div>
-                  </div>
+                    </FormSection>
                 </div>
             </div>
         </div>
@@ -30,109 +25,105 @@
 
         <div class="col-md-12">
             <div class="row">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Compliance with Requirements
-                            <a class="panelClicker" :href="'#'+pdBody" data-toggle="collapse"  data-parent="#userInfo" expanded="true" :aria-controls="pdBody">
-                                <span class="glyphicon glyphicon-chevron-up pull-right "></span>
-                            </a>
-                        </h3>
-                    </div>
-                    <div class="panel-body panel-collapse in" :id="pdBody">
-                        <div class="row">
-                           <div class="col-md-12"> 
-                            <form class="form-horizontal" name="complianceForm" method="post">
-                                <alert :show.sync="showError" type="danger">
-                                    <strong>{{errorString}}</strong>
-                                </alert>
-                                <div class="row">
-                                    <div class="form-group">
-                                        <label class="col-sm-3 control-label pull-left"  for="Name">Requirement:</label>
-                                        <div class="col-sm-6">
-                                            {{compliance.requirement}}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="form-group">
-                                        <label class="col-sm-3 control-label pull-left"  for="Name">Details:</label>
-                                        <div class="col-sm-6">
-                                            <textarea :disabled="isFinalised" class="form-control" name="detail" placeholder="" v-model="compliance.text"></textarea>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div v-if="hasDocuments" class="form-group">
-                                        <div class="col-sm-3 control-label pull-left" >  
-                                            <label  for="Name">Documents:</label>
-                                        </div> 
-                                        <div class="col-sm-6">
-                                            <div class="row" v-for="d in compliance.documents">
-                                                <a :href="d[1]" target="_blank" class="control-label pull-left">{{d[0]   }}</a>
-                                                <span v-if="!isFinalised && d.can_delete">
-                                                    <a @click="delete_document(d)" class="fa fa-trash-o control-label" title="Remove file" style="cursor: pointer; color:red;"></a>
-                                                </span>
-                                                <span v-else >
-                                                    <i class="fa fa-info-circle" aria-hidden="true" title="Previously submitted documents cannot be deleted" style="cursor: pointer;"></i>
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div v-if="!isFinalised" class="form-group"> 
-                                        <label class="col-sm-3 control-label pull-left"  for="Name">Attachments:</label>
+                <FormSection
+                    label="Compliance with Requirements"
+                    :formCollapse="false"
+                    :Index="pdBody"
+                >
+                    <div class="row">
+                        <div class="col-md-12"> 
+                        <form class="form-horizontal" name="complianceForm" method="post">
+                            <alert :show.sync="showError" type="danger">
+                                <strong>{{errorString}}</strong>
+                            </alert>
+                            <div class="row">
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label pull-left"  for="Name">Requirement:</label>
                                     <div class="col-sm-6">
-                                        <template v-for="(f,i) in files">
-                                            <div :class="'row top-buffer file-row-'+i">
-                                                <div class="col-sm-4">
-                                                    <span v-if="f.file == null" class="btn btn-info btn-file pull-left" style="margin-bottom: 5px">
-                                                        Attach File <input type="file" :name="'file-upload-'+i" :class="'file-upload-'+i" @change="uploadFile('file-upload-'+i,f)"/>
-                                                    </span>
-                                                    <span v-else class="btn btn-info btn-file pull-left" style="margin-bottom: 5px">
-                                                        Update File <input type="file" :name="'file-upload-'+i" :class="'file-upload-'+i" @change="uploadFile('file-upload-'+i,f)"/>
-                                                    </span>
-                                                </div>
-                                                <div class="col-sm-4">
-                                                    <span>{{f.name}}</span>
-                                                </div>
-                                                <div class="col-sm-4">
-                                                    <button @click="removeFile(i)" class="btn btn-danger">Remove</button>
-                                                </div>
-                                            </div>
-                                        </template>
-                                        <a href="" @click.prevent="attachAnother"><i class="fa fa-lg fa-plus top-buffer-2x"></i></a>
-                                    </div>
+                                        {{compliance.requirement}}
                                     </div>
                                 </div>
+                            </div>
 
-                                <div class="row">
-                                    <div class="form-group">
-                                        <div class="col-lg-2 pull-right">
-                                            <button v-if="!isFinalised" @click.prevent="submit()" class="btn btn-primary">Submit</button>
-                                            <button v-if="!isFinalised" @click.prevent="close()" class="btn btn-primary">Close</button>
+                            <div class="row">
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label pull-left"  for="Name">Details:</label>
+                                    <div class="col-sm-6">
+                                        <textarea :disabled="isFinalised" class="form-control" name="detail" placeholder="" v-model="compliance.text"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div v-if="hasDocuments" class="form-group">
+                                    <div class="col-sm-3 control-label pull-left" >  
+                                        <label  for="Name">Documents:</label>
+                                    </div> 
+                                    <div class="col-sm-6">
+                                        <div class="row" v-for="d in compliance.documents">
+                                            <a :href="d[1]" target="_blank" class="control-label pull-left">{{d[0]   }}</a>
+                                            <span v-if="!isFinalised && d.can_delete">
+                                                <a @click="delete_document(d)" class="fa fa-trash-o control-label" title="Remove file" style="cursor: pointer; color:red;"></a>
+                                            </span>
+                                            <span v-else >
+                                                <i class="fa fa-info-circle" aria-hidden="true" title="Previously submitted documents cannot be deleted" style="cursor: pointer;"></i>
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
-                            </form>
-                           </div>
+                            </div>
+
+                            <div class="row">
+                                <div v-if="!isFinalised" class="form-group"> 
+                                    <label class="col-sm-3 control-label pull-left"  for="Name">Attachments:</label>
+                                <div class="col-sm-6">
+                                    <template v-for="(f,i) in files">
+                                        <div :class="'row top-buffer file-row-'+i">
+                                            <div class="col-sm-4">
+                                                <span v-if="f.file == null" class="btn btn-info btn-file pull-left" style="margin-bottom: 5px">
+                                                    Attach File <input type="file" :name="'file-upload-'+i" :class="'file-upload-'+i" @change="uploadFile('file-upload-'+i,f)"/>
+                                                </span>
+                                                <span v-else class="btn btn-info btn-file pull-left" style="margin-bottom: 5px">
+                                                    Update File <input type="file" :name="'file-upload-'+i" :class="'file-upload-'+i" @change="uploadFile('file-upload-'+i,f)"/>
+                                                </span>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <span>{{f.name}}</span>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <button @click="removeFile(i)" class="btn btn-danger">Remove</button>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <a href="" @click.prevent="attachAnother"><i class="fa fa-lg fa-plus top-buffer-2x"></i></a>
+                                </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group">
+                                    <div class="col-lg-2 pull-right">
+                                        <button v-if="!isFinalised" @click.prevent="submit()" class="btn btn-primary">Submit</button>
+                                        <button v-if="!isFinalised" @click.prevent="close()" class="btn btn-primary">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
                         </div>
-                    </div> 
-                </div>
+                    </div>
+                </FormSection>
             </div>
         </div>
     </div>
 </div>
 </template>
 <script>
-//import $ from 'jquery'
+import $ from 'jquery'
 import Vue from 'vue'
 import datatable from '@vue-utils/datatable.vue'
 import CommsLogs from '@common-utils/comms_logs.vue'
 import alert from '@vue-utils/alert.vue'
+import FormSection from '@/components/forms/section_toggle.vue'
 import {
   api_endpoints,
   helpers
@@ -183,6 +174,7 @@ export default {
     datatable,
     CommsLogs,
     alert,
+    FormSection,
   },
   computed: {
     showError: function() {
@@ -261,23 +253,12 @@ export default {
                     detail: "field is required",                                         
                 },
                 showErrors: function(errorMap, errorList) {
-                    $.each(this.validElements(), function(index, element) {
-                        var $element = $(element);
-                        $element.attr("data-original-title", "").parents('.form-group').removeClass('has-error');
-                    });
-                    // destroy tooltips on valid elements
-                    $("." + this.settings.validClass).tooltip("destroy");
-                    // add or update tooltips
-                    for (var i = 0; i < errorList.length; i++) {
-                        var error = errorList[i];
-                        $(error.element)
-                            .tooltip({
-                                trigger: "focus"
-                            })
-                            .attr("data-original-title", error.message)
-                            .parents('.form-group').addClass('has-error');
-                    }
-                }
+                    helpers.showValidationErrors.call(
+                        this,
+                        errorMap,
+                        errorList
+                    );
+                },
             });
        },
 

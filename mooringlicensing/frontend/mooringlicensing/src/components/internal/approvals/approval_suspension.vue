@@ -1,6 +1,6 @@
 <template>
     <div id="approvalCancellation">
-        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :title="title" large>
+        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :processing="issuingApproval" :title="title" large>
             <div class="container-fluid">
                 <div class="row">
                     <form class="form-horizontal" name="approvalForm">
@@ -13,11 +13,14 @@
                                         <label class="control-label pull-left"  for="Name">From Date</label>
                                     </div>
                                     <div class="col-sm-9">
-                                        <div class="input-group date" ref="from_date" style="width: 70%;">
-                                            <input type="text" class="form-control" name="from_date" placeholder="DD/MM/YYYY" v-model="approval.from_date">
-                                            <span class="input-group-addon">
-                                                <span class="glyphicon glyphicon-calendar"></span>
-                                            </span>
+                                        <div style="width: 70%;">
+                                            <input
+                                                type="date"
+                                                class="form-control"
+                                                name="from_date"
+                                                v-model="approval.from_date"
+                                                :min="approval.from_date"
+                                            >
                                         </div>
                                     </div>
                                 </div>
@@ -30,11 +33,14 @@
                                         <label class="control-label pull-left"  for="Name">To Date</label>
                                     </div>
                                     <div class="col-sm-9">
-                                        <div class="input-group date" ref="to_date" style="width: 70%;">
-                                            <input type="text" class="form-control" name="to_date" placeholder="DD/MM/YYYY" v-model="approval.to_date">
-                                            <span class="input-group-addon">
-                                                <span class="glyphicon glyphicon-calendar"></span>
-                                            </span>
+                                        <div style="width: 70%;">
+                                            <input
+                                                type="date"
+                                                class="form-control"
+                                                name="to_date"
+                                                v-model="approval.to_date"
+                                                :min="today"
+                                            >
                                         </div>
                                     </div>
                                 </div>
@@ -55,18 +61,12 @@
                     </form>
                 </div>
             </div>
-            <div slot="footer">
-                <button type="button" v-if="issuingApproval" disabled class="btn btn-default" @click="ok"><i class="fa fa-spinner fa-spin"></i> Processing</button>
-                <button type="button" v-else class="btn btn-default" @click="ok">Ok</button>
-                <button type="button" class="btn btn-default" @click="cancel">Cancel</button>
-            </div>
         </modal>
     </div>
 </template>
 
 <script>
-//import $ from 'jquery'
-import 'eonasdan-bootstrap-datetimepicker'
+import $ from 'jquery'
 import modal from '@vue-utils/bootstrap-modal.vue'
 import alert from '@vue-utils/alert.vue'
 import {helpers,api_endpoints} from "@/utils/hooks.js"
@@ -90,13 +90,6 @@ export default {
             errorString: '',
             successString: '',
             success:false,
-            datepickerOptions:{
-                format: 'DD/MM/YYYY',
-                showClear:true,
-                useCurrent:false,
-                keepInvalid:true,
-                allowInputToggle:true
-            },
         }
     },
     computed: {
@@ -106,6 +99,9 @@ export default {
         },
         title: function(){
             return 'Suspend Approval';
+        },
+        today() {
+            return new Date().toISOString().split('T')[0];
         }
     },
     methods:{
@@ -124,8 +120,8 @@ export default {
             this.approval = {};
             this.errors = false;
             $('.has-error').removeClass('has-error');
-            $(this.$refs.from_date).data('DateTimePicker').clear();
-            $(this.$refs.to_date).data('DateTimePicker').clear();
+            this.approval.from_date = '';
+            this.approval.to_date = '';
             this.validation_form.resetForm();
         },
         fetchContact: function(id){
@@ -171,57 +167,19 @@ export default {
                     suspension_details:"Field is required",
                 },
                 showErrors: function(errorMap, errorList) {
-                    $.each(this.validElements(), function(index, element) {
-                        var $element = $(element);
-                        $element.attr("data-original-title", "").parents('.form-group').removeClass('has-error');
-                    });
-                    // destroy tooltips on valid elements
-                    $("." + this.settings.validClass).tooltip("destroy");
-                    // add or update tooltips
-                    for (var i = 0; i < errorList.length; i++) {
-                        var error = errorList[i];
-                        $(error.element)
-                            .tooltip({
-                                trigger: "focus"
-                            })
-                            .attr("data-original-title", error.message)
-                            .parents('.form-group').addClass('has-error');
-                    }
-                }
+                    helpers.showValidationErrors.call(
+                        this,
+                        errorMap,
+                        errorList
+                    );
+                },
             });
        },
-       eventListeners:function () {
-            let vm = this;
-            // Initialise Date Picker
-
-            $(vm.$refs.from_date).datetimepicker(vm.datepickerOptions);
-            $(vm.$refs.from_date).on('dp.change', function(e){
-                if ($(vm.$refs.from_date).data('DateTimePicker').date()) {
-                    vm.approval.from_date =  e.date.format('DD/MM/YYYY');
-                }
-                else if ($(vm.$refs.from_date).data('date') === "") {
-                    vm.approval.from_date = "";
-                }
-             });
-
-            $(vm.$refs.to_date).datetimepicker(vm.datepickerOptions);
-            $(vm.$refs.to_date).on('dp.change', function(e){
-                if ($(vm.$refs.to_date).data('DateTimePicker').date()) {
-                    vm.approval.to_date =  e.date.format('DD/MM/YYYY');
-                }
-                else if ($(vm.$refs.to_date).data('date') === "") {
-                    vm.approval.to_date = "";
-                }
-             });
-       }
    },
    mounted:function () {
         let vm =this;
         vm.form = document.forms.approvalForm;
         vm.addFormValidations();
-        this.$nextTick(()=>{
-            vm.eventListeners();
-        });
    }
 }
 </script>

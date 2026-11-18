@@ -15,23 +15,23 @@
             <div class="col-md-8">
                 <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
                     <li class="nav-item">
-                        <a class="nav-link active" id="pills-details-tab" data-toggle="pill" href="#pills-details" role="tab" aria-controls="pills-details" aria-selected="true" @click="tab_clicked()">
+                        <a class="nav-link show active" id="pills-details-tab" data-bs-toggle="pill" href="#pills-details" role="tab" aria-controls="pills-details" aria-selected="true" @click="tab_clicked()">
                             Details
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" id="pills-approvals-tab" data-toggle="pill" href="#pills-approvals" role="tab" aria-controls="pills-approvals" aria-selected="false">
+                        <a class="nav-link" id="pills-approvals-tab" data-bs-toggle="pill" href="#pills-approvals" role="tab" aria-controls="pills-approvals" aria-selected="false">
                             Approvals
                         </a>
                     </li>
                     <li v-if="user" class="nav-item">
-                        <a class="nav-link" id="pills-vessels-tab" data-toggle="pill" href="#pills-vessels" role="tab" aria-controls="pills-vessels" aria-selected="false" @click="tab_clicked()">
+                        <a class="nav-link" id="pills-vessels-tab" data-bs-toggle="pill" href="#pills-vessels" role="tab" aria-controls="pills-vessels" aria-selected="false" @click="tab_clicked()">
                             Vessels
                         </a>
                     </li>
                 </ul>
                 <div class="tab-content" id="pills-tabContent">
-                    <div class="tab-pane fade" id="pills-details" role="tabpanel" aria-labelledby="pills-details-tab">
+                    <div class="tab-pane fade show active" id="pills-details" role="tabpanel" aria-labelledby="pills-details-tab">
                         <Applicant v-if="user"
                             ref="applicant_table"
                             :user="user" 
@@ -153,8 +153,6 @@ export default {
         }
     },
     mounted: function(){
-        /* set Details tab Active */
-        $('#pills-tab a[href="#pills-details"]').tab('show');
         // ensure datatables in tabs are responsive
         let vm=this;
         $('#pills-approvals-tab').on('shown.bs.tab', function (e) {
@@ -171,7 +169,7 @@ export default {
 }
 </script>
 
-<style>
+<style lang="css" scoped>
     .section{
         text-transform: capitalize;
     }

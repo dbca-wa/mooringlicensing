@@ -1,221 +1,170 @@
-<!--bootstrap3-->
+{% extends "webtemplate_dbca/base_b5_auth_session.html" %}
 
 {% load static %}
 {% load django_vite %}
 
 {% load users %}
 {% load utils %}
-{% is_internal as is_internal_login %}
-{% is_mooringlicensing_admin as is_mooringlicensing_admin_user %}
-{% is_account_management_user as is_account_management_user %}
-{% can_show_tests as show_tests %}
-{% system_maintenance_due as system_maintenance_due %}
-{% system_name_short as short_name %}
-{% dept_name as department_name %}
-{% system_name as system_name %}
-{% system_name_short as system_name_short %}
-{% support_email as support_email %}
-{% is_payment_officer as is_payment_officer %}
-{% RAND_HASH as RAND_HASH %}
 
-<!DOCTYPE html>
-<html lang="en">
+{% block header_top_menu %}
+{% endblock %}
 
-    <head>
-        <meta charset="UTF-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <link type="text/css" href="{% static 'mooringlicensing/css/bootstrap.min.css' %}" rel="stylesheet">
-        <link type="text/css" href="{% static 'mooringlicensing/css/base.css' %}" rel="stylesheet">
-        {% vite_hmr_client app='default' %}
-        {% vite_asset vue3_entry_script app='default' %}
+{% block menu_spacer %}
+{% endblock %}
 
-        {% block extra_css %}
-        {% endblock %}
-        {% block extra_js %}
-        {% endblock %}
-        <title>
-            {% block title %}
-            {{ short_name }} - {{ department_name }}
-            {% endblock %}
-        </title>
+{% block title %}
+    {% system_name_short as short_name %}
+    {% dept_name as department_name %}
+    {{ short_name }} - {{ department_name }}
+{% endblock %}
 
-        </meta>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/static/favicon.svg"/>
-    </head>
-    {% block development_header %}
-    {% if DJANGO_SETTINGS.EMAIL_INSTANCE == 'DEV' or DJANGO_SETTINGS.EMAIL_INSTANCE == 'UAT' or DJANGO_SETTINGS.EMAIL_INSTANCE == 'TEST'  %}
-        <div class="col-lg-12 p-3 bg-danger text-white text-center fs-6" style='background-color: #dc3545 !important; padding: 18px ;font-size: 18px ; color: #FFFFFF;'>
-            DEVELOPMENT: FOR TESTING ONLY DO NOT USE
+{% block header_js %}
+    {{ block.super }}   
+    {% vite_hmr_client app='default' %}
+    {% vite_asset vue3_entry_script app='default' %}
+{% endblock %}
+
+{% block header_css %}
+    {{ block.super }}
+    <link rel="icon" href="/static/favicon.svg"/>
+    <link type="text/css" href="{% static 'mooringlicensing/css/base.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block development_header %}
+{% if DJANGO_SETTINGS.EMAIL_INSTANCE == 'DEV' or DJANGO_SETTINGS.EMAIL_INSTANCE == 'UAT' or DJANGO_SETTINGS.EMAIL_INSTANCE == 'TEST'  %}
+    <div class="col-lg-12 p-3 bg-danger text-white text-center fs-6" style='background-color: #dc3545 !important; padding: 18px ;font-size: 18px ; color: #FFFFFF;'>
+        DEVELOPMENT: FOR TESTING ONLY DO NOT USE
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block menu_items_left_brand %}
+    {% is_internal as is_internal_login %}
+    {% if is_internal_login %}
+        <a class="navbar-brand" href="/internal">
+            Applications
+        </a>
+    {% else %}
+        <a class="navbar-brand" href="{% url 'home' %}">
+            Home
+        </a>
+    {% endif %}
+{% endblock %}
+
+{% block menu_items_left %}
+    {% is_internal as is_internal_login %}
+ 
+    {% if is_internal_login %}
+        <li class="nav-item">
+            <a class="nav-link" href="/internal/approvals">Approvals</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/internal/compliances">Compliance</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/internal/waiting_list">Waiting List</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/internal/moorings">Moorings</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/internal/search">Search</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/internal/dcv">Commercial Vessels</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/internal/sticker">Stickers</a>
+        </li>
+    {% else %}
+        {{ block.super }}
+    {% endif %}
+{% endblock %}
+
+{% block menu_dropdown %}
+    {% is_internal as is_internal_login %}
+    {% is_mooringlicensing_admin as is_mooringlicensing_admin_user %}
+    {% is_account_management_user as is_account_management_user %}
+    {% can_show_tests as show_tests %}
+    {% is_payment_officer as is_payment_officer %}
+    {% if is_mooringlicensing_admin_user or request.user.is_superuser %}
+        <li><a class="dropdown-item" href="{% url 'admin:index' %}">Admin</a></li>
+    {% endif %}
+    {% if is_internal_login %}
+        <li><a class="dropdown-item" class="dropdown-item" href="/internal/invoice">Invoices</a></li>
+    {% endif %}
+    {% if is_mooringlicensing_admin_user or request.user.is_superuser or is_payment_officer %}
+        <li><a  class="dropdown-item" href="{{ LEDGER_UI_URL }}/reports?system_id={{ LEDGER_SYSTEM_ID }} ">Financial Reports</a></li>
+        <li><a  class="dropdown-item" href="{{ LEDGER_UI_URL }}/ledger/payments/oracle/payment-totals?system_id={{ LEDGER_SYSTEM_ID }}">Payment Totals</a></li>
+        <li><a  class="dropdown-item" href="{{ LEDGER_UI_URL }}/ledger/payments/oracle/failed-transactions?system_id={{ LEDGER_SYSTEM_ID }}">Failed Refunds {% if ledger_totals.total_failed > 0 %}<span class="badge badge-danger">{{ ledger_totals.total_failed }}</span>{% endif %}</li>                                                    
+    {% endif %}
+    {% if is_mooringlicensing_admin_user or request.user.is_superuser %}
+        <li><hr class="dropdown-divider"></li>
+    {% endif %}
+    {% if management_commands_enabled %}
+    {% if is_mooringlicensing_admin_user or request.user.is_superuser %}
+        <li><a class="dropdown-item" href="{% url 'mgt-commands' %}">Management Commands</a></li>
+    {% endif %}
+    {% endif %}
+    {% if show_tests and request.user.is_superuser %}
+        <li><a class="dropdown-item" href="{% url 'test-emails' %}">Test Emails</a></li>
+    {% endif %}
+    {% if is_account_management_user or request.user.is_superuser %}
+        <li><a class="dropdown-item" href="/ledger-ui/accounts-management">Accounts Management</a></li>
+    {% endif %}
+        <li><a class="dropdown-item" href="/ledger-ui/system-accounts">Manage Account</a></li>
+    {% if is_internal_login %}
+        <li><a class="dropdown-item" href="{% url 'email-exports' %}">Reports</a></li>
+    {% endif %}
+    {% if not is_internal_login %}
+        <li><a class="dropdown-item" href="/external/vessels">Manage Vessels</a></li>
+    {% endif %}
+
+    <li><hr class="dropdown-divider"></li>
+    <li><a class="dropdown-item" href="{% url 'logout' %}?next=/">Logout</a></li>
+{% endblock %}
+
+{% block before_content %}
+    {% system_maintenance_due as system_maintenance_due %}
+    {% if system_maintenance_due %}
+        <div class="container">
+            <div class="alert alert-warning">
+                <strong>Notice!</strong>
+                System will be down for maintenance between
+                {{ system_maintenance_due }}
+            </div>
         </div>
     {% endif %}
-    {% endblock %}
+{% endblock %}
 
+{% block content %}
+{{ block.super }}
+{% endblock %}
 
-    <body>
-        <header class="topmast-rottnest">
-            {% block header %}
-                {% include 'mooringlicensing/header.html' %}
-            {% endblock %}
-        </header>
-        {% block menu %}
-            <div class="container-fluid">
-                <div class="row">
-                    <nav class="navbar navbar-default">
-                        <div class="container">
-                            <div class="navbar-header">
-                                <a type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-                                    <span class="sr-only">Toggle navigation</span>
-                                    <span class="icon-bar"></span>
-                                    <span class="icon-bar"></span>
-                                    <span class="icon-bar"></span>
-                                </a>
-                                <a class="navbar-brand" href="{% url 'home' %}">
-                                    <div style="inline">
-                                        {% if is_internal_login %}Applications {% else %}Home {% endif %}
-                                    </div>
-                                </a>
-                            </div>
-                            <div id="navbar" class="navbar-collapse collapse">
-                                <ul class="nav navbar-nav">
-                                    {% block left_menu_items %}
-                                        {% if is_internal_login %}
-                                            <li><a href="/internal/approvals">Approvals</a></li>
-                                            <li><a href="/internal/compliances">Compliance</a></li>
-                                            <li><a href="/internal/waiting_list">Waiting List</a></li>
-                                            <li><a href="/internal/moorings">Moorings</a></li>
-                                            <li><a href="/internal/search">Search</a></li>
-                                            <li><a href="/internal/dcv">Commercial Vessels</a></li>
-                                            <li><a href="/internal/sticker">Stickers</a></li>
-                                        {% else %}
-                                            {% include 'webtemplate_dbca/includes/primary_menu.html' %}
-                                        {% endif %}
-                                    {% endblock %}
-                                </ul>
-                                <ul class="nav navbar-nav navbar-right">
-                                    {% if request.user.is_authenticated %}
-                                        <li>
-                                            <a>
-                                            Welcome
-                                            <strong>
-                                                {% if request.user.first_name %}
-                                                    {{ request.user.get_short_name }}
-                                                {% elif request.user.last_name %}
-                                                    {{ request.user.last_name }}
-                                                {% else %}
-                                                    {{ request.user.email }}
-                                                {% endif %}
-                                            </strong>
-                                            </a>
-                                        </li>
-                                        <li class="dropdown">
-                                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                                                Options
-                                                <span class="caret"></span>
-                                            </a>
-                                            <ul class="dropdown-menu">
-                                                {% if is_mooringlicensing_admin_user or request.user.is_superuser %}
-                                                    <li><a href="{% url 'admin:index' %}">Admin</a></li>
-                                                {% endif %}
-                                                {% if is_internal_login %}
-                                                    <li><a  class="dropdown-item" href="/internal/invoice">Invoices</a></li>
-                                                {% endif %}
-                                                {% if is_mooringlicensing_admin_user or request.user.is_superuser or is_payment_officer %}
-                                                    <li><a  class="dropdown-item" href="{{ LEDGER_UI_URL }}/reports?system_id={{ LEDGER_SYSTEM_ID }} ">Financial Reports</a></li>
-                                                    <li><a  class="dropdown-item" href="{{ LEDGER_UI_URL }}/ledger/payments/oracle/payment-totals?system_id={{ LEDGER_SYSTEM_ID }}">Payment Totals</a></li>
-                                                    <li><a  class="dropdown-item" href="{{ LEDGER_UI_URL }}/ledger/payments/oracle/failed-transactions?system_id={{ LEDGER_SYSTEM_ID }}">Failed Refunds {% if ledger_totals.total_failed > 0 %}<span class="badge badge-danger">{{ ledger_totals.total_failed }}</span>{% endif %}</li>                                                    
-                                                {% endif %}
-                                                {% if is_mooringlicensing_admin_user or request.user.is_superuser %}
-                                                    <li role="separator" class="divider"></li>
-                                                {% endif %}
-                                                {% if management_commands_enabled %}
-                                                {% if is_mooringlicensing_admin_user or request.user.is_superuser %}
-                                                    <li><a href="{% url 'mgt-commands' %}">Management Commands</a></li>
-                                                {% endif %}
-                                                {% endif %}
-                                                {% if show_tests and request.user.is_superuser %}
-                                                    <li><a href="{% url 'test-emails' %}">Test Emails</a></li>
-                                                {% endif %}
-                                                {% if is_account_management_user or request.user.is_superuser %}
-                                                    <li><a class="dropdown-item" href="/ledger-ui/accounts-management">Accounts Management</a></li>
-                                                {% endif %}
-                                                    <li><a class="dropdown-item" href="/ledger-ui/system-accounts">Manage Account</a></li>
-                                                {% if is_internal_login %}
-                                                    <li><a href="{% url 'email-exports' %}">Reports</a></li>
-                                                {% endif %}
-                                                {% if not is_internal_login %}
-                                                    <li><a href="/external/vessels">Manage Vessels</a></li>
-                                                {% endif %}
-                            
-                                                <li role="separator" class="divider"></li>
-                                                <li><a class="dropdown-item" href="{% url 'logout' %}?next=/">Logout</a></li>
-                                            </ul>
-                                        </li>
-                                    {% endif %}
-                                    {% block right_menu_items %}
-                                    {% endblock %}
-                                </ul>
-                            </div>
-                        </div>
-                    </nav>
-                </div>
+{% block modals %}
+{{ block.super }}
+{% endblock %}
 
-            </div>
-        {% endblock %}
-        {% block breadcrumbs %}
-        {% endblock %}
-        {% block messages %}
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-12">
-                        {% for message in messages %}
-                            <div class="{{ message }} alert-dismissable">
-                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&#215;</button>
-                                {{ message|safe }}
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
+{% block custom_js %}
+    {% if DJANGO_SETTINGS.WAITING_QUEUE_ENABLED is True %}
+    <!-- load queue after jquery -->
+    <script src="{{ QUEUE_URL }}/static/js/django_queue_manager/site-queue-manager.js?ver={{ GIT_COMMIT_HASH }}"></script>
+    <script>
+        if (typeof sitequeuemanager !== "undefined") {
+            sitequeuemanager.init('{{ QUEUE_DOMAIN }}','{{ QUEUE_URL }}','{{ QUEUE_GROUP_NAME }}','{{ QUEUE_ACTIVE_HOSTS }}');
+        }
+    </script>	    
+    {% endif %}
 
-        {% endblock %}
-
-        {% block custom_js %}
-
-        {% endblock %}
-
-		{% if system_maintenance_due %}
-		    <div class="alert alert-warning">
-		    	<strong>Notice!</strong> System will be down for maintenance between {{ system_maintenance_due }}
-		    </div>
-        {% endif %}
-
-        {% block content %}
-        {% endblock %}
-        {% block modals %}
-        {% endblock %}
-
-        {% if DJANGO_SETTINGS.WAITING_QUEUE_ENABLED is True %}
-        <!-- load queue after jquery -->
-        <script src="{{ QUEUE_URL }}/static/js/django_queue_manager/site-queue-manager.js?ver={{ GIT_COMMIT_HASH }}"></script>
-        <script>
-            if (typeof sitequeuemanager !== "undefined") {
-                sitequeuemanager.init('{{ QUEUE_DOMAIN }}','{{ QUEUE_URL }}','{{ QUEUE_GROUP_NAME }}','{{ QUEUE_ACTIVE_HOSTS }}');
-            }
-        </script>	    
-        {% endif %}
-
-	<!-- Google Tag Manager -->
-	<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-TBPLZJM');</script>
-<!-- End Google Tag Manager -->    
-	<!-- Google Tag Manager (noscript) -->
-	<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TBPLZJM"
-	height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-	<!-- End Google Tag Manager (noscript) -->
-	    
-    </body>
-</html>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-TBPLZJM');</script>
+    <!-- End Google Tag Manager -->    
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TBPLZJM"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+{% endblock %}

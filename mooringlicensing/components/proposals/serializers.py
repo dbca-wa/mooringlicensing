@@ -1394,7 +1394,7 @@ class MooringLogEntrySerializer(CommunicationLogEntrySerializer):
 
 
 class ProposalRequirementSerializer(serializers.ModelSerializer):
-    due_date = serializers.DateField(input_formats=['%d/%m/%Y'],required=False,allow_null=True)
+    due_date = serializers.DateField(input_formats=['%d/%m/%Y', '%Y-%m-%d'],required=False,allow_null=True)
     read_due_date = serializers.SerializerMethodField()
 
     class Meta:
@@ -1436,8 +1436,8 @@ class ProposalStandardRequirementSerializer(serializers.ModelSerializer):
 
 
 class ProposedApprovalSerializer(serializers.Serializer):
-    expiry_date = serializers.DateField(input_formats=['%d/%m/%Y'], required=False)
-    start_date = serializers.DateField(input_formats=['%d/%m/%Y'], required=False)
+    expiry_date = serializers.DateField(input_formats=['%d/%m/%Y', '%Y-%m-%d'], required=False)
+    start_date = serializers.DateField(input_formats=['%d/%m/%Y', '%Y-%m-%d'], required=False)
     details = serializers.CharField(required=False, allow_null=True, allow_blank=True)
     cc_email = serializers.CharField(required=False, allow_null=True)
     mooring_id = serializers.IntegerField(required=False, allow_null=True)
@@ -1695,7 +1695,14 @@ class VesselFullOwnershipSerializer(serializers.ModelSerializer):
 
     def get_owner_full_name(self, obj):
         owner = obj.owner.emailuser_obj
-        return owner.get_full_name()
+        try:
+            system_user = retrieve_system_user(owner.id)
+            if system_user.legal_first_name or system_user.first_name:
+                return system_user.__str__()
+            else:
+                return owner.get_full_name()
+        except:
+            return owner.get_full_name()
 
     def get_applicable_percentage(self, obj):
         return obj.applicable_percentage
@@ -1714,14 +1721,15 @@ class VesselFullOwnershipSerializer(serializers.ModelSerializer):
 
     def get_owner_phone_number(self, obj):
         owner = obj.owner.emailuser_obj
-        return owner.phone_number if owner.phone_number else owner.mobile_number
+        system_user = retrieve_system_user(owner.id)
+        return system_user.phone_number if system_user.phone_number else system_user.mobile_number
 
     def get_individual_owner(self, obj):
         return obj.individual_owner
 
 
 class SaveVesselOwnershipSaleDateSerializer(serializers.ModelSerializer):
-    end_date = serializers.DateTimeField(input_formats=['%d/%m/%Y'],required=True,allow_null=False)
+    end_date = serializers.DateTimeField(input_formats=['%d/%m/%Y', '%Y-%m-%d'],required=True,allow_null=False)
 
     class Meta:
         model = VesselOwnership
