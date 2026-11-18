@@ -235,4 +235,21 @@ export default {
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;');
     },
+    showValidationErrors: function(errorMap, errorList) {
+        $.each(this.validElements(), function(index, element) {
+            $(element)
+                .parents('.form-group')
+                .removeClass('has-error');
+        });
+
+        for (let i = 0; i < errorList.length; i++) {
+            let error = errorList[i];
+
+            $(error.element)
+                .parents('.form-group')
+                .addClass('has-error');
+        }
+
+        this.defaultShowErrors();
+    },
 };
