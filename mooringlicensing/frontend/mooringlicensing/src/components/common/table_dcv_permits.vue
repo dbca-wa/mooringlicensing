@@ -58,8 +58,8 @@
 </template>
 
 <script>
+import $ from 'jquery'
 import datatable from '@/utils/vue/datatable.vue'
-import Vue from 'vue'
 import { api_endpoints, helpers } from '@/utils/hooks'
 import CreateNewStickerModal from "@/components/common/create_new_sticker_modal.vue"
 import RequestNewDCVStickerModal from "@/components/common/request_new_dcv_sticker_modal.vue"

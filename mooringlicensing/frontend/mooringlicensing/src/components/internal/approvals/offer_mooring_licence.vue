@@ -87,6 +87,7 @@
 </template>
 
 <script>
+import $ from 'jquery'
 import modal from '@vue-utils/bootstrap-modal.vue'
 import FileField from '@/components/forms/filefield_immediate.vue'
 import alert from '@vue-utils/alert.vue'

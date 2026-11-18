@@ -194,6 +194,7 @@
 </template>
 
 <script>
+import $ from 'jquery'
 import Vue from 'vue'
 import ProposedDecline from '@/components/internal/proposals/proposal_proposed_decline.vue'
 import AmendmentRequest from '@/components/internal/proposals/amendment_request.vue'

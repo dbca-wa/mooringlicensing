@@ -231,9 +231,8 @@
     </div>
 </template>
 <script>
-
+import $ from 'jquery'
 import FormSection from '@/components/forms/section_toggle.vue'
-
 import {
     api_endpoints,
     helpers
