@@ -1,6 +1,6 @@
 <template>
     <div id="bypassPayment">
-        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :title="title" large>
+        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :processing="submitting" :title="title" large>
             <div class="container-fluid">
                 <div class="row">
                     <form class="form-horizontal" name="bypassForm">
@@ -43,11 +43,6 @@
                         </div>
                     </form>
                 </div>
-            </div>
-            <div slot="footer">
-                <button type="button" v-if="submitting" disabled class="btn btn-default" @click="ok"><i class="fa fa-spinner fa-spin"></i> Processing</button>
-                <button type="button" v-else class="btn btn-default" @click="ok">Ok</button>
-                <button type="button" class="btn btn-default" @click="cancel">Cancel</button>
             </div>
         </modal>
     </div>

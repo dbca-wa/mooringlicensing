@@ -92,14 +92,14 @@
             </div>
             <div slot="footer">
                 <template v-if="requirement.id">
-                    <button type="button" v-if="updatingRequirement" disabled class="btn btn-default" @click="ok"><i class="fa fa-spinnner fa-spin"></i> Updating</button>
-                    <button type="button" v-else class="btn btn-default" @click="ok">Update</button>
+                    <button type="button" v-if="updatingRequirement" disabled class="btn btn-primary me-2" @click="ok"><i class="fa fa-spinnner fa-spin"></i> Updating</button>
+                    <button type="button" v-else class="btn btn-primary me-2" @click="ok">Update</button>
                 </template>
                 <template v-else>
-                    <button type="button" v-if="addingRequirement" disabled class="btn btn-default" @click="ok"><i class="fa fa-spinner fa-spin"></i> Adding</button>
-                    <button type="button" v-else class="btn btn-default" @click="ok">Add</button>
+                    <button type="button" v-if="addingRequirement" disabled class="btn btn-primary me-2" @click="ok"><i class="fa fa-spinner fa-spin"></i> Adding</button>
+                    <button type="button" v-else class="btn btn-primary me-2" @click="ok">Add</button>
                 </template>
-                <button type="button" class="btn btn-default" @click="cancel">Cancel</button>
+                <button type="button" class="btn btn-secondary me-2" @click="cancel">Cancel</button>
             </div>
         </modal>
     </div>

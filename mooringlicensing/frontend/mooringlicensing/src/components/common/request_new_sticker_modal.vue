@@ -91,15 +91,16 @@
                 </div>
             </div>
             <div slot="footer">
-                <div class="row">
-                    <div class="col-md-7">
-                        <span v-if="is_internal"><strong><input type="checkbox" v-model="waive_the_fee" /> Waive the fee</strong></span>
+                <div class="row w-100">
+                    <div class="col-md-6 text-end">
+                        <span v-if="is_internal">
+                            <strong><input type="checkbox" v-model="waive_the_fee" /> Waive the fee</strong>
+                        </span>
                     </div>
-                    <div class="col-md-5">
-                        <span><strong>Sticker replacement cost ${{ total_fee }}</strong></span>
-                        <button type="button" v-if="processing" disabled class="btn btn-default" @click="ok"><i class="fa fa-spinner fa-spin"></i> Processing</button>
-                        <button type="button" v-else class="btn btn-default" @click="ok" :disabled="!okButtonEnabled">Ok</button>
-                        <button type="button" class="btn btn-default" @click="cancel">Cancel</button>
+                    <div class="col-md-6 text-end">
+                        <button type="button" v-if="processing" disabled class="btn btn-primary me-2" @click="ok"><i class="fa fa-spinner fa-spin"></i> Processing</button>
+                        <button type="button" v-else class="btn btn-primary me-2" @click="ok" :disabled="!okButtonEnabled">Ok</button>
+                        <button type="button" class="btn btn-secondary me-2" @click="cancel">Cancel</button>
                     </div>
                 </div>
             </div>
@@ -349,3 +350,9 @@ export default {
     }
 }
 </script>
+
+<style scoped>
+.modal-footer > * {
+    width: 100%;
+}
+</style>

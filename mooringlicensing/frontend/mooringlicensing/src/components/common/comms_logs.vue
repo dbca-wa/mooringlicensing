@@ -23,7 +23,7 @@
           </template>
         </div>
       </div>
-      <div class="card-body">
+      <div class="card-body" v-if="enable_actions_section">
         <label for="assigned-to" class="form-label">Action Logs</label>
         <div class="rounded border py-2">
           <span class="ps-3 pe-2"><i class="bi bi-card-list"></i> </span>
@@ -66,6 +66,10 @@ export default {
       required: true,
     },
     disable_add_entry: {
+      type: Boolean,
+      default: true,
+    },
+    enable_actions_section: {
       type: Boolean,
       default: true,
     },

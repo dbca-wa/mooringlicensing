@@ -1,6 +1,6 @@
 <template>
     <div id="change-contact">
-        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :title="title" large>
+        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :processing="processing" :title="title" large>
             <div class="container-fluid">
                 <alert :show.sync="showError" type="danger"><strong>{{ errorString }}</strong></alert>
                 <div class="row form-group">
@@ -73,15 +73,6 @@
                     <label class="col-sm-2 control-label" for="reason">Reason</label>
                     <div class="col-sm-9">
                         <textarea class="col-sm-9 form-control" name="reason" v-model="details.reason"></textarea>
-                    </div>
-                </div>
-            </div>
-            <div slot="footer">
-                <div class="row">
-                    <div class="col-md-5">
-                        <button type="button" v-if="processing" disabled class="btn btn-default" @click="ok"><i class="fa fa-spinner fa-spin"></i> Processing</button>
-                        <button type="button" v-else class="btn btn-default" @click="ok" :disabled="!okButtonEnabled">Ok</button>
-                        <button type="button" class="btn btn-default" @click="cancel">Cancel</button>
                     </div>
                 </div>
             </div>

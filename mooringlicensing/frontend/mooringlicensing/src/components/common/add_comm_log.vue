@@ -4,6 +4,7 @@
       transition="modal fade"
       @ok="ok()"
       @cancel="cancel()"
+      okText="Add"
       title="Communication Log - Add Entry"
       large
     >
@@ -159,23 +160,6 @@
             </div>
           </form>
         </div>
-      </div>
-      <div>
-        <button
-          type="button"
-          v-if="addingComms"
-          disabled
-          class="btn btn-primary"
-          @click="ok"
-        >
-          <i class="fa fa-spinner fa-spin"></i> Adding
-        </button>
-        <button type="button" v-else class="btn btn-primary" @click="ok">
-          Add
-        </button>
-        <button type="button" class="btn btn-secondary" @click="cancel">
-          Cancel
-        </button>
       </div>
     </modal>
   </div>

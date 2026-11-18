@@ -77,9 +77,9 @@
                     <label for="noEmails">
                         &nbsp;Do not send email notifications for this application &nbsp;
                     </label>
-                <button type="button" v-if="savingOffer" disabled class="btn btn-default" @click="ok"><i class="fa fa-spinner fa-spin"></i> Processing</button>
-                <button type="button" v-else class="btn btn-default" @click="ok" :disabled="!ok_button_enabled">Ok</button>
-                <button type="button" class="btn btn-default" @click="cancel">Cancel</button>
+                <button type="button" v-if="savingOffer" disabled class="btn btn-primary me-2" @click="ok"><i class="fa fa-spinner fa-spin"></i> Processing</button>
+                <button type="button" v-else class="btn btn-primary me-2" @click="ok" :disabled="!ok_button_enabled">Ok</button>
+                <button type="button" class="btn btn-secondary me-2" @click="cancel">Cancel</button>
                 </p>
             </div>
         </modal>
