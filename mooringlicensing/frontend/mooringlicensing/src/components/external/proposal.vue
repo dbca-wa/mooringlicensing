@@ -19,22 +19,18 @@
             <div v-if="!proposal_readonly">
               <div v-if="hasAmendmentRequest" class="row" style="color:red;">
                   <div class="col-lg-12 pull-right">
-                    <div class="panel panel-default">
-                      <div class="panel-heading">
-                        <h3 class="panel-title" style="color:red;">An amendment has been requested for this Application
-                          <a class="panelClicker" :href="'#'+pBody" data-toggle="collapse"  data-parent="#userInfo" expanded="true" :aria-controls="pBody">
-                                <span class="glyphicon glyphicon-chevron-down pull-right "></span>
-                          </a>
-                        </h3>
-                      </div>
-                      <div class="panel-body collapse in" :id="pBody">
+                    <FormSection
+                        label="An amendment has been requested for this Application"
+                        :formCollapse="false"
+                        :Index="pBody"
+                    >
                         <div v-for="a in amendment_request">
-                          <p>Reason: {{a.reason}}</p>
-                          <p>Details: <p v-for="t in splitText(a.text)">{{t}}</p></p>
-                      </div>
-                    </div>
+                            <p>Reason: {{a.reason}}</p>
+                            <p>Details:</p>
+                            <p v-for="t in splitText(a.text)">{{t}}</p>
+                        </div>
+                    </FormSection>
                   </div>
-                </div>
               </div>
             </div>
 
@@ -164,6 +160,7 @@ import WaitingListApplication from '../form_wla.vue';
 import AnnualAdmissionApplication from '../form_aaa.vue';
 import AuthorisedUserApplication from '../form_aua.vue';
 import MooringLicenceApplication from '../form_mla.vue';
+import FormSection from '@/components/forms/section_toggle.vue'
 import Vue from 'vue'
 import {
   api_endpoints,
@@ -185,7 +182,6 @@ export default {
       savingProposal:false,
       paySubmitting:false,
       newText: "",
-      pBody: 'pBody',
       missing_fields: [],
       proposal_parks:null,
       terms_and_conditions_checked: false,
@@ -207,6 +203,7 @@ export default {
       AnnualAdmissionApplication,
       AuthorisedUserApplication,
       MooringLicenceApplication,
+      FormSection,
   },
   computed: {
       profileHasChanged: function(){

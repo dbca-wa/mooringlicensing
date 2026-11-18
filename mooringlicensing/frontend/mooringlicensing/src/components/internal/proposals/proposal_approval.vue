@@ -19,68 +19,58 @@
             <p>The proposal was declined. The decision was emailed to {{ proposal.proposal_applicant.email }}</p>
         </div>
 
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 v-if="!isFinalised" class="panel-title">Proposed Decision
-                    <a class="panelClicker" :href="'#'+proposedDecision" data-toggle="collapse"  data-parent="#userInfo" expanded="false" :aria-controls="proposedDecision">
-                        <span class="glyphicon glyphicon-chevron-down pull-right "></span>
-                    </a>
-                </h3>
-                <h3 v-else class="panel-title">Decision
-                    <a class="panelClicker" :href="'#'+proposedDecision" data-toggle="collapse"  data-parent="#userInfo" expanded="false" :aria-controls="proposedDecision">
-                        <span class="glyphicon glyphicon-chevron-down pull-right "></span>
-                    </a>
-                </h3>
-            </div>
-            <div class="panel-body panel-collapse collapse in" :id="proposedDecision">
-                <template v-if="!proposal.proposed_decline_status">
-                    <div class="row"><div :class="title_class_name">{{ decisionTitle }}: </div><div :class="value_class_name">Issue</div></div>
-                    <div class="row"><div :class="title_class_name">{{ ccEmailTitle }}: </div><div :class="value_class_name">{{ displayCCEmail }}</div></div>
-                    <div class="row"><div :class="title_class_name">Proposed details: </div><div :class="value_class_name">{{ proposal.proposed_issuance_approval.details }}</div></div>
-                    <template v-if="proposal.site_licensee_moorings.length > 0">
-                        <div class="currently_listed_moorings"><strong>Requested moorings</strong></div>
-                        <template v-for="item in proposal.site_licensee_moorings">
-                            <div class="mooring_box">
-                                <div class="row"><div :class="title_class_name">Selected: </div><div :class="value_class_name"><input type="checkbox" v-model="item.checked" disabled /></div></div>
-                                <div class="row"><div :class="title_class_name">Bay: </div><div :class="value_class_name">{{ item.bay }}</div></div>
-                                <div class="row"><div :class="title_class_name">Mooring Site ID: </div><div :class="value_class_name">{{ item.mooring_name }}</div></div>
-                                <div v-if="item.vessel_weight_limit" class="row"><div :class="title_class_name">Max vessel weight: </div><div :class="value_class_name">{{ (item.vessel_weight_limit) }}</div></div>
-                                <div class="row"><div :class="title_class_name">Max vessel draft: </div><div :class="value_class_name">{{ (item.vessel_draft_limit) }}</div></div>
-                                <div class="row"><div :class="title_class_name">Max vessel length: </div><div :class="value_class_name">{{ (item.vessel_size_limit) }}</div></div>
-                            </div>
-                        </template>
+        <FormSection
+            :label="isFinalised ? 'Decision' : 'Proposed Decision'"
+            :formCollapse="false"
+            :Index="proposedDecision"
+        >
+            <template v-if="!proposal.proposed_decline_status">
+                <div class="row"><div :class="title_class_name">{{ decisionTitle }}: </div><div :class="value_class_name">Issue</div></div>
+                <div class="row"><div :class="title_class_name">{{ ccEmailTitle }}: </div><div :class="value_class_name">{{ displayCCEmail }}</div></div>
+                <div class="row"><div :class="title_class_name">Proposed details: </div><div :class="value_class_name">{{ proposal.proposed_issuance_approval.details }}</div></div>
+                <template v-if="proposal.site_licensee_moorings.length > 0">
+                    <div class="currently_listed_moorings"><strong>Requested moorings</strong></div>
+                    <template v-for="item in proposal.site_licensee_moorings">
+                        <div class="mooring_box">
+                            <div class="row"><div :class="title_class_name">Selected: </div><div :class="value_class_name"><input type="checkbox" v-model="item.checked" disabled /></div></div>
+                            <div class="row"><div :class="title_class_name">Bay: </div><div :class="value_class_name">{{ item.bay }}</div></div>
+                            <div class="row"><div :class="title_class_name">Mooring Site ID: </div><div :class="value_class_name">{{ item.mooring_name }}</div></div>
+                            <div v-if="item.vessel_weight_limit" class="row"><div :class="title_class_name">Max vessel weight: </div><div :class="value_class_name">{{ (item.vessel_weight_limit) }}</div></div>
+                            <div class="row"><div :class="title_class_name">Max vessel draft: </div><div :class="value_class_name">{{ (item.vessel_draft_limit) }}</div></div>
+                            <div class="row"><div :class="title_class_name">Max vessel length: </div><div :class="value_class_name">{{ (item.vessel_size_limit) }}</div></div>
+                        </div>
                     </template>
-                    <template v-if="proposal.authorised_user_moorings.length > 0">
-                        <div class="currently_listed_moorings"><strong>Currently listed moorings</strong></div>
-                        <template v-for="item in proposal.authorised_user_moorings">
-                            <div class="mooring_box">
-                                <div class="row"><div :class="title_class_name">Selected: </div><div :class="value_class_name"><input type="checkbox" v-model="item.checked" disabled /></div></div>
-                                <div class="row"><div :class="title_class_name">Bay: </div><div :class="value_class_name">{{ item.bay }}</div></div>
-                                <div class="row"><div :class="title_class_name">Mooring Site ID: </div><div :class="value_class_name">{{ item.mooring_name }}</div></div>
-                                <div v-if="item.vessel_weight_limit" class="row"><div :class="title_class_name">Max vessel weight: </div><div :class="value_class_name">{{ (item.vessel_weight_limit) }}</div></div>
-                                <div class="row"><div :class="title_class_name">Max vessel draft: </div><div :class="value_class_name">{{ (item.vessel_draft_limit) }}</div></div>
-                                <div class="row"><div :class="title_class_name">Max vessel length: </div><div :class="value_class_name">{{ (item.vessel_size_limit) }}</div></div>
-                            </div>
-                        </template>
-                    </template>
-                    <template v-if="proposal.mooring_licence_vessels.length > 0">
-                        <div class="currently_listed_moorings"><strong>Currently listed vessels</strong></div>
-                        <template v-for="item in proposal.mooring_licence_vessels">
-                            <div class="mooring_box">
-                                <div class="row"><div :class="title_class_name">Selected: </div><div :class="value_class_name"><input type="checkbox" v-model="item.checked" disabled /></div></div>
-                                <div class="row"><div :class="title_class_name">Vessel rego: </div><div :class="value_class_name">{{ item.rego }}</div></div>
-                                <div class="row"><div :class="title_class_name">Vessel name: </div><div :class="value_class_name">{{ item.vessel_name }}</div></div>
-                            </div>
-                        </template>
-                    </template>
-                    
                 </template>
-                <template v-else>
-                    <strong v-if="!isFinalised">Proposed decision: Decline</strong>
-                    <strong v-else>Decision: Decline</strong>
+                <template v-if="proposal.authorised_user_moorings.length > 0">
+                    <div class="currently_listed_moorings"><strong>Currently listed moorings</strong></div>
+                    <template v-for="item in proposal.authorised_user_moorings">
+                        <div class="mooring_box">
+                            <div class="row"><div :class="title_class_name">Selected: </div><div :class="value_class_name"><input type="checkbox" v-model="item.checked" disabled /></div></div>
+                            <div class="row"><div :class="title_class_name">Bay: </div><div :class="value_class_name">{{ item.bay }}</div></div>
+                            <div class="row"><div :class="title_class_name">Mooring Site ID: </div><div :class="value_class_name">{{ item.mooring_name }}</div></div>
+                            <div v-if="item.vessel_weight_limit" class="row"><div :class="title_class_name">Max vessel weight: </div><div :class="value_class_name">{{ (item.vessel_weight_limit) }}</div></div>
+                            <div class="row"><div :class="title_class_name">Max vessel draft: </div><div :class="value_class_name">{{ (item.vessel_draft_limit) }}</div></div>
+                            <div class="row"><div :class="title_class_name">Max vessel length: </div><div :class="value_class_name">{{ (item.vessel_size_limit) }}</div></div>
+                        </div>
+                    </template>
                 </template>
-            </div>
-        </div>
+                <template v-if="proposal.mooring_licence_vessels.length > 0">
+                    <div class="currently_listed_moorings"><strong>Currently listed vessels</strong></div>
+                    <template v-for="item in proposal.mooring_licence_vessels">
+                        <div class="mooring_box">
+                            <div class="row"><div :class="title_class_name">Selected: </div><div :class="value_class_name"><input type="checkbox" v-model="item.checked" disabled /></div></div>
+                            <div class="row"><div :class="title_class_name">Vessel rego: </div><div :class="value_class_name">{{ item.rego }}</div></div>
+                            <div class="row"><div :class="title_class_name">Vessel name: </div><div :class="value_class_name">{{ item.vessel_name }}</div></div>
+                        </div>
+                    </template>
+                </template>
+                
+            </template>
+            <template v-else>
+                <strong v-if="!isFinalised">Proposed decision: Decline</strong>
+                <strong v-else>Decision: Decline</strong>
+            </template>
+        </FormSection>
     </div>
 </template>
 <script>
