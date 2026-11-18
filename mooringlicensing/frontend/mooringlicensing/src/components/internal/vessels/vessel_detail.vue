@@ -263,8 +263,6 @@ from '@/utils/hooks'
         methods:{
             setTabs:function(){
                 let vm = this;
-                /* set Applicant tab Active */
-                $('#pills-tab a[href="#pills-vessel-details"]').tab('show');
                 // ensure datatables in tabs are responsive
                 $('#pills-owners-tab').on('shown.bs.tab', function (e) {
                     vm.$refs.owners_datatable.vmDataTable.columns.adjust().responsive.recalc();

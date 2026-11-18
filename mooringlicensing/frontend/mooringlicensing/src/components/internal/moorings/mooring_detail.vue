@@ -122,21 +122,6 @@ from '@/utils/hooks'
                 }
             },
         },
-        methods:{
-            setTabs:function(){
-                let vm = this;
-
-                /* set Applicant tab Active */
-                $('#pills-tab a[href="#pills-mooring-details"]').tab('show');
-
-            },
-
-        },
-        mounted: function () {
-            this.$nextTick(async () => {
-                this.setTabs();
-            });
-        },
         created: async function() {
             const res = await this.$http.get(`/api/mooring/${this.$route.params.mooring_id}.json`);
             this.mooring = Object.assign({}, res.body);

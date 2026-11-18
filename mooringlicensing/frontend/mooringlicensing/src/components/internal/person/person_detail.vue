@@ -153,8 +153,6 @@ export default {
         }
     },
     mounted: function(){
-        /* set Details tab Active */
-        $('#pills-tab a[href="#pills-details"]').tab('show');
         // ensure datatables in tabs are responsive
         let vm=this;
         $('#pills-approvals-tab').on('shown.bs.tab', function (e) {
