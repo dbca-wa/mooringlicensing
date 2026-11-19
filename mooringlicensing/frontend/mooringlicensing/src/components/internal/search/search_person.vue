@@ -1,7 +1,7 @@
 <template>
     <FormSection label="Search Person" Index="search_person">
         <div class="row form-group">
-            <label for="person_lookup" class="col-sm-3 control-label">Person</label>
+            <label for="person_lookup" class="col-sm-3 col-form-label">Person</label>
             <div class="col-sm-6">
                 <select 
                     id="person_lookup"  

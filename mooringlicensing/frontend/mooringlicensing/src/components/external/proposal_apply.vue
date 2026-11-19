@@ -51,7 +51,7 @@
                                                 <label :for="application_type.code" style="font-weight:normal">{{
                                                     application_type.new_application_text }}</label>
                                             </div>
-                                            <span class="pull-left col-sm-2" v-if="application_type.multiple">
+                                            <span class="float-start col-sm-2" v-if="application_type.multiple">
                                                 <select class="form-control" v-model="selectedCurrentProposal">
                                                     <option v-for="approval in aaaApprovals"
                                                         :value="approval.current_proposal_id">
@@ -82,7 +82,7 @@
                                                 <label :for="application_type.code" style="font-weight:normal">{{
                                                     application_type.new_application_text }}</label>
                                             </div>
-                                            <span class="pull-left col-sm-2" v-if="application_type.multiple">
+                                            <span class="float-start col-sm-2" v-if="application_type.multiple">
                                                 <select class="form-control" v-model="selectedCurrentProposal">
                                                     <option v-for="approval in auaApprovals"
                                                         :value="approval.current_proposal_id">
@@ -113,7 +113,7 @@
                                                 <label :for="application_type.code" style="font-weight:normal">{{
                                                     application_type.new_application_text }}</label>
                                             </div>
-                                            <span class="pull-left col-sm-2" v-if="application_type.multiple">
+                                            <span class="float-start col-sm-2" v-if="application_type.multiple">
                                                 <select class="form-control" v-model="selectedCurrentProposal">
                                                     <option v-for="approval in wlaApprovals"
                                                         :value="approval.current_proposal_id">
@@ -183,7 +183,7 @@
                                                     {{ application_type.new_application_text }}
                                                 </label>
                                             </div>
-                                            <span class="pull-left col-sm-2" v-if="application_type.multiple">
+                                            <span class="float-start col-sm-2" v-if="application_type.multiple">
                                                 <select class="form-control" v-model="selectedCurrentProposal">
                                                     <option v-for="approval in mlApprovals"
                                                         :value="approval.current_proposal_id"
@@ -213,15 +213,15 @@
                     </FormSection>
                     
                     <div class="col-sm-12">
-                        <p class="pull-right" style="margin-top:5px">
+                        <p class="float-end" style="margin-top:5px">
                         <input v-if="is_internal" type="checkbox" v-model="noEmails" id="noEmails" />
                         <label v-if="is_internal" for="noEmails">
                             &nbsp;Do not send email notifications for this application &nbsp;
                         </label>
 
                         <button v-if="!creatingProposal" :disabled="isDisabled" @click.prevent="submit()"
-                            class="btn btn-primary pull-right">Continue</button>
-                        <button v-else disabled class="pull-right btn btn-primary"><i
+                            class="btn btn-primary float-end">Continue</button>
+                        <button v-else disabled class="float-end btn btn-primary"><i
                                 class="fa fa-spin fa-spinner"></i>&nbsp;Creating</button>
                         </p>
                     </div>

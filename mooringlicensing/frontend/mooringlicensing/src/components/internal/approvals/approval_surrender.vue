@@ -14,7 +14,7 @@
                         <div class="col-sm-12">
                             <div class="form-group">
                                 <div class="col-sm-3">
-                                    <label class="control-label pull-left"  for="Name">Surrender Details</label>
+                                    <label class="form-label float-start"  for="Name">Surrender Details</label>
                                 </div>
                                 <div class="col-sm-9">
                                     <textarea name="surrender_details" class="form-control" style="width:70%;" v-model="approval.surrender_details"></textarea>

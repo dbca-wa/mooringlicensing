@@ -15,7 +15,7 @@
                             <div class="form-group" v-if="displayBayField && !siteLicensee">
                                 <div class="row">
                                     <div class="col-sm-3">
-                                        <label class="control-label pull-left" for="mooring_bay">Bay</label>
+                                        <label class="form-label float-start" for="mooring_bay">Bay</label>
                                     </div>
                                     <div class="col-sm-6">
                                         <select class="form-control" v-model="approval.mooring_bay_id"
@@ -30,7 +30,7 @@
                             <div class="form-group" v-if="displayMooringSiteIdField && !siteLicensee">
                                 <div class="row">
                                     <div class="col-sm-3">
-                                        <label class="control-label pull-left" for="mooring_site_id">Mooring Site ID</label>
+                                        <label class="form-label float-start" for="mooring_site_id">Mooring Site ID</label>
                                     </div>
                                     <div class="col-sm-6">
                                         <select id="mooring_lookup" name="mooring_lookup" ref="mooring_lookup"
@@ -42,7 +42,7 @@
                             <div class="form-group" v-if="vessel_size_limit">
                                 <div class="row">
                                     <div class="col-sm-3">
-                                        <label class="control-label pull-left">Mooring Vessel Length Limit</label>
+                                        <label class="form-label float-start">Mooring Vessel Length Limit</label>
                                     </div>
                                     <div class="col-sm-6">
                                         <input class="form-control" disabled :value="vessel_size_limit"/>
@@ -52,7 +52,7 @@
                             <div class="form-group" v-if="vessel_draft_limit">
                                 <div class="row">
                                     <div class="col-sm-3">
-                                        <label class="control-label pull-left">Mooring Vessel Draft Limit</label>
+                                        <label class="form-label float-start">Mooring Vessel Draft Limit</label>
                                     </div>
                                     <div class="col-sm-6">
                                         <input class="form-control" disabled :value="vessel_draft_limit"/>
@@ -62,7 +62,7 @@
                             <div class="form-group" v-if="vessel_weight_limit">
                                 <div class="row">
                                     <div class="col-sm-3">
-                                        <label class="control-label pull-left">Mooring Vessel Weight Limit</label>
+                                        <label class="form-label float-start">Mooring Vessel Weight Limit</label>
                                     </div>
                                     <div class="col-sm-6">
                                         <input class="form-control" disabled :value="vessel_weight_limit"/>
@@ -73,7 +73,7 @@
                             <div class="form-group" v-if="displayMooringSiteIdField">
                                 <div class="row">
                                     <div class="col-sm-3">
-                                        <label class="control-label pull-left">Proposed Vessel Length</label>
+                                        <label class="form-label float-start">Proposed Vessel Length</label>
                                     </div>
                                     <div class="col-sm-6">
                                         <input class="form-control" disabled :value="proposal.vessel_length"/>
@@ -83,7 +83,7 @@
                             <div class="form-group" v-if="displayMooringSiteIdField">
                                 <div class="row">
                                     <div class="col-sm-3">
-                                        <label class="control-label pull-left">Proposed Vessel Draft</label>
+                                        <label class="form-label float-start">Proposed Vessel Draft</label>
                                     </div>
                                     <div class="col-sm-6">
                                         <input class="form-control" disabled :value="proposal.vessel_draft"/>
@@ -93,7 +93,7 @@
                             <div class="form-group" v-if="displayMooringSiteIdField">
                                 <div class="row">
                                     <div class="col-sm-3">
-                                        <label class="control-label pull-left">Proposed Vessel Weight</label>
+                                        <label class="form-label float-start">Proposed Vessel Weight</label>
                                     </div>
                                     <div class="col-sm-6">
                                         <input class="form-control" disabled :value="proposal.vessel_weight"/>
@@ -118,7 +118,7 @@
                             <div class="form-group">
                                 <div class="row">
                                     <div class="col-sm-3">
-                                        <label class="control-label pull-left" for="Name">{{ detailsText }}</label>
+                                        <label class="form-label float-start" for="Name">{{ detailsText }}</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <textarea name="approval_details" class="form-control" style="width:70%;"
@@ -129,7 +129,7 @@
                             <div class="form-group">
                                 <div class="row">
                                     <div class="col-sm-3">
-                                        <label class="control-label pull-left" for="Name">{{ ccText }}</label>
+                                        <label class="form-label float-start" for="Name">{{ ccText }}</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <input type="text" class="form-control" name="approval_cc" style="width:70%;"

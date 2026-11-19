@@ -7,7 +7,7 @@
                 </div>
             </div>
             <div class="row form-group" v-if="is_internal">
-                <label class="col-sm-3 control-label" >Applicant Email</label>
+                <label class="col-sm-3 col-form-label" >Applicant Email</label>
                 <div class="col-sm-6">
                         <select
                             id="person_lookup"  
@@ -18,13 +18,13 @@
                     </div>
             </div>
             <div v-if="show_confirm_email_field" class="row form-group">
-                <label for="email_address_confirmation" class="col-sm-3 control-label">Applicant Email (Confirm)</label>
+                <label for="email_address_confirmation" class="col-sm-3 col-form-label">Applicant Email (Confirm)</label>
                 <div class="col-sm-6">
                     <input type="email" class="form-control" name="email_address_confirmation" placeholder="" v-model="dcv_admission.email_address_confirmation">
                 </div>
             </div>
             <div class="row form-group">
-                <label for="vessel_search" class="col-sm-3 control-label">Unique vessel identifier</label>
+                <label for="vessel_search" class="col-sm-3 col-form-label">Unique vessel identifier</label>
                 <div class="col-sm-9">
                     <select :disabled="readonly" id="vessel_search" name="vessel_registration" ref="dcv_vessel_rego_nos" class="form-control" style="width: 40%">
                         <option></option>
@@ -33,46 +33,46 @@
             </div>
 
             <div class="row form-group">
-                <label for="vessel_name" class="col-sm-3 control-label">Vessel name</label>
+                <label for="vessel_name" class="col-sm-3 col-form-label">Vessel name</label>
                 <div class="col-sm-6">
                     <input type="text" class="form-control" name="vessel_name" placeholder="" v-model="dcv_admission.dcv_vessel.vessel_name">
                 </div>
             </div>
             <div class="row form-group">
-                <label for="skipper" class="col-sm-3 control-label">Skipper</label>
+                <label for="skipper" class="col-sm-3 col-form-label">Skipper</label>
                 <div class="col-sm-6">
                     <input type="text" class="form-control" name="skipper" placeholder="" v-model="dcv_admission.skipper">
                 </div>
             </div>
             <div class="row form-group">
-                <label for="contact_number" class="col-sm-3 control-label">Contact number</label>
+                <label for="contact_number" class="col-sm-3 col-form-label">Contact number</label>
                 <div class="col-sm-6">
                     <input type="text" class="form-control" name="contact_number" placeholder="" v-model="dcv_admission.contact_number">
                 </div>
             </div>
 
             <div class="row form-group">
-                <label for="" class="col-sm-3 control-label">Organisation</label>
+                <label for="" class="col-sm-3 col-form-label">Organisation</label>
                 <div class="col-sm-6">
                     <input type="text" class="form-control" name="organisation" placeholder="" v-model="dcv_admission.organisation_name">
                 </div>
             </div>
 
             <div v-if="show_dcv_organisation_fields" class="row form-group">
-                <label for="" class="col-sm-3 control-label">ABN / ACN</label>
+                <label for="" class="col-sm-3 col-form-label">ABN / ACN</label>
                 <div class="col-sm-6">
                     <input type="text" class="form-control" name="abn_acn" placeholder="" v-model="dcv_admission.organisation_abn">
                 </div>
             </div>
 
             <div v-if="show_email_fields && !is_internal" class="row form-group">
-                <label for="email_address" class="col-sm-3 control-label">Email address</label>
+                <label for="email_address" class="col-sm-3 col-form-label">Email address</label>
                 <div class="col-sm-6">
                     <input type="email" class="form-control" name="email_address" placeholder="" v-model="dcv_admission.email_address">
                 </div>
             </div>
             <div v-if="(show_email_fields && !is_internal)" class="row form-group">
-                <label for="email_address_confirmation" class="col-sm-3 control-label">Email address (Confirm)</label>
+                <label for="email_address_confirmation" class="col-sm-3 col-form-label">Email address (Confirm)</label>
                 <div class="col-sm-6">
                     <input type="email" class="form-control" name="email_address_confirmation" placeholder="" v-model="dcv_admission.email_address_confirmation">
                 </div>
@@ -99,7 +99,7 @@
 
             <div class="row">
                 <div class="col-sm-12">
-                    <div class="pull-right">
+                    <div class="float-end">
                         <label>Click <span @click="add_another_date_clicked" class="add_another_date_text">here</span> to add another date</label>
                     </div>
                 </div>
@@ -115,7 +115,7 @@
                         <div class="navbar navbar-fixed-bottom"  style="background-color: #f5f5f5;">
                             <div class="navbar-inner">
                                 <div class="container">
-                                    <p class="pull-right" style="margin-top:5px">
+                                    <p class="float-end" style="margin-top:5px">
                                         <input v-if="pay_submit_button_enabled" type="button" @click.prevent="pay_and_submit" class="btn btn-primary" :value="pay_submit_button_text"/>
                                         <button v-else type="button" class="btn btn-primary" disabled>{{ pay_submit_button_text }}<i v-if="paySubmitting" class="fa fa-circle-o-notch fa-spin fa-fw"></i></button>
                                     </p>

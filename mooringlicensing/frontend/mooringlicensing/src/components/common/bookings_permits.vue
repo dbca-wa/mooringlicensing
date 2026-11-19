@@ -2,7 +2,7 @@
     <div id="bookingsPermits">
         <div class="row form-group">
             <div class="col-sm-12">
-                <label for="" class="col-sm-2 control-label">Date</label>
+                <label for="" class="col-sm-2 col-form-label">Date</label>
                 <div class="col-sm-3 input-group date">
                     <div style="width: 70%;">
                         <input

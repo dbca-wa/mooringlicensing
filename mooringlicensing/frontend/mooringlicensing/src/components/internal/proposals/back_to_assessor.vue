@@ -10,7 +10,7 @@
                             <div class="row">
                                 <div class="form-group">
                                     <div class="col-sm-3">
-                                        <label class="control-label pull-right" for="back_to_assessor_details">Details</label>
+                                        <label class="form-label float-end" for="back_to_assessor_details">Details</label>
                                     </div>
                                     <div class="col-sm-6">
                                         <textarea class="form-control" name="details" v-model="back_to_assessor.details" id="back_to_assessor_details"></textarea>

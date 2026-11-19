@@ -18,7 +18,7 @@
         <form :action="proposal_form_url" method="post" name="new_proposal" enctype="multipart/form-data">
             <div v-if="!proposal_readonly">
               <div v-if="hasAmendmentRequest" class="row" style="color:red;">
-                  <div class="col-lg-12 pull-right">
+                  <div class="col-lg-12 float-end">
                     <FormSection
                         label="An amendment has been requested for this Application"
                         :formCollapse="false"
@@ -108,7 +108,7 @@
                               <div class="navbar navbar-fixed-bottom"  style="background-color: #f5f5f5;">
                                   <div class="navbar-inner">
                                     <div v-if="proposal && !proposal.readonly" class="container">
-                                        <p class="pull-right" style="margin-top:5px">
+                                        <p class="float-end" style="margin-top:5px">
                                             <input type="checkbox" v-model="terms_and_conditions_checked" id="terms_and_conditions_checked" />
                                             <label for="terms_and_conditions_checked">
                                               &nbsp;I agree with all the <a href="https://www.ria.wa.gov.au/boating/licensed-moorings-permits/mooring-terms-and-conditions" target="_blank">RIA Terms and Conditions&nbsp;</a>
@@ -141,7 +141,7 @@
                                         </p>
                                     </div>
                                     <div v-else class="container">
-                                      <p class="pull-right" style="margin-top:5px;">
+                                      <p class="float-end" style="margin-top:5px;">
                                         <router-link class="btn btn-primary" :to="{name: 'external-dashboard'}">Back to Dashboard</router-link>
                                       </p>
                                     </div>

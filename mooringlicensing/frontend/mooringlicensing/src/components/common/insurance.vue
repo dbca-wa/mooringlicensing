@@ -1,7 +1,7 @@
 <template>
     <FormSection label="Insurance details" Index="insurance_details">
         <div class="row form-group">
-            <label for="" class="col-sm-9 control-label">The nominated vessel has
+            <label for="" class="col-sm-9 form-label">The nominated vessel has
             </label>
         </div>
         <div class="row form-group">
@@ -15,7 +15,7 @@
             </div>
         </div>
         <div v-if="!(applicationTypeCode==='aaa')" class="row form-group">
-            <label for="" class="col-sm-3 control-label">Copy of the vessel's current insurance certificate showing legal liability amount</label>
+            <label for="" class="col-sm-3 col-form-label">Copy of the vessel's current insurance certificate showing legal liability amount</label>
             <div class="col-sm-9">
                 <FileField 
                     :readonly="readonly"

@@ -14,7 +14,7 @@
                           <div class="navbar navbar-fixed-bottom"  style="background-color: #f5f5f5;">
                               <div class="navbar-inner">
                                 <div class="container">
-                                  <p class="pull-right" style="margin-top:5px">
+                                  <p class="float-end" style="margin-top:5px">
                                     <router-link class="btn btn-primary" :to="{name: 'vessels-dashboard'}">Back to Dashboard</router-link>
                                   </p>
                                 </div>

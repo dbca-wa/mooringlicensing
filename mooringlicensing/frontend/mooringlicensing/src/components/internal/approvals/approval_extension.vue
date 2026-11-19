@@ -10,7 +10,7 @@
                             <div class="form-group">
                                 <div class="row">
                                     <div class="col-sm-3">
-                                        <label class="control-label pull-left" for="Name">New Expiry Date</label>
+                                        <label class="form-label float-start" for="Name">New Expiry Date</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div style="width: 70%;">
@@ -29,7 +29,7 @@
                             <div class="form-group">
                                 <div class="row">
                                     <div class="col-sm-3">
-                                        <label class="control-label pull-left"  for="Name">Extension Details</label>
+                                        <label class="form-label float-start"  for="Name">Extension Details</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <textarea name="extension_details" class="form-control" style="width:70%;" v-model="approval.extension_details"></textarea>

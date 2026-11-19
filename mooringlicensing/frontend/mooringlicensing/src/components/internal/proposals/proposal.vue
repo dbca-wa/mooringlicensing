@@ -161,7 +161,7 @@
                     <div class="navbar navbar-fixed-bottom"  style="background-color: #f5f5f5;">
                         <div class="navbar-inner">
                             <div v-if="!readonly" class="container">
-                                <p class="pull-right" style="margin-top:5px">
+                                <p class="float-end" style="margin-top:5px">
 
                                     <input v-if="proposal.can_bypass_auto_approval" type="checkbox" v-model="bypass_auto_approval" id="noAutoApprove" />
                                     <label v-if="proposal.can_bypass_auto_approval" for="noEmails">

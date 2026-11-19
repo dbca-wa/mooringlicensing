@@ -1,7 +1,7 @@
 <template>
     <FormSection label="Search Mooring" Index="search_mooring">
         <div class="row form-group">
-            <label for="mooring_lookup" class="col-sm-3 control-label">Mooring</label>
+            <label for="mooring_lookup" class="col-sm-3 col-form-label">Mooring</label>
             <div class="col-sm-6">
                 <select 
                     id="mooring_lookup"  

@@ -9,7 +9,7 @@
                             <div class="row">
                                 <div class="col-sm-offset-2 col-sm-8">
                                     <div class="form-group">
-                                        <label class="control-label pull-left"  for="Name">Reason</label>
+                                        <label class="form-label float-start"  for="Name">Reason</label>
                                         <select class="form-control" name="reason" ref="reason" v-model="amendment.reason">
                                             <option v-for="r in reason_choices" :value="r.key">{{r.value}}</option>
                                         </select>
@@ -19,7 +19,7 @@
                             <div class="row">
                                 <div class="col-sm-offset-2 col-sm-8">
                                     <div class="form-group">
-                                        <label class="control-label pull-left"  for="Name">Details</label>
+                                        <label class="form-label float-start"  for="Name">Details</label>
                                         <textarea class="form-control" name="name" v-model="amendment.text"></textarea>
                                     </div>
                                 </div>

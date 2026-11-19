@@ -28,7 +28,7 @@
 
         <div v-if="is_external || is_internal" class="row">
             <div class="col-md-12">
-                <button type="button" class="btn btn-primary pull-right" @click="new_application_button_clicked">New Application</button>
+                <button type="button" class="btn btn-primary float-end" @click="new_application_button_clicked">New Application</button>
             </div>
         </div>
 

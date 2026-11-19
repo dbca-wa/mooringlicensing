@@ -20,7 +20,7 @@
                             <div class="form-group">
                                 <div class="row">
                                     <div class="col-sm-3">
-                                        <label class="control-label pull-left"  for="Name">Bypass Payment Reason</label>
+                                        <label class="form-label float-start"  for="Name">Bypass Payment Reason</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <textarea name="bypass_payment_reason" class="form-control" style="width:70%;" v-model="bypass_payment_reason"></textarea>
@@ -33,7 +33,7 @@
                             <div class="form-group">
                                 <div class="row">
                                     <div class="col-sm-6">
-                                        <label class="control-label pull-left"  for="Name">Record amount as paid (for potential future deductions)</label>
+                                        <label class="form-label float-start"  for="Name">Record amount as paid (for potential future deductions)</label>
                                     </div>
                                     <div class="col-sm-6">
                                         <input type="checkbox" v-model="record_amount_as_paid" />

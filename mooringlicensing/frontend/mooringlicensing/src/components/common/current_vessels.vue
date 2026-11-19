@@ -3,7 +3,7 @@
         <FormSection v-if="mooringLicenceCurrentVesselDisplayText || currentVesselDisplayText" label="Current Vessel" Index="current_vessel">
             <div v-if="mooringLicenceCurrentVesselDisplayText" class="row form-group">
                 <div class="col-sm-9">
-                    <label for="" class="col-sm-12 control-label">{{ mooringLicenceCurrentVesselDisplayText }}</label>
+                    <label for="" class="col-sm-12 form-label">{{ mooringLicenceCurrentVesselDisplayText }}</label>
                     <div class="col-sm-9">
                         <input
                         @change="resetCurrentVessel"
@@ -15,7 +15,7 @@
                         v-model="keep_current_vessel"
                         required
                         />
-                        <label for="current_vessel_false" class="control-label">Yes</label>
+                        <label for="current_vessel_false" class="form-label">Yes</label>
                     </div>
                     <div class="col-sm-9">
                         <input
@@ -28,13 +28,13 @@
                         v-model="keep_current_vessel"
                         required
                         />
-                        <label for="current_vessel_true" class="control-label">No</label>
+                        <label for="current_vessel_true" class="form-label">No</label>
                     </div>
                 </div>
             </div>
             <div v-else class="row form-group">
                 <div class="col-sm-9">
-                    <label for="" class="col-sm-12 control-label">{{ currentVesselDisplayText }}</label>
+                    <label for="" class="col-sm-12 form-label">{{ currentVesselDisplayText }}</label>
                         <div class="col-sm-9">
                             <input
                             @change="resetCurrentVessel"
@@ -46,7 +46,7 @@
                             v-model="keep_current_vessel"
                             required
                             />
-                            <label for="current_vessel_true" class="control-label">Keep my current vessel</label>
+                            <label for="current_vessel_true" class="form-label">Keep my current vessel</label>
                         </div>
                         <div class="col-sm-9">
                             <input
@@ -59,7 +59,7 @@
                             v-model="keep_current_vessel"
                             required
                             />
-                            <label for="current_vessel_false" class="control-label">Change to different vessel</label>
+                            <label for="current_vessel_false" class="form-label">Change to different vessel</label>
                         </div>
 
                 </div>

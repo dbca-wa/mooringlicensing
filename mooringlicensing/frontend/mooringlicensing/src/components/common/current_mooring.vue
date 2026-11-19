@@ -3,7 +3,7 @@
         <FormSection v-if="currentMooringDisplayText" label="Current Moorings" Index="current_mooring">
             <div class="row form-group">
                 <div class="col-sm-9">
-                    <label for="" class="col-sm-12 control-label">{{ currentMooringDisplayText }}</label>
+                    <label for="" class="col-sm-12 form-label">{{ currentMooringDisplayText }}</label>
                         <div class="col-sm-9">
                             <input
                             @change="resetCurrentMooring"
@@ -15,7 +15,7 @@
                             v-model="changeMooring"
                             required
                             />
-                            <label for="changeMooringFalse" class="control-label">No</label>
+                            <label for="changeMooringFalse" class="form-label">No</label>
                         </div>
                         <div class="col-sm-9">
                             <input
@@ -28,7 +28,7 @@
                             v-model="changeMooring"
                             required
                             />
-                            <label for="changeMooringTrue" class="control-label">Yes</label>
+                            <label for="changeMooringTrue" class="form-label">Yes</label>
                         </div>
 
                 </div>

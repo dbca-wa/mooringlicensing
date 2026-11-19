@@ -1,10 +1,10 @@
 <template>
     <div class="row">
-        <div class="panel panel-default">
-            <div class="panel-heading">
+        <div class="card">
+            <div class="card-header">
                Submission
             </div>
-            <div class="panel-body panel-collapse">
+            <div class="card-body">
                 <div class="row">
                     <div class="col-sm-12">
                         <strong>Submitted by</strong><br/>

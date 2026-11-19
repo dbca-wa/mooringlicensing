@@ -1,11 +1,11 @@
 <template>
     <FormSection label="Preferred mooring area" Index="preferred_mooring_area">
         <div class="row form-group">
-            <label for="" class="col-sm-9 control-label">Select one preferred mooring area. Preference cannot be changed without losing your original application date.</label>
+            <label for="" class="col-sm-9 form-label">Select one preferred mooring area. Preference cannot be changed without losing your original application date.</label>
         </div>
         <div class="row form-group">
             <div class="col-sm-6" v-for="mooring in mooringBays">
-                <label :for="mooring.id" class="label-right col-sm-5 control-label">{{ mooring.name }}</label>
+                <label :for="mooring.id" class="label-right col-sm-5 col-form-label">{{ mooring.name }}</label>
                 <input :disabled="readonly" type="radio" :id="mooring.id" :value="mooring.id" v-model="selectedMooring" @change="mooringPreferenceChanged" required=""/>
             </div>
         </div>

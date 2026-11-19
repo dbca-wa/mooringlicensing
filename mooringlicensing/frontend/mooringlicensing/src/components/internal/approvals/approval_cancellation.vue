@@ -10,7 +10,7 @@
                                 <div class="row">
                                     <div class="col-sm-3">
 
-                                        <label class="control-label pull-left"  for="Name">Cancellation Date</label>
+                                        <label class="form-label float-start"  for="Name">Cancellation Date</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div style="width: 70%;">
@@ -30,7 +30,7 @@
                                 <div class="row">
                                     <div class="col-sm-3">
 
-                                        <label class="control-label pull-left"  for="Name">Cancellation Details</label>
+                                        <label class="form-label float-start"  for="Name">Cancellation Details</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <textarea name="cancellation_details" class="form-control" style="width:70%;" v-model="approval.cancellation_details"></textarea>

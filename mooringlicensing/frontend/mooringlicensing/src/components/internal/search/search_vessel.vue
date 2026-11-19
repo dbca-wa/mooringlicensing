@@ -1,7 +1,7 @@
 <template>
     <FormSection label="Search Vessels" Index="search_vessel">
         <div class="row form-group">
-                <label for="vessel_lookup" class="col-sm-3 control-label">Search Vessel by registration number or name</label>
+                <label for="vessel_lookup" class="col-sm-3 col-form-label">Search Vessel by registration number or name</label>
                 <div class="col-sm-6">
                     <select 
                         id="vessel_lookup"  

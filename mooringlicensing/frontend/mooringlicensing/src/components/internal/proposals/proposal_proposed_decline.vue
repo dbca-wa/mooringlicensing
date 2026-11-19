@@ -9,7 +9,7 @@
                             <div class="form-group">
                                 <div class="row">
                                     <div class="col-sm-12">
-                                        <label class="control-label"  for="Name">{{ detailsText }} </label>
+                                        <label class="form-label"  for="Name">{{ detailsText }} </label>
                                         <textarea style="width: 70%;"class="form-control" name="reason" v-model="decline.reason"></textarea>
                                     </div>
                                 </div>
@@ -17,7 +17,7 @@
                             <div class="form-group">
                                 <div class="row">
                                     <div class="col-sm-12">
-                                        <label class="control-label"  for="Name">{{ ccText }}</label>
+                                        <label class="form-label"  for="Name">{{ ccText }}</label>
                                         <input type="text" style="width: 70%;"class="form-control" name="cc_email" v-model="decline.cc_email"/>
                                     </div>
                                 </div>

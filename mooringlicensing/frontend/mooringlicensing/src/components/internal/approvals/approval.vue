@@ -5,11 +5,11 @@
         <div class="col-md-3">
             <CommsLogs :comms_url="comms_url" :logs_url="logs_url" :comms_add_url="comms_add_url" :disable_add_entry="false"/>
             <div class="row">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
+                <div class="card">
+                    <div class="card-header">
                        Submission
                     </div>
-                    <div class="panel-body panel-collapse">
+                    <div class="card-body">
                         <div class="row">
 
                             <div class="col-sm-12 top-buffer-s">
@@ -30,11 +30,11 @@
                 </div>
             </div>
             <div class="row">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
+                <div class="card">
+                    <div class="card-header">
                         Workflow
                     </div>
-                    <div class="panel-body panel-collapse">
+                    <div class="card-body">
                         <div class="row">
                             <div class="col-sm-12">
                                 <strong>Status</strong><br/>
@@ -70,34 +70,34 @@
                     <div v-if="loading.length == 0">
                       <form class="form-horizontal" action="index.html" method="post">
                           <div v-if="mooringLicence" class="form-group">
-                            <label for="" class="col-sm-3 control-label">Mooring</label>
+                            <label for="" class="col-sm-3 col-form-label">Mooring</label>
                             <div class="col-sm-6">
-                                <label for="" class="control-label pull-left">{{approval.mooring_licence_mooring}}</label>
+                                <label for="" class="form-label float-start">{{approval.mooring_licence_mooring}}</label>
                             </div>
                           </div>
                           <div class="form-group">
-                            <label for="" class="col-sm-3 control-label">Issue Date</label>
+                            <label for="" class="col-sm-3 col-form-label">Issue Date</label>
                             <div class="col-sm-6">
-                                <label for="" class="control-label pull-left">{{approval.issue_date | formatDate}}</label>
+                                <label for="" class="form-label float-start">{{approval.issue_date | formatDate}}</label>
                             </div>
                           </div>
                           <div class="form-group">
-                            <label for="" class="col-sm-3 control-label" >Start Date</label>
+                            <label for="" class="col-sm-3 col-form-label" >Start Date</label>
                             <div class="col-sm-6">
-                                <label for="" class="control-label pull-left">{{approval.start_date | formatDate}}</label>
+                                <label for="" class="form-label float-start">{{approval.start_date | formatDate}}</label>
                             </div>
                           </div>
                           <div class="form-group">
-                            <label for="" class="col-sm-3 control-label">Expiry Date</label>
+                            <label for="" class="col-sm-3 col-form-label">Expiry Date</label>
                             <div class="col-sm-3">
-                                <label for="" class="control-label pull-left">{{approval.expiry_date_str}}</label>
+                                <label for="" class="form-label float-start">{{approval.expiry_date_str}}</label>
                             </div>
 
                           </div>
                           <div class="form-group">
-                              <label for="" class="col-sm-3 control-label" >{{ approvalLabel }}</label>
+                              <label for="" class="col-sm-3 col-form-label" >{{ approvalLabel }}</label>
                             <div class="col-sm-4">
-                                <p><a target="_blank" :href="approval.licence_document" class="control-label pull-left">Licence.pdf</a></p>
+                                <p><a target="_blank" :href="approval.licence_document" class="form-label float-start">Licence.pdf</a></p>
                             </div>
                           </div>
                        </form>

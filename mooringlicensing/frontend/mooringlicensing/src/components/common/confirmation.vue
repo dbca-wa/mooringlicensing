@@ -1,7 +1,7 @@
 <template>
 
     <div class="container">
-        <div class="well">
+        <div class="card card-body">
             <div v-if="proposal.fee_paid" class="row">
                 <div class="col-sm-12">
                     <h2>Application Fee: Paid</h2>

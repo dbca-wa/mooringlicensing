@@ -11,7 +11,7 @@
                 >
                     <form class="form-horizontal">
                         <div class="form-group">
-                            <label class="col-sm-3 control-label">Applicant</label>
+                            <label class="col-sm-3 col-form-label">Applicant</label>
                             <div class="col-sm-6">
                                 <select 
                                     id="person_lookup"  
@@ -23,10 +23,10 @@
                         </div>
                         <div>
                             <div class="col-sm-12">
-                                <button v-if="changingApplicant" type="button" class="btn btn-primary pull-right" disabled>
+                                <button v-if="changingApplicant" type="button" class="btn btn-primary float-end" disabled>
                                 Change Applicant&nbsp;<i class="fa fa-circle-o-notch fa-spin fa-fw"></i>
                                 </button>
-                                <button v-else type="button" @click.prevent="changeApplicant" class="btn btn-primary pull-right"
+                                <button v-else type="button" @click.prevent="changeApplicant" class="btn btn-primary float-end"
                                 :disabled="applicant_system_id == null || applicant_system_id == original_applicant_system_id">
                                 Change Applicant
                                 </button>
@@ -41,7 +41,7 @@
                 >
                     <form class="form-horizontal">
                     <div v-if="!proposalApplicant" class="form-group">
-                        <label for="" class="col-sm-3 control-label"></label>
+                        <label for="" class="col-sm-3 col-form-label"></label>
                         <div v-if="!is_internal" class="col-sm-12">
                             <div class="alert alert-info"><b>To update the legal name of the permit holder, contact moorings@rottnestisland.com</b></div>
                         </div>
@@ -50,7 +50,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="" class="col-sm-3 control-label">Legal Given name(s)</label>
+                        <label for="" class="col-sm-3 col-form-label">Legal Given name(s)</label>
                         <div class="col-sm-6" v-if="profile.legal_first_name">
                             <input readonly type="text" class="form-control" id="first_name" name="Given name" placeholder="" v-model="profile.legal_first_name" required="">
                         </div>
@@ -59,7 +59,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="" class="col-sm-3 control-label" >Legal Surname</label>
+                        <label for="" class="col-sm-3 col-form-label" >Legal Surname</label>
                         <div class="col-sm-6" v-if="profile.legal_first_name">
                             <input readonly type="text" class="form-control" id="surname" name="Surname" placeholder="" v-model="profile.legal_last_name">
                         </div>
@@ -68,7 +68,7 @@
                         </div>
                     </div>
                     <div class="row form-group" v-if="!forEndorser">
-                        <label for="" class="col-sm-3 control-label" >Date of Birth</label>
+                        <label for="" class="col-sm-3 col-form-label" >Date of Birth</label>
                         <div class="col-sm-6">
                             <input readonly type="text" class="form-control" id="dob" name="Date of Birth" placeholder="" v-model="profile.legal_dob">
                         </div>
@@ -90,7 +90,7 @@
                     <div v-if="!readonly">
                         <form class="form-horizontal">
                             <div class="form-group">
-                                <label for="" class="col-sm-3 control-label" >
+                                <label for="" class="col-sm-3 col-form-label" >
                                     <strong>
                                     Residential Address
                                     </strong>
@@ -105,7 +105,7 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="" class="col-sm-3 control-label" >
+                                <label for="" class="col-sm-3 col-form-label" >
                                     <strong>
                                     Postal Address
                                     </strong>
@@ -124,7 +124,7 @@
                     <div v-else-if="proposal.proposal_applicant">
                         <form class="form-horizontal">
                             <div class="form-group">
-                                <label for="" class="col-sm-3 control-label" >
+                                <label for="" class="col-sm-3 col-form-label" >
                                     <strong>
                                     Residential Address
                                     </strong>
@@ -132,38 +132,38 @@
                             </div>
                             <div class="row">
                             <div class="form-group">
-                                <label for="" class="col-sm-3 control-label" >Street</label>
+                                <label for="" class="col-sm-3 col-form-label" >Street</label>
                                 <div class="col-sm-6">
                                     <input readonly type="text" class="form-control" v-model="proposal.proposal_applicant.residential_address_line1">
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="" class="col-sm-3 control-label" >Town/Suburb</label>
+                                <label for="" class="col-sm-3 col-form-label" >Town/Suburb</label>
                                 <div class="col-sm-6">
                                     <input readonly type="text" class="form-control" v-model="proposal.proposal_applicant.residential_address_locality">
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="" class="col-sm-3 control-label" >State</label>
+                                <label for="" class="col-sm-3 col-form-label" >State</label>
                                 <div class="col-sm-6">
                                     <input readonly type="text" class="form-control" v-model="proposal.proposal_applicant.residential_address_state">
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="" class="col-sm-3 control-label" >Postcode</label>
+                                <label for="" class="col-sm-3 col-form-label" >Postcode</label>
                                 <div class="col-sm-6">
                                     <input readonly type="text" class="form-control" v-model="proposal.proposal_applicant.residential_address_postcode">
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="" class="col-sm-3 control-label" >Country</label>
+                                <label for="" class="col-sm-3 col-form-label" >Country</label>
                                 <div class="col-sm-6">
                                     <input readonly type="text" class="form-control" v-model="proposal.proposal_applicant.residential_address_country">
                                 </div>
                             </div> 
                             </div>
                             <div class="form-group">
-                                <label for="" class="col-sm-3 control-label" >
+                                <label for="" class="col-sm-3 col-form-label" >
                                     <strong>
                                     Postal Address
                                     </strong>
@@ -171,31 +171,31 @@
                             </div>
                             <div class="row">
                             <div class="form-group">
-                                <label for="" class="col-sm-3 control-label" >Street</label>
+                                <label for="" class="col-sm-3 col-form-label" >Street</label>
                                 <div class="col-sm-6">
                                     <input readonly type="text" class="form-control" v-model="proposal.proposal_applicant.postal_address_line1">
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="" class="col-sm-3 control-label" >Town/Suburb</label>
+                                <label for="" class="col-sm-3 col-form-label" >Town/Suburb</label>
                                 <div class="col-sm-6">
                                     <input readonly type="text" class="form-control" v-model="proposal.proposal_applicant.postal_address_locality">
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="" class="col-sm-3 control-label" >State</label>
+                                <label for="" class="col-sm-3 col-form-label" >State</label>
                                 <div class="col-sm-6">
                                     <input readonly type="text" class="form-control" v-model="proposal.proposal_applicant.postal_address_state">
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="" class="col-sm-3 control-label" >Postcode</label>
+                                <label for="" class="col-sm-3 col-form-label" >Postcode</label>
                                 <div class="col-sm-6">
                                     <input readonly type="text" class="form-control" v-model="proposal.proposal_applicant.postal_address_postcode">
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="" class="col-sm-3 control-label" >Country</label>
+                                <label for="" class="col-sm-3 col-form-label" >Country</label>
                                 <div class="col-sm-6">
                                     <input readonly type="text" class="form-control" v-model="proposal.proposal_applicant.postal_address_country">
                                 </div>
@@ -215,21 +215,21 @@
                 >
                     <form class="form-horizontal">
                         <div class="form-group">
-                            <label for="" class="col-sm-3 control-label">Phone (work)</label>
+                            <label for="" class="col-sm-3 col-form-label">Phone (work)</label>
                             <div class="col-sm-6">
                                 <input readonly type="text" class="form-control" id="phone" name="Phone" placeholder="" v-model="profile.phone_number">
                             </div>
                         </div>
 
                         <div class="form-group" v-if="!forEndorser">
-                            <label for="" class="col-sm-3 control-label">Mobile</label>
+                            <label for="" class="col-sm-3 col-form-label">Mobile</label>
                             <div class="col-sm-6">
                                 <input readonly type="text" class="form-control" id="mobile" name="Mobile" placeholder="" v-model="profile.mobile_number">
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label for="" class="col-sm-3 control-label">Email</label>
+                            <label for="" class="col-sm-3 col-form-label">Email</label>
                             <div class="col-sm-6">
                                 <input readonly type="email" class="form-control" id="email" name="Email" placeholder="" v-model="profile.email">
                             </div>

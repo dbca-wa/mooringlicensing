@@ -17,19 +17,19 @@
         </FormSection>
         <FormSection :formCollapse="false" label="DCV Permit" Index="dcv_permit">
             <div class="row form-group">
-                <label for="" class="col-sm-3 control-label">Organisation</label>
+                <label for="" class="col-sm-3 col-form-label">Organisation</label>
                 <div class="col-sm-6">
                     <input type="text" class="form-control" name="organisation" placeholder="" v-model="dcv_permit.organisation">
                 </div>
             </div>
             <div class="row form-group">
-                <label for="" class="col-sm-3 control-label">ABN / ACN</label>
+                <label for="" class="col-sm-3 col-form-label">ABN / ACN</label>
                 <div class="col-sm-6">
                     <input type="text" class="form-control" name="abn_acn" placeholder="" v-model="dcv_permit.abn_acn">
                 </div>
             </div>
             <div class="row form-group">
-                <label for="" class="col-sm-3 control-label">Season</label>
+                <label for="" class="col-sm-3 col-form-label">Season</label>
                 <div class="col-sm-6">
                     <select class="form-control" v-model="dcv_permit.season">
                         <option value=""></option>
@@ -38,20 +38,20 @@
                 </div>
             </div>
             <div class="row form-group">
-                <label for="" class="col-sm-3 control-label">Unique Vessel Identifier (UVI)</label>
+                <label for="" class="col-sm-3 col-form-label">Unique Vessel Identifier (UVI)</label>
                 <div class="col-sm-9">
                     <select :disabled="readonly" id="vessel_search" name="vessel_registration" ref="dcv_vessel_rego_nos" class="form-control" style="width: 40%">
                     </select>
                 </div>
             </div>
             <div class="row form-group">
-                <label for="" class="col-sm-3 control-label">Vessel name</label>
+                <label for="" class="col-sm-3 col-form-label">Vessel name</label>
                 <div class="col-sm-6">
                     <input type="text" class="form-control" name="vessel_name" placeholder="" v-model="dcv_permit.dcv_vessel.vessel_name">
                 </div>
             </div>
             <div class="row form-group">
-                            <label for="" class="col-sm-3 control-label" >
+                            <label for="" class="col-sm-3 col-form-label" >
                                 <strong>
                                 Postal Address
                                 </strong>
@@ -77,7 +77,7 @@
                         <div class="navbar navbar-fixed-bottom"  style="background-color: #f5f5f5;">
                             <div class="navbar-inner">
                                 <div class="container">
-                                    <p class="pull-right" style="margin-top:5px">
+                                    <p class="float-end" style="margin-top:5px">
                                         <button v-if="paySubmitting" type="button" class="btn btn-primary" disabled>Pay and Submit&nbsp;<i class="fa fa-circle-o-notch fa-spin fa-fw"></i></button>
                                         <input v-else type="button" @click.prevent="pay_and_submit" class="btn btn-primary" value="Pay and Submit" :disabled="paySubmitting"/>
                                     </p>

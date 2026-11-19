@@ -9,7 +9,7 @@
                             <div class="row">
                                 <div class="form-group">
                                     <div class="col-sm-3">
-                                        <label class="control-label pull-right"  for="reason_select">Reason</label>
+                                        <label class="form-label float-end"  for="reason_select">Reason</label>
                                     </div>
                                     <div class="col-sm-6">
                                         <select class="form-control" id="reason_select" ref="reason" v-model="amendment.reason">
@@ -21,7 +21,7 @@
                             <div class="row">
                                 <div class="form-group">
                                     <div class="col-sm-3">
-                                        <label class="control-label pull-right" for="amendment_text">Details</label>
+                                        <label class="form-label float-end" for="amendment_text">Details</label>
                                     </div>
                                     <div class="col-sm-6">
                                         <textarea class="form-control" v-model="amendment.text" id="amendment_text"></textarea>

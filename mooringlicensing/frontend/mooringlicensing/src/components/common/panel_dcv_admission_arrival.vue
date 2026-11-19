@@ -1,34 +1,34 @@
 <template>
     <transition>
-        <div v-if="shown" class="panel panel-default">
-            <div class="panel-body">
+        <div v-if="shown" class="card">
+            <div class="card-body">
                 <div class="delete_arrival_icon">
                     <i class="fa fa-times-circle fa-2x" style="color:coral" @click="delete_arrival_icon_clicked"></i>
                 </div>
 
                 <div class="row form-group">
-                    <label for="" class="col-sm-2 control-label">Arrival</label>
+                    <label for="" class="col-sm-2 col-form-label">Arrival</label>
                     <div class="col-sm-3 input-group date">
                         <input type="date" class="form-control text-center" placeholder="DD/MM/YYYY" v-model="arrival.arrival_date" @change="calculate_column_extended_stay_inputability"/>
                     </div>
                 </div>
 
                 <div class="row form-group">
-                    <label for="" class="col-sm-2 control-label">Departure</label>
+                    <label for="" class="col-sm-2 col-form-label">Departure</label>
                     <div class="col-sm-3 input-group date">
                         <input type="date" class="form-control text-center" placeholder="DD/MM/YYYY" v-model="arrival.departure_date" @change="calculate_column_extended_stay_inputability"/>
                     </div>
                 </div>
 
                 <div class="row form-group">
-                    <label class="col-sm-2 control-label">Private visit</label>
+                    <label class="col-sm-2 col-form-label">Private visit</label>
                     <div class="col-sm-2">
                         <input :disabled="!radio_private_visit_enabled" type="radio" :id="radio_yes_id" :name="radio_buttons_name" :value="true" v-model="arrival.private_visit"/>
-                        <label class="radio-inline control-label" :for="radio_yes_id">Yes</label>
+                        <label class="form-check-label form-label" :for="radio_yes_id">Yes</label>
                     </div>
                     <div class="col-sm-2">
                         <input :disabled="!radio_private_visit_enabled" type="radio" :id="radio_no_id" :name="radio_buttons_name" :value="false" v-model="arrival.private_visit"/>
-                        <label class="radio-inline control-label" :for="radio_no_id">No</label>
+                        <label class="form-check-label form-label" :for="radio_no_id">No</label>
                     </div>
                 </div>
 
@@ -68,7 +68,7 @@
                             <input :disabled="!column_approved_events_enabled" type="number" min="0" max="100" step="1" class="form-control text-center" name="adults-approved-events" placeholder="" v-model="arrival.adults.approved_events">
                         </div>
                         <div class="col-sm-2">
-                            <div class="total_fee text-right">
+                            <div class="total_fee text-end">
                                 {{ total_fee_adults }}
                             </div>
                         </div>
@@ -88,7 +88,7 @@
                             <input :disabled="!column_approved_events_enabled" type="number" min="0" max="100" step="1" class="form-control text-center" name="children-approved-events" placeholder="" v-model="arrival.children.approved_events">
                         </div>
                         <div class="col-sm-2">
-                            <div class="total_fee text-right">
+                            <div class="total_fee text-end">
                                 {{ total_fee_children }}
                             </div>
                         </div>
@@ -294,7 +294,7 @@ export default {
 .mb-2 {
     margin: 0 0 2em 0;
 }
-.panel-body {
+.card-body {
     position: relative;
 }
 .delete_arrival_icon {

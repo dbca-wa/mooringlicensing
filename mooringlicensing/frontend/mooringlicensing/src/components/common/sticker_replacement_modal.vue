@@ -4,13 +4,13 @@
             <div class="container-fluid">
                 <alert :show.sync="showError" type="danger"><strong>{{ errorString }}</strong></alert>
                 <div class="row form-group">
-                    <label class="col-sm-2 control-label" for="reason">Reason</label>
+                    <label class="col-sm-2 col-form-label" for="reason">Reason</label>
                     <div class="col-sm-10">
                         <textarea class="col-sm-9 form-control" name="reason" v-model="details.reason"></textarea>
                     </div>
                 </div>
                 <div v-show="showDateOfLost" class="row form-group">
-                    <label class="col-sm-2 control-label">Date of Lost</label>
+                    <label class="col-sm-2 col-form-label">Date of Lost</label>
                     <div class="col-sm-3">
                         <div style="width: 70%;">
                             <input
@@ -24,7 +24,7 @@
                     </div>
                 </div>
                 <div v-show="showDateOfReturned" class="row form-group">
-                    <label class="col-sm-2 control-label">Date of Returned</label>
+                    <label class="col-sm-2 col-form-label">Date of Returned</label>
                     <div class="col-sm-3">
                         <div style="width: 70%;">
                             <input

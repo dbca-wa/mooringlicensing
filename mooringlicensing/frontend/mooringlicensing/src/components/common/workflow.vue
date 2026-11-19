@@ -1,10 +1,10 @@
 <template>
             <div class="row">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
+                <div class="card">
+                    <div class="card-header">
                         Workflow
                     </div>
-                    <div class="panel-body panel-collapse">
+                    <div class="card-body">
                         <div class="row">
                             <div class="col-sm-12">
                                 <strong>Status</strong><br/>
@@ -26,7 +26,7 @@
                                                 @change="assignTo()">
                                                 <option v-for="member in proposal.allowed_assessors" :value="member.ledger_id">{{ member.first_name }} {{ member.last_name }}</option>
                                             </select>
-                                            <a v-if="canAssess && proposal.assigned_approver != proposal.current_assessor.id" @click.prevent="assignRequestUser()" class="actionBtn pull-right">Assign to me</a>
+                                            <a v-if="canAssess && proposal.assigned_approver != proposal.current_assessor.id" @click.prevent="assignRequestUser()" class="actionBtn float-end">Assign to me</a>
                                     </template>
                                     <template v-else>
                                             <select 
@@ -37,7 +37,7 @@
                                                 @change="assignTo()">
                                                 <option v-for="member in proposal.allowed_assessors" :value="member.ledger_id">{{ member.first_name }} {{ member.last_name }}</option>
                                             </select>
-                                            <a v-if="canAssess && proposal.assigned_officer != proposal.current_assessor.id" @click.prevent="assignRequestUser()" class="actionBtn pull-right">Assign to me</a>
+                                            <a v-if="canAssess && proposal.assigned_officer != proposal.current_assessor.id" @click.prevent="assignRequestUser()" class="actionBtn float-end">Assign to me</a>
                                     </template>
                                 </div>
                             </div>
