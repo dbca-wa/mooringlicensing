@@ -1,7 +1,7 @@
 <template>
     <div id="vessels">
         <FormSection label="Registration Details" Index="registration_details" v-if="!forEndorser">
-            <div class="row form-group">
+            <div class="row mb-3">
                 <label for="vessel_search" class="col-sm-3 col-form-label">Vessel registration <span style="color: red;">*</span></label>
                 <div class="col-sm-9">
                     <select :disabled="readonly" id="vessel_search" ref="vessel_rego_nos" class="form-control"
@@ -10,14 +10,14 @@
                     </select>
                 </div>
             </div>
-            <div class="row form-group">
+            <div class="row mb-3">
                 <label for="" class="col-sm-3 col-form-label">Vessel name <span style="color: red;">*</span></label>
                 <div class="col-sm-9">
                     <input :readonly="readonly" type="text" class="form-control" id="vessel_name" placeholder=""
                         v-model="vessel.vessel_details.vessel_name" required />
                 </div>
             </div>
-            <div v-if="!readonly || (vessel.vessel_ownership.individual_owner && vessel.vessel_ownership.owner_name)" class="row form-group">
+            <div v-if="!readonly || (vessel.vessel_ownership.individual_owner && vessel.vessel_ownership.owner_name)" class="row mb-3">
                 <label for="" class="col-sm-3 col-form-label">Registration vessel owner <span style="color: red;">*</span></label>
                 <div v-if="!readonly" class="col-sm-9">
                     <div class="row">
@@ -59,7 +59,7 @@
                 </div>
             </div>
             <transition>
-                <div v-show="companyOwner" class="row form-group">
+                <div v-show="companyOwner" class="row mb-3">
                     <label for="" class="col-sm-3 col-form-label">Company</label>
                     <div class="col-sm-8">
                         <select :disabled="readonly" id="company_name" ref="company_name" class="form-control"
@@ -67,7 +67,7 @@
                     </div>
                 </div>
             </transition>
-            <div class="row form-group">
+            <div class="row mb-3">
                 <label for="" class="col-sm-3 col-form-label">Ownership percentage <span style="color: red;"><span style="color: red;">*</span></span></label>
                 <div v-if="individualOwner" class="col-sm-2">
                     <input
@@ -99,7 +99,7 @@
                     />
                 </div>
             </div>
-            <div class="row form-group">
+            <div class="row mb-3">
                 <label for="" class="col-sm-3 col-form-label">Owner name as shown on DoT registration (SURNAME FIRST MIDDLE) <span style="color: red;">*</span></label>
                 <div class="col-sm-9">
                     <input
@@ -114,7 +114,7 @@
                 </div>
             </div>
 
-            <div v-show="false" class="row form-group">
+            <div v-show="false" class="row mb-3">
                 <label for="" class="col-sm-3 col-form-label">Permanent or usual place of berthing/mooring of vessel</label>
                 <div class="col-sm-9">
                     <input :readonly="readonly" type="text" class="col-sm-9 form-control" id="berth_mooring" placeholder=""
@@ -123,7 +123,7 @@
             </div>
             <!-- Start:new file field -->
             <transition>
-                <div v-if="showDotRegistrationPapers" class="row form-group">
+                <div v-if="showDotRegistrationPapers" class="row mb-3">
                     <label for="" class="col-sm-3 col-form-label">Copy of registration papers <span style="color: red;">*</span></label>
                     <div class="col-sm-9">
                         <FileField
@@ -141,7 +141,7 @@
             <!-- End:new file field -->
 
             <transition>
-                <div v-if="showProofOfVesselOwnership" class="row form-group">
+                <div v-if="showProofOfVesselOwnership" class="row mb-3">
                     <label for="" class="col-sm-3 col-form-label">A statutory declaration is required as proof of vessel ownership <span style="color: red;">*</span></label>
                     <div class="col-sm-9" v-if="proposal && proposal.stat_dec_form">
                         Download form <a target="_blank" :href="proposal.stat_dec_form">here</a>
@@ -162,28 +162,28 @@
 
         </FormSection>
         <FormSection label="Vessel Details" Index="vessel_details">
-            <div class="row form-group">
+            <div class="row mb-3">
                 <label for="" class="col-sm-3 col-form-label">Vessel length (m) <span style="color: red;">*</span></label>
                 <div class="col-sm-2">
                     <input :readonly="readonly" type="number" min="1" class="form-control" id="vessel_length" placeholder=""
                         v-model="vessel.vessel_details.vessel_length" required="" @change="emitVesselLength" />
                 </div>
             </div>
-            <div class="row form-group">
+            <div class="row mb-3">
                 <label for="" class="col-sm-3 col-form-label">Displacement tonnage <span style="color: red;">*</span></label>
                 <div class="col-sm-2">
                     <input :readonly="readonly" type="number" min="1" class="form-control" id="displacement_tonnage"
                         placeholder="" v-model="vessel.vessel_details.vessel_weight" required="" />
                 </div>
             </div>
-            <div class="row form-group">
+            <div class="row mb-3">
                 <label for="" class="col-sm-3 col-form-label">Draft (m) <span style="color: red;">*</span></label>
                 <div class="col-sm-2">
                     <input :readonly="readonly" type="number" min="1" class="form-control" id="draft" placeholder=""
                         v-model="vessel.vessel_details.vessel_draft" required="" />
                 </div>
             </div>
-            <div class="row form-group">
+            <div class="row mb-3">
                 <label for="" class="col-sm-3 col-form-label">Vessel Type <span style="color: red;">*</span></label>
                 <div class="col-sm-4">
                     <select :disabled="readonly" class="form-control" style="width:40%"

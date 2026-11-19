@@ -32,12 +32,12 @@
                 >
                     <div class="row">
                         <div class="col-md-12"> 
-                        <form class="form-horizontal" name="complianceForm" method="post">
+                        <form   name="complianceForm" method="post">
                             <alert :show.sync="showError" type="danger">
                                 <strong>{{errorString}}</strong>
                             </alert>
                             <div class="row">
-                                <div class="form-group">
+                                <div class="row mb-3">
                                     <label class="col-sm-3 col-form-label float-start"  for="Name">Requirement:</label>
                                     <div class="col-sm-6">
                                         {{compliance.requirement}}
@@ -46,7 +46,7 @@
                             </div>
 
                             <div class="row">
-                                <div class="form-group">
+                                <div class="row mb-3">
                                     <label class="col-sm-3 col-form-label float-start"  for="Name">Details:</label>
                                     <div class="col-sm-6">
                                         <textarea :disabled="isFinalised" class="form-control" name="detail" placeholder="" v-model="compliance.text"></textarea>
@@ -55,7 +55,7 @@
                             </div>
 
                             <div class="row">
-                                <div v-if="hasDocuments" class="form-group">
+                                <div v-if="hasDocuments" class="row mb-3">
                                     <div class="col-sm-3 col-form-label float-start" >  
                                         <label  for="Name">Documents:</label>
                                     </div> 
@@ -74,7 +74,7 @@
                             </div>
 
                             <div class="row">
-                                <div v-if="!isFinalised" class="form-group"> 
+                                <div v-if="!isFinalised" class="row mb-3"> 
                                     <label class="col-sm-3 col-form-label float-start"  for="Name">Attachments:</label>
                                 <div class="col-sm-6">
                                     <template v-for="(f,i) in files">
@@ -101,7 +101,7 @@
                             </div>
 
                             <div class="row">
-                                <div class="form-group">
+                                <div class="row mb-3">
                                     <div class="col-lg-2 float-end">
                                         <button v-if="!isFinalised" @click.prevent="submit()" class="btn btn-primary">Submit</button>
                                         <button v-if="!isFinalised" @click.prevent="close()" class="btn btn-primary">Close</button>

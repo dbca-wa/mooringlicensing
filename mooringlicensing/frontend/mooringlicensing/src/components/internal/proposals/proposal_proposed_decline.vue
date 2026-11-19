@@ -3,10 +3,10 @@
         <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :processing="decliningProposal" :title="title" large>
             <div class="container-fluid">
                 <div class="row">
-                    <form class="form-horizontal" name="declineForm">
+                    <form   name="declineForm">
                         <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
                         <div class="col-sm-12">
-                            <div class="form-group">
+                            <div class="row mb-3">
                                 <div class="row">
                                     <div class="col-sm-12">
                                         <label class="form-label"  for="Name">{{ detailsText }} </label>
@@ -14,7 +14,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="row mb-3">
                                 <div class="row">
                                     <div class="col-sm-12">
                                         <label class="form-label"  for="Name">{{ ccText }}</label>

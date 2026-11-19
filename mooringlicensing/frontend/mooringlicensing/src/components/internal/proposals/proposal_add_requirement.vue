@@ -3,16 +3,16 @@
         <modal transition="modal fade" @ok="ok()" @cancel="cancel()" title="Requirement" large>
             <div class="container-fluid">
                 <div class="row">
-                    <form class="form-horizontal" name="requirementForm">
+                    <form   name="requirementForm">
                         <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
                         <div class="col-sm-12">
-                            <div class="form-group">
+                            <div class="row mb-3">
                                 <label class="form-check-label form-label"><input type="radio" name="requirementType" :value="true" v-model="requirement.standard">Standard Requirement</label>
                                 <label class="form-check-label"><input type="radio" name="requirementType" :value="false" v-model="requirement.standard">Free Text Requirement</label>
                             </div>
                         </div>
                         <div class="col-sm-12">
-                            <div class="form-group">
+                            <div class="row mb-3">
                                 <div class="row">
                                     <div class="col-sm-3">
                                         <label class="form-label float-start"  for="Name">Requirement</label>
@@ -29,7 +29,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="row mb-3">
                                 <div class="row">
                                     <div class="col-sm-3">
                                         <label class="form-label float-start"  for="Name">Due Date</label>
@@ -48,18 +48,18 @@
                                 </div>
                             </div>
                             <template v-if="validDate">
-                                <div class="form-group">
+                                <div class="row mb-3">
                                     <div class="row">
                                         <div class="col-sm-3">
                                             <label class="form-label float-start"  for="Name">Recurrence</label>
                                         </div>
                                         <div class="col-sm-9">
-                                            <label class="checkbox-inline"><input type="checkbox" v-model="requirement.recurrence"></label>
+                                            <label class="form-check-inline"><input type="checkbox" v-model="requirement.recurrence"></label>
                                         </div>
                                     </div>
                                 </div>
                                 <template v-if="requirement.recurrence">
-                                    <div class="form-group">
+                                    <div class="row mb-3">
                                         <div class="row">
                                             <div class="col-sm-3">
                                                 <label class="form-label float-start"  for="Name">Recurrence pattern</label>
@@ -71,7 +71,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="form-group">
+                                    <div class="row mb-3">
                                         <div class="row">
                                             <div class="col-sm-12">
                                                 <label class="form-label"  for="Name">

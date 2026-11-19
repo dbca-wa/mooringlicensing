@@ -16,7 +16,7 @@
                             
                             <div v-if="!isFinalised" class="col-sm-12 top-buffer-s">
                                 <strong>Currently assigned to</strong><br/>
-                                <div class="form-group">
+                                <div class="row mb-3">
                                     <template v-if="proposal.processing_status == 'With Approver'">
                                             <select 
                                                 ref="assigned_officer" 

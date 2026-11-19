@@ -1,7 +1,7 @@
 <template>
     <div id="current_vessels" v-if="vesselExists && !forEndorser">
         <FormSection v-if="mooringLicenceCurrentVesselDisplayText || currentVesselDisplayText" label="Current Vessel" Index="current_vessel">
-            <div v-if="mooringLicenceCurrentVesselDisplayText" class="row form-group">
+            <div v-if="mooringLicenceCurrentVesselDisplayText" class="row mb-3">
                 <div class="col-sm-9">
                     <label for="" class="col-sm-12 form-label">{{ mooringLicenceCurrentVesselDisplayText }}</label>
                     <div class="col-sm-9">
@@ -32,7 +32,7 @@
                     </div>
                 </div>
             </div>
-            <div v-else class="row form-group">
+            <div v-else class="row mb-3">
                 <div class="col-sm-9">
                     <label for="" class="col-sm-12 form-label">{{ currentVesselDisplayText }}</label>
                         <div class="col-sm-9">

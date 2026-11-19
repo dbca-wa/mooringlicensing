@@ -1,6 +1,6 @@
 <template>
     <FormSection label="Search Mooring" Index="search_mooring">
-        <div class="row form-group">
+        <div class="row mb-3">
             <label for="mooring_lookup" class="col-sm-3 col-form-label">Mooring</label>
             <div class="col-sm-6">
                 <select 

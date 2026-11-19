@@ -5,7 +5,7 @@
             :formCollapse="false"
             :Index="panelBody"
         >
-            <form class="form-horizontal" action="index.html" method="post">
+            <form   action="index.html" method="post">
                 <div class="row mb-2">
                     <div class="col-12 text-end">
                         <button

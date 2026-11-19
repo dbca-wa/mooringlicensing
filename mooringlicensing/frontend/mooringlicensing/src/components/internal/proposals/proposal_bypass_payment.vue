@@ -3,7 +3,7 @@
         <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :processing="submitting" :title="title" large>
             <div class="container-fluid">
                 <div class="row">
-                    <form class="form-horizontal" name="bypassForm">
+                    <form   name="bypassForm">
                         <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
                         <alert type="warning">
                             <strong>Caution</strong> 
@@ -17,7 +17,7 @@
                             Otherwise, if the checkbox if left unchecked then the amount paid will be recored as 0 and will not affect future payments.
                             </alert>
                         <div class="col-sm-12">
-                            <div class="form-group">
+                            <div class="row mb-3">
                                 <div class="row">
                                     <div class="col-sm-3">
                                         <label class="form-label float-start"  for="Name">Bypass Payment Reason</label>
@@ -30,7 +30,7 @@
                         </div>
 
                         <div class="col-sm-12">
-                            <div class="form-group">
+                            <div class="row mb-3">
                                 <div class="row">
                                     <div class="col-sm-6">
                                         <label class="form-label float-start"  for="Name">Record amount as paid (for potential future deductions)</label>

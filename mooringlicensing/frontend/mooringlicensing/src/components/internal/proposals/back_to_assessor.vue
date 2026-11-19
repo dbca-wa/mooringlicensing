@@ -4,11 +4,11 @@
         <modal transition="modal fade" @ok="ok()" @cancel="cancel()" title="Back To Assessor" large>
             <div class="container-fluid">
                 <div class="row">
-                    <form class="form-horizontal" name="backToAssessorForm">
+                    <form   name="backToAssessorForm">
                         <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
                         <div class="col-sm-12">
                             <div class="row">
-                                <div class="form-group">
+                                <div class="row mb-3">
                                     <div class="col-sm-3">
                                         <label class="form-label float-end" for="back_to_assessor_details">Details</label>
                                     </div>

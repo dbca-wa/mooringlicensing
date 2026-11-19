@@ -3,12 +3,12 @@
         <modal transition="modal fade" @ok="ok()" @cancel="cancel()" title="Amendment Request" large>
             <div class="container-fluid">
                 <div class="row">
-                    <form class="form-horizontal" name="amendForm">
+                    <form   name="amendForm">
                         <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
                         <div class="col-sm-12">
                             <div class="row">
                                 <div class="col-sm-offset-2 col-sm-8">
-                                    <div class="form-group">
+                                    <div class="row mb-3">
                                         <label class="form-label float-start"  for="Name">Reason</label>
                                         <select class="form-control" name="reason" ref="reason" v-model="amendment.reason">
                                             <option v-for="r in reason_choices" :value="r.key">{{r.value}}</option>
@@ -18,7 +18,7 @@
                             </div>
                             <div class="row">
                                 <div class="col-sm-offset-2 col-sm-8">
-                                    <div class="form-group">
+                                    <div class="row mb-3">
                                         <label class="form-label float-start"  for="Name">Details</label>
                                         <textarea class="form-control" name="name" v-model="amendment.text"></textarea>
                                     </div>

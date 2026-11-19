@@ -11,7 +11,7 @@
         <div v-else class="row">
             <div v-if="!wlaDash">
                 <div class="col-md-3">
-                    <div class="form-group">
+                    <div class="mb-3">
                         <label for="">Type:</label>
                         <select class="form-control" v-model="filterApprovalType">
                             <option value="All">All</option>
@@ -22,7 +22,7 @@
             </div>
             <div v-else>
                 <div class="col-md-3">
-                    <div class="form-group">
+                    <div class="mb-3">
                         <label for="">Bay:</label>
                         <select class="form-control" v-model="filterMooringBay">
                             <option value="All">All</option>
@@ -32,7 +32,7 @@
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="form-group">
+                <div class="mb-3">
                     <label for="">Status:</label>
                     <select class="form-control" v-model="filterStatus">
                         <option value="All">All</option>
@@ -43,13 +43,13 @@
 
             <div v-if="wlaDash">
                 <div class="col-md-2">
-                    <div class="form-group">
+                    <div class="mb-3">
                         <label for="">Max Vessel Length:</label>
                         <input class="form-control" type="number" v-model="maxVesselLength" id="maxVesselLength"/>
                     </div>
                 </div>
                 <div class="col-md-2">
-                    <div class="form-group">
+                    <div class="mb-3">
                         <label for="">Max Vessel Draft:</label>
                         <input class="form-control" type="number" v-model="maxVesselDraft" id="maxVesselDraft"/>
                     </div>

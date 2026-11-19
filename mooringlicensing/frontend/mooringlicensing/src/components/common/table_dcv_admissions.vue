@@ -2,7 +2,7 @@
     <div>
         <div class="row">
             <div class="col-md-3">
-                <div class="form-group">
+                <div class="mb-3">
                     <label for="organisation_lookup">Organisation</label>
                         <select
                             id="organisation_lookup"  
@@ -16,7 +16,7 @@
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="form-group">
+                <div class="mb-3">
                     <label for="">Date from</label>
                     <div class="input-group date">
                         <input type="date" class="form-control text-center" placeholder="DD/MM/YYYY" v-model="filterDateFrom" id="dateFromField"/>
@@ -24,7 +24,7 @@
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="form-group">
+                <div class="mb-3">
                     <label for="">Date to</label>
                     <div class="input-group date">
                         <input type="date" class="form-control text-center" placeholder="DD/MM/YYYY" v-model="filterDateTo" id="dateToField"/>

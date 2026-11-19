@@ -8,22 +8,22 @@
                         :formCollapse="false"
                         :Index="detailsBody"
                     >
-                        <form class="form-horizontal">
-                            <div v-if="!proposalApplicant" class="form-group">
+                        <form  >
+                            <div v-if="!proposalApplicant" class="row mb-3">
                                 <label for="" class="col-sm-3 col-form-label"></label>
                                 <div class="col-sm-12">
                                     <div class="alert alert-info"><b>The user must log in to the system, navigate to Options > Manage Account, and click Click Here to update their account name</b></div>
                                 </div>
                             </div>
 
-                            <div class="form-group">
+                            <div class="row mb-3">
                                 <label for="" class="col-sm-3 col-form-label">Account Given Name(s)</label>
                                 <div class="col-sm-6">
                                     <input disabled type="text" class="form-control" placeholder=""
                                         v-model="user.first_name">
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="row mb-3">
                                 <label for="" class="col-sm-3 col-form-label">Account Surname</label>
                                 <div class="col-sm-6">
                                     <input disabled type="text" class="form-control" placeholder=""
@@ -31,14 +31,14 @@
                                 </div>
                             </div>
 
-                            <div v-if="!proposalApplicant" class="form-group">
+                            <div v-if="!proposalApplicant" class="row mb-3">
                                 <label for="" class="col-sm-3 col-form-label"></label>
                                 <div class="col-sm-12">
                                     <div class="alert alert-info"><b>To update the legal name of the permit holder go to Accounts Management: <u><a :href="'/ledger-ui/accounts-management/'+user.id+'/change'">Edit System Account</a></u></b></div>
                                 </div>
                             </div>
 
-                            <div class="form-group">
+                            <div class="row mb-3">
                                 <label for="" class="col-sm-3 col-form-label">Legal Given Name(s)</label>
                                 <div class="col-sm-6">
                                     <input v-if="user.legal_first_name" disabled type="text" class="form-control" placeholder=""
@@ -47,7 +47,7 @@
                                         v-model="user.first_name">
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="row mb-3">
                                 <label for="" class="col-sm-3 col-form-label">Legal Surname</label>
                                 <div class="col-sm-6">
                                     <input v-if="user.legal_last_name" disabled type="text" class="form-control" placeholder=""
@@ -57,7 +57,7 @@
                                 </div>
                             </div>
 
-                            <div class="form-group">
+                            <div class="row mb-3">
                                 <label for="" class="col-sm-3 col-form-label">Legal Date of Birth</label>
                                 <div class="col-sm-6">
                                     <input disabled type="text" class="form-control" placeholder=""
@@ -75,8 +75,8 @@
                         :formCollapse="true"
                         :Index="addressBody"
                     > 
-                        <form class="form-horizontal">
-                            <div class="form-group">
+                        <form  >
+                            <div class="row mb-3">
                                 <label for="" class="col-sm-3 col-form-label" >
                                     <strong>
                                     Residential Address
@@ -84,38 +84,38 @@
                                 </label>
                             </div>
                             <div class="row">
-                            <div class="form-group">
+                            <div class="row mb-3">
                                 <label for="" class="col-sm-3 col-form-label" >Street</label>
                                 <div class="col-sm-6">
                                     <input readonly type="text" class="form-control" v-model="proposalApplicant.residential_address_line1">
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="row mb-3">
                                 <label for="" class="col-sm-3 col-form-label" >Town/Suburb</label>
                                 <div class="col-sm-6">
                                     <input readonly type="text" class="form-control" v-model="proposalApplicant.residential_address_locality">
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="row mb-3">
                                 <label for="" class="col-sm-3 col-form-label" >State</label>
                                 <div class="col-sm-6">
                                     <input readonly type="text" class="form-control" v-model="proposalApplicant.residential_address_state">
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="row mb-3">
                                 <label for="" class="col-sm-3 col-form-label" >Postcode</label>
                                 <div class="col-sm-6">
                                     <input readonly type="text" class="form-control" v-model="proposalApplicant.residential_address_postcode">
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="row mb-3">
                                 <label for="" class="col-sm-3 col-form-label" >Country</label>
                                 <div class="col-sm-6">
                                     <input readonly type="text" class="form-control" v-model="proposalApplicant.residential_address_country">
                                 </div>
                             </div> 
                             </div>
-                            <div class="form-group">
+                            <div class="row mb-3">
                                 <label for="" class="col-sm-3 col-form-label" >
                                     <strong>
                                     Postal Address
@@ -123,31 +123,31 @@
                                 </label>
                             </div>
                             <div class="row">
-                            <div class="form-group">
+                            <div class="row mb-3">
                                 <label for="" class="col-sm-3 col-form-label" >Street</label>
                                 <div class="col-sm-6">
                                     <input readonly type="text" class="form-control" v-model="proposalApplicant.postal_address_line1">
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="row mb-3">
                                 <label for="" class="col-sm-3 col-form-label" >Town/Suburb</label>
                                 <div class="col-sm-6">
                                     <input readonly type="text" class="form-control" v-model="proposalApplicant.postal_address_locality">
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="row mb-3">
                                 <label for="" class="col-sm-3 col-form-label" >State</label>
                                 <div class="col-sm-6">
                                     <input readonly type="text" class="form-control" v-model="proposalApplicant.postal_address_state">
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="row mb-3">
                                 <label for="" class="col-sm-3 col-form-label" >Postcode</label>
                                 <div class="col-sm-6">
                                     <input readonly type="text" class="form-control" v-model="proposalApplicant.postal_address_postcode">
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="row mb-3">
                                 <label for="" class="col-sm-3 col-form-label" >Country</label>
                                 <div class="col-sm-6">
                                     <input readonly type="text" class="form-control" v-model="proposalApplicant.postal_address_country">
@@ -210,22 +210,22 @@
                         :formCollapse="true"
                         :Index="contactsBody"
                     >
-                        <form class="form-horizontal">
-                            <div class="form-group">
+                        <form  >
+                            <div class="row mb-3">
                                 <label for="" class="col-sm-3 col-form-label">Phone (work)</label>
                                 <div class="col-sm-6">
                                     <input disabled type="text" class="form-control" name="phoneNumber"
                                         placeholder="" v-model="user.phone_number">
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="row mb-3">
                                 <label for="" class="col-sm-3 col-form-label">Mobile</label>
                                 <div class="col-sm-6">
                                     <input disabled type="text" class="form-control" name="mobileNumber"
                                         placeholder="" v-model="user.mobile_number">
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="row mb-3">
                                 <label for="" class="col-sm-3 col-form-label">Email</label>
                                 <div class="col-sm-6">
                                     <input disabled type="text" class="form-control" name="email"
@@ -243,8 +243,8 @@
                         :formCollapse="true"
                         :Index="electoralRollBody"
                     >
-                        <form class="form-horizontal">
-                            <div class="form-group">
+                        <form  >
+                            <div class="row mb-3">
                                 <div class="col-sm-8 mb-3">
                                     <strong>
                                         You must be on the WA state electoral roll to make an application

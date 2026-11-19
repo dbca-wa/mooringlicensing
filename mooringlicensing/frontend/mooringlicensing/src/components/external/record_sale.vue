@@ -3,17 +3,17 @@
         <modal transition="modal fade" @ok="ok()" @cancel="cancel()" title="Record Sale" large>
             <div class="container-fluid">
                 <div class="row">
-                    <form class="form-horizontal" name="recordSaleForm">
+                    <form   name="recordSaleForm">
                         <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
                         <div class="col-sm-12">
-                            <div class="form-group">
+                            <div class="row mb-3">
                                 <div class="row">
                                     <div class="col-sm-9">
                                         Select the date you sold the vessel
                                     </div>
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="row mb-3">
                                 <div class="row">
                                     <div class="col-sm-3">
                                         <label class="form-label float-start"  for="Name">Sale Date</label>

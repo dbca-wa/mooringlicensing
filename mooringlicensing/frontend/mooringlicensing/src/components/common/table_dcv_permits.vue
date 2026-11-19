@@ -2,7 +2,7 @@
     <div>
         <div class="row">
             <div class="col-md-3">
-                <div class="form-group">
+                <div class="mb-3">
                     <label for="">Organisation</label>
                     <select
                             id="organisation_lookup1"  
@@ -16,7 +16,7 @@
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="form-group">
+                <div class="mb-3">
                     <label for="">Season</label>
                     <select class="form-control" v-model="filterFeeSeason">
                         <option value="All">All</option>

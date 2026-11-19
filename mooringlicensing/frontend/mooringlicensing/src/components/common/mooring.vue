@@ -1,11 +1,11 @@
 <template>
     <FormSection label="Preferred mooring area" Index="preferred_mooring_area">
-        <div class="row form-group">
+        <div class="row mb-3">
             <label for="" class="col-sm-9 form-label">Select one preferred mooring area. Preference cannot be changed without losing your original application date.</label>
         </div>
-        <div class="row form-group">
+        <div class="row mb-3">
             <div class="col-sm-6" v-for="mooring in mooringBays">
-                <label :for="mooring.id" class="label-right col-sm-5 col-form-label">{{ mooring.name }}</label>
+                <label :for="mooring.id" class=" text-end col-sm-5 col-form-label">{{ mooring.name }}</label>
                 <input :disabled="readonly" type="radio" :id="mooring.id" :value="mooring.id" v-model="selectedMooring" @change="mooringPreferenceChanged" required=""/>
             </div>
         </div>
@@ -76,7 +76,7 @@ from '@/utils/hooks'
 </script>
 
 <style lang="css" scoped>
-.label-right {
+. text-end {
     float: right;
     text-align: left;
     margin-right: 50%;

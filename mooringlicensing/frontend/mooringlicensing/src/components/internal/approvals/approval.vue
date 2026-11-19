@@ -68,33 +68,33 @@
                     :Index="oBody"
                 >
                     <div v-if="loading.length == 0">
-                      <form class="form-horizontal" action="index.html" method="post">
-                          <div v-if="mooringLicence" class="form-group">
+                      <form   action="index.html" method="post">
+                          <div v-if="mooringLicence" class="row mb-3">
                             <label for="" class="col-sm-3 col-form-label">Mooring</label>
                             <div class="col-sm-6">
                                 <label for="" class="form-label float-start">{{approval.mooring_licence_mooring}}</label>
                             </div>
                           </div>
-                          <div class="form-group">
+                          <div class="row mb-3">
                             <label for="" class="col-sm-3 col-form-label">Issue Date</label>
                             <div class="col-sm-6">
                                 <label for="" class="form-label float-start">{{approval.issue_date | formatDate}}</label>
                             </div>
                           </div>
-                          <div class="form-group">
+                          <div class="row mb-3">
                             <label for="" class="col-sm-3 col-form-label" >Start Date</label>
                             <div class="col-sm-6">
                                 <label for="" class="form-label float-start">{{approval.start_date | formatDate}}</label>
                             </div>
                           </div>
-                          <div class="form-group">
+                          <div class="row mb-3">
                             <label for="" class="col-sm-3 col-form-label">Expiry Date</label>
                             <div class="col-sm-3">
                                 <label for="" class="form-label float-start">{{approval.expiry_date_str}}</label>
                             </div>
 
                           </div>
-                          <div class="form-group">
+                          <div class="row mb-3">
                               <label for="" class="col-sm-3 col-form-label" >{{ approvalLabel }}</label>
                             <div class="col-sm-4">
                                 <p><a target="_blank" :href="approval.licence_document" class="form-label float-start">Licence.pdf</a></p>

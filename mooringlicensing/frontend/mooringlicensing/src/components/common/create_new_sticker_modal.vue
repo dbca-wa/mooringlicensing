@@ -4,25 +4,25 @@
             <div class="container-fluid">
                 <alert :show.sync="showError" type="danger"><strong>{{ errorString }}</strong></alert>
                 <alert v-if="missing_sticker_message" type="warning"><strong>{{ missing_sticker_message }}</strong></alert>   
-                <div class="row form-group">
+                <div class="row mb-3">
                     <label class="col-sm-5 col-form-label" for="change_sticker_address">Change Sticker Address</label>
                     <div class="col-md-6">
                         <input type="checkbox" v-model="change_sticker_address" />
                     </div>
                 </div>
-                <div v-if="change_sticker_address" class="row form-group">
+                <div v-if="change_sticker_address" class="row mb-3">
                     <label for="" class="col-sm-3 col-form-label">Street</label>
                     <div class="col-sm-6">
                         <input type="text" class="form-control" name="street" placeholder="" v-model="postal_address_line1">
                     </div>
                 </div>
-                <div v-if="change_sticker_address" class="row form-group">
+                <div v-if="change_sticker_address" class="row mb-3">
                     <label for="" class="col-sm-3 col-form-label" >Town/Suburb</label>
                     <div class="col-sm-6">
                         <input type="text" class="form-control" name="surburb" placeholder="" v-model="postal_address_locality">
                     </div>
                 </div>
-                <div v-if="change_sticker_address" class="row form-group">
+                <div v-if="change_sticker_address" class="row mb-3">
                     <label for="" class="col-sm-3 col-form-label">State</label>
                     <div class="col-sm-2">
                         <input type="text" class="form-control" name="state" placeholder="" v-model="postal_address_state">
@@ -32,7 +32,7 @@
                         <input type="text" class="form-control" name="postcode" placeholder="" v-model="postal_address_postcode">
                     </div>
                 </div>
-                <div v-if="change_sticker_address" class="row form-group">
+                <div v-if="change_sticker_address" class="row mb-3">
                     <label for="" class="col-sm-3 col-form-label" >Country</label>
                     <div class="col-sm-4">
                         <select v-model="postal_address_country" class="form-control" name="country">
@@ -41,7 +41,7 @@
                         </select>
                     </div>
                 </div>
-                <div v-if="replacementFee" class="row form-group">
+                <div v-if="replacementFee" class="row mb-3">
                     <label class="col-sm-2 col-form-label" for="reason">Reason</label>
                     <div class="col-sm-9">
                         <textarea class="col-sm-9 form-control" name="reason" v-model="details.reason"></textarea>

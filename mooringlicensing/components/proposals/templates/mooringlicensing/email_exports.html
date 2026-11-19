@@ -19,7 +19,7 @@
                 </h3>
             </div>
             <div class="card-body collapse show">
-                <div class="row form-group">
+                <div class="row mb-3">
                     <div class="col-sm-12">
                     {% if message %}
                     <div class="alert alert-success">{{message}}</div>
@@ -28,7 +28,7 @@
                     {% endif %}
                     </div>
                 </div>
-                <div class="row form-group">
+                <div class="row mb-3">
                     <label class="col-sm-3 col-form-label">Format</label>
                     <div class="col-sm-6">
                         <select id="format_select" name="format" class="form-control">
@@ -37,13 +37,13 @@
                         </select>
                     </div>
                 </div>
-                <div class="row form-group">
+                <div class="row mb-3">
                     <label class="col-sm-3 col-form-label"># Records for Report</label>
                     <div class="col-sm-6">
                         <input id="num_records" name="num_records" type="number" value=100000 max=500000 min=1 class="form-control">
                     </div>
                 </div>
-                <div class="row form-group">
+                <div class="row mb-3">
                     <label class="col-sm-3 col-form-label">Report Type</label>
                     <div class="col-sm-6">
                         <select id="report_select" onchange="selectReport()" class="form-control">

@@ -16,19 +16,19 @@
             </div>
         </FormSection>
         <FormSection :formCollapse="false" label="DCV Permit" Index="dcv_permit">
-            <div class="row form-group">
+            <div class="row mb-3">
                 <label for="" class="col-sm-3 col-form-label">Organisation</label>
                 <div class="col-sm-6">
                     <input type="text" class="form-control" name="organisation" placeholder="" v-model="dcv_permit.organisation">
                 </div>
             </div>
-            <div class="row form-group">
+            <div class="row mb-3">
                 <label for="" class="col-sm-3 col-form-label">ABN / ACN</label>
                 <div class="col-sm-6">
                     <input type="text" class="form-control" name="abn_acn" placeholder="" v-model="dcv_permit.abn_acn">
                 </div>
             </div>
-            <div class="row form-group">
+            <div class="row mb-3">
                 <label for="" class="col-sm-3 col-form-label">Season</label>
                 <div class="col-sm-6">
                     <select class="form-control" v-model="dcv_permit.season">
@@ -37,20 +37,20 @@
                     </select>
                 </div>
             </div>
-            <div class="row form-group">
+            <div class="row mb-3">
                 <label for="" class="col-sm-3 col-form-label">Unique Vessel Identifier (UVI)</label>
                 <div class="col-sm-9">
                     <select :disabled="readonly" id="vessel_search" name="vessel_registration" ref="dcv_vessel_rego_nos" class="form-control" style="width: 40%">
                     </select>
                 </div>
             </div>
-            <div class="row form-group">
+            <div class="row mb-3">
                 <label for="" class="col-sm-3 col-form-label">Vessel name</label>
                 <div class="col-sm-6">
                     <input type="text" class="form-control" name="vessel_name" placeholder="" v-model="dcv_permit.dcv_vessel.vessel_name">
                 </div>
             </div>
-            <div class="row form-group">
+            <div class="row mb-3">
                             <label for="" class="col-sm-3 col-form-label" >
                                 <strong>
                                 Postal Address
@@ -74,14 +74,15 @@
             <div class="row" style="margin-bottom: 50px">
                 <div  class="container">
                     <div class="row" style="margin-bottom: 50px">
-                        <div class="navbar navbar-fixed-bottom"  style="background-color: #f5f5f5;">
-                            <div class="navbar-inner">
-                                <div class="container">
-                                    <p class="float-end" style="margin-top:5px">
-                                        <button v-if="paySubmitting" type="button" class="btn btn-primary" disabled>Pay and Submit&nbsp;<i class="fa fa-circle-o-notch fa-spin fa-fw"></i></button>
-                                        <input v-else type="button" @click.prevent="pay_and_submit" class="btn btn-primary" value="Pay and Submit" :disabled="paySubmitting"/>
-                                    </p>
-                                </div>
+                        <div
+                            style="background-color: #f5f5f5;"
+                            class="d-flex justify-content-end align-items-center flex-wrap gap-2 p-2"
+                        >
+                            <div class="container">
+                                <p class="float-end" style="margin-top:5px">
+                                    <button v-if="paySubmitting" type="button" class="btn btn-primary" disabled>Pay and Submit&nbsp;<i class="fa fa-circle-o-notch fa-spin fa-fw"></i></button>
+                                    <input v-else type="button" @click.prevent="pay_and_submit" class="btn btn-primary" value="Pay and Submit" :disabled="paySubmitting"/>
+                                </p>
                             </div>
                         </div>
                     </div>

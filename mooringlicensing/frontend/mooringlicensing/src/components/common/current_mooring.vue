@@ -1,7 +1,7 @@
 <template>
     <div id="current_moorings">
         <FormSection v-if="currentMooringDisplayText" label="Current Moorings" Index="current_mooring">
-            <div class="row form-group">
+            <div class="row mb-3">
                 <div class="col-sm-9">
                     <label for="" class="col-sm-12 form-label">{{ currentMooringDisplayText }}</label>
                         <div class="col-sm-9">

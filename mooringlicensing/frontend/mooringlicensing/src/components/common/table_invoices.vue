@@ -2,7 +2,7 @@
     <div>
         <div class="row">
             <div class="col-md-3">
-                <div class="form-group">
+                <div class="mb-3">
                     <label for="">Fee Source Type</label>
                     <select class="form-control" v-model="filterFeeSourceType">
                         <option value="All">All</option>
@@ -11,7 +11,7 @@
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="form-group">
+                <div class="mb-3">
                     <label for="">Status</label>
                     <select class="form-control" v-model="filterStatus">
                         <option value="All">All</option>

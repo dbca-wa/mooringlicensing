@@ -3,16 +3,16 @@
         <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :processing="issuingApproval" :title="title" large>
             <div class="container-fluid">
                 <div class="row">
-                    <form class="form-horizontal" name="approvalForm">
+                    <form   name="approvalForm">
                         <alert :show.sync="showError" type="danger"><strong>{{ errorString }}</strong></alert>
                         <div class="col-sm-12">
-                            <div class="form-group" v-if="displayBayField && siteLicensee">
+                            <div class="row mb-3" v-if="displayBayField && siteLicensee">
                                 <div class="row col-sm-12">
                                     <datatable ref="requestedMooringsTable" :id="requestedMooringsTableId" :dtOptions="requestedMooringsDtOptions"
                                         :dtHeaders="requestedMooringsDtHeaders" />
                                 </div>
                             </div>
-                            <div class="form-group" v-if="displayBayField && !siteLicensee">
+                            <div class="row mb-3" v-if="displayBayField && !siteLicensee">
                                 <div class="row">
                                     <div class="col-sm-3">
                                         <label class="form-label float-start" for="mooring_bay">Bay</label>
@@ -27,7 +27,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="form-group" v-if="displayMooringSiteIdField && !siteLicensee">
+                            <div class="row mb-3" v-if="displayMooringSiteIdField && !siteLicensee">
                                 <div class="row">
                                     <div class="col-sm-3">
                                         <label class="form-label float-start" for="mooring_site_id">Mooring Site ID</label>
@@ -39,7 +39,7 @@
                                 </div>
                             </div>
                             
-                            <div class="form-group" v-if="vessel_size_limit">
+                            <div class="row mb-3" v-if="vessel_size_limit">
                                 <div class="row">
                                     <div class="col-sm-3">
                                         <label class="form-label float-start">Mooring Vessel Length Limit</label>
@@ -49,7 +49,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="form-group" v-if="vessel_draft_limit">
+                            <div class="row mb-3" v-if="vessel_draft_limit">
                                 <div class="row">
                                     <div class="col-sm-3">
                                         <label class="form-label float-start">Mooring Vessel Draft Limit</label>
@@ -59,7 +59,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="form-group" v-if="vessel_weight_limit">
+                            <div class="row mb-3" v-if="vessel_weight_limit">
                                 <div class="row">
                                     <div class="col-sm-3">
                                         <label class="form-label float-start">Mooring Vessel Weight Limit</label>
@@ -70,7 +70,7 @@
                                 </div>
                             </div>
 
-                            <div class="form-group" v-if="displayMooringSiteIdField">
+                            <div class="row mb-3" v-if="displayMooringSiteIdField">
                                 <div class="row">
                                     <div class="col-sm-3">
                                         <label class="form-label float-start">Proposed Vessel Length</label>
@@ -80,7 +80,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="form-group" v-if="displayMooringSiteIdField">
+                            <div class="row mb-3" v-if="displayMooringSiteIdField">
                                 <div class="row">
                                     <div class="col-sm-3">
                                         <label class="form-label float-start">Proposed Vessel Draft</label>
@@ -90,7 +90,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="form-group" v-if="displayMooringSiteIdField">
+                            <div class="row mb-3" v-if="displayMooringSiteIdField">
                                 <div class="row">
                                     <div class="col-sm-3">
                                         <label class="form-label float-start">Proposed Vessel Weight</label>
@@ -101,21 +101,21 @@
                                 </div>
                             </div>
 
-                            <div class="form-group" v-if="displayAssociatedMoorings">
+                            <div class="row mb-3" v-if="displayAssociatedMoorings">
                                 <div class="row col-sm-12">
                                     <datatable ref="mooringsTable" :id="mooringsTableId" :dtOptions="mooringsDtOptions"
                                         :dtHeaders="mooringsDtHeaders" />
                                 </div>
 
                             </div>
-                            <div class="form-group" v-if="displayAssociatedVessels">
+                            <div class="row mb-3" v-if="displayAssociatedVessels">
                                 <div class="row col-sm-12">
                                     <datatable ref="vesselsTable" :id="vesselsTableId" :dtOptions="vesselsDtOptions"
                                         :dtHeaders="vesselsDtHeaders" />
                                 </div>
                             </div>
 
-                            <div class="form-group">
+                            <div class="row mb-3">
                                 <div class="row">
                                     <div class="col-sm-3">
                                         <label class="form-label float-start" for="Name">{{ detailsText }}</label>
@@ -126,7 +126,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="row mb-3">
                                 <div class="row">
                                     <div class="col-sm-3">
                                         <label class="form-label float-start" for="Name">{{ ccText }}</label>

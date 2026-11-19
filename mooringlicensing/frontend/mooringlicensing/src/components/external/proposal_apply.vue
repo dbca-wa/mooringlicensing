@@ -22,7 +22,7 @@
         </div>
         <div v-else class="row">
             <div class="col-sm-12">
-                <form class="form-horizontal" name="personal_form" method="post">
+                <form   name="personal_form" method="post">
                     <FormSection label="Apply for">
                         <div>
                             <div v-if="season_text" class="col-sm-12" style="margin-bottom: 1em;">
@@ -31,7 +31,7 @@
                                 </strong>
                             </div>
                             <div class="col-sm-12" style="margin-left:20px">
-                                <div class="form-group">
+                                <div class="row mb-3">
                                     <label v-if="aaaChoices.length > 0">Annual Admission</label>
                                     <div v-if="aaaApprovals.length <= 1">
                                         <div v-for="(application_type, index) in aaaChoices">
@@ -62,7 +62,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group">
+                                <div class="row mb-3">
                                     <label v-if="auaChoices.length > 0">Authorised User</label>
                                     <div v-if="auaApprovals.length <= 1">
                                         <div v-for="(application_type, index) in auaChoices">
@@ -93,7 +93,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group">
+                                <div class="row mb-3">
                                     <label v-if="wlaChoices.length > 0">Waiting List</label>
                                     <div v-if="wlaApprovals.length <= 1">
                                         <div v-for="(application_type, index) in wlaChoices">
@@ -124,7 +124,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div v-if="mlApprovals.length" class="form-group">
+                                <div v-if="mlApprovals.length" class="row mb-3">
                                     <label>Mooring Site Licence</label>
                                     <div v-if="mlApprovals.length <= 1">
                                         <!-- Approvals <= 1 -->
@@ -196,7 +196,7 @@
                                     </div>
                                 </div>
                                 
-                                <!--<div v-if="!is_internal" class="form-group">
+                                <!--<div v-if="!is_internal" class="row mb-3">
                                     <label>DCV Permit</label>
                                     <div>
                                         <div v-for="(application_type, index) in dcvpChoices">

@@ -8,11 +8,11 @@
                         Note: this is permanent and cannot be reversed.
                     </div>
                 </div>
-                <form class="form-horizontal" name="approvalForm">
+                <form   name="approvalForm">
                     <div class="row">
                         <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
                         <div class="col-sm-12">
-                            <div class="form-group">
+                            <div class="row mb-3">
                                 <div class="col-sm-3">
                                     <label class="form-label float-start"  for="Name">Surrender Details</label>
                                 </div>

@@ -5,7 +5,7 @@
                 <div class="row">
                     <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
                     <div class="col-sm-12">
-                        <div class="form-group">
+                        <div class="row mb-3">
                             <div class="row">
                                 <div class="col-sm-3">
                                     <label class="form-label float-start" for="mooring_bay_lookup">Bay</label>
@@ -19,7 +19,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="form-group">
+                        <div class="row mb-3">
                             <div class="row">
                                 <div class="col-sm-3">
                                     <label class="form-label float-start" for="mooring_site_id">Mooring Site ID</label>
@@ -35,7 +35,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="form-group">
+                        <div class="row mb-3">
                             <div class="row">
                                 <div class="col-sm-3">
                                     <label class="form-label float-start"  for="Name">Details</label>
@@ -45,7 +45,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="form-group">
+                        <div class="row mb-3">
                             <div class="row">
                                 <div class="col-sm-3">
                                     <label class="form-label float-start"  for="Name">BCC email</label>
@@ -55,7 +55,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="row form-group">
+                        <div class="row mb-3">
                             <label for="" class="col-sm-3 col-form-label">Document</label>
                             <div class="col-sm-9">
                                 <FileField

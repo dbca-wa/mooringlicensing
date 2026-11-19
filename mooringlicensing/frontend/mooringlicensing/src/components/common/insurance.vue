@@ -1,20 +1,30 @@
 <template>
     <FormSection label="Insurance details" Index="insurance_details">
-        <div class="row form-group">
+        <div class="row mb-3">
             <label for="" class="col-sm-9 form-label">The nominated vessel has
             </label>
         </div>
-        <div class="row form-group">
+        <div class="row mb-3">
             <div class="col-sm-9" v-for="choice in insuranceChoices">
-                <div class="col-sm-1">
-                <input :disabled="readonly" type="radio" name="insuranceChoice" :id="choice.code" :value="choice.code" required=""/>
-                </div>
-                <div class="col-sm-8">
-                <label :for="choice.code">{{ choice.description }}</label>
+                <div class="form-check">
+                    <input
+                        :disabled="readonly"
+                        class="form-check-input"
+                        type="radio"
+                        name="insuranceChoice"
+                        :id="choice.code"
+                        :value="choice.code"
+                    >
+                    <label
+                        class="form-check-label"
+                        :for="choice.code"
+                    >
+                        {{ choice.description }}
+                    </label>
                 </div>
             </div>
         </div>
-        <div v-if="!(applicationTypeCode==='aaa')" class="row form-group">
+        <div v-if="!(applicationTypeCode==='aaa')" class="row mb-3">
             <label for="" class="col-sm-3 col-form-label">Copy of the vessel's current insurance certificate showing legal liability amount</label>
             <div class="col-sm-9">
                 <FileField 

@@ -4,7 +4,7 @@
             <p>Please select a Mooring Site License to exchange with the mooring of Mooring Site License: <strong>{{ approval_lodgement_number }}</strong>.</p>
             <div class="container-fluid">
                 <alert :show.sync="showError" type="danger"><strong>{{ errorString }}</strong></alert>
-                <div class="row form-group">
+                <div class="row mb-3">
                     <datatable
                         ref="swap_moorings_datatable"
                         :id="datatable_id"

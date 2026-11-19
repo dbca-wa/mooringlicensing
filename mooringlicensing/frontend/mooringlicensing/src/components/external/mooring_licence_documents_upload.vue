@@ -5,11 +5,11 @@
             label="Other documents"
             Index="other_documents"
         >
-            <div class="row form-group" v-if="!readonly">
+            <div class="row mb-3" v-if="!readonly">
                 <label for="" class="col-sm-12 form-label">Attach the following documents and submit them to the Rottnest Island Authority. If you are a current licensee, please do not attach any documents here.</label>
             </div>
 
-            <div class="row form-group">
+            <div class="row mb-3">
                 <label for="" class="col-sm-5 col-form-label">Copy of current mooring report</label>
                 <div class="col-sm-7">
                     <FileField
@@ -23,7 +23,7 @@
                 </div>
             </div>
 
-            <div class="row form-group">
+            <div class="row mb-3">
                 <label for="" class="col-sm-5 col-form-label">Written proof of finalisation concerning the ownership of the mooring apparatus between you and the previous licensee</label>
                 <div class="col-sm-7">
                     <FileField
@@ -37,7 +37,7 @@
                 </div>
             </div>
 
-            <div class="row form-group">
+            <div class="row mb-3">
                 <label for="" class="col-sm-5 col-form-label">Signed licence agreement</label>
                 <div class="col-sm-7">
                     <FileField
@@ -51,7 +51,7 @@
                 </div>
             </div>
 
-            <div class="row form-group">
+            <div class="row mb-3">
                 <label for="" class="col-sm-5 col-form-label">Proof of Identity</label>
                 <div class="col-sm-7">
                     <FileField
@@ -66,19 +66,20 @@
             </div>
         </FormSection>
 
-        <div>
+        <div v-if="!readonly && !uuid_props">
             <input type="hidden" name="csrfmiddlewaretoken" :value="csrf_token"/>
             <div class="row" style="margin-bottom: 50px">
                 <div  class="container">
                     <div class="row" style="margin-bottom: 50px">
-                        <div class="navbar navbar-fixed-bottom"  style="background-color: #f5f5f5;">
-                            <div class="navbar-inner">
-                                <div class="container">
-                                    <p class="float-end" style="margin-top:5px">
-                                        <button v-if="submitting" type="button" class="btn btn-primary" disabled>Submit&nbsp;<i class="fa fa-circle-o-notch fa-spin fa-fw"></i></button>
-                                        <input v-else type="button" @click.prevent="submit" class="btn btn-primary" value="Submit" :disabled="submitting"/>
-                                    </p>
-                                </div>
+                        <div
+                            style="background-color: #f5f5f5;"
+                            class="d-flex justify-content-end align-items-center flex-wrap gap-2 p-2"
+                        >
+                            <div class="container">
+                                <p class="float-end" style="margin-top:5px">
+                                    <button v-if="submitting" type="button" class="btn btn-primary" disabled>Submit&nbsp;<i class="fa fa-circle-o-notch fa-spin fa-fw"></i></button>
+                                    <input v-else type="button" @click.prevent="submit" class="btn btn-primary" value="Submit" :disabled="submitting"/>
+                                </p>
                             </div>
                         </div>
                     </div>
