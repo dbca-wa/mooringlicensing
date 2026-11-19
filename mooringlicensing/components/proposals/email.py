@@ -1246,7 +1246,7 @@ def send_au_summary_to_ml_holder(mooring_licence, au_proposal):
     context = {
         'authorised_user_full_name': au_proposal.applicant,
         'mooring_number': mooring_licence.mooring.name,
-        'yourself_or_ria': 'ria' if au_proposal.mooring_authorisation_preference == 'RIA' else 'yourself',
+        'yourself_or_ria': 'RIA' if au_proposal.mooring_authorisation_preference.lower() == 'ria' else 'yourself',
         'approval_date': au_proposal.approval.issue_date.strftime('%d/%m/%Y'),
         'public_url': get_public_url(),
         'recipient': mooring_licence.applicant,
