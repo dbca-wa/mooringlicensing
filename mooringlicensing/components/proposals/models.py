@@ -4356,15 +4356,11 @@ class AuthorisedUserApplication(Proposal):
             # Email to ML holder when new moorings added
             for mooring_licence in mls_to_be_emailed:
                 mooring_licence.regenerate_documents = True
-                
-                if not self.mooring_authorisation_preference == 'ria':
-                    #TODO run this in management command
-                    #send_au_summary_to_ml_holder(mooring_licence, self)
 
-                    mooring_licence.regenerate_document_email_notification = {
-                        "func": "send_au_summary_to_ml_holder",
-                        "params": [mooring_licence.id, self.id],
-                    }
+                mooring_licence.regenerate_document_email_notification = {
+                    "func": "send_au_summary_to_ml_holder",
+                    "params": [mooring_licence.id, self.id],
+                }
                 mooring_licence.save()
 
             # Log proposal action
