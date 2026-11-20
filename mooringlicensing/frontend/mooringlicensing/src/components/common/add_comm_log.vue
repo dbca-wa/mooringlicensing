@@ -11,7 +11,7 @@
       <div class="container-fluid">
         <div class="row">
           <form
-            class="form-horizontal needs-validation"
+            class="needs-validation"
             name="commsForm"
             @submit.prevent
           >

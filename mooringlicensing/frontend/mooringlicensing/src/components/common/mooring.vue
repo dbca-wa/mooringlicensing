@@ -76,7 +76,7 @@ from '@/utils/hooks'
 </script>
 
 <style lang="css" scoped>
-. text-end {
+.text-end {
     float: right;
     text-align: left;
     margin-right: 50%;

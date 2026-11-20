@@ -148,9 +148,6 @@ export default {
         margin-right: 10px;
         display: inline-block;
     }
-    .input-sm {
-        width: auto;
-    }
     @media screen and (max-width: 767px)
     {
         div.dataTables_length,div.dataTables_info {

@@ -598,7 +598,7 @@ export default {
 .electoral-label {
     margin-bottom: 25px !important;
 }
-. text-end {
+.text-end {
     float: right;
     text-align: left;
 }

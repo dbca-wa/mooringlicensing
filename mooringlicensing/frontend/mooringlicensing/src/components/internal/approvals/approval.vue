@@ -4,42 +4,26 @@
         <h3>{{ approvalLabel }}: {{ approval.lodgement_number }}</h3>
         <div class="col-md-3">
             <CommsLogs :comms_url="comms_url" :logs_url="logs_url" :comms_add_url="comms_add_url" :disable_add_entry="false"/>
-            <div class="row">
-                <div class="card">
-                    <div class="card-header">
-                       Submission
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-
-                            <div class="col-sm-12 top-buffer-s">
-                                <strong>Issued on</strong><br/>
-                                {{ approval.issue_date | formatDate}}
-                            </div>
-                            <div class="col-sm-12 top-buffer-s">
-                                <table class="table small-table">
-                                    <tr>
-                                        <th>Lodgement</th>
-                                        <th>Date</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
+            <div class="card mb-3">
+                <div class="card-header">
+                    Submission
+                </div>
+                <div class="card-body border-bottom">
+                    <div class="col-sm-12 top-buffer-s">
+                        <strong>Issued on</strong><br/>
+                        {{ approval.issue_date | formatDate}}
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="card">
-                    <div class="card-header">
-                        Workflow
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <strong>Status</strong><br/>
-                                {{ approval.status }}
-                            </div>
+            <div class="card mb-3">
+                <div class="card-header">
+                    Workflow
+                </div>
+                <div class="card-body border-bottom">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <strong>Status</strong><br/>
+                            {{ approval.status }}
                         </div>
                     </div>
                 </div>
@@ -121,7 +105,7 @@
                     label="Moorings" 
                     Index="moorings"
                 >
-                    <div class="col-sm-9">
+                    <div class="col-sm-12">
                         <datatable
                             ref="moorings_datatable"
                             :id="moorings_datatable_id"
@@ -160,7 +144,7 @@
                     label="Vessels" 
                     Index="mooringLicenceVessels"
                 >
-                    <div class="col-sm-11">
+                    <div class="col-sm-12">
                         <datatable
                             ref="ml_vessels_datatable"
                             :id="ml_vessels_datatable_id"
