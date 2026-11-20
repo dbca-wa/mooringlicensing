@@ -8,7 +8,7 @@
                             <input
                             @change="resetCurrentMooring"
                             :disabled="readonly"
-                            type="radio"
+                            class="form-check-input" type="radio"
                             id="changeMooringFalse"
                             name="changeMooringFalse"
                             :value="false"
@@ -21,7 +21,7 @@
                             <input
                             @change="resetCurrentMooring"
                             :disabled="readonly"
-                            type="radio"
+                            class="form-check-input" type="radio"
                             id="changeMooringTrue"
                             name="changeMooringTrue"
                             :value="true"

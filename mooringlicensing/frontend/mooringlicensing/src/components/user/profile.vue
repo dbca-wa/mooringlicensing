@@ -246,14 +246,14 @@
                     </strong>
                 </div>
                 <div class="col-sm-8">
-                    <input :disabled="readonly" type="radio" id="electoral_roll_yes" :value="false" v-model="silentElector"/>
+                    <input :disabled="readonly" class="form-check-input" type="radio" id="electoral_roll_yes" :value="false" v-model="silentElector"/>
                     <label for="electoral_roll_yes">
                         Yes, I am on the
                         <a target="_blank" href="https://www.elections.wa.gov.au/oes#/oec">WA state electoral roll</a>
                     </label>
                 </div>
                 <div class="col-sm-8">
-                    <input :disabled="readonly" class="mb-3" type="radio" id="electoral_roll_silent" :value="true" v-model="silentElector"/>
+                    <input :disabled="readonly" class="form-check-input" type="radio" id="electoral_roll_silent" :value="true" v-model="silentElector"/>
                     <label for="electoral_roll_silent">
                         I am a silent elector
                     </label>

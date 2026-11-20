@@ -35,7 +35,7 @@
                                     <label v-if="aaaChoices.length > 0">Annual Admission</label>
                                     <div v-if="aaaApprovals.length <= 1">
                                         <div v-for="(application_type, index) in aaaChoices">
-                                            <input type="radio" name="applicationType"
+                                            <input class="form-check-input" type="radio" name="applicationType"
                                                 :id="application_type.code + '_' + index" value="application_type"
                                                 @change="selectApplication(application_type)" />
                                             <label :for="application_type.code + '_' + index" style="font-weight:normal">{{
@@ -45,7 +45,7 @@
                                     <div v-else>
                                         <div class="row" v-for="application_type in aaaMultiple">
                                             <div class="col-sm-5">
-                                                <input type="radio" name="applicationType" :id="application_type.code"
+                                                <input class="form-check-input" type="radio" name="applicationType" :id="application_type.code"
                                                     value="application_type"
                                                     @change="selectApplication(application_type)" />
                                                 <label :for="application_type.code" style="font-weight:normal">{{
@@ -66,7 +66,7 @@
                                     <label v-if="auaChoices.length > 0">Authorised User</label>
                                     <div v-if="auaApprovals.length <= 1">
                                         <div v-for="(application_type, index) in auaChoices">
-                                            <input type="radio" name="applicationType"
+                                            <input class="form-check-input" type="radio" name="applicationType"
                                                 :id="application_type.code + '_' + index" value="application_type"
                                                 @change="selectApplication(application_type)" />
                                             <label :for="application_type.code + '_' + index" style="font-weight:normal">{{
@@ -76,7 +76,7 @@
                                     <div v-else>
                                         <div class="row" v-for="application_type in auaMultiple">
                                             <div class="col-sm-5">
-                                                <input type="radio" name="applicationType" :id="application_type.code"
+                                                <input class="form-check-input" type="radio" name="applicationType" :id="application_type.code"
                                                     value="application_type"
                                                     @change="selectApplication(application_type)" />
                                                 <label :for="application_type.code" style="font-weight:normal">{{
@@ -97,7 +97,7 @@
                                     <label v-if="wlaChoices.length > 0">Waiting List</label>
                                     <div v-if="wlaApprovals.length <= 1">
                                         <div v-for="(application_type, index) in wlaChoices">
-                                            <input type="radio" name="applicationType"
+                                            <input class="form-check-input" type="radio" name="applicationType"
                                                 :id="application_type.code + '_' + index" value="application_type"
                                                 @change="selectApplication(application_type)" />
                                             <label :for="application_type.code + '_' + index" style="font-weight:normal">{{
@@ -107,7 +107,7 @@
                                     <div v-else>
                                         <div class="row" v-for="application_type in wlaMultiple">
                                             <div class="col-sm-5">
-                                                <input type="radio" name="applicationType" :id="application_type.code"
+                                                <input class="form-check-input" type="radio" name="applicationType" :id="application_type.code"
                                                     value="application_type"
                                                     @change="selectApplication(application_type)" />
                                                 <label :for="application_type.code" style="font-weight:normal">{{
@@ -132,7 +132,7 @@
                                             <div class="row">
                                                 <div class="col-sm-7">
                                                     <input
-                                                        type="radio"
+                                                        class="form-check-input" type="radio"
                                                         name="applicationType"
                                                         :id="application_type.code + '_' + index"
                                                         value="application_type"
@@ -149,7 +149,7 @@
                                             <div class="row">
                                                 <div class="col-sm-7">
                                                     <input
-                                                        type="radio"
+                                                        class="form-check-input" type="radio"
                                                         name="applicationType"
                                                         :id="application_type.code + '_' + index + '_add_vessel'"
                                                         value="application_type"
@@ -170,7 +170,7 @@
                                         <div class="row" v-for="application_type in mlMultiple">
                                             <div class="col-sm-5">
                                                 <input
-                                                    type="radio"
+                                                    class="form-check-input" type="radio"
                                                     name="applicationType"
                                                     :id="application_type.code"
                                                     value="application_type"
@@ -200,7 +200,7 @@
                                     <label>DCV Permit</label>
                                     <div>
                                         <div v-for="(application_type, index) in dcvpChoices">
-                                            <input type="radio" name="applicationType"
+                                            <input class="form-check-input" type="radio" name="applicationType"
                                                 :id="application_type.code + '_' + index" value="application_type"
                                                 @change="selectApplication(application_type)" />
                                             <label :for="application_type.code + '_' + index" style="font-weight:normal">{{

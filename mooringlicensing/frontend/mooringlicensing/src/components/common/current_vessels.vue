@@ -8,7 +8,7 @@
                         <input
                         @change="resetCurrentVessel"
                         :disabled="readonly"
-                        type="radio"
+                        class="form-check-input" type="radio"
                         id="current_vessel_false"
                         name="current_vessel_false"
                         :value="false"
@@ -21,7 +21,7 @@
                         <input
                         @change="resetCurrentVessel"
                         :disabled="readonly"
-                        type="radio"
+                        class="form-check-input" type="radio"
                         id="current_vessel_true"
                         name="current_vessel_true"
                         :value="true"
@@ -39,7 +39,7 @@
                             <input
                             @change="resetCurrentVessel"
                             :disabled="readonly"
-                            type="radio"
+                            class="form-check-input" type="radio"
                             id="current_vessel_true"
                             name="current_vessel_true"
                             :value="true"
@@ -52,7 +52,7 @@
                             <input
                             @change="resetCurrentVessel"
                             :disabled="readonly"
-                            type="radio"
+                            class="form-check-input" type="radio"
                             id="current_vessel_false"
                             name="current_vessel_false"
                             :value="false"

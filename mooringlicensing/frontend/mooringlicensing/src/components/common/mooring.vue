@@ -5,8 +5,22 @@
         </div>
         <div class="row mb-3">
             <div class="col-sm-6" v-for="mooring in mooringBays">
-                <label :for="mooring.id" class=" text-end col-sm-5 col-form-label">{{ mooring.name }}</label>
-                <input :disabled="readonly" type="radio" :id="mooring.id" :value="mooring.id" v-model="selectedMooring" @change="mooringPreferenceChanged" required=""/>
+                <div class="form-check">
+                    <input
+                        :disabled="readonly"
+                        class="form-check-input" type="radio"
+                        :id="mooring.id"
+                        :value="mooring.id"
+                        v-model="selectedMooring"
+                        @change="mooringPreferenceChanged"
+                    />
+                    <label
+                        class="form-check-label"
+                        :for="mooring.id"
+                    >
+                        {{ mooring.name }}
+                    </label>
+                </div>
             </div>
         </div>
     </FormSection>

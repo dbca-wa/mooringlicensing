@@ -25,7 +25,7 @@
                             <input 
                                 @change="clearOrgName(); setRegisteredOwner(true)"
                                 :disabled="readonly"
-                                type="radio"
+                                class="form-check-input" type="radio"
                                 id="registered_owner_current_user"
                                 name="registered_owner"
                                 :value="true"
@@ -40,7 +40,7 @@
                             <input
                                 @change="clearOrgName(); setRegisteredOwner(false)"
                                 :disabled="readonly"
-                                type="radio"
+                                class="form-check-input" type="radio"
                                 id="registered_owner_company"
                                 name="registered_owner"
                                 :value="false"

@@ -7,8 +7,8 @@
                         <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
                         <div class="col-sm-12">
                             <div class="row mb-3">
-                                <label class="form-check-label form-label"><input type="radio" name="requirementType" :value="true" v-model="requirement.standard">Standard Requirement</label>
-                                <label class="form-check-label"><input type="radio" name="requirementType" :value="false" v-model="requirement.standard">Free Text Requirement</label>
+                                <label class="form-check-label form-label"><input class="form-check-input" type="radio" name="requirementType" :value="true" v-model="requirement.standard">Standard Requirement</label>
+                                <label class="form-check-label"><input class="form-check-input" type="radio" name="requirementType" :value="false" v-model="requirement.standard">Free Text Requirement</label>
                             </div>
                         </div>
                         <div class="col-sm-12">
@@ -65,9 +65,9 @@
                                                 <label class="form-label float-start"  for="Name">Recurrence pattern</label>
                                             </div>
                                             <div class="col-sm-9">
-                                                <label class="form-check-label form-label"><input type="radio" name="recurrenceSchedule" value="1" v-model="requirement.recurrence_pattern">Weekly</label>
-                                                <label class="form-check-label form-label"><input type="radio" name="recurrenceSchedule" value="2" v-model="requirement.recurrence_pattern">Monthly</label>
-                                                <label class="form-check-label form-label"><input type="radio" name="recurrenceSchedule" value="3" v-model="requirement.recurrence_pattern">Yearly</label>
+                                                <label class="form-check-label form-label"><input class="form-check-input" type="radio" name="recurrenceSchedule" value="1" v-model="requirement.recurrence_pattern">Weekly</label>
+                                                <label class="form-check-label form-label"><input class="form-check-input" type="radio" name="recurrenceSchedule" value="2" v-model="requirement.recurrence_pattern">Monthly</label>
+                                                <label class="form-check-label form-label"><input class="form-check-input" type="radio" name="recurrenceSchedule" value="3" v-model="requirement.recurrence_pattern">Yearly</label>
                                             </div>
                                         </div>
                                     </div>

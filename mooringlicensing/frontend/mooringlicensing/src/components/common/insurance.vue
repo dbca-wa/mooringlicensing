@@ -9,8 +9,7 @@
                 <div class="form-check">
                     <input
                         :disabled="readonly"
-                        class="form-check-input"
-                        type="radio"
+                        class="form-check-input" type="radio"
                         name="insuranceChoice"
                         :id="choice.code"
                         :value="choice.code"

@@ -251,7 +251,7 @@
                                     </strong>
                                 </div>
                                 <div class="col-sm-8">
-                                    <input disabled type="radio" id="electoral_roll_yes" :value="false"
+                                    <input disabled class="form-check-input" type="radio" id="electoral_roll_yes" :value="false"
                                         v-model="silentElector" />
                                     <label for="electoral_roll_yes">
                                         Yes, I am on the
@@ -260,7 +260,7 @@
                                     </label>
                                 </div>
                                 <div class="col-sm-8">
-                                    <input disabled class="mb-3" type="radio" id="electoral_roll_silent"
+                                    <input disabled class="form-check-input" type="radio" id="electoral_roll_silent"
                                         :value="true" v-model="silentElector" />
                                     <label for="electoral_roll_silent">
                                         I am a silent elector

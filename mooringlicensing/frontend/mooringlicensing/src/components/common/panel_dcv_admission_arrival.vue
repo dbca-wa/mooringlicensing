@@ -23,11 +23,11 @@
                 <div class="row mb-3">
                     <label class="col-sm-2 col-form-label">Private visit</label>
                     <div class="col-sm-2">
-                        <input :disabled="!radio_private_visit_enabled" type="radio" :id="radio_yes_id" :name="radio_buttons_name" :value="true" v-model="arrival.private_visit"/>
+                        <input :disabled="!radio_private_visit_enabled" class="form-check-input" type="radio" :id="radio_yes_id" :name="radio_buttons_name" :value="true" v-model="arrival.private_visit"/>
                         <label class="form-check-label form-label" :for="radio_yes_id">Yes</label>
                     </div>
                     <div class="col-sm-2">
-                        <input :disabled="!radio_private_visit_enabled" type="radio" :id="radio_no_id" :name="radio_buttons_name" :value="false" v-model="arrival.private_visit"/>
+                        <input :disabled="!radio_private_visit_enabled" class="form-check-input" type="radio" :id="radio_no_id" :name="radio_buttons_name" :value="false" v-model="arrival.private_visit"/>
                         <label class="form-check-label form-label" :for="radio_no_id">No</label>
                     </div>
                 </div>

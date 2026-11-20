@@ -8,13 +8,13 @@
             <div class="row mb-3">
                 <div class="row">
                     <div class="col-sm-9">
-                        <input :disabled="readonly" type="radio" id="site_licensee" value="site_licensee" v-model="mooringAuthPreference" required=""/>
+                        <input :disabled="readonly" class="form-check-input" type="radio" id="site_licensee" value="site_licensee" v-model="mooringAuthPreference" required=""/>
                         <label for="site_licensee" class="form-label">By a mooring site licensee for their mooring</label>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-sm-9">
-                        <input :disabled="readonly" type="radio" id="ria" value="ria" v-model="mooringAuthPreference" required=""/>
+                        <input :disabled="readonly" class="form-check-input" type="radio" id="ria" value="ria" v-model="mooringAuthPreference" required=""/>
                         <label for="ria" class="form-label">By Rottnest Island Authority for a mooring allocated by the Authority</label>
                     </div>
                 </div>
