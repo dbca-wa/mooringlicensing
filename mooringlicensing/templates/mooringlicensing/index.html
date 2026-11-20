@@ -3,65 +3,71 @@
 {% load static %}
 
 {% block extra_css %}
-    <link type="text/css" href="{% static 'mooringlicensing/css/base.css' %}" rel="stylesheet">
+<link type="text/css" href="{% static 'mooringlicensing/css/base.css' %}" rel="stylesheet">
 {% endblock %}
 
-{% block left_menu_items %}
-{% endblock %}
+{% block left_menu_items %}{% endblock %}
 
-{% block messages %}
-{% endblock %}
-
+{% block messages %}{% endblock %}
 
 {% block content %}
-    <div class="container">
-        <div class="row">
-            <div class="col-md-6">
-                <div class="row">
-                    <h2>
-                        Welcome to the {{system_name}} Portal
-                    </h2>
-                </div>
-                <div class="row">
-                    Login to the system to apply for an annual admission permit, authorised user permit or to be listed on the waiting list for a mooring license.
-                </div>
-                <div class="row">
-                    <h3>
-                        Daily admission fees
-                    </h3>
-                </div>
-                <div class="row">
-                    Click <a href="{{ daily_admission_page_url }}" target="_blank">here</a> if you want to pay for daily admission fees
-                </div>
-            </div>
-            <div class="col-md-2">
-            </div>
-            <div class="col-md-4">
-                {% if not request.user.is_authenticated %}
-                    <div id="ps-login-container">
-                        <h3>
-                            Access {{system_name}}
-                        </h3>
+<div class="container">
+    <div class="row g-4">
 
-                        <!--   Auth2   -->
-                        <div id="submit-container">
-                            <br>
-                            <a href='/ssologin' class="btn btn-primary">Login</a>
-                            <br><br>
-                        </div>
-                        <p>Click the login button to login or start the new-user registration process.</p>
-                        <hr>
-                        <h4>
-                            {{ system_name }} Password-less Logins
-                        </h4>
-                        <p>
-                            At the Department of Biodiversity, Conservation and Attractions, we employ a password-less authentication system, meaning you never need to remember
-                            a password. When you need to login to a site, such as the {{ system_name }} Portal, simply enter your email and an
-                            authentication code will be sent to your registered email address. From there, enter the code on screen to complete the login process.
-                        </p>
-                    </div>
-                {% endif %}
-            </div>
+        <div class="col-lg-7">
+            <h2>Welcome to the {{ system_name }} Portal</h2>
+
+            <p>
+                Login to the system to apply for an annual admission permit,
+                authorised user permit or to be listed on the waiting list for
+                a mooring licence.
+            </p>
+
+            <h3>Daily admission fees</h3>
+
+            <p>
+                Click
+                <a href="{{ daily_admission_page_url }}" target="_blank" rel="noopener noreferrer">
+                    here
+                </a>
+                if you want to pay for daily admission fees.
+            </p>
         </div>
+
+        <div class="col-lg-5">
+            {% if not request.user.is_authenticated %}
+                <div id="ps-login-container">
+                    <h3>Access {{ system_name }}</h3>
+
+                    <div id="submit-container" class="my-3">
+                        <a href="/ssologin" class="btn btn-primary">
+                            Login
+                        </a>
+                    </div>
+
+                    <p>
+                        Click the login button to login or start the new-user
+                        registration process.
+                    </p>
+
+                    <hr>
+
+                    <h4>{{ system_name }} Password-less Logins</h4>
+
+                    <p>
+                        At the Department of Biodiversity, Conservation and
+                        Attractions, we employ a password-less authentication
+                        system, meaning you never need to remember a password.
+                        When you need to login to a site, such as the
+                        {{ system_name }} Portal, simply enter your email and
+                        an authentication code will be sent to your registered
+                        email address. Enter the code on screen to complete the
+                        login process.
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+
     </div>
+</div>
 {% endblock %}
