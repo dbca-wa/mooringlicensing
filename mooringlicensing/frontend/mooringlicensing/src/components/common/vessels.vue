@@ -25,7 +25,7 @@
                             <input 
                                 @change="clearOrgName(); setRegisteredOwner(true)"
                                 :disabled="readonly"
-                                class="form-check-input" type="radio"
+                                type="radio"
                                 id="registered_owner_current_user"
                                 name="registered_owner"
                                 :value="true"
@@ -40,7 +40,7 @@
                             <input
                                 @change="clearOrgName(); setRegisteredOwner(false)"
                                 :disabled="readonly"
-                                class="form-check-input" type="radio"
+                                type="radio"
                                 id="registered_owner_company"
                                 name="registered_owner"
                                 :value="false"
@@ -201,8 +201,7 @@
 import $ from 'jquery'
 import FormSection from '@/components/forms/section_toggle.vue'
 import FileField from '@/components/forms/filefield_immediate.vue'
-import "select2/dist/css/select2.min.css";
-import "select2-bootstrap-theme/dist/select2-bootstrap.min.css";
+
 import {
     api_endpoints,
     helpers

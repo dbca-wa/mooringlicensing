@@ -31,21 +31,19 @@
         </div>
         <div class="col-md-1"></div>
         <div class="col-md-8">
-            <div class="row">
-                <div v-if="approval && approval.applicant">
+            <div class="row" v-if="approval && approval.applicant">
                     <Applicant
-                        :user="approval.applicant" 
+                        :user="approval.applicant"
                         id="approvalSubmitterDetails"
                         :readonly="true"
                         customerType="holder"
                         :proposalId="approval.current_proposal.id"
                         :proposalApplicant="approval.current_proposal.proposal_applicant"
                     />
-                </div>
             </div>
 
             <div class="row">
-
+                <div>
                 <FormSection
                     :label="approvalLabel"
                     :formCollapse="true"
@@ -87,17 +85,23 @@
                        </form>
                     </div>
                 </FormSection>
+                </div>
             </div>
-            <div class="row" v-if="approval && approval.applicant && approval.current_proposal && annualAdmissionPermit">
-                  <Vessels
-                  :proposal="approval.current_proposal"
-                  :profile="approval.applicant"
-                  id="approvalVessel"
-                  ref="vessel"
-                  :readonly="true"
-                  :is_internal="true"
-                  :keep_current_vessel="true"
-                  />
+            <div
+                class="row"
+                v-if="approval && approval.applicant && approval.current_proposal && annualAdmissionPermit"
+            >
+                <div class="col-12">
+                    <Vessels
+                        :proposal="approval.current_proposal"
+                        :profile="approval.applicant"
+                        id="approvalVessel"
+                        ref="vessel"
+                        :readonly="true"
+                        :is_internal="true"
+                        :keep_current_vessel="true"
+                    />
+                </div>
             </div>
             <div class="row" v-if="approval && approval.id && authorisedUserPermit">
                 <FormSection 
@@ -127,7 +131,7 @@
                             <label for="checkbox_show_expired">Show expired and/or surrendered authorised user permits</label>
                         </div>
                     </div>
-                    <div class="col-sm-11">
+                    <div class="col-sm-12">
                         <datatable
                             ref="ml_authorised_users_datatable"
                             :id="ml_authorised_users_datatable_id"
