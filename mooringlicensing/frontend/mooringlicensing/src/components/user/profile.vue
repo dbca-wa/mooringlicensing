@@ -40,7 +40,7 @@
                     :Index="pBody"
                 >
                     <form  >
-                    <div v-if="!proposalApplicant" class="row mb-3">
+                    <div class="row mb-3">
                         <label for="" class="col-sm-3 col-form-label"></label>
                         <div v-if="!is_internal" class="col-sm-12">
                             <div class="alert alert-info"><b>To update the legal name of the permit holder, contact moorings@rottnestisland.com</b></div>

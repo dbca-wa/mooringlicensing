@@ -88,10 +88,10 @@ export default {
                                 popTemplate = _.template('<a href="#" ' +
                                     'role="button" ' +
                                     'data-bs-toggle="popover" ' +
-                                    'data-trigger="click" ' +
-                                    'data-placement="top auto"' +
-                                    'data-html="true" ' +
-                                    'data-content="<%= text %>" ' +
+                                    'data-bs-trigger="click" ' +
+                                    'data-bs-placement="top"' +
+                                    'data-bs-html="true" ' +
+                                    'data-bs-content="<%= text %>" ' +
                                     '>more</a>');
                             if (_.endsWith(truncated, ellipsis)) {
                                 result += popTemplate({
