@@ -22,7 +22,7 @@
                     <div class="col-12">
                         <datatable
                             ref="requirements_datatable"
-                            :id="'requirements-datatable-'+_uid"
+                            :id="requirementsDatatableId"
                             :dtOptions="requirement_options"
                             :dtHeaders="requirement_headers"
                         />
@@ -54,6 +54,7 @@ export default {
     data: function() {
         let vm = this;
         return {
+            requirementsDatatableId: `requirements-datatable-${vm.$.uid}`,
             panelBody: "proposal-requirements-"+vm.$.uid,
             requirements: [],
             requirement_headers:["Requirement","Due Date","Recurrence","Action","Order"],
