@@ -1,3 +1,5 @@
+import { RouterView } from 'vue-router'
+
 import ExternalDashboard from '@/components/external/dashboard.vue'
 import Proposal from '@/components/external/proposal.vue'
 import ProposalApply from '@/components/external/proposal_apply.vue'
@@ -11,16 +13,10 @@ import ComplianceSubmit from '../compliances/submit.vue'
 export default
 {
     path: '/external',
-    component:
-    {
-        render(c)
-        {
-            return c('router-view')
-        }
-    },
+    component: RouterView,
     children: [
         {
-            path: '/',
+            path: '',
             component: ExternalDashboard,
             name: 'external-dashboard'
         },
@@ -35,16 +31,10 @@ export default
         },
         {
             path: 'proposal',
-            component:
-            {
-                render(c)
-                {
-                    return c('router-view')
-                }
-            },
+            component: RouterView,
             children: [
                 {
-                    path: '/',
+                    path: '',
                     component: ProposalApply,
                     name:"apply_proposal"
                 },
@@ -83,16 +73,10 @@ export default
         },
         {
             path: 'vesselownership',
-            component:
-            {
-                render(c)
-                {
-                    return c('router-view')
-                }
-            },
+            component: RouterView,
             children: [
                 {
-                    path: '/',
+                    path: '',
                     component: ManageVessel,
                     name:"new-vessel"
                 },
@@ -103,6 +87,5 @@ export default
                 },
             ]
         },
-
     ]
 }
