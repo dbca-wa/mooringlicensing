@@ -348,7 +348,7 @@ export default {
             let vm = this;
             $(vm.$refs.person_lookup).select2({
                 minimumInputLength: 2,
-                "theme": "bootstrap",
+                theme: "bootstrap-5",
                 allowClear: true,
                 placeholder:"Select Person",
                 pagination: true,

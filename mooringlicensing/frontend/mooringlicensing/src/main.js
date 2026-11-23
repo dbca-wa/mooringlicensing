@@ -25,14 +25,11 @@ import 'jquery-validation';
 
 import 'sweetalert2/dist/sweetalert2.css';
 import 'select2/dist/css/select2.min.css';
-import 'select2-bootstrap-theme/dist/select2-bootstrap.min.css';
+import "select2-bootstrap-5-theme/dist/select2-bootstrap-5-theme.min.css";
 
 import "datatables.net";
 import "datatables.net-bs5";
 
-//import "datatables.net-buttons/js/dataTables.buttons.js";
-//import "datatables.net-buttons-bs5";
-//import "datatables.net-buttons/js/buttons.html5.js";
 
 import "datatables.net-responsive";
 import "datatables.net-responsive-bs5";

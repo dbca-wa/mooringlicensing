@@ -314,7 +314,7 @@ export default {
             let vm = this;
             // Intialise select2
             $(vm.$refs.standard_req).select2({
-                "theme": "bootstrap",
+                theme: "bootstrap-5",
                 allowClear: true,
                 placeholder:"Select Requirement",
                 dropdownParent: $(vm.$refs.standard_req).parent(),

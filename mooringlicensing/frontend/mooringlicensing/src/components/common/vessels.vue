@@ -538,7 +538,7 @@ export default {
             // Vessel search
             $(vm.$refs.company_name).select2({
                 minimumInputLength: 2,
-                "theme": "bootstrap",
+                theme: "bootstrap-5",
                 placeholder: "",
                 tags: true,
                 ajax: {
@@ -620,7 +620,7 @@ export default {
 
             $(vm.$refs.vessel_rego_nos).select2({
                 minimumInputLength: 1,
-                "theme": "bootstrap",
+                theme: "bootstrap-5",
                 placeholder: "",
                 allowClear: true,
                 tags: allow_add_new_vessel,

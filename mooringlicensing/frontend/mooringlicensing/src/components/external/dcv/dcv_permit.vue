@@ -97,9 +97,6 @@ import $ from 'jquery'
 import FormSection from "@/components/forms/section_toggle.vue"
 import { api_endpoints, helpers } from '@/utils/hooks'
 
-import "select2/dist/css/select2.min.css";
-import "select2-bootstrap-theme/dist/select2-bootstrap.min.css";
-
 export default {
     name: 'DcvTablePage',
     data() {
@@ -157,7 +154,7 @@ export default {
             let vm = this;
             $(vm.$refs.person_lookup).select2({
                 minimumInputLength: 2,
-                "theme": "bootstrap",
+                theme: "bootstrap-5",
                 allowClear: true,
                 placeholder:"Select Person",
                 pagination: true,
@@ -245,7 +242,7 @@ export default {
             let vm = this;
             $(vm.$refs.dcv_vessel_rego_nos).select2({
                 minimumInputLength: 2,
-                "theme": "bootstrap",
+                theme: "bootstrap-5",
                 allowClear: true,
                 placeholder: "",
                 tags: true,

@@ -26,8 +26,6 @@
 <script>
 import $ from 'jquery'
 import FormSection from '@/components/forms/section_toggle.vue'
-import "select2/dist/css/select2.min.css";
-import "select2-bootstrap-theme/dist/select2-bootstrap.min.css";
 import {
   api_endpoints
 }
@@ -58,7 +56,7 @@ from '@/utils/hooks'
                 let vm = this;
                 $(vm.$refs.mooring_lookup).select2({
                     minimumInputLength: 2,
-                    "theme": "bootstrap",
+                    theme: "bootstrap-5",
                     allowClear: true,
                     placeholder:"Select Mooring",
                     pagination: true,

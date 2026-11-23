@@ -362,7 +362,7 @@ export default {
             let vm = this;
             $(vm.$refs.organisation_lookup1).select2({
                 minimumInputLength: 2,
-                theme: "bootstrap",
+                theme: "bootstrap-5",
                 allowClear: true,
                 placeholder: "",
                 ajax: {
