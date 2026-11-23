@@ -127,6 +127,11 @@ export default {
   methods: {
     toggle_show_hide: function () {
       this.isCollapsed = !this.isCollapsed;
+
+      setTimeout(() => {
+        window.dispatchEvent(new Event('resize'));
+      }, 350);
+
       this.$emit("toggle-collapse");
     },
     toggleComment: function () {

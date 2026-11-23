@@ -49,6 +49,11 @@ export default {
             };
             var options = Object.assign(vm.dtOptions);
             vm.vmDataTable = $(vm.table).DataTable(options);
+
+            window.addEventListener('resize', function () {
+                vm.vmDataTable.columns.adjust().responsive.recalc();
+            });
+
             vm.vmDataTable.on('draw', function () {
                 vm.vmDataTable.columns.adjust().responsive.recalc();
             });
