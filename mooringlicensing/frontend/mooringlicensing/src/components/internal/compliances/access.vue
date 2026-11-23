@@ -36,7 +36,7 @@
                             </select>
                             <select @change="assignTo" 
                             :disabled="canViewonly || !check_assessor()" 
-                            v-if="!isLoading" class="form-control" 
+                            v-if="!isLoading" class="form-select" 
                             v-model="compliance.assigned_to">
                                 <option v-for="member in compliance.allowed_assessors" :value="member.ledger_id">{{member.legal_first_name}} {{member.legal_last_name}}</option>
                             </select>

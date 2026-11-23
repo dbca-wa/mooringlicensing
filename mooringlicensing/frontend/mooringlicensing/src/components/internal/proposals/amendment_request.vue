@@ -12,7 +12,7 @@
                                         <label class="form-label float-end"  for="reason_select">Reason</label>
                                     </div>
                                     <div class="col-sm-6">
-                                        <select class="form-control" id="reason_select" ref="reason" v-model="amendment.reason">
+                                        <select class="form-select" id="reason_select" ref="reason" v-model="amendment.reason">
                                             <option v-for="r in reason_choices" :value="r.key">{{r.value}}</option>
                                         </select>
                                     </div>

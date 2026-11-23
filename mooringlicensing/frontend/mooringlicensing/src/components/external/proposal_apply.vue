@@ -52,7 +52,7 @@
                                                     application_type.new_application_text }}</label>
                                             </div>
                                             <span class="float-start col-sm-2" v-if="application_type.multiple">
-                                                <select class="form-control" v-model="selectedCurrentProposal">
+                                                <select class="form-select" v-model="selectedCurrentProposal">
                                                     <option v-for="approval in aaaApprovals"
                                                         :value="approval.current_proposal_id">
                                                         {{ approval.lodgement_number }}
@@ -83,7 +83,7 @@
                                                     application_type.new_application_text }}</label>
                                             </div>
                                             <span class="float-start col-sm-2" v-if="application_type.multiple">
-                                                <select class="form-control" v-model="selectedCurrentProposal">
+                                                <select class="form-select" v-model="selectedCurrentProposal">
                                                     <option v-for="approval in auaApprovals"
                                                         :value="approval.current_proposal_id">
                                                         {{ approval.lodgement_number }}
@@ -114,7 +114,7 @@
                                                     application_type.new_application_text }}</label>
                                             </div>
                                             <span class="float-start col-sm-2" v-if="application_type.multiple">
-                                                <select class="form-control" v-model="selectedCurrentProposal">
+                                                <select class="form-select" v-model="selectedCurrentProposal">
                                                     <option v-for="approval in wlaApprovals"
                                                         :value="approval.current_proposal_id">
                                                         {{ approval.lodgement_number }}
@@ -184,7 +184,7 @@
                                                 </label>
                                             </div>
                                             <span class="float-start col-sm-2" v-if="application_type.multiple">
-                                                <select class="form-control" v-model="selectedCurrentProposal">
+                                                <select class="form-select" v-model="selectedCurrentProposal">
                                                     <option v-for="approval in mlApprovals"
                                                         :value="approval.current_proposal_id"
                                                     >

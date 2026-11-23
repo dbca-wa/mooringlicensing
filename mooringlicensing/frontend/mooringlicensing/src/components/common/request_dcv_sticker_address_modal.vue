@@ -57,7 +57,7 @@
                 <div class="row mb-3">
                     <label for="" class="col-sm-3 col-form-label" >Country</label>
                     <div class="col-sm-4">
-                        <select v-model="new_postal_address_country" class="form-control" name="country">
+                        <select v-model="new_postal_address_country" class="form-select" name="country">
                             <option selected></option>
                             <option v-for="c in countries" :value="c.code">{{ c.name }}</option>
                         </select>

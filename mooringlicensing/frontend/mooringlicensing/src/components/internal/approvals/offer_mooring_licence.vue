@@ -11,7 +11,7 @@
                                     <label class="form-label float-start" for="mooring_bay_lookup">Bay</label>
                                 </div>
                                 <div class="col-sm-6">
-                                    <select class="form-control" v-model="selectedMooringBayId" id="mooring_bay_lookup" disabled>
+                                    <select class="form-select" v-model="selectedMooringBayId" id="mooring_bay_lookup" disabled>
                                         <option v-for="bay in mooringBays" v-bind:value="bay.id">
                                         {{ bay.name }}
                                         </option>

@@ -9,52 +9,78 @@
             </div>
         </div>
         <div v-else class="row">
-            <div v-if="!wlaDash">
-                <div class="col-md-3">
-                    <div class="mb-3">
-                        <label for="">Type:</label>
-                        <select class="form-control" v-model="filterApprovalType">
-                            <option value="All">All</option>
-                            <option v-for="type in approvalTypes" :value="type.code">{{ type.description }}</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div v-else>
-                <div class="col-md-3">
-                    <div class="mb-3">
-                        <label for="">Bay:</label>
-                        <select class="form-control" v-model="filterMooringBay">
-                            <option value="All">All</option>
-                            <option v-for="bay in mooringBays" :value="bay.id">{{ bay.name }}</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
+            <div class="col-md-3" v-if="!wlaDash">
                 <div class="mb-3">
-                    <label for="">Status:</label>
-                    <select class="form-control" v-model="filterStatus">
+                    <label>Type</label>
+                    <select class="form-select" v-model="filterApprovalType">
                         <option value="All">All</option>
-                        <option v-for="status in statusValues" :value="status.code">{{ status.description }}</option>
+                        <option
+                            v-for="type in approvalTypes"
+                            :key="type.code"
+                            :value="type.code"
+                        >
+                            {{ type.description }}
+                        </option>
                     </select>
                 </div>
             </div>
 
-            <div v-if="wlaDash">
-                <div class="col-md-2">
-                    <div class="mb-3">
-                        <label for="">Max Vessel Length:</label>
-                        <input class="form-control" type="number" v-model="maxVesselLength" id="maxVesselLength"/>
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class="mb-3">
-                        <label for="">Max Vessel Draft:</label>
-                        <input class="form-control" type="number" v-model="maxVesselDraft" id="maxVesselDraft"/>
-                    </div>
+            <div class="col-md-3" v-else>
+                <div class="mb-3">
+                    <label>Bay</label>
+                    <select class="form-select" v-model="filterMooringBay">
+                        <option value="All">All</option>
+                        <option
+                            v-for="bay in mooringBays"
+                            :key="bay.id"
+                            :value="bay.id"
+                        >
+                            {{ bay.name }}
+                        </option>
+                    </select>
                 </div>
             </div>
+
+            <div class="col-md-3">
+                <div class="mb-3">
+                    <label>Status</label>
+                    <select class="form-select" v-model="filterStatus">
+                        <option value="All">All</option>
+                        <option
+                            v-for="status in statusValues"
+                            :key="status.code"
+                            :value="status.code"
+                        >
+                            {{ status.description }}
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+            <div v-if="wlaDash" class="col-md-2">
+                <div class="mb-3">
+                    <label>Max Vessel Length</label>
+                    <input
+                        class="form-control"
+                        type="number"
+                        v-model="maxVesselLength"
+                        id="maxVesselLength"
+                    />
+                </div>
+            </div>
+
+            <div v-if="wlaDash" class="col-md-2">
+                <div class="mb-3">
+                    <label>Max Vessel Draft</label>
+                    <input
+                        class="form-control"
+                        type="number"
+                        v-model="maxVesselDraft"
+                        id="maxVesselDraft"
+                    />
+                </div>
+            </div>
+
         </div>
 
         <div class="row">

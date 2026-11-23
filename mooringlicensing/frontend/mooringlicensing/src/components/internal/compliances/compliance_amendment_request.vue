@@ -10,7 +10,7 @@
                                 <div class="col-sm-offset-2 col-sm-8">
                                     <div class="row mb-3">
                                         <label class="form-label float-start"  for="Name">Reason</label>
-                                        <select class="form-control" name="reason" ref="reason" v-model="amendment.reason">
+                                        <select class="form-select" name="reason" ref="reason" v-model="amendment.reason">
                                             <option v-for="r in reason_choices" :value="r.key">{{r.value}}</option>
                                         </select>
                                     </div>

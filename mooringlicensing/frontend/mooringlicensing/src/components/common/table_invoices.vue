@@ -4,7 +4,7 @@
             <div class="col-md-3">
                 <div class="mb-3">
                     <label for="">Fee Source Type</label>
-                    <select class="form-control" v-model="filterFeeSourceType">
+                    <select class="form-select" v-model="filterFeeSourceType">
                         <option value="All">All</option>
                         <option v-for="type in fee_source_types" :value="type.code">{{ type.description }}</option>
                     </select>
@@ -13,7 +13,7 @@
             <div class="col-md-3">
                 <div class="mb-3">
                     <label for="">Status</label>
-                    <select class="form-control" v-model="filterStatus">
+                    <select class="form-select" v-model="filterStatus">
                         <option value="All">All</option>
                         <option v-for="invoice_status in invoice_statuses" :value="invoice_status.code">{{ invoice_status.description }}</option>
                     </select>

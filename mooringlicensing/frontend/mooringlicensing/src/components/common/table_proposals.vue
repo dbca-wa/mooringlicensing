@@ -4,7 +4,7 @@
             <div class="col-md-3">
                 <div class="mb-3">
                     <label for="">Type</label>
-                    <select class="form-control" v-model="filterApplicationType">
+                    <select class="form-select" v-model="filterApplicationType">
                         <option value="All">All</option>
                         <option v-for="type in application_types" :value="type.code">{{ type.description }}</option>
                     </select>
@@ -13,7 +13,7 @@
             <div class="col-md-3">
                 <div class="mb-3">
                     <label for="">Category</label>
-                    <select class="form-control" v-model="filterApplicationCategory">
+                    <select class="form-select" v-model="filterApplicationCategory">
                         <option value="All">All</option>
                         <option v-for="category in application_categories" :value="category.code">{{ category.description }}</option>
                     </select>
@@ -22,7 +22,7 @@
             <div class="col-md-3">
                 <div class="mb-3">
                     <label for="">Status</label>
-                    <select class="form-control" v-model="filterApplicationStatus">
+                    <select class="form-select" v-model="filterApplicationStatus">
                         <option value="All">All</option>
                         <option v-for="status in application_statuses" :value="status.code">{{ status.description }}</option>
                     </select>

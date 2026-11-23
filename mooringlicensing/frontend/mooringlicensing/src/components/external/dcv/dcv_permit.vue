@@ -31,7 +31,7 @@
             <div class="row mb-3">
                 <label for="" class="col-sm-3 col-form-label">Season</label>
                 <div class="col-sm-6">
-                    <select class="form-control" v-model="dcv_permit.season">
+                    <select class="form-select" v-model="dcv_permit.season">
                         <option value=""></option>
                         <option v-for="season in season_options" :value="season">{{ season.name }}</option>
                     </select>
@@ -57,7 +57,7 @@
                                 </strong>
                             </label>
                             <div class="col-sm-6">
-                            <select v-model="dcv_permit.postal_address" class="form-control">
+                            <select v-model="dcv_permit.postal_address" class="form-select">
                                 <option selected disabled hidden value>Select postal address...</option>
                                 <option v-for="option in postal_addresses" :value="option" :key="option.id">
                                     {{ option.line1 }}, {{ option.locality }}, {{ option.state }}, {{ option.postcode }}, {{ option.country }}

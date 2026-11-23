@@ -96,7 +96,7 @@
                                     </strong>
                                 </label>
                                 <div class="col-sm-6">
-                                <select v-model="residential_address" class="form-control">
+                                <select v-model="residential_address" class="form-select">
                                     <option selected disabled hidden value>Select residential address...</option>
                                     <option v-for="option in profile.residential_address_list" :value="option">
                                         {{ option.line1 }}, {{ option.locality }}, {{ option.state }}, {{ option.postcode }}, {{ option.country }}
@@ -111,7 +111,7 @@
                                     </strong>
                                 </label>
                                 <div class="col-sm-6">
-                                <select v-model="postal_address" class="form-control">
+                                <select v-model="postal_address" class="form-select">
                                     <option selected disabled hidden value>Select postal address...</option>
                                     <option v-for="option in profile.postal_address_list" :value="option">
                                         {{ option.line1 }}, {{ option.locality }}, {{ option.state }}, {{ option.postcode }}, {{ option.country }}

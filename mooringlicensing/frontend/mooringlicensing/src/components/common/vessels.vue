@@ -186,7 +186,7 @@
             <div class="row mb-3">
                 <label for="" class="col-sm-3 col-form-label">Vessel Type <span style="color: red;">*</span></label>
                 <div class="col-sm-4">
-                    <select :disabled="readonly" class="form-control" style="width:40%"
+                    <select :disabled="readonly" class="form-select" style="width:40%"
                         v-model="vessel.vessel_details.vessel_type">
                         <option v-for="vesselType in vesselTypes" :value="vesselType.code">
                             {{ vesselType.description }}

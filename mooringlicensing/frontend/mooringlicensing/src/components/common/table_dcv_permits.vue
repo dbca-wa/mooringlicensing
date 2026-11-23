@@ -18,7 +18,7 @@
             <div class="col-md-3">
                 <div class="mb-3">
                     <label for="">Season</label>
-                    <select class="form-control" v-model="filterFeeSeason">
+                    <select class="form-select" v-model="filterFeeSeason">
                         <option value="All">All</option>
                         <option v-for="fee_season in fee_seasons" :value="fee_season.id">{{ fee_season.name }}</option>
                     </select>

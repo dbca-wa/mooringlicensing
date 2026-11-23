@@ -21,7 +21,7 @@
                                     <select 
                                         ref="assigned_officer" 
                                         :disabled="!canAction" 
-                                        class="form-control" 
+                                        class="form-select" 
                                         v-model="proposal.assigned_approver"
                                         @change="assignTo()">
                                         <option v-for="member in proposal.allowed_assessors" :value="member.ledger_id">{{ member.first_name }} {{ member.last_name }}</option>
@@ -32,7 +32,7 @@
                                     <select 
                                         ref="assigned_officer" 
                                         :disabled="!canAction" 
-                                        class="form-control" 
+                                        class="form-select" 
                                         v-model="proposal.assigned_officer"
                                         @change="assignTo()">
                                         <option v-for="member in proposal.allowed_assessors" :value="member.ledger_id">{{ member.first_name }} {{ member.last_name }}</option>
