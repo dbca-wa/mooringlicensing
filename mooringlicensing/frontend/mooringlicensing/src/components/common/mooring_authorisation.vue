@@ -42,7 +42,8 @@
                 <div class="col-lg-2 float-end" v-if="!readonly">
                     <button @click.prevent="addSiteLicensee()" class="btn btn-primary">Add</button>
                 </div>
-                <div class="row mb-3">
+                </br>
+                <div class="mb-3">
                     <div class="col-sm-12">
                         <datatable
                             ref="site_licensee_datatable"
