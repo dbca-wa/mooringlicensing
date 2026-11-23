@@ -56,7 +56,7 @@ export default {
             errors: false,
             errorString: '',
 
-            datatable_id: 'swap-moorings-datatable-' + vm._uid,
+            datatable_id: 'swap-moorings-datatable-' + vm.$.uid,
             selectedApprovalId: null,
             selectedApprovalLodgementNumber: null,
         }

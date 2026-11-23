@@ -71,7 +71,7 @@
                 </div>
             </div>
 
-            <div slot="footer">
+            <template v-slot:footer>
                 <p class="float-end" style="margin-top:5px">
                     <input type="checkbox" v-model="noEmails" id="noEmails" />
                     <label for="noEmails">
@@ -81,7 +81,7 @@
                 <button type="button" v-else class="btn btn-primary me-2" @click="ok" :disabled="!ok_button_enabled">Ok</button>
                 <button type="button" class="btn btn-secondary me-2" @click="cancel">Cancel</button>
                 </p>
-            </div>
+            </template>
         </modal>
     </div>
 </template>

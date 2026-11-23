@@ -54,7 +54,7 @@ export default {
     data: function() {
         let vm = this;
         return {
-            panelBody: "proposal-requirements-"+vm._uid,
+            panelBody: "proposal-requirements-"+vm.$.uid,
             requirements: [],
             requirement_headers:["Requirement","Due Date","Recurrence","Action","Order"],
             requirement_options:{

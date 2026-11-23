@@ -321,15 +321,15 @@ export default {
     data () {
         let vm = this;
         return {
-            electoralRollSectionIndex: 'electoral_roll_' + vm._uid,
+            electoralRollSectionIndex: 'electoral_roll_' + vm.$.uid,
             silentElector: null,
-            appBody: 'appBody'+vm._uid,
-            adBody: 'adBody'+vm._uid,
-            pBody: 'pBody'+vm._uid,
-            cBody: 'cBody'+vm._uid,
+            appBody: 'appBody'+vm.$.uid,
+            adBody: 'adBody'+vm.$.uid,
+            pBody: 'pBody'+vm.$.uid,
+            cBody: 'cBody'+vm.$.uid,
             profile: {},
-            residential_address_datatable_id: 'residential-address-datatable-' + vm._uid,
-            postal_address_datatable_id: 'postal-address-datatable-' + vm._uid,
+            residential_address_datatable_id: 'residential-address-datatable-' + vm.$.uid,
+            postal_address_datatable_id: 'postal-address-datatable-' + vm.$.uid,
             address_datatable_headers: ["Street","Locality","State","Postcode","Country","Action"],
             residential_address_table_key: 0,
             postal_address_table_key: 0,

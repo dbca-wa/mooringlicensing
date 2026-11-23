@@ -35,7 +35,7 @@
                     </form>
                 </div>
             </div>
-            <div slot="footer">
+            <template v-slot:footer>
 
                 <input v-if="is_internal" type="checkbox" v-model="noEmail" id="noEmail" />
                 <label v-if="is_internal" for="noEmail">
@@ -45,7 +45,7 @@
                 <button type="button" v-if="saving" disabled class="btn btn-primary me-3" @click="ok"><i class="fa fa-spinner fa-spin"></i> Saving</button>
                 <button type="button" v-else class="btn btn-primary me-2" @click="ok">Save</button>
                 <button type="button" class="btn btn-secondary me-2" @click="cancel">Cancel</button>
-            </div>
+            </template>
         </modal>
     </div>
 </template>

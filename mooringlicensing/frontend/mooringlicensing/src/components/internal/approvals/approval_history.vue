@@ -46,7 +46,7 @@ export default {
     data:function () {
         let vm = this;
         return {
-            datatable_id: 'history-datatable-' + vm._uid,
+            datatable_id: 'history-datatable-' + vm.$.uid,
             approvalDetails: {
                 approvalLodgementNumber: null,
             },

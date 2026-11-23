@@ -52,7 +52,7 @@ export default {
     data() {
         let vm = this;
         return {
-            datatable_id: 'applications-datatable-' + vm._uid,
+            datatable_id: 'applications-datatable-' + vm.$.uid,
             approvalTypesToDisplay: ['aap', 'aup', 'ml'],
 
             // selected values for filtering

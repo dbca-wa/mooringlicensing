@@ -185,10 +185,6 @@ export default {
         ]
     }
   },
-  filters: {
-    formatDate: function(data){
-        return data ? moment(data).format('DD/MM/YYYY'): '';    }
-  },
   beforeRouteEnter: function(to, from, next){
     http.get(helpers.add_endpoint_json(api_endpoints.compliances,to.params.compliance_id+'/internal_compliance')).then((response) => {
         next(vm => {
@@ -227,6 +223,9 @@ export default {
     }
   },
   methods: {
+    formatDate: function(data){
+        return data ? moment(data).format('DD/MM/YYYY'): '';    
+    },
     delete_document: function(doc){
         let vm= this;
         let data = {'document': doc}

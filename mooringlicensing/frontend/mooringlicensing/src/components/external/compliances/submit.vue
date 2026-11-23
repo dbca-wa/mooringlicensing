@@ -39,7 +39,7 @@ export default {
         "compliance": {},
     }
   },
-  filters:{
+  methods:{
         formatDate: function(data){
             return data ? moment(data).format('DD/MM/YYYY HH:mm:ss'): '';
         }

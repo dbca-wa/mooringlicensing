@@ -35,7 +35,7 @@ export default {
     data() {
         let vm = this;
         return {
-            datatable_id: 'to_be_endorsed-datatable-' + vm._uid,
+            datatable_id: 'to_be_endorsed-datatable-' + vm.$.uid,
             approvalTypesToDisplay: ['aua'],
 
             // selected values for filtering

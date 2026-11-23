@@ -90,7 +90,7 @@
                     </form>
                 </div>
             </div>
-            <div slot="footer">
+            <template v-slot:footer>
                 <template v-if="requirement.id">
                     <button type="button" v-if="updatingRequirement" disabled class="btn btn-primary me-2" @click="ok"><i class="fa fa-spinnner fa-spin"></i> Updating</button>
                     <button type="button" v-else class="btn btn-primary me-2" @click="ok">Update</button>
@@ -100,7 +100,7 @@
                     <button type="button" v-else class="btn btn-primary me-2" @click="ok">Add</button>
                 </template>
                 <button type="button" class="btn btn-secondary me-2" @click="cancel">Cancel</button>
-            </div>
+            </template>
         </modal>
     </div>
 </template>

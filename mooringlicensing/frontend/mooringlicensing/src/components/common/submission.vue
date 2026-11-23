@@ -36,9 +36,9 @@ export default {
             default: null,
         },
     },
-    filters: {
-        formatDate: function(data){
-            return data ? moment(data).format('DD/MM/YYYY HH:mm:ss'): '';
+    methods: {
+        formatDate(data) {
+            return data ? moment(data).format('DD/MM/YYYY HH:mm:ss') : '';
         }
     },
 }

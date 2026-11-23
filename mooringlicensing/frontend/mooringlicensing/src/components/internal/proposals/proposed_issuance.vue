@@ -218,9 +218,9 @@ export default {
             successString: '',
             success: false,
             warningString: 'Please attach Level of Approval document before issuing Approval',
-            mooringsTableId: 'moorings_table' + vm._uid,
-            requestedMooringsTableId: 'requested_moorings_table' + vm._uid,
-            vesselsTableId: 'vessels_table' + vm._uid,
+            mooringsTableId: 'moorings_table' + vm.$.uid,
+            requestedMooringsTableId: 'requested_moorings_table' + vm.$.uid,
+            vesselsTableId: 'vessels_table' + vm.$.uid,
             mooringsDtHeaders: [
                 'Id',
                 '',

@@ -175,7 +175,7 @@ export default {
     data() {
         let vm = this;
         return {
-            datatable_id: 'waiting_lists-datatable-' + vm._uid,
+            datatable_id: 'waiting_lists-datatable-' + vm.$.uid,
             show_expired_surrendered: false,
             selectedWaitingListAllocationId: null,
             approvalHistoryId: null,

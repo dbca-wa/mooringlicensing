@@ -48,7 +48,7 @@
                     </div>
                 </div>
             </div>
-            <div slot="footer">
+            <template v-slot:footer>
                 <div class="row w-100">
                     <div class="col-md-6 text-end">
                         <span v-if="replacementFee">
@@ -61,7 +61,7 @@
                         <button type="button" class="btn btn-secondary me-2" @click="cancel">Cancel</button>
                     </div>
                 </div>
-            </div>
+            </template>
         </modal>
     </div>
 </template>

@@ -177,19 +177,19 @@ export default {
     let vm = this;
     return {
         showExpired: false,
-        moorings_datatable_id: 'moorings-datatable-' + vm._uid,
-        ml_vessels_datatable_id: 'ml-vessels-datatable-' + vm._uid,
-        ml_authorised_users_datatable_id: 'ml-authorised-users-datatable-' + vm._uid,
+        moorings_datatable_id: 'moorings-datatable-' + vm.$.uid,
+        ml_vessels_datatable_id: 'ml-vessels-datatable-' + vm.$.uid,
+        ml_authorised_users_datatable_id: 'ml-authorised-users-datatable-' + vm.$.uid,
         loading: [],
         approval: {
             applicant_id: null
 
         },
         DATE_TIME_FORMAT: 'DD/MM/YYYY HH:mm:ss',
-        adBody: 'adBody'+vm._uid,
-        pBody: 'pBody'+vm._uid,
-        cBody: 'cBody'+vm._uid,
-        oBody: 'oBody'+vm._uid,
+        adBody: 'adBody'+vm.$.uid,
+        pBody: 'pBody'+vm.$.uid,
+        cBody: 'cBody'+vm.$.uid,
+        oBody: 'oBody'+vm.$.uid,
         org: {
             address: {}
         },
@@ -331,11 +331,6 @@ export default {
           });
       },
   },
-  filters: {
-    formatDate: function(data){
-        return moment(data).format('DD/MM/YYYY');
-    }
-  },
   props: {
       approvalId: {
           type: Number,
@@ -397,6 +392,9 @@ export default {
     },
   },
   methods: {
+    formatDate: function(data){
+        return moment(data).format('DD/MM/YYYY');
+    },
     constructMooringsTable: function() {
         let vm = this;
         this.$refs.moorings_datatable.vmDataTable.clear().draw();

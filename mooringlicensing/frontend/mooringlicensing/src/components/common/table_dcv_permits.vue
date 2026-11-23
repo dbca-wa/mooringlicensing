@@ -80,7 +80,7 @@ export default {
     data() {
         let vm = this;
         return {
-            datatable_id: 'applications-datatable-' + vm._uid,
+            datatable_id: 'applications-datatable-' + vm.$.uid,
 
             // selected values for filtering
             filterDcvOrganisation: null,

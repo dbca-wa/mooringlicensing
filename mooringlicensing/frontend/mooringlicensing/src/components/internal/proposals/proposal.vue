@@ -221,10 +221,10 @@ export default {
             submittingProposal: false,
             submitText: "Submit",
             paySubmitting:false,
-            detailsBody: 'detailsBody'+vm._uid,
-            addressBody: 'addressBody'+vm._uid,
-            contactsBody: 'contactsBody'+vm._uid,
-            siteLocations: 'siteLocations'+vm._uid,
+            detailsBody: 'detailsBody'+vm.$.uid,
+            addressBody: 'addressBody'+vm.$.uid,
+            contactsBody: 'contactsBody'+vm.$.uid,
+            siteLocations: 'siteLocations'+vm.$.uid,
             defaultKey: "aho",
             "proposal": null,
             "original_proposal": null,
@@ -241,7 +241,7 @@ export default {
             hasAmendmentRequest: false,
             requirementsComplete:true,
             state_options: ['requirements','processing'],
-            contacts_table_id: vm._uid+'contacts-table',
+            contacts_table_id: vm.$.uid+'contacts-table',
             contacts_options:{
                 language: {
                     processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>"

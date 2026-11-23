@@ -18,7 +18,8 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="sticker in stickers" :key="sticker.id" v-if="sticker.status.code == 'current'">
+                            <template v-for="sticker in stickers" :key="sticker.id">
+                            <tr v-if="sticker.status && sticker.status.code === 'current'">
                                 <td><input v-if="sticker.status.code == 'current'" type="checkbox" v-model="sticker.checked" /></td>
                                 <td v-if="sticker.number">{{ sticker.number }}</td>
                                 <td v-else>Not Assigned</td>
@@ -37,6 +38,7 @@
                                     <span>{{sticker.postal_address_postcode}}</span>
                                 </td>
                             </tr>
+                            </template>
                         </tbody>
                     </table>
                 </div>
@@ -90,7 +92,7 @@
                     </div>
                 </div>
             </div>
-            <div slot="footer">
+            <template v-slot:footer>
                 <div class="row w-100">
                     <div class="col-md-6 text-end">
                         <span v-if="is_internal">
@@ -103,7 +105,7 @@
                         <button type="button" class="btn btn-secondary me-2" @click="cancel">Cancel</button>
                     </div>
                 </div>
-            </div>
+            </template>
         </modal>
     </div>
 </template>

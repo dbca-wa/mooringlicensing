@@ -143,9 +143,9 @@ export default {
         isFinalised: false,
         errors: false,
         errorString: '',
-        pdBody: 'pdBody'+vm._uid,
-        oBody: 'oBody'+vm._uid,
-        pdBody: 'pdBody'+vm._uid,
+        pdBody: 'pdBody'+vm.$.uid,
+        oBody: 'oBody'+vm.$.uid,
+        pdBody: 'pdBody'+vm.$.uid,
         hasDocuments: false,
         validation_form: null,
         files: [
@@ -163,13 +163,7 @@ export default {
     hasDocuments: function(){             
         return this.compliance && this.compliance.documents;
     }
-  },
-  filters: {
-    formatDate: function(data){
-        return moment(data).format('DD/MM/YYYY HH:mm:ss');
-    }
-  },
- 
+  }, 
   components: {
     datatable,
     CommsLogs,
@@ -190,6 +184,9 @@ export default {
     
   },
   methods: {
+    formatDate: function(data){
+        return moment(data).format('DD/MM/YYYY HH:mm:ss');
+    },
     uploadFile(target,file_obj){
             let vm = this;
             let _file = null;

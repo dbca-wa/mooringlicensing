@@ -39,7 +39,7 @@ export default {
     data() {
         let vm = this;
         return {
-            datatable_id: 'moorings-datatable-' + vm._uid,
+            datatable_id: 'moorings-datatable-' + vm.$.uid,
 
             // selected values for filtering
             filterMooringStatus: null,

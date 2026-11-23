@@ -16,7 +16,8 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="sticker in stickers" :key="sticker.id"  v-if="sticker.status.code == 'ready' || sticker.status.code == 'not_yet_ready'">
+                            <template v-for="sticker in stickers" :key="sticker.id">
+                            <tr v-if="sticker.status && (sticker.status.code === 'ready' || sticker.status.code === 'not_yet_ready')">
                                 <td><input v-if="sticker.status.code == 'ready' || sticker.status.code == 'not_yet_ready'" type="checkbox" v-model="sticker.checked" /></td>
                                 <td v-if="sticker.number">{{ sticker.number }}</td>
                                 <td v-else>Not Assigned</td>
@@ -35,6 +36,7 @@
                                     <span>{{sticker.postal_address_postcode}}</span>
                                 </td>
                             </tr>
+                            </template>
                         </tbody>
                     </table>
                 </div>

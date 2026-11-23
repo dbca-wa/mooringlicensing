@@ -92,8 +92,8 @@ export default {
     data: function() {
         let vm = this;
         return {
-            proposedDecision: "proposal-decision-"+vm._uid,
-            proposedLevel: "proposal-level-"+vm._uid,
+            proposedDecision: "proposal-decision-"+vm.$.uid,
+            proposedLevel: "proposal-level-"+vm.$.uid,
             uploadedFile: null,
             component_site_selection_key: '',
             mooring: {},
