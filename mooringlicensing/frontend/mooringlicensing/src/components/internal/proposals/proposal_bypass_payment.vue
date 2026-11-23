@@ -4,7 +4,7 @@
             <div class="container-fluid">
                 <div class="row">
                     <form   name="bypassForm">
-                        <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
+                        <alert v-model:show="showError" type="danger"><strong>{{errorString}}</strong></alert>
                         <alert type="warning">
                             <strong>Caution</strong> 
                             This form will cancel the application invoice and forward the application to the approval/printing sticker stage.

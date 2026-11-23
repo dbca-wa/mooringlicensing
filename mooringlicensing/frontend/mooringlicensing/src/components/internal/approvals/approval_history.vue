@@ -3,7 +3,7 @@
         <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :showOK="false" :showCancel="false" :title="title" large>
             <div class="container-fluid">
                 <div class="row">
-                    <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
+                    <alert v-model:show="showError" type="danger"><strong>{{errorString}}</strong></alert>
                     <div class="col-sm-12">
                         <div class="row mb-3">
                             <div class="row">

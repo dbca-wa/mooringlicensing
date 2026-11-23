@@ -4,7 +4,7 @@
             <div class="container-fluid">
                 <div class="row">
                     <form   name="requirementForm">
-                        <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
+                        <alert v-model:show="showError" type="danger"><strong>{{errorString}}</strong></alert>
                         <div class="col-sm-12">
                             <div class="row mb-3">
                                 <label class="form-check-label form-label"><input class="form-check-input" type="radio" name="requirementType" :value="true" v-model="requirement.standard">Standard Requirement</label>

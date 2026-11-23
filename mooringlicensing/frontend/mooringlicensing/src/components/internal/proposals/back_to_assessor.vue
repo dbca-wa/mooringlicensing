@@ -5,7 +5,7 @@
             <div class="container-fluid">
                 <div class="row">
                     <form   name="backToAssessorForm">
-                        <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
+                        <alert v-model:show="showError" type="danger"><strong>{{errorString}}</strong></alert>
                         <div class="col-sm-12">
                             <div class="row">
                                 <div class="row mb-3">

@@ -2,9 +2,9 @@
     <div id="change-contact">
         <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :title="title" large>
             <div class="container-fluid">
-                <alert :show.sync="showError" type="danger"><strong>{{ errorString }}</strong></alert>
-                <alert :show.sync="showWarning" type="warning"><strong>One or more stickers have a postal address set that does not match the postal address on holder's user profile. Use the Create New Sticker option to change the postal address that the sticker should be sent to.</strong></alert>
-                <alert :show.sync="showReplaceInfo" type="info"><strong>{{ replaceInfo }}</strong></alert>
+                <alert v-model:show="showError" type="danger"><strong>{{ errorString }}</strong></alert>
+                <alert v-model:show="showWarning" type="warning"><strong>One or more stickers have a postal address set that does not match the postal address on holder's user profile. Use the Create New Sticker option to change the postal address that the sticker should be sent to.</strong></alert>
+                <alert v-model:show="showReplaceInfo" type="info"><strong>{{ replaceInfo }}</strong></alert>
                 <div class="row mb-3">
                     <table class="table table-striped table-bordered">
                         <thead>

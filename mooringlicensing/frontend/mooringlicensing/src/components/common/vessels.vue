@@ -509,19 +509,19 @@ export default {
         },
         setRegisteredOwner: function (isIndividualOwner) {
             if (!this.vessel.vessel_ownership) {
-                this.$set(this.vessel, 'vessel_ownership', {
+                this.vessel.vessel_ownership = {
                     company_ownership: {
                         company: {},
                     },
-                });
+                };
             }
 
-            this.$set(this.vessel.vessel_ownership, 'individual_owner', isIndividualOwner);
+            this.vessel.vessel_ownership.individual_owner = isIndividualOwner;
 
             if (!isIndividualOwner && !this.vessel.vessel_ownership.company_ownership) {
-                this.$set(this.vessel.vessel_ownership, 'company_ownership', {
+                this.vessel.vessel_ownership.company_ownership = {
                     company: {},
-                });
+                };
             }
 
             this.vessel = Object.assign({}, this.vessel);
@@ -800,7 +800,7 @@ export default {
             const res = await this.$http.post(url, payload);
             const companyOwnershipData = res.body;
             if (companyOwnershipData && companyOwnershipData.company) {
-                this.$set(this.vessel.vessel_ownership, 'company_ownership', Object.assign({}, res.body));
+                this.vessel.vessel_ownership.company_ownership = Object.assign({}, res.body);
                 this.vessel = Object.assign({}, this.vessel);
             }
         },

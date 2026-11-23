@@ -13,7 +13,7 @@
                             </tr>
                             <tr>
                                 <td><strong>Date/Time:</strong></td>
-                                <td><strong> {{compliance.lodgement_date|formatDate}}</strong></td>
+                                <td><strong> {{ formatDate(compliance.lodgement_date) }}</strong></td>
                             </tr>
                         </table>
                         <div>

@@ -14,7 +14,7 @@
     v-bind:style="{width:width}"
     role="alert">
     <button v-show="dismissable" type="button" class="close"
-      @click="show = false">
+      @click="$emit('update:show', false)">
       <span>&times;</span>
     </button>
     <slot></slot>
@@ -46,11 +46,14 @@ export default {
       type: String
     }
   },
+  emits: ['update:show'],
   watch: {
     show (val) {
       if (this._timeout) clearTimeout(this._timeout)
       if (val && Boolean(this.duration)) {
-        this._timeout = setTimeout(() => { this.show = false }, this.duration)
+        this._timeout = setTimeout(() => {
+        this.$emit('update:show', false)
+      }, this.duration)
       }
     }
   }

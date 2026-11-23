@@ -12,7 +12,7 @@
                 </div>
                 <div class="col-sm-12 top-buffer-s">
                     <strong>Lodged on</strong><br/>
-                    {{ lodgement_date | formatDate}}
+                    {{ formatDate(lodgement_date) }}
                 </div>
             </div>
         </div>

@@ -15,7 +15,7 @@
                     </div>
                     <div class="col-sm-12 top-buffer-s">
                         <strong>Lodged on</strong><br/>
-                        {{ compliance.lodgement_date | formatDate}}
+                        {{ formatDate(compliance.lodgement_date) }}
                     </div>
                 </div>
             </div>
@@ -62,7 +62,7 @@
                     <div class="row">
                         <div class="col-md-12"> 
                         <form   name="complianceForm" method="post">
-                            <alert :show.sync="showError" type="danger">
+                            <alert v-model:show="showError" type="danger">
                                 <strong>{{errorString}}</strong>
                             </alert>
                             <div class="row">
