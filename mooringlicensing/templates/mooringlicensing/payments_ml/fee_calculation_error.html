@@ -2,7 +2,7 @@
 {% load static %}
 {% block content %}
     <div class="container">
-        <div class="well">
+        <div class="border rounded p-3 bg-light">
             <div class="row"><div class="col-sm-12">
                 <h2>Error</h2>
             </div></div>
@@ -16,11 +16,11 @@
             <div class="row">
                 {% if request.user.is_staff %}
                 <div class="col-sm-12">
-                    <a href="{% url 'internal' %}" class="pull-right btn btn-info btn-lg">Return to Applications</a>
+                    <a href="{% url 'internal' %}" class="float-end btn btn-info btn-lg">Return to Applications</a>
                 </div>
                 {% elif request.user.is_authenticated %}
                 <div class="col-sm-12">
-                    <a href="{% url 'external' %}" class="pull-right btn btn-info btn-lg">Return to Dashboard</a>
+                    <a href="{% url 'external' %}" class="float-end btn btn-info btn-lg">Return to Dashboard</a>
                 </div>
                 {% endif %}
             </div>

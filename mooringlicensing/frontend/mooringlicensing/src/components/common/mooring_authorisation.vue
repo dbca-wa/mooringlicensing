@@ -1,34 +1,34 @@
 <template>
     <div v-if="newAua || changeMooring || (changeMooring && noMoorings)" id="mooring_authorisation">
         <FormSection label="Mooring details" Index="mooring_authorisation">
-            <div class="row form-group">
-                <label for="" class="col-sm-9 control-label">Do you want to be authorised
+            <div class="row mb-3">
+                <label for="" class="col-sm-9 form-label">Do you want to be authorised
                 </label>
             </div>
-            <div class="form-group">
+            <div class="row mb-3">
                 <div class="row">
                     <div class="col-sm-9">
-                        <input :disabled="readonly" type="radio" id="site_licensee" value="site_licensee" v-model="mooringAuthPreference" required=""/>
-                        <label for="site_licensee" class="control-label">By a mooring site licensee for their mooring</label>
+                        <input :disabled="readonly" class="form-check-input" type="radio" id="site_licensee" value="site_licensee" v-model="mooringAuthPreference" required=""/>
+                        <label for="site_licensee" class="form-label">By a mooring site licensee for their mooring</label>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-sm-9">
-                        <input :disabled="readonly" type="radio" id="ria" value="ria" v-model="mooringAuthPreference" required=""/>
-                        <label for="ria" class="control-label">By Rottnest Island Authority for a mooring allocated by the Authority</label>
+                        <input :disabled="readonly" class="form-check-input" type="radio" id="ria" value="ria" v-model="mooringAuthPreference" required=""/>
+                        <label for="ria" class="form-label">By Rottnest Island Authority for a mooring allocated by the Authority</label>
                     </div>
                 </div>
             </div>
 
             <div v-show="mooringAuthPreference==='site_licensee'">
-                <div class="row form-group">
-                    <label for="site_licensee_email" class="col-sm-3 control-label">Site licensee email</label>
+                <div class="row mb-3">
+                    <label for="site_licensee_email" class="col-sm-3 col-form-label">Site licensee email</label>
                     <div class="col-sm-9">
                         <input :readonly="readonly" class="form-control" type="text" placeholder="" id="site_licensee_email" v-model="siteLicenseeEmail"/>
                     </div>
                 </div>
-                <div class="row form-group">
-                    <label for="mooring_id" class="col-sm-3 control-label">Mooring site ID</label>
+                <div class="row mb-3">
+                    <label for="mooring_id" class="col-sm-3 col-form-label">Mooring site ID</label>
                     <div class="col-sm-9">
                         <select 
                             id="mooring_lookup"  
@@ -39,10 +39,11 @@
                         />
                     </div>
                 </div>
-                <div class="col-lg-2 pull-right" v-if="!readonly">
+                <div class="col-lg-2 float-end" v-if="!readonly">
                     <button @click.prevent="addSiteLicensee()" class="btn btn-primary">Add</button>
                 </div>
-                <div class="row form-group">
+                </br>
+                <div class="mb-3">
                     <div class="col-sm-12">
                         <datatable
                             ref="site_licensee_datatable"
@@ -55,9 +56,9 @@
                 </div>
             </div>
 
-            <div v-show="mooringAuthPreference==='ria'" class="row form-group">
+            <div v-show="mooringAuthPreference==='ria'" class="row mb-3">
                 <div class="col-sm-9">
-                <label for="ria_draggable" class="draggable-label-class control-label">Order the bays in your preferred order with most preferred bay on top</label>
+                <label for="ria_draggable" class="draggable-label-class form-label">Order the bays in your preferred order with most preferred bay on top</label>
                 <draggable 
                 id="ria_draggable"
                 :disabled="readonly" 
@@ -312,7 +313,7 @@ import draggable from 'vuedraggable';
                 let vm = this;
                 $(vm.$refs.mooring_lookup).select2({
                     minimumInputLength: 2,
-                    "theme": "bootstrap",
+                    theme: "bootstrap-5",
                     allowClear: true,
                     placeholder:"Select Mooring",
                     pagination: true,

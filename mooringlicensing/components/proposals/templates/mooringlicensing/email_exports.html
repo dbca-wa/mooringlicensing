@@ -12,14 +12,14 @@
         }
     </style>
     <div class="container">
-        <div class="panel panel-default">
-            <div class="panel-header">
-                <h3 class="panel-title">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
                     Reports
                 </h3>
             </div>
-            <div class="panel-body collapse show">
-                <div class="row form-group">
+            <div class="card-body collapse show">
+                <div class="row mb-3">
                     <div class="col-sm-12">
                     {% if message %}
                     <div class="alert alert-success">{{message}}</div>
@@ -28,25 +28,25 @@
                     {% endif %}
                     </div>
                 </div>
-                <div class="row form-group">
-                    <label class="col-sm-3 control-label">Format</label>
+                <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label">Format</label>
                     <div class="col-sm-6">
-                        <select id="format_select" name="format" class="form-control">
+                        <select id="format_select" name="format" class="form-select">
                             <option value="excel">Excel</option>
                             <option value="csv">CSV</option>
                         </select>
                     </div>
                 </div>
-                <div class="row form-group">
-                    <label class="col-sm-3 control-label"># Records for Report</label>
+                <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label"># Records for Report</label>
                     <div class="col-sm-6">
                         <input id="num_records" name="num_records" type="number" value=100000 max=500000 min=1 class="form-control">
                     </div>
                 </div>
-                <div class="row form-group">
-                    <label class="col-sm-3 control-label">Report Type</label>
+                <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label">Report Type</label>
                     <div class="col-sm-6">
-                        <select id="report_select" onchange="selectReport()" class="form-control">
+                        <select id="report_select" onchange="selectReport()" class="form-select">
                             <option value="proposal_report">Proposals</option>
                             <option value="approval_report">Approvals</option>
                             <option value="compliance_report">Compliance</option>
@@ -62,18 +62,18 @@
                 </div>
             </div>
         </div>
-
+        <br>
         <form class="report_form" id="proposal_report" method="POST" onsubmit="submitReport('proposal_report')">
-            <div class="panel panel-default">
-                <div class="panel-header">
-                    <h3 class="panel-title">Proposal Report</h3>
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Proposal Report</h3>
                 </div>
-                <div class="panel-body collapse show">
+                <div class="card-body collapse show">
                     {% csrf_token %}
                     <div class="row">
-                        <label class="col-sm-3 control-label">Proposal Type</label>
+                        <label class="col-sm-3 col-form-label">Proposal Type</label>
                         <div class="col-sm-6">
-                        <select class="proposal_field form-control" id="proposal_type_select" name="type">
+                        <select class="proposal_field form-select" id="proposal_type_select" name="type">
                             <option value="all">All</option>
                             {% for i in proposal_type_options %}
                                 <option value="{{i.code}}">{{i.description}}</option>
@@ -82,9 +82,9 @@
                         </div>
                     </div>
                     <div class="row">
-                        <label class="col-sm-3 control-label">Proposal Category</label>
+                        <label class="col-sm-3 col-form-label">Proposal Category</label>
                         <div class="col-sm-6">
-                        <select class="proposal_field form-control" id="proposal_category_select" name="category">
+                        <select class="proposal_field form-select" id="proposal_category_select" name="category">
                             <option value="all">All</option>
                             {% for i in proposal_category_options %}
                                 <option value="{{i.code}}">{{i.description}}</option>
@@ -93,9 +93,9 @@
                         </div>
                     </div>
                     <div class="row">
-                        <label class="col-sm-3 control-label">Proposal Status</label>
+                        <label class="col-sm-3 col-form-label">Proposal Status</label>
                         <div class="col-sm-6">
-                        <select class="proposal_field form-control" id="proposal_status_options" name="status">
+                        <select class="proposal_field form-select" id="proposal_status_options" name="status">
                             <option value="all">All</option>
                             {% for i in proposal_status_options %}
                                 <option value="{{i.code}}">{{i.description}}</option>
@@ -104,11 +104,11 @@
                         </div>
                     </div>
                     <div class="row">
-                        <label class="col-sm-3 control-label">Lodged From</label>
+                        <label class="col-sm-3 col-form-label">Lodged From</label>
                         <div class="col-sm-3">
                         <input class="proposal_field form-control" type="date" id="proposal_lodged_from" name="lodged_on_from">
                         </div>
-                        <label class="col-sm-3 control-label">Lodged To</label>
+                        <label class="col-sm-3 col-form-label">Lodged To</label>
                         <div class="col-sm-3">
                         <input class="proposal_field form-control" type="date" id="proposal_lodged_to" name="lodge_on_to">
                         </div>
@@ -130,16 +130,16 @@
         </form>
 
         <form class="report_form" style="display:None" id="approval_report" method="POST" onsubmit="submitReport('approval_report')">
-            <div class="panel panel-default">
-                <div class="panel-header">
-                    <h3 class="panel-title">Approval Report</h3>
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Approval Report</h3>
                 </div>
-                <div class="panel-body collapse show">
+                <div class="card-body collapse show">
                     {% csrf_token %}
                     <div class="row">
-                        <label class="col-sm-3 control-label">Approval Type</label>
+                        <label class="col-sm-3 col-form-label">Approval Type</label>
                         <div class="col-sm-6">
-                            <select class="approval_field form-control" id="approval_type_select" name="type">
+                            <select class="approval_field form-select" id="approval_type_select" name="type">
                                 <option value="all">All</option>
                                 {% for i in approval_type_options %}
                                     <option value="{{i.code}}">{{i.description}}</option>
@@ -148,9 +148,9 @@
                         </div>
                     </div>
                     <div class="row">
-                        <label class="col-sm-3 control-label">Approval Status</label>
+                        <label class="col-sm-3 col-form-label">Approval Status</label>
                         <div class="col-sm-6">
-                            <select class="approval_field form-control" id="approval_status_select" name="status">
+                            <select class="approval_field form-select" id="approval_status_select" name="status">
                                 <option value="all">All</option>
                                 {% for i in approval_status_options %}
                                     <option value="{{i.code}}">{{i.description}}</option>
@@ -159,11 +159,11 @@
                         </div>
                     </div>
                     <div class="row">
-                        <label class="col-sm-3 control-label">Issued From</label>
+                        <label class="col-sm-3 col-form-label">Issued From</label>
                         <div class="col-sm-3">
                         <input class="approval_field form-control" type="date" id="approval_issued_from" name="issued_from">
                         </div>
-                        <label class="col-sm-3 control-label">Issued To</label>
+                        <label class="col-sm-3 col-form-label">Issued To</label>
                         <div class="col-sm-3">
                         <input class="approval_field form-control" type="date" id="approval_issued_to" name="issued_to">
                         </div>
@@ -183,16 +183,16 @@
         </form>
 
         <form class="report_form" style="display:None" id="compliance_report" method="POST" onsubmit="submitReport('compliance_report')">
-            <div class="panel panel-default">
-                <div class="panel-header">
-                    <h3 class="panel-title">Compliance Report</h3>
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Compliance Report</h3>
                 </div>
-                <div class="panel-body collapse show">
+                <div class="card-body collapse show">
                     {% csrf_token %}
                     <div class="row">
-                        <label class="col-sm-3 control-label">Compliance Status</label>
+                        <label class="col-sm-3 col-form-label">Compliance Status</label>
                         <div class="col-sm-6">
-                        <select class="compliance_field form-control" id="compliance_status_select" name="status">
+                        <select class="compliance_field form-select" id="compliance_status_select" name="status">
                             <option value="all">All</option>
                             {% for i in compliance_status_options %}
                                 <option value="{{i.code}}">{{i.description}}</option>
@@ -201,11 +201,11 @@
                         </div>
                     </div>
                     <div class="row">
-                        <label class="col-sm-3 control-label">Lodged From</label>
+                        <label class="col-sm-3 col-form-label">Lodged From</label>
                         <div class="col-sm-3">
                         <input class="compliance_field form-control" type="date" id="compliance_lodged_from" name="lodged_on_from">
                         </div>
-                        <label class="col-sm-3 control-label">Lodged To</label>
+                        <label class="col-sm-3 col-form-label">Lodged To</label>
                         <div class="col-sm-3">
                         <input class="compliance_field form-control" type="date" id="compliance_lodged_to" name="lodged_on_to">
                         </div>
@@ -225,16 +225,16 @@
         </form>
 
         <form class="report_form" style="display:None" id="waiting_list_report" method="POST" onsubmit="submitReport('waiting_list_report')">
-            <div class="panel panel-default">
-                <div class="panel-header">
-                    <h3 class="panel-title">Waiting List Report</h3>
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Waiting List Report</h3>
                 </div>
-                <div class="panel-body collapse show">
+                <div class="card-body collapse show">
                     {% csrf_token %}
                     <div class="row">
-                        <label class="col-sm-3 control-label">Waiting List Bay</label>
+                        <label class="col-sm-3 col-form-label">Waiting List Bay</label>
                         <div class="col-sm-6">
-                        <select class="waiting_list_field form-control" id="waiting_list_bay_select" name="bay">
+                        <select class="waiting_list_field form-select" id="waiting_list_bay_select" name="bay">
                             <option value="all">All</option>
                             {% for i in mooring_bay_options %}
                                 <option value="{{i.id}}">{{i.name}}</option>
@@ -243,9 +243,9 @@
                         </div>
                     </div>
                     <div class="row">
-                        <label class="col-sm-3 control-label">Waiting List Status</label>
+                        <label class="col-sm-3 col-form-label">Waiting List Status</label>
                         <div class="col-sm-6">
-                        <select class="waiting_list_field form-control" id="waiting_list_status_select" name="status">
+                        <select class="waiting_list_field form-select" id="waiting_list_status_select" name="status">
                             <option value="all">All</option>
                             {% for i in approval_status_options %}
                                 <option value="{{i.code}}">{{i.description}}</option>
@@ -254,23 +254,23 @@
                         </div>
                     </div>
                     <div class="row">
-                        <label class="col-sm-3 control-label">Max Vessel Length</label>
+                        <label class="col-sm-3 col-form-label">Max Vessel Length</label>
                         <div class="col-sm-6">
                         <input class="waiting_list_field form-control" id="waiting_list_max_vessel_length" type="number" min=0 name="max_vessel_length">
                         </div>
                     </div>
                     <div class="row">
-                        <label class="col-sm-3 control-label">Max Vessel Draft</label>
+                        <label class="col-sm-3 col-form-label">Max Vessel Draft</label>
                         <div class="col-sm-6">
                         <input class="waiting_list_field form-control" id="waiting_list_max_vessel_draft" type="number" min=0 name="max_vessel_draft">
                         </div>
                     </div>
                     <div class="row">
-                        <label class="col-sm-3 control-label">Issued From</label>
+                        <label class="col-sm-3 col-form-label">Issued From</label>
                         <div class="col-sm-3">
                         <input class="waiting_list_field form-control" type="date" id="waiting_list_issued_from" name="issued_from">
                         </div>
-                        <label class="col-sm-3 control-label">Issued To</label>
+                        <label class="col-sm-3 col-form-label">Issued To</label>
                         <div class="col-sm-3">
                         <input class="waiting_list_field form-control" type="date" id="waiting_list_issued_to" name="issued_to">
                         </div>
@@ -290,16 +290,16 @@
         </form>
 
         <form class="report_form" style="display:None" id="mooring_report" method="POST" onsubmit="submitReport('mooring_report')">
-            <div class="panel panel-default">
-                <div class="panel-header">
-                    <h3 class="panel-title">Mooring Report</h3>
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Mooring Report</h3>
                 </div>
-                <div class="panel-body collapse show">
+                <div class="card-body collapse show">
                     {% csrf_token %}
                     <div class="row">
-                        <label class="col-sm-3 control-label">Mooring Bay</label>
+                        <label class="col-sm-3 col-form-label">Mooring Bay</label>
                         <div class="col-sm-6">
-                        <select class="mooring_field form-control" id="mooring_bay_select" name="bay">
+                        <select class="mooring_field form-select" id="mooring_bay_select" name="bay">
                             <option value="all">All</option>
                             {% for i in mooring_bay_options %}
                                 <option value="{{i.id}}">{{i.name}}</option>
@@ -308,9 +308,9 @@
                         </div>
                     </div>
                     <div class="row">
-                        <label class="col-sm-3 control-label">Mooring Status</label>
+                        <label class="col-sm-3 col-form-label">Mooring Status</label>
                         <div class="col-sm-6">
-                        <select class="mooring_field form-control" id="mooring_status_select" name="status">
+                        <select class="mooring_field form-select" id="mooring_status_select" name="status">
                             <option value="all">All</option>
                             {% for i in mooring_status_options %}
                                 <option value="{{i}}">{{i}}</option>
@@ -333,22 +333,22 @@
         </form>
 
         <form class="report_form" style="display:None" id="dcv_permit_report" method="POST" onsubmit="submitReport('dcv_permit_report')">
-            <div class="panel panel-default">
-                <div class="panel-header">
-                    <h3 class="panel-title">DCV Permit Report</h3>
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">DCV Permit Report</h3>
                 </div>
-                <div class="panel-body collapse show">
+                <div class="card-body collapse show">
                     {% csrf_token %}
                     <div class="row">
-                        <label class="col-sm-3 control-label">Organisation</label>
+                        <label class="col-sm-3 col-form-label">Organisation</label>
                         <div class="col-sm-6">
                         <input class="dcv_permit_field form-control" id="dcv_permit_organisation" name="organisation">
                         </div>
                     </div>
                     <div class="row">
-                        <label class="col-sm-3 control-label">DCV Permit Seasons</label>
+                        <label class="col-sm-3 col-form-label">DCV Permit Seasons</label>
                         <div class="col-sm-6">
-                        <select class="dcv_permit_field form-control" id="dcv_permit_season_select" name="season">
+                        <select class="dcv_permit_field form-select" id="dcv_permit_season_select" name="season">
                             <option value="all">All</option>
                             {% for i in dcv_permit_fee_seasons %}
                                 <option value="{{i.id}}">{{i.name}}</option>
@@ -371,24 +371,24 @@
         </form>
 
         <form class="report_form" style="display:None" id="dcv_admission_report" method="POST" onsubmit="submitReport('dcv_admission_report')">
-            <div class="panel panel-default">
-                <div class="panel-header">
-                    <h3 class="panel-title">DCV Admission Report</h3>
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">DCV Admission Report</h3>
                 </div>
-                <div class="panel-body collapse show">
+                <div class="card-body collapse show">
                     {% csrf_token %}
                     <div class="row">
-                        <label class="col-sm-3 control-label">Organisation</label>
+                        <label class="col-sm-3 col-form-label">Organisation</label>
                         <div class="col-sm-6">
                         <input class="dcv_admission_field form-control" id="dcv_admission_organisation" name="organisation">
                         </div>
                     </div>
                     <div class="row">
-                        <label class="col-sm-3 control-label">Lodged From</label>
+                        <label class="col-sm-3 col-form-label">Lodged From</label>
                         <div class="col-sm-3">
                         <input class="dcv_admission_field form-control" type="date" id="dcv_admission_lodged_from" name="lodged_on_from">
                         </div>
-                        <label class="col-sm-3 control-label">Lodged To</label>
+                        <label class="col-sm-3 col-form-label">Lodged To</label>
                         <div class="col-sm-3">
                         <input class="dcv_admission_field form-control" type="date" id="dcv_admission_lodged_to" name="lodged_on_to">
                         </div>
@@ -408,16 +408,16 @@
         </form>
 
         <form class="report_form" style="display:None" id="sticker_report" method="POST" onsubmit="submitReport('sticker_report')">
-            <div class="panel panel-default">
-                <div class="panel-header">
-                    <h3 class="panel-title">Sticker Report</h3>
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Sticker Report</h3>
                 </div>
-                <div class="panel-body collapse show">
+                <div class="card-body collapse show">
                     {% csrf_token %}
                     <div class="row">
-                        <label class="col-sm-3 control-label">Sticker Status</label>
+                        <label class="col-sm-3 col-form-label">Sticker Status</label>
                         <div class="col-sm-6">
-                        <select class="sticker_field form-control" id="sticker_status_select" name="status">
+                        <select class="sticker_field form-select" id="sticker_status_select" name="status">
                             <option value="all">All</option>
                             {% for i in sticker_status_options %}
                                 <option value="{{i.id}}">{{i.display}}</option>
@@ -426,9 +426,9 @@
                         </div>
                     </div>
                     <div class="row">
-                        <label class="col-sm-3 control-label">Sticker Seasons</label>
+                        <label class="col-sm-3 col-form-label">Sticker Seasons</label>
                         <div class="col-sm-6">
-                        <select class="sticker_field form-control" id="sticker_season_select" name="season">
+                        <select class="sticker_field form-select" id="sticker_season_select" name="season">
                             <option value="all">All</option>
                             {% for i in sticker_fee_seasons %}
                                 <option value="{{i.start_date}}">{{i.name}}</option>
@@ -451,14 +451,14 @@
         </form>
 
         <form class="report_form" style="display:None" id="system_user_report" method="POST" onsubmit="submitReport('system_user_report')">
-            <div class="panel panel-default">
-                <div class="panel-header">
-                    <h3 class="panel-title">System Users Report</h3>
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">System Users Report</h3>
                 </div>
-                <div class="panel-body collapse show">
+                <div class="card-body collapse show">
                     {% csrf_token %}
                     <div class="row">
-                        <label class="col-sm-3 control-label">Active Users</label>
+                        <label class="col-sm-3 col-form-label">Active Users</label>
                         <div class="col-sm-6">
                         <input class="system_user_field form-check-input" id="system_user_active" name="active" type="checkbox">
                         </div>
@@ -478,16 +478,16 @@
         </form>
 
         <form class="report_form" style="display:None" id="invoice_report" method="POST" onsubmit="submitReport('invoice_report')">
-            <div class="panel panel-default">
-                <div class="panel-header">
-                    <h3 class="panel-title">Invoices Report</h3>
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Invoices Report</h3>
                 </div>
-                <div class="panel-body collapse show">
+                <div class="card-body collapse show">
                     {% csrf_token %}
                     <div class="row">
-                        <label class="col-sm-3 control-label">Fee Source Type</label>
+                        <label class="col-sm-3 col-form-label">Fee Source Type</label>
                         <div class="col-sm-6">
-                        <select class="invoice_field form-control" id="invoice_fee_source_type_select" name="invoice_fee_source_type">
+                        <select class="invoice_field form-select" id="invoice_fee_source_type_select" name="invoice_fee_source_type">
                             <option value="all">All</option>
                             {% for i in invoice_fee_source_type_select %}
                                 <option value="{{i.code}}">{{i.name}}</option>
@@ -496,9 +496,9 @@
                         </div>
                     </div>
                     <div class="row">
-                        <label class="col-sm-3 control-label">Status</label>
+                        <label class="col-sm-3 col-form-label">Status</label>
                         <div class="col-sm-6">
-                        <select class="invoice_field form-control" id="invoice_status_select" name="invoice_status_select">
+                        <select class="invoice_field form-select" id="invoice_status_select" name="invoice_status_select">
                             <option value="all">All</option>
                             {% for i in invoice_status_select %}
                                 <option value="{{i.code}}">{{i.name}}</option>

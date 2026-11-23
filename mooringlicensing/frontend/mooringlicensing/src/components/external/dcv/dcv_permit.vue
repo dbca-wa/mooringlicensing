@@ -16,48 +16,48 @@
             </div>
         </FormSection>
         <FormSection :formCollapse="false" label="DCV Permit" Index="dcv_permit">
-            <div class="row form-group">
-                <label for="" class="col-sm-3 control-label">Organisation</label>
+            <div class="row mb-3">
+                <label for="" class="col-sm-3 col-form-label">Organisation</label>
                 <div class="col-sm-6">
                     <input type="text" class="form-control" name="organisation" placeholder="" v-model="dcv_permit.organisation">
                 </div>
             </div>
-            <div class="row form-group">
-                <label for="" class="col-sm-3 control-label">ABN / ACN</label>
+            <div class="row mb-3">
+                <label for="" class="col-sm-3 col-form-label">ABN / ACN</label>
                 <div class="col-sm-6">
                     <input type="text" class="form-control" name="abn_acn" placeholder="" v-model="dcv_permit.abn_acn">
                 </div>
             </div>
-            <div class="row form-group">
-                <label for="" class="col-sm-3 control-label">Season</label>
+            <div class="row mb-3">
+                <label for="" class="col-sm-3 col-form-label">Season</label>
                 <div class="col-sm-6">
-                    <select class="form-control" v-model="dcv_permit.season">
+                    <select class="form-select" v-model="dcv_permit.season">
                         <option value=""></option>
                         <option v-for="season in season_options" :value="season">{{ season.name }}</option>
                     </select>
                 </div>
             </div>
-            <div class="row form-group">
-                <label for="" class="col-sm-3 control-label">Unique Vessel Identifier (UVI)</label>
+            <div class="row mb-3">
+                <label for="" class="col-sm-3 col-form-label">Unique Vessel Identifier (UVI)</label>
                 <div class="col-sm-9">
                     <select :disabled="readonly" id="vessel_search" name="vessel_registration" ref="dcv_vessel_rego_nos" class="form-control" style="width: 40%">
                     </select>
                 </div>
             </div>
-            <div class="row form-group">
-                <label for="" class="col-sm-3 control-label">Vessel name</label>
+            <div class="row mb-3">
+                <label for="" class="col-sm-3 col-form-label">Vessel name</label>
                 <div class="col-sm-6">
                     <input type="text" class="form-control" name="vessel_name" placeholder="" v-model="dcv_permit.dcv_vessel.vessel_name">
                 </div>
             </div>
-            <div class="row form-group">
-                            <label for="" class="col-sm-3 control-label" >
+            <div class="row mb-3">
+                            <label for="" class="col-sm-3 col-form-label" >
                                 <strong>
                                 Postal Address
                                 </strong>
                             </label>
                             <div class="col-sm-6">
-                            <select v-model="dcv_permit.postal_address" class="form-control">
+                            <select v-model="dcv_permit.postal_address" class="form-select">
                                 <option selected disabled hidden value>Select postal address...</option>
                                 <option v-for="option in postal_addresses" :value="option" :key="option.id">
                                     {{ option.line1 }}, {{ option.locality }}, {{ option.state }}, {{ option.postcode }}, {{ option.country }}
@@ -74,14 +74,15 @@
             <div class="row" style="margin-bottom: 50px">
                 <div  class="container">
                     <div class="row" style="margin-bottom: 50px">
-                        <div class="navbar navbar-fixed-bottom"  style="background-color: #f5f5f5;">
-                            <div class="navbar-inner">
-                                <div class="container">
-                                    <p class="pull-right" style="margin-top:5px">
-                                        <button v-if="paySubmitting" type="button" class="btn btn-primary" disabled>Pay and Submit&nbsp;<i class="fa fa-circle-o-notch fa-spin fa-fw"></i></button>
-                                        <input v-else type="button" @click.prevent="pay_and_submit" class="btn btn-primary" value="Pay and Submit" :disabled="paySubmitting"/>
-                                    </p>
-                                </div>
+                        <div
+                            style="background-color: #f5f5f5;"
+                            class="d-flex justify-content-end align-items-center flex-wrap gap-2 p-2"
+                        >
+                            <div class="container">
+                                <p class="float-end" style="margin-top:5px">
+                                    <button v-if="paySubmitting" type="button" class="btn btn-primary" disabled>Pay and Submit&nbsp;<i class="fa fa-circle-o-notch fa-spin fa-fw"></i></button>
+                                    <input v-else type="button" @click.prevent="pay_and_submit" class="btn btn-primary" value="Pay and Submit" :disabled="paySubmitting"/>
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -95,9 +96,6 @@
 import $ from 'jquery'
 import FormSection from "@/components/forms/section_toggle.vue"
 import { api_endpoints, helpers } from '@/utils/hooks'
-
-import "select2/dist/css/select2.min.css";
-import "select2-bootstrap-theme/dist/select2-bootstrap.min.css";
 
 export default {
     name: 'DcvTablePage',
@@ -156,7 +154,7 @@ export default {
             let vm = this;
             $(vm.$refs.person_lookup).select2({
                 minimumInputLength: 2,
-                "theme": "bootstrap",
+                theme: "bootstrap-5",
                 allowClear: true,
                 placeholder:"Select Person",
                 pagination: true,
@@ -244,7 +242,7 @@ export default {
             let vm = this;
             $(vm.$refs.dcv_vessel_rego_nos).select2({
                 minimumInputLength: 2,
-                "theme": "bootstrap",
+                theme: "bootstrap-5",
                 allowClear: true,
                 placeholder: "",
                 tags: true,

@@ -3,7 +3,7 @@
 
 {% block content %}
     <div class="container">
-        <div class="well">
+        <div class="border rounded p-3 bg-light">
             <div class="row"><div class="col-sm-12">
                 <h2>Success!</h2>
                 <strong>A confirmation email has been sent to {{ applicant.email }}. </strong>
@@ -61,9 +61,9 @@
                     <div class="row">
                         <div class="col-sm-12">
                             {% if request.user.is_internal %}
-                                <a href="{% url 'internal' %}" class="pull-right btn btn-info btn-lg">Return to Dashboard</a>
+                                <a href="{% url 'internal' %}" class="float-end btn btn-info btn-lg">Return to Dashboard</a>
                             {% else %}
-                                <a href="{% url 'external' %}" class="pull-right btn btn-info btn-lg">Return to Dashboard</a>
+                                <a href="{% url 'external' %}" class="float-end btn btn-info btn-lg">Return to Dashboard</a>
                             {% endif %}
                         </div>
                     </div>

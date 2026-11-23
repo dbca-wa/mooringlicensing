@@ -33,7 +33,7 @@
                 <div class="tab-content" id="pills-tabContent">
                     <div class="tab-pane fade show active" id="pills-vessel-details" role="tabpanel" aria-labelledby="pills-vessel-details-tab">
                         <FormSection label="Registration details" Index="registration_details">
-                            <div class="row form-group">
+                            <div class="row mb-3">
                                 <div class="col-sm-3">
                                     <label>Registration number:</label>
                                 </div>
@@ -42,7 +42,7 @@
                                 </div>
                             </div>
 
-                            <div class="row form-group">
+                            <div class="row mb-3">
                                 <div class="col-sm-3">
                                     <label>Name:</label>
                                 </div>
@@ -52,7 +52,7 @@
                             </div>
                         </FormSection>
                         <FormSection label="Vessel details" Index="vessel_details">
-                            <div class="row form-group">
+                            <div class="row mb-3">
                                 <div class="col-sm-3">
                                     <label>Vessel length:</label>
                                 </div>
@@ -60,7 +60,7 @@
                                     {{ vessel.vessel_details.vessel_length }}
                                 </div>
                             </div>
-                            <div class="row form-group">
+                            <div class="row mb-3">
                                 <div class="col-sm-3">
                                     <label>Displacement tonnage:</label>
                                 </div>
@@ -68,7 +68,7 @@
                                     {{ vessel.vessel_details.vessel_weight }}
                                 </div>
                             </div>
-                            <div class="row form-group">
+                            <div class="row mb-3">
                                 <div class="col-sm-3">
                                     <label>Draft:</label>
                                 </div>
@@ -76,7 +76,7 @@
                                     {{ vessel.vessel_details.vessel_draft }}
                                 </div>
                             </div>
-                            <div class="row form-group">
+                            <div class="row mb-3">
                                 <div class="col-sm-3">
                                     <label>Type:</label>
                                 </div>

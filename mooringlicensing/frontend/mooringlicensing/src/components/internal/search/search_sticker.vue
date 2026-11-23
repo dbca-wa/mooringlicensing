@@ -1,7 +1,7 @@
 <template>
     <FormSection label="Search Sticker" Index="search_sticker">
-        <div class="row form-group">
-            <label for="sticker_lookup" class="col-sm-3 control-label">Sticker</label>
+        <div class="row mb-3">
+            <label for="sticker_lookup" class="col-sm-3 col-form-label">Sticker</label>
             <div class="col-sm-6">
                 <select 
                     id="sticker_lookup"  
@@ -25,8 +25,7 @@
 <script>
 import $ from 'jquery'
 import FormSection from '@/components/forms/section_toggle.vue'
-import "select2/dist/css/select2.min.css";
-import "select2-bootstrap-theme/dist/select2-bootstrap.min.css";
+
 import {
   api_endpoints,
 }
@@ -58,7 +57,7 @@ from '@/utils/hooks'
                 let vm = this;
                 $(vm.$refs.sticker_lookup).select2({
                     minimumInputLength: 2,
-                    "theme": "bootstrap",
+                    theme: "bootstrap-5",
                     allowClear: true,
                     placeholder:"Select Sticker",
                     pagination: true,

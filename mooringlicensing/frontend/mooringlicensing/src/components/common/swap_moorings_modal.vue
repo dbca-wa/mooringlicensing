@@ -4,7 +4,7 @@
             <p>Please select a Mooring Site License to exchange with the mooring of Mooring Site License: <strong>{{ approval_lodgement_number }}</strong>.</p>
             <div class="container-fluid">
                 <alert :show.sync="showError" type="danger"><strong>{{ errorString }}</strong></alert>
-                <div class="row form-group">
+                <div class="row mb-3">
                     <datatable
                         ref="swap_moorings_datatable"
                         :id="datatable_id"
@@ -82,7 +82,7 @@ export default {
                 searchable: false,
                 visible: true,
                 'render': function(row, type, full){
-                    return '<input type="radio" name="select" data-selected-approval="' + full.id + '" data-selected-approval-lodgement-number="' + full.lodgement_number + '">';
+                    return '<input class="form-check-input" type="radio" name="select" data-selected-approval="' + full.id + '" data-selected-approval-lodgement-number="' + full.lodgement_number + '">';
                 }
             }
         },
@@ -258,7 +258,7 @@ export default {
         },
         addEventListeners: function () {
             let vm = this;
-            vm.$refs.swap_moorings_datatable.vmDataTable.on('click', 'input[type="radio"]', function(e) {
+            vm.$refs.swap_moorings_datatable.vmDataTable.on('click', 'input[class="form-check-input" type="radio"]', function(e) {
                 var id = $(this).attr('data-selected-approval');
                 var lodgement_number = $(this).attr('data-selected-approval-lodgement-number');
                 vm.selectedApprovalId = id

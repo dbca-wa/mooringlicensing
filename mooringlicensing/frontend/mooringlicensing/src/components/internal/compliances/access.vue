@@ -4,158 +4,139 @@
         <h3>Compliance with Requirements {{ compliance.reference }}</h3>
         <div class="col-md-3">
         <CommsLogs :comms_url="comms_url" :logs_url="logs_url" :comms_add_url="comms_add_url" :disable_add_entry="false"/>
-            <div class="row">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                       Submission 
+            <div class="card mb-3">
+                <div class="card-header">
+                    Submission 
+                </div>
+                <div class="card-body border-bottom">
+                    <div class="col-sm-12">
+                        <strong>Submitted by</strong><br/>
+                        {{ compliance.submitter}}
                     </div>
-                    <div class="panel-body panel-collapse">
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <strong>Submitted by</strong><br/>
-                                {{ compliance.submitter}}
-                            </div>
-                            <div class="col-sm-12 top-buffer-s">
-                                <strong>Lodged on</strong><br/>
-                                {{ compliance.lodgement_date | formatDate}}
-                            </div>
-                            <div class="col-sm-12 top-buffer-s">
-                                <table class="table small-table">
-                                    <tr>
-                                        <th>Lodgement</th>
-                                        <th>Date</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
+                    <div class="col-sm-12 top-buffer-s">
+                        <strong>Lodged on</strong><br/>
+                        {{ compliance.lodgement_date | formatDate}}
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        Workflow 
+            <div class="card mb-3">
+                <div class="card-header">
+                    Workflow 
+                </div>
+                <div class="card-body border-bottom">
+                    <div class="col-sm-12">
+                        <strong>Status</strong><br/>
+                        {{ compliance.processing_status }}
                     </div>
-                    <div class="panel-body panel-collapse">
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <strong>Status</strong><br/>
-                                {{ compliance.processing_status }}
-                            </div>
-                            <div class="col-sm-12 top-buffer-s">
-                                <strong>Currently assigned to</strong><br/>
-                                <div class="form-group">
-                                    <select v-show="isLoading" class="form-control">
-                                        <option value="">Loading...</option>
-                                    </select>
-                                    <select @change="assignTo" 
-                                    :disabled="canViewonly || !check_assessor()" 
-                                    v-if="!isLoading" class="form-control" 
-                                    v-model="compliance.assigned_to">
-                                        <option v-for="member in compliance.allowed_assessors" :value="member.ledger_id">{{member.legal_first_name}} {{member.legal_last_name}}</option>
-                                    </select>
-                                    <a v-if="!canViewonly && check_assessor()" @click.prevent="assignMyself()" class="actionBtn pull-right">Assign to me</a>
-                                </div>
-                            </div>
-                            <div class="col-sm-12 top-buffer-s" v-if="!canViewonly && check_assessor()">
-                                <strong>Action</strong><br/>
-                                <button class="btn btn-primary" @click.prevent="acceptCompliance()">Accept</button><br/>
-                                <button class="btn btn-primary top-buffer-s" @click.prevent="amendmentRequest()">Request Amendment</button>
-                                <button class="btn btn-primary top-buffer-s" @click.prevent="discardCompliance()">Discard</button>
-                            </div>
+                    <div class="col-sm-12 top-buffer-s">
+                        <strong>Currently assigned to</strong><br/>
+                        <div class="mb-3">
+                            <select v-show="isLoading" class="form-control">
+                                <option value="">Loading...</option>
+                            </select>
+                            <select @change="assignTo" 
+                            :disabled="canViewonly || !check_assessor()" 
+                            v-if="!isLoading" class="form-select" 
+                            v-model="compliance.assigned_to">
+                                <option v-for="member in compliance.allowed_assessors" :value="member.ledger_id">{{member.legal_first_name}} {{member.legal_last_name}}</option>
+                            </select>
+                            <a v-if="!canViewonly && check_assessor()" @click.prevent="assignMyself()" class="actionBtn float-end">Assign to me</a>
                         </div>
+                    </div>
+                    <div class="col-sm-12 top-buffer-s" v-if="!canViewonly && check_assessor()">
+                        <strong>Action</strong><br/>
+                        <button class="btn btn-primary" @click.prevent="acceptCompliance()">Accept</button><br/>
+                        <button class="btn btn-primary top-buffer-s" @click.prevent="amendmentRequest()">Request Amendment</button><br/>
+                        <button class="btn btn-primary top-buffer-s" @click.prevent="discardCompliance()">Discard</button>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-1"></div>
         <div class="col-md-8">
-            <div class="row">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3>Compliance with Requirements</h3> 
-                    </div>
-                    <div class="panel-body panel-collapse">
-                        <div class="row">
-                           <div class="col-md-12"> 
-                            <form class="form-horizontal" name="complianceForm" method="post">
-                                <alert :show.sync="showError" type="danger">
-                                    <strong>{{errorString}}</strong>
-                                </alert>
-                                <div class="row">
-                                    <div class="form-group">
-                                        <label class="col-sm-3 control-label pull-left"  for="Name">Requirement:</label>
-                                        <div class="col-sm-6">
-                                            {{compliance.requirement}}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="form-group">
-                                        <label class="col-sm-3 control-label pull-left"  for="Name">Details:</label>
-                                        <div class="col-sm-6">
-                                            <textarea :disabled="isFinalised" class="form-control" name="detail" placeholder="" v-model="compliance.text"></textarea>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div v-if="hasDocuments" class="form-group">
-                                        <div class="col-sm-3 control-label pull-left" >  
-                                            <label  for="Name">Documents:</label>
-                                        </div> 
-                                        <div class="col-sm-6">
-                                            <div class="row" v-for="d in compliance.documents">
-                                                <a :href="d[1]" target="_blank" class="control-label pull-left">{{d[0]   }}</a>
-                                                <span v-if="!isFinalised && d.can_delete">
-                                                    <a @click="delete_document(d)" class="fa fa-trash-o control-label" title="Remove file" style="cursor: pointer; color:red;"></a>
-                                                </span>
-                                                <span v-else >
-                                                    <i class="fa fa-info-circle" aria-hidden="true" title="Previously submitted documents cannot be deleted" style="cursor: pointer;"></i>
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div v-if="!isFinalised" class="form-group"> 
-                                        <label class="col-sm-3 control-label pull-left"  for="Name">Attachments:</label>
+            <div class="card">
+                <div class="card-header">
+                    <h3>Compliance with Requirements</h3> 
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12"> 
+                        <form   name="complianceForm" method="post">
+                            <alert :show.sync="showError" type="danger">
+                                <strong>{{errorString}}</strong>
+                            </alert>
+                            <div class="row">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label float-start"  for="Name">Requirement:</label>
                                     <div class="col-sm-6">
-                                        <template v-for="(f,i) in files">
-                                            <div :class="'row top-buffer file-row-'+i">
-                                                <div class="col-sm-4">
-                                                    <span v-if="f.file == null" class="btn btn-info btn-file pull-left" style="margin-bottom: 5px">
-                                                        Attach File <input type="file" :name="'file-upload-'+i" :class="'file-upload-'+i" @change="uploadFile($event,f)"/>
-                                                    </span>
-                                                    <span v-else class="btn btn-info btn-file pull-left" style="margin-bottom: 5px">
-                                                        Update File <input type="file" :name="'file-upload-'+i" :class="'file-upload-'+i" @change="uploadFile($event,f)"/>
-                                                    </span>
-                                                </div>
-                                                <div class="col-sm-4">
-                                                    <span>{{f.name}}</span>
-                                                </div>
-                                                <div class="col-sm-4">
-                                                    <button @click="removeFile(i)" class="btn btn-danger">Remove</button>
-                                                </div>
-                                            </div>
-                                        </template>
-                                        <a href="" @click.prevent="attachAnother"><i class="fa fa-lg fa-plus top-buffer-2x"></i></a>
-                                    </div>
+                                        {{compliance.requirement}}
                                     </div>
                                 </div>
+                            </div>
 
-                                <div class="row">
-                                    <div class="form-group">
-                                        <div class="col-lg-2 pull-right">
-                                            <button v-if="!isFinalised" @click.prevent="submit()" class="btn btn-primary">Submit</button>
+                            <div class="row">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label float-start"  for="Name">Details:</label>
+                                    <div class="col-sm-6">
+                                        <textarea :disabled="isFinalised" class="form-control" name="detail" placeholder="" v-model="compliance.text"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div v-if="hasDocuments" class="row mb-3">
+                                    <div class="col-sm-3 col-form-label float-start" >  
+                                        <label  for="Name">Documents:</label>
+                                    </div> 
+                                    <div class="col-sm-6">
+                                        <div class="row" v-for="d in compliance.documents">
+                                            <a :href="d[1]" target="_blank" class="form-label float-start">{{d[0]   }}</a>
+                                            <span v-if="!isFinalised && d.can_delete">
+                                                <a @click="delete_document(d)" class="fa fa-trash-o form-label" title="Remove file" style="cursor: pointer; color:red;"></a>
+                                            </span>
+                                            <span v-else >
+                                                <i class="fa fa-info-circle" aria-hidden="true" title="Previously submitted documents cannot be deleted" style="cursor: pointer;"></i>
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
-                            </form>
-                           </div>
+                            </div>
+
+                            <div class="row">
+                                <div v-if="!isFinalised" class="row mb-3"> 
+                                    <label class="col-sm-3 col-form-label float-start"  for="Name">Attachments:</label>
+                                <div class="col-sm-6">
+                                    <template v-for="(f,i) in files">
+                                        <div :class="'row top-buffer file-row-'+i">
+                                            <div class="col-sm-4">
+                                                <span v-if="f.file == null" class="btn btn-info btn-file float-start" style="margin-bottom: 5px">
+                                                    Attach File <input type="file" :name="'file-upload-'+i" :class="'file-upload-'+i" @change="uploadFile($event,f)"/>
+                                                </span>
+                                                <span v-else class="btn btn-info btn-file float-start" style="margin-bottom: 5px">
+                                                    Update File <input type="file" :name="'file-upload-'+i" :class="'file-upload-'+i" @change="uploadFile($event,f)"/>
+                                                </span>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <span>{{f.name}}</span>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <button @click="removeFile(i)" class="btn btn-danger">Remove</button>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <a href="" @click.prevent="attachAnother"><i class="fa fa-lg fa-plus top-buffer-2x"></i></a>
+                                </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="row mb-3">
+                                    <div class="col-lg-2 float-end">
+                                        <button v-if="!isFinalised" @click.prevent="submit()" class="btn btn-primary">Submit</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
                         </div>
                     </div>
                 </div>

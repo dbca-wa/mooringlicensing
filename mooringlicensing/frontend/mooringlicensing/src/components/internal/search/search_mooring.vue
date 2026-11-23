@@ -1,7 +1,7 @@
 <template>
     <FormSection label="Search Mooring" Index="search_mooring">
-        <div class="row form-group">
-            <label for="mooring_lookup" class="col-sm-3 control-label">Mooring</label>
+        <div class="row mb-3">
+            <label for="mooring_lookup" class="col-sm-3 col-form-label">Mooring</label>
             <div class="col-sm-6">
                 <select 
                     id="mooring_lookup"  
@@ -26,8 +26,6 @@
 <script>
 import $ from 'jquery'
 import FormSection from '@/components/forms/section_toggle.vue'
-import "select2/dist/css/select2.min.css";
-import "select2-bootstrap-theme/dist/select2-bootstrap.min.css";
 import {
   api_endpoints
 }
@@ -58,7 +56,7 @@ from '@/utils/hooks'
                 let vm = this;
                 $(vm.$refs.mooring_lookup).select2({
                     minimumInputLength: 2,
-                    "theme": "bootstrap",
+                    theme: "bootstrap-5",
                     allowClear: true,
                     placeholder:"Select Mooring",
                     pagination: true,

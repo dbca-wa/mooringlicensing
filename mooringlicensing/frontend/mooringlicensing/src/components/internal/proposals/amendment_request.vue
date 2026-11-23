@@ -3,25 +3,25 @@
         <modal transition="modal fade" @ok="ok()" @cancel="cancel()" title="Amendment Request" large>
             <div class="container-fluid">
                 <div class="row">
-                    <form class="form-horizontal" name="amendForm">
+                    <form   name="amendForm">
                         <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
                         <div class="col-sm-12">
                             <div class="row">
-                                <div class="form-group">
+                                <div class="row mb-3">
                                     <div class="col-sm-3">
-                                        <label class="control-label pull-right"  for="reason_select">Reason</label>
+                                        <label class="form-label float-end"  for="reason_select">Reason</label>
                                     </div>
                                     <div class="col-sm-6">
-                                        <select class="form-control" id="reason_select" ref="reason" v-model="amendment.reason">
+                                        <select class="form-select" id="reason_select" ref="reason" v-model="amendment.reason">
                                             <option v-for="r in reason_choices" :value="r.key">{{r.value}}</option>
                                         </select>
                                     </div>
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="form-group">
+                                <div class="row mb-3">
                                     <div class="col-sm-3">
-                                        <label class="control-label pull-right" for="amendment_text">Details</label>
+                                        <label class="form-label float-end" for="amendment_text">Details</label>
                                     </div>
                                     <div class="col-sm-6">
                                         <textarea class="form-control" v-model="amendment.text" id="amendment_text"></textarea>
@@ -31,7 +31,7 @@
 
                             <div class="row">
                                 <div class="col-sm-offset-2 col-sm-8">
-                                    <div class="form-group">
+                                    <div class="row mb-3">
                                         <div class="input-group date" ref="add_attachments" style="width: 70%;">
                                             <FileField v-if="false"
                                                 ref="filefield"
@@ -198,7 +198,7 @@ export default {
 
             // Intialise select2
             $(vm.$refs.reason).select2({
-                "theme": "bootstrap",
+                theme: "bootstrap-5",
                 allowClear: true,
                 placeholder:"Select Reason",
                 dropdownParent: $(vm.$refs.reason).parent(),

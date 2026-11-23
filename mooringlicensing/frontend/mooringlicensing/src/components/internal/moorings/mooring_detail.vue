@@ -30,7 +30,7 @@
                 <div class="tab-content" id="pills-tabContent">
                     <div class="tab-pane fade show active" id="pills-mooring-details" role="tabpanel" aria-labelledby="pills-mooring-details-tab">
                         <FormSection label="Mooring details" Index="mooring_details">
-                            <div class="row form-group">
+                            <div class="row mb-3">
                                 <div class="col-sm-3">
                                     <label>Name:</label>
                                 </div>
@@ -38,7 +38,7 @@
                                     {{ mooring.name }}
                                 </div>
                             </div>
-                            <div class="row form-group">
+                            <div class="row mb-3">
                                 <div class="col-sm-3">
                                     <label>Mooring Bay:</label>
                                 </div>
@@ -48,7 +48,7 @@
                             </div>
                         </FormSection>
                         <FormSection label="Vessel limits" Index="vessel_limits">
-                            <div class="row form-group">
+                            <div class="row mb-3">
                                 <div class="col-sm-3">
                                     <label>Vessel draft limit:</label>
                                 </div>
@@ -56,7 +56,7 @@
                                     {{ mooring.vessel_draft_limit }}
                                 </div>
                             </div>
-                            <div class="row form-group">
+                            <div class="row mb-3">
                                 <div class="col-sm-3">
                                     <label>Vessel size limit:</label>
                                 </div>
@@ -64,7 +64,7 @@
                                     {{ mooring.vessel_size_limit }}
                                 </div>
                             </div>
-                            <div class="row form-group">
+                            <div class="row mb-3">
                                 <div class="col-sm-3">
                                     <label>Vessel weight limit:</label>
                                 </div>

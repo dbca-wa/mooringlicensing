@@ -2,9 +2,9 @@
     <div>
         <div class="row">
             <div class="col-md-3">
-                <div class="form-group">
+                <div class="mb-3">
                     <label for="">Status</label>
-                    <select class="form-control" v-model="filterComplianceStatus">
+                    <select class="form-select" v-model="filterComplianceStatus">
                         <option value="All">All</option>
                         <option v-for="status in compliance_statuses" :value="status.code">{{ status.description }}</option>
                     </select>

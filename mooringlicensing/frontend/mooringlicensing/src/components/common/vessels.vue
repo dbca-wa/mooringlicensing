@@ -1,8 +1,8 @@
 <template>
     <div id="vessels">
         <FormSection label="Registration Details" Index="registration_details" v-if="!forEndorser">
-            <div class="row form-group">
-                <label for="vessel_search" class="col-sm-3 control-label">Vessel registration <span style="color: red;">*</span></label>
+            <div class="row mb-3">
+                <label for="vessel_search" class="col-sm-3 col-form-label">Vessel registration <span style="color: red;">*</span></label>
                 <div class="col-sm-9">
                     <select :disabled="readonly" id="vessel_search" ref="vessel_rego_nos" class="form-control"
                         style="width: 40%">
@@ -10,15 +10,15 @@
                     </select>
                 </div>
             </div>
-            <div class="row form-group">
-                <label for="" class="col-sm-3 control-label">Vessel name <span style="color: red;">*</span></label>
+            <div class="row mb-3">
+                <label for="" class="col-sm-3 col-form-label">Vessel name <span style="color: red;">*</span></label>
                 <div class="col-sm-9">
                     <input :readonly="readonly" type="text" class="form-control" id="vessel_name" placeholder=""
                         v-model="vessel.vessel_details.vessel_name" required />
                 </div>
             </div>
-            <div v-if="!readonly || (vessel.vessel_ownership.individual_owner && vessel.vessel_ownership.owner_name)" class="row form-group">
-                <label for="" class="col-sm-3 control-label">Registration vessel owner <span style="color: red;">*</span></label>
+            <div v-if="!readonly || (vessel.vessel_ownership.individual_owner && vessel.vessel_ownership.owner_name)" class="row mb-3">
+                <label for="" class="col-sm-3 col-form-label">Registration vessel owner <span style="color: red;">*</span></label>
                 <div v-if="!readonly" class="col-sm-9">
                     <div class="row">
                         <div class="col-sm-9">
@@ -32,7 +32,7 @@
                                 v-model="vessel.vessel_ownership.individual_owner"
                                 required
                             />
-                            <label for="registered_owner_current_user" class="control-label">{{ profileFullName }}</label>
+                            <label for="registered_owner_current_user" class="form-label">{{ profileFullName }}</label>
                         </div>
                     </div>
                     <div class="row">
@@ -47,7 +47,7 @@
                                 v-model="vessel.vessel_ownership.individual_owner"
                                 required=""
                             />
-                            <label for="registered_owner_company" class="control-label">Your company</label>
+                            <label for="registered_owner_company" class="form-label">Your company</label>
                         </div>
                     </div>
                 </div>
@@ -59,16 +59,16 @@
                 </div>
             </div>
             <transition>
-                <div v-show="companyOwner" class="row form-group">
-                    <label for="" class="col-sm-3 control-label">Company</label>
+                <div v-show="companyOwner" class="row mb-3">
+                    <label for="" class="col-sm-3 col-form-label">Company</label>
                     <div class="col-sm-8">
                         <select :disabled="readonly" id="company_name" ref="company_name" class="form-control"
                             style="width: 40%" />
                     </div>
                 </div>
             </transition>
-            <div class="row form-group">
-                <label for="" class="col-sm-3 control-label">Ownership percentage <span style="color: red;"><span style="color: red;">*</span></span></label>
+            <div class="row mb-3">
+                <label for="" class="col-sm-3 col-form-label">Ownership percentage <span style="color: red;"><span style="color: red;">*</span></span></label>
                 <div v-if="individualOwner" class="col-sm-2">
                     <input
                         :readonly="readonly"
@@ -99,8 +99,8 @@
                     />
                 </div>
             </div>
-            <div class="row form-group">
-                <label for="" class="col-sm-3 control-label">Owner name as shown on DoT registration (SURNAME FIRST MIDDLE) <span style="color: red;">*</span></label>
+            <div class="row mb-3">
+                <label for="" class="col-sm-3 col-form-label">Owner name as shown on DoT registration (SURNAME FIRST MIDDLE) <span style="color: red;">*</span></label>
                 <div class="col-sm-9">
                     <input
                         :readonly="readonly"
@@ -114,8 +114,8 @@
                 </div>
             </div>
 
-            <div v-show="false" class="row form-group">
-                <label for="" class="col-sm-3 control-label">Permanent or usual place of berthing/mooring of vessel</label>
+            <div v-show="false" class="row mb-3">
+                <label for="" class="col-sm-3 col-form-label">Permanent or usual place of berthing/mooring of vessel</label>
                 <div class="col-sm-9">
                     <input :readonly="readonly" type="text" class="col-sm-9 form-control" id="berth_mooring" placeholder=""
                         v-model="vessel.vessel_details.berth_mooring" required="" />
@@ -123,8 +123,8 @@
             </div>
             <!-- Start:new file field -->
             <transition>
-                <div v-if="showDotRegistrationPapers" class="row form-group">
-                    <label for="" class="col-sm-3 control-label">Copy of registration papers <span style="color: red;">*</span></label>
+                <div v-if="showDotRegistrationPapers" class="row mb-3">
+                    <label for="" class="col-sm-3 col-form-label">Copy of registration papers <span style="color: red;">*</span></label>
                     <div class="col-sm-9">
                         <FileField
                             :readonly="hinReadonly"
@@ -141,8 +141,8 @@
             <!-- End:new file field -->
 
             <transition>
-                <div v-if="showProofOfVesselOwnership" class="row form-group">
-                    <label for="" class="col-sm-3 control-label">A statutory declaration is required as proof of vessel ownership <span style="color: red;">*</span></label>
+                <div v-if="showProofOfVesselOwnership" class="row mb-3">
+                    <label for="" class="col-sm-3 col-form-label">A statutory declaration is required as proof of vessel ownership <span style="color: red;">*</span></label>
                     <div class="col-sm-9" v-if="proposal && proposal.stat_dec_form">
                         Download form <a target="_blank" :href="proposal.stat_dec_form">here</a>
                     </div>
@@ -162,31 +162,31 @@
 
         </FormSection>
         <FormSection label="Vessel Details" Index="vessel_details">
-            <div class="row form-group">
-                <label for="" class="col-sm-3 control-label">Vessel length (m) <span style="color: red;">*</span></label>
+            <div class="row mb-3">
+                <label for="" class="col-sm-3 col-form-label">Vessel length (m) <span style="color: red;">*</span></label>
                 <div class="col-sm-2">
                     <input :readonly="readonly" type="number" min="1" class="form-control" id="vessel_length" placeholder=""
                         v-model="vessel.vessel_details.vessel_length" required="" @change="emitVesselLength" />
                 </div>
             </div>
-            <div class="row form-group">
-                <label for="" class="col-sm-3 control-label">Displacement tonnage <span style="color: red;">*</span></label>
+            <div class="row mb-3">
+                <label for="" class="col-sm-3 col-form-label">Displacement tonnage <span style="color: red;">*</span></label>
                 <div class="col-sm-2">
                     <input :readonly="readonly" type="number" min="1" class="form-control" id="displacement_tonnage"
                         placeholder="" v-model="vessel.vessel_details.vessel_weight" required="" />
                 </div>
             </div>
-            <div class="row form-group">
-                <label for="" class="col-sm-3 control-label">Draft (m) <span style="color: red;">*</span></label>
+            <div class="row mb-3">
+                <label for="" class="col-sm-3 col-form-label">Draft (m) <span style="color: red;">*</span></label>
                 <div class="col-sm-2">
                     <input :readonly="readonly" type="number" min="1" class="form-control" id="draft" placeholder=""
                         v-model="vessel.vessel_details.vessel_draft" required="" />
                 </div>
             </div>
-            <div class="row form-group">
-                <label for="" class="col-sm-3 control-label">Vessel Type <span style="color: red;">*</span></label>
+            <div class="row mb-3">
+                <label for="" class="col-sm-3 col-form-label">Vessel Type <span style="color: red;">*</span></label>
                 <div class="col-sm-4">
-                    <select :disabled="readonly" class="form-control" style="width:40%"
+                    <select :disabled="readonly" class="form-select" style="width:40%"
                         v-model="vessel.vessel_details.vessel_type">
                         <option v-for="vesselType in vesselTypes" :value="vesselType.code">
                             {{ vesselType.description }}
@@ -201,8 +201,7 @@
 import $ from 'jquery'
 import FormSection from '@/components/forms/section_toggle.vue'
 import FileField from '@/components/forms/filefield_immediate.vue'
-import "select2/dist/css/select2.min.css";
-import "select2-bootstrap-theme/dist/select2-bootstrap.min.css";
+
 import {
     api_endpoints,
     helpers
@@ -539,7 +538,7 @@ export default {
             // Vessel search
             $(vm.$refs.company_name).select2({
                 minimumInputLength: 2,
-                "theme": "bootstrap",
+                theme: "bootstrap-5",
                 placeholder: "",
                 tags: true,
                 ajax: {
@@ -621,7 +620,7 @@ export default {
 
             $(vm.$refs.vessel_rego_nos).select2({
                 minimumInputLength: 1,
-                "theme": "bootstrap",
+                theme: "bootstrap-5",
                 placeholder: "",
                 allowClear: true,
                 tags: allow_add_new_vessel,

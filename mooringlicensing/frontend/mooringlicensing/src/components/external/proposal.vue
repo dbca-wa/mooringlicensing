@@ -18,7 +18,7 @@
         <form :action="proposal_form_url" method="post" name="new_proposal" enctype="multipart/form-data">
             <div v-if="!proposal_readonly">
               <div v-if="hasAmendmentRequest" class="row" style="color:red;">
-                  <div class="col-lg-12 pull-right">
+                  <div class="col-lg-12 float-end">
                     <FormSection
                         label="An amendment has been requested for this Application"
                         :formCollapse="false"
@@ -103,52 +103,53 @@
                 <input type='hidden' name="proposal_id" :value="1" />
 
                 <div class="row">
-                        <div  class="container">
-                          <div class="row">
-                              <div class="navbar navbar-fixed-bottom"  style="background-color: #f5f5f5;">
-                                  <div class="navbar-inner">
-                                    <div v-if="proposal && !proposal.readonly" class="container">
-                                        <p class="pull-right" style="margin-top:5px">
-                                            <input type="checkbox" v-model="terms_and_conditions_checked" id="terms_and_conditions_checked" />
-                                            <label for="terms_and_conditions_checked">
-                                              &nbsp;I agree with all the <a href="https://www.ria.wa.gov.au/boating/licensed-moorings-permits/mooring-terms-and-conditions" target="_blank">RIA Terms and Conditions&nbsp;</a>
-                                            </label>
+                    <div  class="container">
+                        <div class="row">
+                            <div
+                                style="background-color: #f5f5f5;"
+                                class="d-flex justify-content-end align-items-center flex-wrap gap-2 p-2"
+                            >
+                                <div v-if="proposal && !proposal.readonly" class="container">
+                                    <p class="float-end" style="margin-top:5px">
+                                        <input type="checkbox" v-model="terms_and_conditions_checked" id="terms_and_conditions_checked" />
+                                        <label for="terms_and_conditions_checked">
+                                            &nbsp;I agree with all the <a href="https://www.ria.wa.gov.au/boating/licensed-moorings-permits/mooring-terms-and-conditions" target="_blank">RIA Terms and Conditions&nbsp;</a>
+                                        </label>
 
-                                            <button v-if="saveExitProposal" type="button" class="btn btn-primary" disabled>
-                                                Save and Exit&nbsp;<i class="fa fa-circle-o-notch fa-spin fa-fw"></i>
-                                            </button>
-                                            <input v-else type="button" @click.prevent="save_exit" class="btn btn-primary" value="Save and Exit" :disabled="savingProposal || paySubmitting"/>
+                                        <button v-if="saveExitProposal" type="button" class="btn btn-primary" disabled>
+                                            Save and Exit&nbsp;<i class="fa fa-circle-o-notch fa-spin fa-fw"></i>
+                                        </button>
+                                        <input v-else type="button" @click.prevent="save_exit" class="btn btn-primary" value="Save and Exit" :disabled="savingProposal || paySubmitting"/>
 
-                                            <button v-if="savingProposal" type="button" class="btn btn-primary" disabled>
-                                                Save and Continue&nbsp;<i class="fa fa-circle-o-notch fa-spin fa-fw"></i>
-                                            </button>
-                                            <input v-else type="button" @click.prevent="save" class="btn btn-primary" value="Save and Continue" :disabled="saveExitProposal || paySubmitting"/>
+                                        <button v-if="savingProposal" type="button" class="btn btn-primary" disabled>
+                                            Save and Continue&nbsp;<i class="fa fa-circle-o-notch fa-spin fa-fw"></i>
+                                        </button>
+                                        <input v-else type="button" @click.prevent="save" class="btn btn-primary" value="Save and Continue" :disabled="saveExitProposal || paySubmitting"/>
 
-                                            <button v-if="paySubmitting || !terms_and_conditions_checked" type="button" class="btn btn-primary" disabled>
-                                                {{ submitText }}&nbsp;
-                                                <i v-show="terms_and_conditions_checked" class="fa fa-circle-o-notch fa-spin fa-fw"></i>
-                                            </button>
-                                            <input v-else 
-                                                type="button" 
-                                                @click.prevent="submit" 
-                                                class="btn btn-primary" 
-                                                :value="submitText" 
-                                                :disabled="saveExitProposal || savingProposal "
-                                                id="submitButton"
-                                                
-                                            />
-                                            <input id="save_and_continue_btn" type="hidden" @click.prevent="save_wo_confirm" class="btn btn-primary" value="Save Without Confirmation"/>
-                                        </p>
-                                    </div>
-                                    <div v-else class="container">
-                                      <p class="pull-right" style="margin-top:5px;">
-                                        <router-link class="btn btn-primary" :to="{name: 'external-dashboard'}">Back to Dashboard</router-link>
-                                      </p>
-                                    </div>
-                                  </div>
+                                        <button v-if="paySubmitting || !terms_and_conditions_checked" type="button" class="btn btn-primary" disabled>
+                                            {{ submitText }}&nbsp;
+                                            <i v-show="terms_and_conditions_checked" class="fa fa-circle-o-notch fa-spin fa-fw"></i>
+                                        </button>
+                                        <input v-else 
+                                            type="button" 
+                                            @click.prevent="submit" 
+                                            class="btn btn-primary" 
+                                            :value="submitText" 
+                                            :disabled="saveExitProposal || savingProposal "
+                                            id="submitButton"
+                                            
+                                        />
+                                        <input id="save_and_continue_btn" type="hidden" @click.prevent="save_wo_confirm" class="btn btn-primary" value="Save Without Confirmation"/>
+                                    </p>
+                                </div>
+                                <div v-else class="container">
+                                    <p class="float-end" style="margin-top:5px;">
+                                    <router-link class="btn btn-primary" :to="{name: 'external-dashboard'}">Back to Dashboard</router-link>
+                                    </p>
                                 </div>
                             </div>
                         </div>
+                    </div>
                 </div>
             </div>
 

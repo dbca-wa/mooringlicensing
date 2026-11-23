@@ -1,34 +1,34 @@
 <template>
     <div id="current_moorings">
         <FormSection v-if="currentMooringDisplayText" label="Current Moorings" Index="current_mooring">
-            <div class="row form-group">
+            <div class="row mb-3">
                 <div class="col-sm-9">
-                    <label for="" class="col-sm-12 control-label">{{ currentMooringDisplayText }}</label>
+                    <label for="" class="col-sm-12 form-label">{{ currentMooringDisplayText }}</label>
                         <div class="col-sm-9">
                             <input
                             @change="resetCurrentMooring"
                             :disabled="readonly"
-                            type="radio"
+                            class="form-check-input" type="radio"
                             id="changeMooringFalse"
                             name="changeMooringFalse"
                             :value="false"
                             v-model="changeMooring"
                             required
                             />
-                            <label for="changeMooringFalse" class="control-label">No</label>
+                            <label for="changeMooringFalse" class="form-label">No</label>
                         </div>
                         <div class="col-sm-9">
                             <input
                             @change="resetCurrentMooring"
                             :disabled="readonly"
-                            type="radio"
+                            class="form-check-input" type="radio"
                             id="changeMooringTrue"
                             name="changeMooringTrue"
                             :value="true"
                             v-model="changeMooring"
                             required
                             />
-                            <label for="changeMooringTrue" class="control-label">Yes</label>
+                            <label for="changeMooringTrue" class="form-label">Yes</label>
                         </div>
 
                 </div>
@@ -39,8 +39,6 @@
 </template>
 <script>
 import FormSection from '@/components/forms/section_toggle.vue'
-import "select2/dist/css/select2.min.css";
-import "select2-bootstrap-theme/dist/select2-bootstrap.min.css";
 
 export default {
     name:'current_mooring',

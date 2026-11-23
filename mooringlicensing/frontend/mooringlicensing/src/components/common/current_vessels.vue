@@ -1,65 +1,65 @@
 <template>
     <div id="current_vessels" v-if="vesselExists && !forEndorser">
         <FormSection v-if="mooringLicenceCurrentVesselDisplayText || currentVesselDisplayText" label="Current Vessel" Index="current_vessel">
-            <div v-if="mooringLicenceCurrentVesselDisplayText" class="row form-group">
+            <div v-if="mooringLicenceCurrentVesselDisplayText" class="row mb-3">
                 <div class="col-sm-9">
-                    <label for="" class="col-sm-12 control-label">{{ mooringLicenceCurrentVesselDisplayText }}</label>
+                    <label for="" class="col-sm-12 form-label">{{ mooringLicenceCurrentVesselDisplayText }}</label>
                     <div class="col-sm-9">
                         <input
                         @change="resetCurrentVessel"
                         :disabled="readonly"
-                        type="radio"
+                        class="form-check-input" type="radio"
                         id="current_vessel_false"
                         name="current_vessel_false"
                         :value="false"
                         v-model="keep_current_vessel"
                         required
                         />
-                        <label for="current_vessel_false" class="control-label">Yes</label>
+                        <label for="current_vessel_false" class="form-label">Yes</label>
                     </div>
                     <div class="col-sm-9">
                         <input
                         @change="resetCurrentVessel"
                         :disabled="readonly"
-                        type="radio"
+                        class="form-check-input" type="radio"
                         id="current_vessel_true"
                         name="current_vessel_true"
                         :value="true"
                         v-model="keep_current_vessel"
                         required
                         />
-                        <label for="current_vessel_true" class="control-label">No</label>
+                        <label for="current_vessel_true" class="form-label">No</label>
                     </div>
                 </div>
             </div>
-            <div v-else class="row form-group">
+            <div v-else class="row mb-3">
                 <div class="col-sm-9">
-                    <label for="" class="col-sm-12 control-label">{{ currentVesselDisplayText }}</label>
+                    <label for="" class="col-sm-12 form-label">{{ currentVesselDisplayText }}</label>
                         <div class="col-sm-9">
                             <input
                             @change="resetCurrentVessel"
                             :disabled="readonly"
-                            type="radio"
+                            class="form-check-input" type="radio"
                             id="current_vessel_true"
                             name="current_vessel_true"
                             :value="true"
                             v-model="keep_current_vessel"
                             required
                             />
-                            <label for="current_vessel_true" class="control-label">Keep my current vessel</label>
+                            <label for="current_vessel_true" class="form-label">Keep my current vessel</label>
                         </div>
                         <div class="col-sm-9">
                             <input
                             @change="resetCurrentVessel"
                             :disabled="readonly"
-                            type="radio"
+                            class="form-check-input" type="radio"
                             id="current_vessel_false"
                             name="current_vessel_false"
                             :value="false"
                             v-model="keep_current_vessel"
                             required
                             />
-                            <label for="current_vessel_false" class="control-label">Change to different vessel</label>
+                            <label for="current_vessel_false" class="form-label">Change to different vessel</label>
                         </div>
 
                 </div>
@@ -70,8 +70,6 @@
 </template>
 <script>
 import FormSection from '@/components/forms/section_toggle.vue'
-import "select2/dist/css/select2.min.css";
-import "select2-bootstrap-theme/dist/select2-bootstrap.min.css";
 
 export default {
     name:'current_vessels',

@@ -49,6 +49,14 @@ export default {
             };
             var options = Object.assign(vm.dtOptions);
             vm.vmDataTable = $(vm.table).DataTable(options);
+
+            window.addEventListener('resize', function () {
+                vm.vmDataTable.columns.adjust().responsive.recalc();
+            });
+
+            vm.vmDataTable.on('draw', function () {
+                vm.vmDataTable.columns.adjust().responsive.recalc();
+            });
             $(vm.table).on('page.dt', function () {
                 vm.vmDataTable.columns.adjust().responsive.recalc();
             } );
@@ -144,9 +152,6 @@ export default {
         margin-left: 10px;
         margin-right: 10px;
         display: inline-block;
-    }
-    .input-sm {
-        width: auto;
     }
     @media screen and (max-width: 767px)
     {

@@ -5,7 +5,7 @@
                 <div class="row">
                     <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
                     <div class="col-sm-12">
-                        <div class="form-group">
+                        <div class="row mb-3">
                             <div class="row">
                                 <div v-if="approvalId" class="col-lg-12">
                                     <datatable

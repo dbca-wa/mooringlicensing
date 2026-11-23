@@ -3,7 +3,7 @@
         <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :processing="processing" :title="title" large>
             <div class="container-fluid">
                 <alert :show.sync="showError" type="danger"><strong>{{ errorString }}</strong></alert>
-                <div class="row form-group">
+                <div class="row mb-3">
                     <table class="table table-striped table-bordered">
                         <thead>
                             <tr>
@@ -32,32 +32,32 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="row form-group">
-                    <label for="" class="col-sm-3 control-label">Street</label>
+                <div class="row mb-3">
+                    <label for="" class="col-sm-3 col-form-label">Street</label>
                     <div class="col-sm-6">
                         <input type="text" class="form-control" name="street" placeholder="" v-model="new_postal_address_line1">
                     </div>
                 </div>
-                <div class="row form-group">
-                    <label for="" class="col-sm-3 control-label" >Town/Suburb</label>
+                <div class="row mb-3">
+                    <label for="" class="col-sm-3 col-form-label" >Town/Suburb</label>
                     <div class="col-sm-6">
                         <input type="text" class="form-control" name="surburb" placeholder="" v-model="new_postal_address_locality">
                     </div>
                 </div>
-                <div class="row form-group">
-                    <label for="" class="col-sm-3 control-label">State</label>
+                <div class="row mb-3">
+                    <label for="" class="col-sm-3 col-form-label">State</label>
                     <div class="col-sm-2">
                         <input type="text" class="form-control" name="state" placeholder="" v-model="new_postal_address_state">
                     </div>
-                    <label for="" class="col-sm-2 control-label">Postcode</label>
+                    <label for="" class="col-sm-2 col-form-label">Postcode</label>
                     <div class="col-sm-2">
                         <input type="text" class="form-control" name="postcode" placeholder="" v-model="new_postal_address_postcode">
                     </div>
                 </div>
-                <div class="row form-group">
-                    <label for="" class="col-sm-3 control-label" >Country</label>
+                <div class="row mb-3">
+                    <label for="" class="col-sm-3 col-form-label" >Country</label>
                     <div class="col-sm-4">
-                        <select v-model="new_postal_address_country" class="form-control" name="country">
+                        <select v-model="new_postal_address_country" class="form-select" name="country">
                             <option selected></option>
                             <option v-for="c in countries" :value="c.code">{{ c.name }}</option>
                         </select>

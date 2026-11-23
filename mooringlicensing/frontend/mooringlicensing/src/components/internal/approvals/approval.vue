@@ -4,42 +4,26 @@
         <h3>{{ approvalLabel }}: {{ approval.lodgement_number }}</h3>
         <div class="col-md-3">
             <CommsLogs :comms_url="comms_url" :logs_url="logs_url" :comms_add_url="comms_add_url" :disable_add_entry="false"/>
-            <div class="row">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                       Submission
-                    </div>
-                    <div class="panel-body panel-collapse">
-                        <div class="row">
-
-                            <div class="col-sm-12 top-buffer-s">
-                                <strong>Issued on</strong><br/>
-                                {{ approval.issue_date | formatDate}}
-                            </div>
-                            <div class="col-sm-12 top-buffer-s">
-                                <table class="table small-table">
-                                    <tr>
-                                        <th>Lodgement</th>
-                                        <th>Date</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
+            <div class="card mb-3">
+                <div class="card-header">
+                    Submission
+                </div>
+                <div class="card-body border-bottom">
+                    <div class="col-sm-12 top-buffer-s">
+                        <strong>Issued on</strong><br/>
+                        {{ approval.issue_date | formatDate}}
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        Workflow
-                    </div>
-                    <div class="panel-body panel-collapse">
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <strong>Status</strong><br/>
-                                {{ approval.status }}
-                            </div>
+            <div class="card mb-3">
+                <div class="card-header">
+                    Workflow
+                </div>
+                <div class="card-body border-bottom">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <strong>Status</strong><br/>
+                            {{ approval.status }}
                         </div>
                     </div>
                 </div>
@@ -47,73 +31,77 @@
         </div>
         <div class="col-md-1"></div>
         <div class="col-md-8">
-            <div class="row">
-                <div v-if="approval && approval.applicant">
+            <div class="row" v-if="approval && approval.applicant">
                     <Applicant
-                        :user="approval.applicant" 
+                        :user="approval.applicant"
                         id="approvalSubmitterDetails"
                         :readonly="true"
                         customerType="holder"
                         :proposalId="approval.current_proposal.id"
                         :proposalApplicant="approval.current_proposal.proposal_applicant"
                     />
-                </div>
             </div>
 
             <div class="row">
-
+                <div>
                 <FormSection
                     :label="approvalLabel"
                     :formCollapse="true"
                     :Index="oBody"
                 >
                     <div v-if="loading.length == 0">
-                      <form class="form-horizontal" action="index.html" method="post">
-                          <div v-if="mooringLicence" class="form-group">
-                            <label for="" class="col-sm-3 control-label">Mooring</label>
+                      <form   action="index.html" method="post">
+                          <div v-if="mooringLicence" class="row mb-3">
+                            <label for="" class="col-sm-3 col-form-label">Mooring</label>
                             <div class="col-sm-6">
-                                <label for="" class="control-label pull-left">{{approval.mooring_licence_mooring}}</label>
+                                <label for="" class="form-label float-start">{{approval.mooring_licence_mooring}}</label>
                             </div>
                           </div>
-                          <div class="form-group">
-                            <label for="" class="col-sm-3 control-label">Issue Date</label>
+                          <div class="row mb-3">
+                            <label for="" class="col-sm-3 col-form-label">Issue Date</label>
                             <div class="col-sm-6">
-                                <label for="" class="control-label pull-left">{{approval.issue_date | formatDate}}</label>
+                                <label for="" class="form-label float-start">{{approval.issue_date | formatDate}}</label>
                             </div>
                           </div>
-                          <div class="form-group">
-                            <label for="" class="col-sm-3 control-label" >Start Date</label>
+                          <div class="row mb-3">
+                            <label for="" class="col-sm-3 col-form-label" >Start Date</label>
                             <div class="col-sm-6">
-                                <label for="" class="control-label pull-left">{{approval.start_date | formatDate}}</label>
+                                <label for="" class="form-label float-start">{{approval.start_date | formatDate}}</label>
                             </div>
                           </div>
-                          <div class="form-group">
-                            <label for="" class="col-sm-3 control-label">Expiry Date</label>
+                          <div class="row mb-3">
+                            <label for="" class="col-sm-3 col-form-label">Expiry Date</label>
                             <div class="col-sm-3">
-                                <label for="" class="control-label pull-left">{{approval.expiry_date_str}}</label>
+                                <label for="" class="form-label float-start">{{approval.expiry_date_str}}</label>
                             </div>
 
                           </div>
-                          <div class="form-group">
-                              <label for="" class="col-sm-3 control-label" >{{ approvalLabel }}</label>
+                          <div class="row mb-3">
+                              <label for="" class="col-sm-3 col-form-label" >{{ approvalLabel }}</label>
                             <div class="col-sm-4">
-                                <p><a target="_blank" :href="approval.licence_document" class="control-label pull-left">Licence.pdf</a></p>
+                                <p><a target="_blank" :href="approval.licence_document" class="form-label float-start">Licence.pdf</a></p>
                             </div>
                           </div>
                        </form>
                     </div>
                 </FormSection>
+                </div>
             </div>
-            <div class="row" v-if="approval && approval.applicant && approval.current_proposal && annualAdmissionPermit">
-                  <Vessels
-                  :proposal="approval.current_proposal"
-                  :profile="approval.applicant"
-                  id="approvalVessel"
-                  ref="vessel"
-                  :readonly="true"
-                  :is_internal="true"
-                  :keep_current_vessel="true"
-                  />
+            <div
+                class="row"
+                v-if="approval && approval.applicant && approval.current_proposal && annualAdmissionPermit"
+            >
+                <div class="col-12">
+                    <Vessels
+                        :proposal="approval.current_proposal"
+                        :profile="approval.applicant"
+                        id="approvalVessel"
+                        ref="vessel"
+                        :readonly="true"
+                        :is_internal="true"
+                        :keep_current_vessel="true"
+                    />
+                </div>
             </div>
             <div class="row" v-if="approval && approval.id && authorisedUserPermit">
                 <FormSection 
@@ -121,7 +109,7 @@
                     label="Moorings" 
                     Index="moorings"
                 >
-                    <div class="col-sm-9">
+                    <div class="col-sm-12">
                         <datatable
                             ref="moorings_datatable"
                             :id="moorings_datatable_id"
@@ -143,7 +131,7 @@
                             <label for="checkbox_show_expired">Show expired and/or surrendered authorised user permits</label>
                         </div>
                     </div>
-                    <div class="col-sm-11">
+                    <div class="col-sm-12">
                         <datatable
                             ref="ml_authorised_users_datatable"
                             :id="ml_authorised_users_datatable_id"
@@ -160,7 +148,7 @@
                     label="Vessels" 
                     Index="mooringLicenceVessels"
                 >
-                    <div class="col-sm-11">
+                    <div class="col-sm-12">
                         <datatable
                             ref="ml_vessels_datatable"
                             :id="ml_vessels_datatable_id"

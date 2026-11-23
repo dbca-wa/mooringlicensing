@@ -8,13 +8,13 @@
                         Note: this is permanent and cannot be reversed.
                     </div>
                 </div>
-                <form class="form-horizontal" name="approvalForm">
+                <form   name="approvalForm">
                     <div class="row">
                         <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
                         <div class="col-sm-12">
-                            <div class="form-group">
+                            <div class="row mb-3">
                                 <div class="col-sm-3">
-                                    <label class="control-label pull-left"  for="Name">Surrender Details</label>
+                                    <label class="form-label float-start"  for="Name">Surrender Details</label>
                                 </div>
                                 <div class="col-sm-9">
                                     <textarea name="surrender_details" class="form-control" style="width:70%;" v-model="approval.surrender_details"></textarea>

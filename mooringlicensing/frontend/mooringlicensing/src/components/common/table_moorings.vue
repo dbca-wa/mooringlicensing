@@ -2,18 +2,18 @@
     <div>
         <div class="row">
             <div class="col-md-3">
-                <div class="form-group">
+                <div class="mb-3">
                     <label for="">Status:</label>
-                    <select class="form-control" v-model="filterMooringStatus">
+                    <select class="form-select" v-model="filterMooringStatus">
                         <option value="All">All</option>
                         <option v-for="status in mooringStatuses" :value="status">{{ status }}</option>
                     </select>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="form-group">
+                <div class="mb-3">
                     <label for="">Bay:</label>
-                    <select class="form-control" v-model="filterMooringBay">
+                    <select class="form-select" v-model="filterMooringBay">
                         <option value="All">All</option>
                         <option v-for="bay in mooringBays" :value="bay.id">{{ bay.name }}</option>
                     </select>

@@ -3,14 +3,14 @@
         <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :processing="issuingApproval" :title="title" large>
             <div class="container-fluid">
                 <div class="row">
-                    <form class="form-horizontal" name="approvalForm">
+                    <form   name="approvalForm">
                         <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
                         <div class="col-sm-12">
-                            <div class="form-group">
+                            <div class="row mb-3">
                                 <div class="row">
                                     <div class="col-sm-3">
 
-                                        <label class="control-label pull-left"  for="Name">From Date</label>
+                                        <label class="form-label float-start"  for="Name">From Date</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div style="width: 70%;">
@@ -26,11 +26,11 @@
                                 </div>
                             </div>
 
-                            <div class="form-group">
+                            <div class="row mb-3">
                                 <div class="row">
                                     <div class="col-sm-3">
 
-                                        <label class="control-label pull-left"  for="Name">To Date</label>
+                                        <label class="form-label float-start"  for="Name">To Date</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div style="width: 70%;">
@@ -46,10 +46,10 @@
                                 </div>
                             </div>
 
-                            <div class="form-group">
+                            <div class="row mb-3">
                                 <div class="row">
                                     <div class="col-sm-3">
-                                        <label class="control-label pull-left"  for="Name">Suspension Details</label>
+                                        <label class="form-label float-start"  for="Name">Suspension Details</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <textarea name="suspension_details" class="form-control" style="width:70%;" v-model="approval.suspension_details"></textarea>

@@ -5,13 +5,13 @@
                 <div class="row">
                     <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
                     <div class="col-sm-12">
-                        <div class="form-group">
+                        <div class="row mb-3">
                             <div class="row">
                                 <div class="col-sm-3">
-                                    <label class="control-label pull-left" for="mooring_bay_lookup">Bay</label>
+                                    <label class="form-label float-start" for="mooring_bay_lookup">Bay</label>
                                 </div>
                                 <div class="col-sm-6">
-                                    <select class="form-control" v-model="selectedMooringBayId" id="mooring_bay_lookup" disabled>
+                                    <select class="form-select" v-model="selectedMooringBayId" id="mooring_bay_lookup" disabled>
                                         <option v-for="bay in mooringBays" v-bind:value="bay.id">
                                         {{ bay.name }}
                                         </option>
@@ -19,10 +19,10 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="form-group">
+                        <div class="row mb-3">
                             <div class="row">
                                 <div class="col-sm-3">
-                                    <label class="control-label pull-left" for="mooring_site_id">Mooring Site ID</label>
+                                    <label class="form-label float-start" for="mooring_site_id">Mooring Site ID</label>
                                 </div>
                                 <div class="col-sm-6">
                                     <select
@@ -35,28 +35,28 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="form-group">
+                        <div class="row mb-3">
                             <div class="row">
                                 <div class="col-sm-3">
-                                    <label class="control-label pull-left"  for="Name">Details</label>
+                                    <label class="form-label float-start"  for="Name">Details</label>
                                 </div>
                                 <div class="col-sm-9">
                                     <textarea name="approval_details" class="form-control" style="width:70%;" v-model="messageDetails"></textarea>
                                 </div>
                             </div>
                         </div>
-                        <div class="form-group">
+                        <div class="row mb-3">
                             <div class="row">
                                 <div class="col-sm-3">
-                                    <label class="control-label pull-left"  for="Name">BCC email</label>
+                                    <label class="form-label float-start"  for="Name">BCC email</label>
                                 </div>
                                 <div class="col-sm-9">
                                         <input type="text" class="form-control" name="approval_cc" style="width:70%;" ref="bcc_email" v-model="ccEmail">
                                 </div>
                             </div>
                         </div>
-                        <div class="row form-group">
-                            <label for="" class="col-sm-3 control-label">Document</label>
+                        <div class="row mb-3">
+                            <label for="" class="col-sm-3 col-form-label">Document</label>
                             <div class="col-sm-9">
                                 <FileField
                                     ref="waiting_list_offer_documents"
@@ -72,7 +72,7 @@
             </div>
 
             <div slot="footer">
-                <p class="pull-right" style="margin-top:5px">
+                <p class="float-end" style="margin-top:5px">
                     <input type="checkbox" v-model="noEmails" id="noEmails" />
                     <label for="noEmails">
                         &nbsp;Do not send email notifications for this application &nbsp;
@@ -208,7 +208,7 @@ export default {
             let vm = this;
             $(vm.$refs.mooring_lookup).select2({
                 minimumInputLength: 2,
-                "theme": "bootstrap",
+                theme: "bootstrap-5",
                 allowClear: true,
                 placeholder:"Select Mooring",
                 dropdownParent: $(vm.$refs.mooring_lookup).parent(),

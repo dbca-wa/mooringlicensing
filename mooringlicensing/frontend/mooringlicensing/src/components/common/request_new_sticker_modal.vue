@@ -5,7 +5,7 @@
                 <alert :show.sync="showError" type="danger"><strong>{{ errorString }}</strong></alert>
                 <alert :show.sync="showWarning" type="warning"><strong>One or more stickers have a postal address set that does not match the postal address on holder's user profile. Use the Create New Sticker option to change the postal address that the sticker should be sent to.</strong></alert>
                 <alert :show.sync="showReplaceInfo" type="info"><strong>{{ replaceInfo }}</strong></alert>
-                <div class="row form-group">
+                <div class="row mb-3">
                     <table class="table table-striped table-bordered">
                         <thead>
                             <tr>
@@ -40,51 +40,51 @@
                         </tbody>
                     </table>
                 </div>
-                <div v-if="showWarning" class="row form-group" style="border: 2px solid rgba(51,122,183,0.3); box-shadow: 0 0 6px rgba(51,122,183,0.3); padding:5px; border-radius:4px;" for="change_sticker_address">
-                    <label class="col-sm-5 control-label">Change Sticker Address</label>
+                <div v-if="showWarning" class="row mb-3" style="border: 2px solid rgba(51,122,183,0.3); box-shadow: 0 0 6px rgba(51,122,183,0.3); padding:5px; border-radius:4px;" for="change_sticker_address">
+                    <label class="col-sm-5 col-form-label">Change Sticker Address</label>
                     <div class="col-md-6">
                         <input :disabled="!formEnabled" type="checkbox" v-model="change_sticker_address" />
                     </div>
                 </div>
-                <div v-else class="row form-group" for="change_sticker_address">
-                    <label class="col-sm-5 control-label">Change Sticker Address</label>
+                <div v-else class="row mb-3" for="change_sticker_address">
+                    <label class="col-sm-5 col-form-label">Change Sticker Address</label>
                     <div class="col-md-6">
                         <input :disabled="!formEnabled" type="checkbox" v-model="change_sticker_address" />
                     </div>
                 </div>
-                <div v-if="change_sticker_address" class="row form-group">
-                    <label for="" class="col-sm-3 control-label">Street</label>
+                <div v-if="change_sticker_address" class="row mb-3">
+                    <label for="" class="col-sm-3 col-form-label">Street</label>
                     <div class="col-sm-6">
                         <input :disabled="!formEnabled" type="text" class="form-control" name="street" placeholder="" v-model="new_postal_address_line1">
                     </div>
                 </div>
-                <div v-if="change_sticker_address" class="row form-group">
-                    <label for="" class="col-sm-3 control-label" >Town/Suburb</label>
+                <div v-if="change_sticker_address" class="row mb-3">
+                    <label for="" class="col-sm-3 col-form-label" >Town/Suburb</label>
                     <div class="col-sm-6">
                         <input :disabled="!formEnabled" type="text" class="form-control" name="surburb" placeholder="" v-model="new_postal_address_locality">
                     </div>
                 </div>
-                <div v-if="change_sticker_address" class="row form-group">
-                    <label for="" class="col-sm-3 control-label">State</label>
+                <div v-if="change_sticker_address" class="row mb-3">
+                    <label for="" class="col-sm-3 col-form-label">State</label>
                     <div class="col-sm-2">
                         <input :disabled="!formEnabled" type="text" class="form-control" name="state" placeholder="" v-model="new_postal_address_state">
                     </div>
-                    <label for="" class="col-sm-2 control-label">Postcode</label>
+                    <label for="" class="col-sm-2 col-form-label">Postcode</label>
                     <div class="col-sm-2">
                         <input :disabled="!formEnabled" type="text" class="form-control" name="postcode" placeholder="" v-model="new_postal_address_postcode">
                     </div>
                 </div>
-                <div v-if="change_sticker_address" class="row form-group">
-                    <label for="" class="col-sm-3 control-label" >Country</label>
+                <div v-if="change_sticker_address" class="row mb-3">
+                    <label for="" class="col-sm-3 col-form-label" >Country</label>
                     <div class="col-sm-4">
-                        <select :disabled="!formEnabled" v-model="new_postal_address_country" class="form-control" name="country">
+                        <select :disabled="!formEnabled" v-model="new_postal_address_country" class="form-select" name="country">
                             <option selected></option>
                             <option v-for="c in countries" :value="c.code">{{ c.name }}</option>
                         </select>
                     </div>
                 </div>
-                <div class="row form-group">
-                    <label class="col-sm-2 control-label" for="reason">Reason</label>
+                <div class="row mb-3">
+                    <label class="col-sm-2 col-form-label" for="reason">Reason</label>
                     <div class="col-sm-9">
                         <textarea :disabled="!formEnabled" class="col-sm-9 form-control" name="reason" v-model="details.reason"></textarea>
                     </div>

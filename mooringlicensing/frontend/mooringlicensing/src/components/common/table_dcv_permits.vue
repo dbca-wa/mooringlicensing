@@ -2,7 +2,7 @@
     <div>
         <div class="row">
             <div class="col-md-3">
-                <div class="form-group">
+                <div class="mb-3">
                     <label for="">Organisation</label>
                     <select
                             id="organisation_lookup1"  
@@ -16,9 +16,9 @@
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="form-group">
+                <div class="mb-3">
                     <label for="">Season</label>
-                    <select class="form-control" v-model="filterFeeSeason">
+                    <select class="form-select" v-model="filterFeeSeason">
                         <option value="All">All</option>
                         <option v-for="fee_season in fee_seasons" :value="fee_season.id">{{ fee_season.name }}</option>
                     </select>
@@ -28,7 +28,7 @@
 
         <div v-if="is_external || is_internal" class="row">
             <div class="col-md-12">
-                <button type="button" class="btn btn-primary pull-right" @click="new_application_button_clicked">New Application</button>
+                <button type="button" class="btn btn-primary float-end" @click="new_application_button_clicked">New Application</button>
             </div>
         </div>
 
@@ -362,7 +362,7 @@ export default {
             let vm = this;
             $(vm.$refs.organisation_lookup1).select2({
                 minimumInputLength: 2,
-                theme: "bootstrap",
+                theme: "bootstrap-5",
                 allowClear: true,
                 placeholder: "",
                 ajax: {

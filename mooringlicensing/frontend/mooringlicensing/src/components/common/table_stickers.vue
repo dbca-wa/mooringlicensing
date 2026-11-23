@@ -2,27 +2,27 @@
     <div>
         <div class="row">
             <div class="col-md-3">
-                <div class="form-group">
+                <div class="mb-3">
                     <label for="">Permit or licence type</label>
-                    <select class="form-control" v-model="filterApprovalType">
+                    <select class="form-select" v-model="filterApprovalType">
                         <option value="All">All</option>
                         <option v-for="type in approval_types" :value="type.code">{{ type.description }}</option>
                     </select>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="form-group">
+                <div class="mb-3">
                     <label for="">Status</label>
-                    <select class="form-control" v-model="filterStickerStatus">
+                    <select class="form-select" v-model="filterStickerStatus">
                         <option value="All">All</option>
                         <option v-for="sticker_status in sticker_statuses" :value="sticker_status.id">{{ sticker_status.display }}</option>
                     </select>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="form-group">
+                <div class="mb-3">
                     <label for="">Season</label>
-                    <select class="form-control" v-model="filterYear">
+                    <select class="form-select" v-model="filterYear">
                         <option value="All">All</option>
                         <option v-for="season in fee_seasons" :value="season.start_date">{{ season.name }}</option>
                     </select>

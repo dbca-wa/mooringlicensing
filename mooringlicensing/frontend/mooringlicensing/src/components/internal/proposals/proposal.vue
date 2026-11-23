@@ -158,34 +158,31 @@
         <div class="row" style="margin-bottom: 50px">
             <div  class="container">
                 <div class="row" style="margin-bottom: 50px">
-                    <div class="navbar navbar-fixed-bottom"  style="background-color: #f5f5f5;">
-                        <div class="navbar-inner">
-                            <div v-if="!readonly" class="container">
-                                <p class="pull-right" style="margin-top:5px">
+                    <div
+                        v-if="!readonly"
+                        class="d-flex justify-content-end align-items-center flex-wrap gap-2 p-2"
+                        style="background-color: #f5f5f5;"
+                    >
+                        <input v-if="proposal.can_bypass_auto_approval" type="checkbox" v-model="bypass_auto_approval" id="noAutoApprove" />
+                        <label v-if="proposal.can_bypass_auto_approval" for="noEmails">
+                            &nbsp;Prevent this application from being auto approved &nbsp;
+                        </label>
 
-                                    <input v-if="proposal.can_bypass_auto_approval" type="checkbox" v-model="bypass_auto_approval" id="noAutoApprove" />
-                                    <label v-if="proposal.can_bypass_auto_approval" for="noEmails">
-                                        &nbsp;Prevent this application from being auto approved &nbsp;
-                                    </label>
+                        <input type="checkbox" v-model="proposal.no_email_notifications" id="noEmails" />
+                        <label for="noEmails">
+                            &nbsp;Do not send email notifications for this application &nbsp;
+                        </label>
+                        <button v-if="savingProposal" type="button" class="btn btn-primary" disabled>
+                            Save Proposal&nbsp;<i class="fa fa-circle-o-notch fa-spin fa-fw"></i>
+                        </button>
+                        <input v-else type="button" @click.prevent="save" 
+                            class="btn btn-primary" value="Save Proposal"/>
 
-                                    <input type="checkbox" v-model="proposal.no_email_notifications" id="noEmails" />
-                                    <label for="noEmails">
-                                        &nbsp;Do not send email notifications for this application &nbsp;
-                                    </label>
-                                    <button v-if="savingProposal" type="button" class="btn btn-primary" disabled>
-                                        Save Proposal&nbsp;<i class="fa fa-circle-o-notch fa-spin fa-fw"></i>
-                                    </button>
-                                    <input v-else type="button" @click.prevent="save" 
-                                        class="btn btn-primary" value="Save Proposal"/>
-
-                                    <button v-if="submittingProposal" type="button" class="btn btn-primary" disabled>
-                                        {{submitText}}&nbsp;<i class="fa fa-circle-o-notch fa-spin fa-fw"></i>
-                                    </button>
-                                    <input v-else-if="submittable" type="button" @click.prevent="submit" 
-                                        class="btn btn-primary" :value="submitText" />
-                                </p>
-                            </div>
-                        </div>
+                        <button v-if="submittingProposal" type="button" class="btn btn-primary" disabled>
+                            {{submitText}}&nbsp;<i class="fa fa-circle-o-notch fa-spin fa-fw"></i>
+                        </button>
+                        <input v-else-if="submittable" type="button" @click.prevent="submit" 
+                            class="btn btn-primary" :value="submitText" />
                     </div>
                 </div>
             </div>
@@ -1007,7 +1004,7 @@ export default {
             }
             // Assigned officer select
             $(vm.$refs.assigned_officer).select2({
-                "theme": "bootstrap",
+                theme: "bootstrap-5",
                 allowClear: true,
                 placeholder:"Select Officer"
             }).

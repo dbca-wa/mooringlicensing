@@ -2,7 +2,7 @@
     <div>
         <div class="row">
             <div class="col-md-3">
-                <div class="form-group">
+                <div class="mb-3">
                     <label for="organisation_lookup">Organisation</label>
                         <select
                             id="organisation_lookup"  
@@ -16,7 +16,7 @@
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="form-group">
+                <div class="mb-3">
                     <label for="">Date from</label>
                     <div class="input-group date">
                         <input type="date" class="form-control text-center" placeholder="DD/MM/YYYY" v-model="filterDateFrom" id="dateFromField"/>
@@ -24,7 +24,7 @@
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="form-group">
+                <div class="mb-3">
                     <label for="">Date to</label>
                     <div class="input-group date">
                         <input type="date" class="form-control text-center" placeholder="DD/MM/YYYY" v-model="filterDateTo" id="dateToField"/>
@@ -35,7 +35,7 @@
 
         <div class="row">
             <div class="col-md-12">
-                <button type="button" class="btn btn-primary pull-right" @click="new_application_button_clicked">New Application</button>
+                <button type="button" class="btn btn-primary float-end" @click="new_application_button_clicked">New Application</button>
             </div>
         </div>
 
@@ -297,7 +297,7 @@ export default {
             let vm = this;
             $(vm.$refs.organisation_lookup).select2({
                 minimumInputLength: 2,
-                theme: "bootstrap",
+                theme: "bootstrap-5",
                 allowClear: true,
                 placeholder: "",
                 ajax: {
