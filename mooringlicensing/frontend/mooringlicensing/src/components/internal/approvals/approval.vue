@@ -164,7 +164,7 @@
 </div>
 </template>
 <script>
-import Vue from 'vue'
+import http from '@/utils/vue-resource-shim'
 import datatable from '@vue-utils/datatable.vue'
 import CommsLogs from '@common-utils/comms_logs.vue'
 import Applicant from '@/components/common/applicant.vue'
@@ -342,7 +342,7 @@ export default {
       },
   },
   created: async function(){
-      const response = await Vue.http.get(helpers.add_endpoint_json(api_endpoints.approvals,this.$route.params.approval_id));
+      const response = await http.get(helpers.add_endpoint_json(api_endpoints.approvals,this.$route.params.approval_id));
       this.approval = Object.assign({}, response.body);
       this.approval.applicant_id = response.body.applicant_id;
 

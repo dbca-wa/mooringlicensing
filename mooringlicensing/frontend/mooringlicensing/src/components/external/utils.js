@@ -1,11 +1,11 @@
-import Vue from 'vue'
+import http from '@/utils/vue-resource-shim'
 import api from './api'
 import {helpers} from '@/utils/hooks' 
 
 export default {
     fetchProfile: function (){
         return new Promise ((resolve,reject) => {
-            Vue.http.get(api.profile).then((response) => {
+            http.get(api.profile).then((response) => {
                 resolve(response.body);
             },
             (error) => {
@@ -16,7 +16,7 @@ export default {
     },
     fetchProposal: function(id){
         return new Promise ((resolve,reject) => {
-            Vue.http.get(helpers.add_endpoint_json(api.proposals,id)).then((response) => {
+            http.get(helpers.add_endpoint_json(api.proposals,id)).then((response) => {
                 resolve(response.body);
             },
             (error) => {
@@ -26,7 +26,7 @@ export default {
     },
     fetchCountries: function (){
         return new Promise ((resolve,reject) => {
-            Vue.http.get(api.countries).then((response) => {
+            http.get(api.countries).then((response) => {
                 resolve(response.body);
             },
             (error) => {

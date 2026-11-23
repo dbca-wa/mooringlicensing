@@ -148,7 +148,7 @@ import CreateNewStickerModal from "@/components/common/create_new_sticker_modal.
 import RequestNewStickerModal from "@/components/common/request_new_sticker_modal.vue"
 import RequestStickerAddressModal from "@/components/common/request_sticker_address_modal.vue"
 import SwapMooringsModal from "@/components/common/swap_moorings_modal.vue"
-import Vue from 'vue'
+import http from '@/utils/vue-resource-shim'
 import { api_endpoints, helpers }from '@/utils/hooks'
 
 export default {
@@ -977,7 +977,7 @@ export default {
         },
         fetchProfile: function(){
             let vm = this;
-            Vue.http.get(api_endpoints.profile).then((response) => {
+            http.get(api_endpoints.profile).then((response) => {
                 vm.profile = response.body
 
             },(error) => {

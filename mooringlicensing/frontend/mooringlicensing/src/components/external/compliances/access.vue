@@ -119,7 +119,7 @@
 </template>
 <script>
 import $ from 'jquery'
-import Vue from 'vue'
+import http from '@/utils/vue-resource-shim'
 import datatable from '@vue-utils/datatable.vue'
 import CommsLogs from '@common-utils/comms_logs.vue'
 import alert from '@vue-utils/alert.vue'
@@ -327,13 +327,13 @@ export default {
   },
 
  beforeRouteEnter: function(to, from, next){
-    Vue.http.get(helpers.add_endpoint_json(api_endpoints.compliances,to.params.compliance_id)).then((response) => {
+    http.get(helpers.add_endpoint_json(api_endpoints.compliances,to.params.compliance_id)).then((response) => {
         next(vm => {
             vm.compliance = response.body 
             if ( vm.compliance.customer_status == "Under Review" || vm.compliance.customer_status == "Approved" ) { vm.isFinalised = true }
             if (vm.compliance && vm.compliance.documents){ vm.hasDocuments = true}
 
-            Vue.http.get(helpers.add_endpoint_json(api_endpoints.compliances,to.params.compliance_id+'/amendment_request')).then((res) => {                     
+            http.get(helpers.add_endpoint_json(api_endpoints.compliances,to.params.compliance_id+'/amendment_request')).then((res) => {                     
                 vm.setAmendmentData(res.body);                  
             },
             err => {

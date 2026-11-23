@@ -56,7 +56,7 @@
 
 <script>
 import $ from 'jquery'
-import Vue from 'vue'
+import http from '@/utils/vue-resource-shim'
 import modal from '@vue-utils/bootstrap-modal.vue'
 import alert from '@vue-utils/alert.vue'
 import FileField from '@/components/forms/filefield_immediate.vue'
@@ -158,7 +158,7 @@ export default {
                     );
                     vm.amendingProposal = true;
                     vm.close();
-                    Vue.http.get(`/api/proposal/${vm.proposal.id}/internal_proposal.json`).then(
+                    http.get(`/api/proposal/${vm.proposal.id}/internal_proposal.json`).then(
                         response => {
                             vm.$emit('refreshFromResponse', response);
                         }, error => {

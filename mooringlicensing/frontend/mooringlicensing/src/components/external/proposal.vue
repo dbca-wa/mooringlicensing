@@ -162,7 +162,7 @@ import AnnualAdmissionApplication from '../form_aaa.vue';
 import AuthorisedUserApplication from '../form_aua.vue';
 import MooringLicenceApplication from '../form_mla.vue';
 import FormSection from '@/components/forms/section_toggle.vue'
-import Vue from 'vue'
+import http from '@/utils/vue-resource-shim'
 import {
   api_endpoints,
   helpers
@@ -698,7 +698,7 @@ export default {
   beforeRouteEnter: function(to, from, next) {
     if (to.params.proposal_id) {
       let vm = this;
-      Vue.http.get(`/api/proposal/${to.params.proposal_id}.json`).then(res => {
+      http.get(`/api/proposal/${to.params.proposal_id}.json`).then(res => {
           next(vm => {
             vm.loading.push('fetching proposal')
             vm.proposal = res.body;

@@ -1,4 +1,4 @@
-import Vue from 'vue'
+import { createApp } from 'vue'
 import 'vite/modulepreload-polyfill';
 import App from './App.vue'
 import router from './router'
@@ -42,19 +42,17 @@ import "@/../node_modules/datatables.net-fixedcolumns-bs5/css/fixedColumns.boots
 import api_endpoints from './api'
 import "font-awesome/css/font-awesome.min.css"
 
-Vue.config.devtools = true;
-Vue.config.productionTip = false
-
 //NOTE/TODO temporary compatibility layer
 import http from '@/utils/vue-resource-shim';
-Vue.http = http;
-Vue.prototype.$http = http;
 
-const appElement = document.getElementById( 'app' );
+const appElement = document.getElementById('app');
 
 if (appElement) {
-  new Vue({
-    router,
-    render: h => h(App)
-  }).$mount('#app');
+  const app = createApp(App);
+
+  app.config.globalProperties.$http = http;
+
+  app.use(router);
+
+  app.mount('#app');
 }

@@ -192,7 +192,7 @@
 
 <script>
 import $ from 'jquery'
-import Vue from 'vue'
+import http from '@/utils/vue-resource-shim'
 import ProposedDecline from '@/components/internal/proposals/proposal_proposed_decline.vue'
 import AmendmentRequest from '@/components/internal/proposals/amendment_request.vue'
 import BackToAssessor from '@/components/internal/proposals/back_to_assessor.vue'
@@ -1058,7 +1058,7 @@ export default {
     },
     created: function() {
         console.log('%cin created', 'color:#f33;')
-        Vue.http.get(`/api/proposal/${this.$route.params.proposal_id}/internal_proposal.json`).then(res => {
+        http.get(`/api/proposal/${this.$route.params.proposal_id}/internal_proposal.json`).then(res => {
             console.log('%cproposal has been returned.', 'color: #f11;')
             this.proposal = res.body;
             this.original_proposal = helpers.copyObject(res.body);
@@ -1070,7 +1070,7 @@ export default {
     },
     beforeRouteUpdate: function(to, from, next) {
         console.log("beforeRouteUpdate")
-          Vue.http.get(`/api/proposal/${to.params.proposal_id}.json`).then(res => {
+          http.get(`/api/proposal/${to.params.proposal_id}.json`).then(res => {
               next(vm => {
                 vm.proposal = res.body;
                 vm.original_proposal = helpers.copyObject(res.body);

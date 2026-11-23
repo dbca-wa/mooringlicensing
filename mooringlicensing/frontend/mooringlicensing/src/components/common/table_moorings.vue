@@ -33,7 +33,6 @@
 
 <script>
 import datatable from '@/utils/vue/datatable.vue'
-import Vue from 'vue'
 import { api_endpoints, helpers } from '@/utils/hooks'
 export default {
     name: 'TableMoorings',
