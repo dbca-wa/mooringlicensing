@@ -8,6 +8,7 @@
                     :logs_url="logs_url" 
                     :comms_add_url="comms_add_url" 
                     :disable_add_entry="false"
+                    :enable_actions_section="false"
                 />
             </div>
             <div class="col-md-1"></div>
