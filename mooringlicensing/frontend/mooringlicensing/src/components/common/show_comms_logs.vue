@@ -53,6 +53,7 @@ export default {
                 'Created',
             ],
             commsDtOptions: {
+                dom: 'lBfrtip',
                 language: {
                     processing: constants.DATATABLE_PROCESSING_HTML,
                 },

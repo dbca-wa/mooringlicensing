@@ -61,7 +61,7 @@ export default {
 
             window.addEventListener('resize', vm.resizeHandler);
 
-            vm.vmDataTable.on('draw', function () {
+            /*vm.vmDataTable.on('draw', function () {
                 vm.vmDataTable.columns.adjust();
 
                 if (vm.vmDataTable.responsive) {
@@ -74,7 +74,7 @@ export default {
                 if (vm.vmDataTable.responsive) {
                     vm.vmDataTable.responsive.recalc();
                 }
-            });
+            });*/
             $(vm.table).on('drawDatatable', function(){
                 vm.vmDataTable.draw();
             });

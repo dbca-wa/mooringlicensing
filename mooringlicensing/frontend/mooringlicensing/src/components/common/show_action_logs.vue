@@ -39,6 +39,7 @@ export default {
   },
   data: function () {
     return {
+      dom: 'lBfrtip',
       actionLogId: "action-log-table" + uuid(),
       isModalOpen: false,
       actionsDtHeaders: ["Who", "What", "When"],
