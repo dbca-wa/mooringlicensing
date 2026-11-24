@@ -25,6 +25,9 @@ import datatable from '@/utils/vue/datatable.vue'
 
 export default {
     name:'SwapMooringsModal',
+    emits: [
+        'sendData',
+    ],
     components:{
         modal,
         alert,

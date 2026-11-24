@@ -64,6 +64,9 @@ import FileField from '@/components/forms/filefield_immediate.vue'
 import {helpers} from "@/utils/hooks.js"
 export default {
     name:'amendment-request',
+    emits: [
+        'refreshFromResponse',
+    ],
     components:{
         modal,
         alert,

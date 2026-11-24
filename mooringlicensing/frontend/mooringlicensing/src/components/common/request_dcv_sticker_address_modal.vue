@@ -75,6 +75,9 @@ import { helpers, api_endpoints } from "@/utils/hooks.js"
 
 export default {
     name:'RequestDCVStickerAddressModal',
+    emits: [
+        'sendData',
+    ],
     components:{
         modal,
         alert,

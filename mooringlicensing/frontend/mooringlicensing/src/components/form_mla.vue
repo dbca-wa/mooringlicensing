@@ -112,6 +112,15 @@
     import MooringSiteLicenceDocumentsUpload from '@/components/external/mooring_licence_documents_upload.vue'
     export default {
         name: 'MooringLicenceApplication',
+        emits: [
+            'noVessel',
+            'profile-fetched',
+            'updateAutoApprove',
+            'updateAutoRenew',
+            'updateSubmitText',
+            'updateVesselOwnershipChanged',
+            'vesselChanged',
+        ],
         props:{
             proposal:{
                 type: Object,

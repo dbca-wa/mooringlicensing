@@ -63,6 +63,9 @@ import alert from '@vue-utils/alert.vue'
 
 export default {
     name:'ModalForSticker',
+    emits: [
+        'sendData',
+    ],
     components:{
         modal,
         alert,

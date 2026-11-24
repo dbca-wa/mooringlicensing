@@ -37,6 +37,9 @@ import alert from '@vue-utils/alert.vue'
 import { helpers, api_endpoints, constants } from "@/utils/hooks.js"
 export default {
     name:'Decline-Proposal',
+    emits: [
+        'refreshFromResponse',
+    ],
     components:{
         modal,
         alert

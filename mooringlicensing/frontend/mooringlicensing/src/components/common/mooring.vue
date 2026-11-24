@@ -35,6 +35,9 @@ from '@/utils/hooks'
 
     export default {
         name:'mooring',
+        emits: [
+            'mooringPreferenceChanged',
+        ],
         components:{
             FormSection,
         },

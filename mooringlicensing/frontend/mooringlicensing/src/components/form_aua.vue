@@ -241,7 +241,14 @@
             },
         },
         emits: [
-            'updateProposal'
+            'changeMooring',
+            'updateProposal',
+            'updateVesselOwnershipChanged',
+            'noVessel',
+            'vesselChanged',
+            'updateSubmitText',
+            'updateAutoApprove',
+            'profile-fetched',
         ],
         methods:{
             updateProposal(data) {

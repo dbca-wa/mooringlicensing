@@ -49,6 +49,9 @@ import RequirementDetail from '@/components/internal/proposals/proposal_add_requ
 import FormSection from "@/components/forms/section_toggle.vue"
 export default {
     name: 'InternalProposalRequirements',
+    emits: [
+        'refreshRequirements',
+    ],
     props: {
         proposal: Object
     },

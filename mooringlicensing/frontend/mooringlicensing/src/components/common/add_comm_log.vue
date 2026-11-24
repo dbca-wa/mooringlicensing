@@ -173,6 +173,9 @@ import alert from "@vue-utils/alert.vue";
 import { helpers } from "@/utils/hooks";
 export default {
   name: "Add-Comms",
+  emits: [
+      'added',
+  ],
   components: {
     modal,
     alert,

@@ -154,6 +154,9 @@ import { helpers, api_endpoints, constants } from "@/utils/hooks.js"
 
 export default {
     name: 'Proposed-Approval',
+    emits: [
+        'refreshFromResponse',
+    ],
     components: {
         modal,
         alert,

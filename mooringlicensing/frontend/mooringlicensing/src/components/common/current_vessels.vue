@@ -73,6 +73,9 @@ import FormSection from '@/components/forms/section_toggle.vue'
 
 export default {
     name:'current_vessels',
+    emits: [
+        'resetCurrentVessel',
+    ],
     data:function () {
         return {
             keep_current_vessel: null,  // Force the user to select one of the radio buttons

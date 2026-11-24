@@ -210,6 +210,14 @@ import {
 
 export default {
     name: 'vessels',
+    emits: [
+        'noVessel',
+        'updateMaxVesselLengthForAAComponent',
+        'updateMaxVesselLengthForMainComponent',
+        'updateVesselLength',
+        'updateVesselOwnershipChanged',
+        'vesselChanged',
+    ],
     data: function () {
         return {
             dotName: '',

@@ -99,6 +99,15 @@ import CurrentVessels from '@/components/common/current_vessels.vue'
 import Mooring from '@/components/common/mooring.vue'
 export default {
     name: 'WaitingListApplication',
+    emits: [
+        'mooringPreferenceChanged',
+        'noVessel',
+        'profile-fetched',
+        'updateAutoApprove',
+        'updateSubmitText',
+        'updateVesselOwnershipChanged',
+        'vesselChanged',
+    ],
     props: {
         proposal: {
             type: Object,

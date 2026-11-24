@@ -98,6 +98,14 @@
     import Insurance from '@/components/common/insurance.vue'
     export default {
         name: 'AnnualAdmissionApplication',
+        emits: [
+            'noVessel',
+            'profile-fetched',
+            'updateAutoApprove',
+            'updateSubmitText',
+            'updateVesselOwnershipChanged',
+            'vesselChanged',
+        ],
         props:{
             proposal:{
                 type: Object,

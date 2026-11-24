@@ -287,6 +287,9 @@ import datatable from '@/utils/vue/datatable.vue'
 
 export default {
     name: 'Profile',
+    emits: [
+        'profile-fetched',
+    ],
     props:{
         proposalId: {
             type: Number,

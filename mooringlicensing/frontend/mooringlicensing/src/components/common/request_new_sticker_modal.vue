@@ -118,6 +118,9 @@ import { helpers, api_endpoints } from "@/utils/hooks.js"
 
 export default {
     name:'RequestNewStickerModal',
+    emits: [
+        'sendData',
+    ],
     components:{
         modal,
         alert,

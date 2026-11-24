@@ -52,6 +52,9 @@ import alert from '@vue-utils/alert.vue'
 import {helpers,api_endpoints} from "@/utils/hooks.js"
 export default {
     name:'Extend-Approval',
+    emits: [
+        'refreshFromResponse',
+    ],
     components:{
         modal,
         alert

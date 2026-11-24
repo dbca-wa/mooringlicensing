@@ -37,6 +37,10 @@ from '@/utils/hooks';
 import http from '@/utils/vue-resource-shim';
 export default {
     name: "FileField",
+    emits: [
+        'update-parent',
+        'update-temp-doc-coll-id',
+    ],
     props:{
         headerCSS:String,
         name:String,

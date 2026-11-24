@@ -173,6 +173,21 @@ import { constants } from '@/utils/hooks'
 
 export default {
     name: 'Workflow',
+    emits: [
+        'amendmentRequest',
+        'assignRequestUser',
+        'assignTo',
+        'backToAssessorRequirements',
+        'bypassEndorsement',
+        'declineProposal',
+        'issueProposal',
+        'proposedApproval',
+        'proposedDecline',
+        'requestEndorsement',
+        'switchStatus',
+        'toggleProposal',
+        'toggleRequirements',
+    ],
     data: function() {
         let vm = this;
         return {

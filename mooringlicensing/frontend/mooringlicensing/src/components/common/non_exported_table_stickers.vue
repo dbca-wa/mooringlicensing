@@ -39,6 +39,9 @@ import datatable from '@/utils/vue/datatable.vue'
 import { api_endpoints, helpers } from '@/utils/hooks'
 export default {
     name: 'NonExportedTableStickers',
+    emits: [
+        'actionClicked',
+    ],
     props: {
         level:{
             type: String,
