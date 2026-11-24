@@ -1653,14 +1653,6 @@ def send_other_documents_submitted_notification_email(request, proposal):
     bcc = []
 
     attachments = []
-    for my_file in proposal.mooring_report_documents.all():
-        extract_file_for_attachment(attachments, my_file)
-    for my_file in proposal.written_proof_documents.all():
-        extract_file_for_attachment(attachments, my_file)
-    for my_file in proposal.signed_licence_agreement_documents.all():
-        extract_file_for_attachment(attachments, my_file)
-    #for my_file in proposal.proof_of_identity_documents.all():
-    #    extract_file_for_attachment(attachments, my_file)
 
     # Send email
     msg = email.send(to_address, context=context, attachments=attachments, cc=cc, bcc=bcc,)
