@@ -300,7 +300,7 @@ export default {
                 columns: columns,
                 processing: true,
                 initComplete: function() {
-                    console.log('in initComplete')
+
                 },
             }
         }

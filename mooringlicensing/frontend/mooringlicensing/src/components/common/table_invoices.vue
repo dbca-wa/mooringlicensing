@@ -277,7 +277,7 @@ export default {
                             })    
                         })
                         d.order = newOrder;
-                        console.log(newOrder)
+
                     }
                 },
                 dom: 'lBfrtip',

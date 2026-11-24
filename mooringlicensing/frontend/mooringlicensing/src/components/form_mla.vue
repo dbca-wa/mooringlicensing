@@ -255,12 +255,12 @@
                 this.max_vessel_length_with_no_payment = combined_length
             },
             updateMaxVesselLengthForAAComponent: function(length){
-                console.log('updateMaxVesselLengthForAAComponent')
+
                 this.max_vessel_length_for_aa_component = length
                 this.updateMaxVesselLength()
             },
             updateMaxVesselLengthForMainComponent: function(length){
-                console.log('updateMaxVesselLengthForMainComponent')
+
                 this.max_vessel_length_for_main_component = length
                 this.updateMaxVesselLength()
             },
@@ -271,7 +271,7 @@
                 await this.$emit("vesselChanged", vesselChanged);
             },
             updateVesselLength: function (length) {
-                console.log('%cin updateVesselLength()', 'color: #44aa33')
+
                 if (this.is_external && this.proposal) {
                     if (this.max_vessel_length_with_no_payment !== null &&
                         (this.max_vessel_length_with_no_payment.max_length < length ||
@@ -282,19 +282,19 @@
                         this.higherVesselCategory = false;
                     }
                 }
-                console.log('%cthis.higherVesselCategory:', 'color: #44aa33')
-                console.log(this.higherVesselCategory)
+
+
                 this.updateAmendmentRenewalProperties();
             },
             resetCurrentVessel: function(keep) {
-                console.log('in recetCurrentVessel()')
-                console.log({keep})
+
+
                 this.keepCurrentVessel = keep;
                 this.uuid++
                 this.updateAmendmentRenewalProperties();
             },
             updateAmendmentRenewalProperties: function() {
-                console.log('updateAmendmentRenewalProperties in form_mla.vue')
+
                 if (this.proposal && this.proposal.proposal_type.code === 'amendment') {
                     this.$nextTick(() => {
                         if (!this.keepCurrentVessel) {

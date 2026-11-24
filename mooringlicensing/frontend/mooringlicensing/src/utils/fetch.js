@@ -65,7 +65,7 @@ async function request(url, options = {}) {
     };
 
     if (!response.ok) {
-        console.log('THROWING', result);
+
         throw result;
     }
 

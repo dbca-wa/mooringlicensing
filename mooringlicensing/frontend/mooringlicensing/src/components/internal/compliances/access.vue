@@ -328,7 +328,7 @@ export default {
         else if (vm.compliance.assigned_to !== undefined) {
             vm.$http.get(helpers.add_endpoint_json(api_endpoints.compliances,(vm.compliance.id+'/unassign')))
             .then((response) => {
-                console.log(response);
+
                 vm.compliance = response.body;
             }, (error) => {
                 console.log(error);
@@ -346,7 +346,7 @@ export default {
         }).then(() => {
             vm.$http.get(helpers.add_endpoint_json(api_endpoints.compliances,(vm.compliance.id+'/accept')))
             .then((response) => {
-                console.log(response);
+
                 vm.compliance = response.body;
                 vm.$router.push({ name: 'internal-compliances-dash'}); //Navigate to dashboard
             }, (error) => {
@@ -372,7 +372,7 @@ export default {
         }).then(() => {
             vm.$http.get(helpers.add_endpoint_json(api_endpoints.compliances,(vm.compliance.id+'/discard')))
             .then((response) => {
-                console.log(response);
+
                 vm.compliance = response.body;
                 vm.$router.push({ name: 'internal-compliances-dash'}); //Navigate to dashboard
             }, (error) => {

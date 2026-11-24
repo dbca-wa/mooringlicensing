@@ -490,7 +490,7 @@ export default {
             }).then(() => {
                 vm.$http.put('/api/proposal/' + proposal_id + '/reinstate_wl_allocation/')
                 .then((response) => {
-                    console.log({response})
+
                     swal(
                         'Reinstated',
                         'Originated waiting list allocation has been reinstated',

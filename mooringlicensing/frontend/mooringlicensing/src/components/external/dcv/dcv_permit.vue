@@ -208,11 +208,11 @@ export default {
             try {
                 const res = await this.$http.get(api_endpoints.lookupDcvVessel(id));
                 const vesselData = res.body;
-                console.log('existing dcv_vessel: ')
-                console.log(vesselData);
+
+
                     if (vesselData && vesselData.rego_no) {
                         this.dcv_permit.dcv_vessel = Object.assign({}, vesselData);
-                        console.log(this.dcv_permit.dcv_vessel)
+
                     }
             } catch(e) {
                 if (e.status == '400'){
@@ -276,7 +276,7 @@ export default {
                         }
                     } else {
                         // fetch the selected vessel from the backend
-                        console.log('existing')
+
                         vm.lookupDcvVessel(id);
                     }
                 });
@@ -343,7 +343,7 @@ export default {
             }
         },
         processError: async function(err){
-            console.log({err})
+
             let errorText = '';
             if (err.hasOwnProperty('body')){
                 if (err.body.hasOwnProperty('non_field_errors')) {
@@ -379,7 +379,7 @@ export default {
                         'success'
                     );
                 };
-                console.log(res)
+
                 return res;
             } catch(err){
                 this.processError(err)

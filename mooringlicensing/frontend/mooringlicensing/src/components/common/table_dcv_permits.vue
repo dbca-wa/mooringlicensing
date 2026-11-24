@@ -352,7 +352,7 @@ export default {
                 columns: columns,
                 processing: true,
                 initComplete: function() {
-                    console.log('in initComplete')
+
                 },
             }
         }
@@ -482,7 +482,7 @@ export default {
             )
         },
         createNewSticker: function(dcv_permit_id){
-            console.log('dcv_permit_id: ' + dcv_permit_id)
+
             this.$refs.create_new_sticker_modal.approval_id = dcv_permit_id
             this.$refs.create_new_sticker_modal.isModalOpen = true
         },

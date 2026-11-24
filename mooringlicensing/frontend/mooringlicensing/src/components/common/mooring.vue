@@ -59,7 +59,7 @@ from '@/utils/hooks'
         },
         methods:{
             mooringPreferenceChanged: async function() {
-                console.log("mooringPrefChanged");
+
                 let preferenceChanged = false;
                 if (this.proposal.previous_application_preferred_bay_id !== this.selectedMooring) {
                     preferenceChanged = true;
@@ -68,7 +68,7 @@ from '@/utils/hooks'
             },
             fetchMooringBays: async function(){
                 const response = await this.$http.get(api_endpoints.mooring_bays);
-                console.log(response.body)
+
                 for (let bay of response.body.results) {
                     this.mooringBays.push(bay)
                 }
@@ -79,7 +79,7 @@ from '@/utils/hooks'
                 await this.fetchMooringBays();
                 // read in currently selected preference from Proposal
                 if (this.proposal.preferred_bay_id) {
-                    console.log("preferred bay");
+
                     this.selectedMooring = this.proposal.preferred_bay_id;
                 }
                 // now read in previously selected mooring bay

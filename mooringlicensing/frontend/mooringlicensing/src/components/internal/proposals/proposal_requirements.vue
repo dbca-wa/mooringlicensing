@@ -228,10 +228,10 @@ export default {
             });
         },
         fetchRequirements(){
-            console.log('fetchRequirements')
+
             let vm = this;
             let url = api_endpoints.proposal_standard_requirements
-            console.log('url: ' + url)
+
             vm.$http.get(url, {params: {'application_type_code': vm.proposal.application_type_code}}).then((response) => {
                 vm.requirements = response.body
             },(error) => {

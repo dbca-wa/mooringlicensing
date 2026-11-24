@@ -906,7 +906,7 @@ export default {
     },
     methods: {
         sendDataForSwapMoorings: function(params){
-            console.log('in sendDataForSwapMoorings')
+
             let vm = this
             vm.$http.post(helpers.add_endpoint_json(api_endpoints.approvals, params.approval_id + '/swap_moorings'), params).then(
                 res => {
@@ -995,7 +995,7 @@ export default {
             this.$refs.approvals_datatable.vmDataTable.ajax.reload();
         },
         refreshFromResponse: async function(lodgementNumber){
-            console.log("refreshFromResponse");
+
             await swal({
                 title: "Saved",
                 text: 'Mooring Site Licence Application ' + lodgementNumber + ' has been created',

@@ -367,7 +367,7 @@ export default {
                         }
                     },
                     processResults: function(data){
-                        console.log({data})
+
                         return {
                             'results': data.results,
                             'pagination': {
@@ -417,9 +417,9 @@ export default {
             });
         },
         parseWla: function () {
-            console.log('in parseWla')
+
             if (this.wlaApprovals.length > 1) {
-                console.log('wlaApprovals > 1')
+
                 for (let app of this.application_types_and_licences) {
                     if (app.code === 'wla' && !app.approval_id) {
                         // new app
@@ -434,7 +434,7 @@ export default {
                     multiple: true
                 })
             } else {
-                console.log('wlaApprovals = 0 or 1')
+
                 // add wla approval to wlaChoices
                 for (let app of this.application_types_and_licences) {
                     if (app.code === 'wla' && (this.newWlaAllowed || app.approval_id)) {
@@ -666,7 +666,7 @@ export default {
         },
         fetchCurrentSeason: async function () {
             const response = await this.$http.get(api_endpoints.current_season);
-            console.log(response.body)
+
             if (response.body.length) {
                 this.season_text = response.body[0].start_date + ' to ' + response.body[0].end_date
             }
@@ -674,7 +674,7 @@ export default {
     },
     watch: {
         applicant_system_id: async function () {
-            console.log(this.applicant_system_id)
+
             this.applicationsLoading = true;
             this.resetForm();
             if (this.applicant_system_id != null) {

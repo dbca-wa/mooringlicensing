@@ -162,7 +162,7 @@ export default {
             vm.$refs.compliances_table.$refs.compliances_datatable.vmDataTable.columns.adjust().responsive.recalc();
         });
         $('#pills-vessels-tab').on('shown.bs.tab', function (e) {
-            console.log(vm.$refs.vessels_table);
+
             vm.$refs.vessels_table.$refs.vessels_datatable.vmDataTable.columns.adjust().responsive.recalc();
         });
     },

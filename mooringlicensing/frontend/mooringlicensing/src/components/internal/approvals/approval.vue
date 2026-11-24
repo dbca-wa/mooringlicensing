@@ -439,7 +439,7 @@ export default {
         vm.$refs.ml_vessels_datatable.vmDataTable.columns.adjust().responsive.recalc();
     },
     constructMLAuthorisedUsersTable: function() {
-        console.log("construct")
+
         let vm = this;
         this.$refs.ml_authorised_users_datatable.vmDataTable.clear().draw();
 

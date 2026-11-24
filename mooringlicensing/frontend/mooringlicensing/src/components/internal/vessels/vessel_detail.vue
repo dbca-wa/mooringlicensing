@@ -254,7 +254,7 @@ from '@/utils/hooks'
                         ],
                     processing: true,
                     initComplete: function() {
-                        console.log('in initComplete')
+
                     },
                 }
             },

@@ -117,7 +117,7 @@ export default {
                         'success'
                 );
                 vm.amendingcompliance = true;
-                console.log(response)
+
                 vm.close();
                 vm.$router.push({ path: '/internal' });
                 

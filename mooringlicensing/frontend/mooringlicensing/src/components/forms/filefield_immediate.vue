@@ -163,7 +163,7 @@ export default {
         },
 
         get_documents: async function() {
-            console.log('in get_documents')
+
             this.show_spinner = true;
 
             if (this.document_action_url) {

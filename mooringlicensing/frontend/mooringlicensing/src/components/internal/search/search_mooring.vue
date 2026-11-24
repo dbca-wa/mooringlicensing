@@ -42,7 +42,7 @@ from '@/utils/hooks'
         },
         methods:{
             openMooring: function() {
-                console.log("open mooring");
+
                 this.$nextTick(() => {
                     if (this.selectedMooring) {
                         this.$router.push({

@@ -146,7 +146,7 @@ export default {
                 const url = `${api_endpoints.vesselownership}${this.recordSaleId}/fetch_sale_date/`;
                 const res = await this.$http.get(url);
                 if (res.ok && res.body.end_date) {
-                    console.log(res.body)
+
                     this.saleDate = res.body.end_date;
                 }
             } catch(error) {

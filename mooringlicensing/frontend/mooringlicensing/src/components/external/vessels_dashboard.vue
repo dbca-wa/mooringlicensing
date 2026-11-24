@@ -145,7 +145,7 @@ export default {
         },
         openSaleModal: function() {
             this.$nextTick(() => {
-                console.log(this.recordSaleId)
+
                 this.$refs.record_sale.isModalOpen = true;
             });
         },

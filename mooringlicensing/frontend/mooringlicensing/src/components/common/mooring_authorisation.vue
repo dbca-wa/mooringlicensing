@@ -215,7 +215,7 @@ export default {
             }
         },
         internalEndorse: function(id) {
-            console.log("internalEndorse", id)
+
             let vm = this;
 
             if (!vm.actioningRequest) {
@@ -250,7 +250,7 @@ export default {
             }
         },
         internalDecline: function(id) {
-            console.log("internalDecline", id)
+
             let vm = this;
 
             if (!vm.actioningRequest) {

@@ -126,7 +126,7 @@ export default {
             this.validation_form.resetForm();
         },
         sendData:function(){
-            console.log('in sendData')
+
             let vm = this;
             vm.errors = false;
             let decline = JSON.parse(JSON.stringify(vm.decline));

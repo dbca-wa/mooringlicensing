@@ -210,7 +210,7 @@ export default {
                 columnDefs: [{
                     targets: [0],
                     render: function(data, type, full, meta) {
-                        console.log({data})
+
                         return '<div>' + data + '</div>';
                     }
                 }],
@@ -275,7 +275,7 @@ export default {
                 dom: 'lBfrtip',
                 processing: true,
                 initComplete: function () {
-                    console.log('in initComplete')
+
                 },
             }
         },

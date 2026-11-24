@@ -99,7 +99,7 @@ export default {
     methods:{
         lookupEntities: async function() {
             this.$nextTick(async () => {
-                console.log("lookupEntities");
+
                 this.dataLoading = true;
                 let payload = {
                     "selected_date": this.selectedDate,
@@ -120,16 +120,16 @@ export default {
                 }
                 // Bookings
                 if (this.entity.type === "vessel") {
-                    console.log('vessel')
+
                     const res = await this.$http.post(`/api/vessel/${this.entity.id}/find_related_bookings.json`, payload);
                     this.bookings = [];
-                    console.log('res.body: ')
-                    console.log(res.body)
+
+
                     for (let booking of res.body) {
                         this.bookings.push(booking);
                     }
                 } else if (this.entity.type === "mooring") {
-                    console.log('mooring')
+
                     const res = await this.$http.post(`/api/mooring/${this.entity.id}/find_related_bookings.json`, payload);
                     this.bookings = [];
                     for (let booking of res.body) {

@@ -124,7 +124,7 @@ export default {
         targetMooringBayDetails: function(){
             let mooringBayDetail = {}
             if (this.proposal.mooring_authorisation_preference == 'ria'){
-                console.log('RIA')
+
                 mooringBayDetail = {
                     'bay_name': this.proposal.proposed_issuance_approval.bay_name,
                     'mooring_name': this.proposal.proposed_issuance_approval.ria_mooring_name,
@@ -132,7 +132,7 @@ export default {
                     'vessel_size_limit': this.mooring.vessel_size_limit
                 }
             } else if (this.proposal.mooring_authorisation_preference == 'site_licensee'){
-                console.log('SITE LICENSEE')
+
                 mooringBayDetail = {
                     'bay_name': this.siteLicenseeMooring.mooring_bay_name,
                     'mooring_name': this.siteLicenseeMooring.name,
@@ -140,7 +140,7 @@ export default {
                     'vessel_size_limit': this.siteLicenseeMooring.vessel_size_limit
                 }                       
             } else {                    
-                console.log('ELSE')
+
                 mooringBayDetail = {
                     'bay_name': this.mooring.mooring_bay_name,
                     'mooring_name': this.mooring.name,
@@ -159,7 +159,7 @@ export default {
         },
         displayAwaitingPaymentMsg: function(){
             let display = false
-            console.log(this.proposal.processing_status)
+
             if (this.proposal.processing_status === constants.AWAITING_PAYMENT){
                 display = true
             }
@@ -209,7 +209,7 @@ export default {
             return text
         },
         retrieveMooringDetails: async function(){
-            console.log('%cAHO', 'color: #370;')
+
             let mooring_id = null
             if (this.proposal.proposed_issuance_approval && this.proposal.proposed_issuance_approval.mooring_id){
                 mooring_id = this.proposal.proposed_issuance_approval.mooring_id
@@ -222,7 +222,7 @@ export default {
             }
         },
         updateComponentSiteSelectionKey: function(){
-            console.log('in updateComponentSiteSelectionKey')
+
             this.component_site_selection_key = uuidv4()
         },
     },

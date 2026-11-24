@@ -148,7 +148,7 @@ export default {
             } );
         },
         sendData:function(){
-            console.log('in sendData')
+
             let vm = this;
             vm.errors = false;
 

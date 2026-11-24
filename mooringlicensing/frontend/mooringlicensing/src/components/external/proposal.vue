@@ -208,7 +208,7 @@ export default {
   },
   computed: {
       profileHasChanged: function(){
-        console.log(this.profile_original)
+
         let originalHash = JSON.stringify(this.profile_original)
         let currentHash = JSON.stringify(this.profile)
         if (originalHash !== currentHash){
@@ -228,17 +228,17 @@ export default {
                       if (['aaa', 'mla'].includes(this.proposal.application_type_code)){
                           if (!this.vesselChanged && !this.vesselOwnershipChanged && !this.profileHasChanged) {
                               disable = true
-                              console.log('%cSubmit button is disabled 1', 'color: #FF0000')
+
                           }
                       } else if (this.proposal.application_type_code === 'wla'){
                           if (!this.vesselChanged && !this.mooringPreferenceChanged && !this.vesselOwnershipChanged && !this.profileHasChanged) {
                               disable = true
-                              console.log('%cSubmit button is disabled 2', 'color: #FF0000')
+
                           }
                       } else if (this.proposal.application_type_code === 'aua'){
                           if (!this.vesselChanged && !this.mooringOptionsChanged && !this.vesselOwnershipChanged && !this.profileHasChanged) {
                               disable = true
-                              console.log('%cSubmit button is disabled 3', 'color: #FF0000')
+
                           }
                       }
                   }
@@ -399,15 +399,15 @@ export default {
         this.mooringOptionsChanged = changed;
     },
     updateVesselChanged: function(vesselChanged) {
-        console.log('in updateVesselChanged at the proposal.vue')
+
         this.vesselChanged = vesselChanged;
-        console.log('this.vesselChanged: ' + this.vesselChanged)
+
     },
     updateMooringPreference: function(preferenceChanged) {
         this.mooringPreferenceChanged = preferenceChanged;
     },
     updateVesselOwnershipChanged: function(changed) {
-        console.log('updateVesselOwnershipChanged in proposal.vue:' + changed)
+
         this.vesselOwnershipChanged = changed
     },
     proposal_refs:function(){
@@ -481,7 +481,7 @@ export default {
       try {
             await this.save(false, this.proposal_submit_url)
             this.$nextTick(async () => {
-                console.log(this.submitRes)
+
                 if (this.submitRes) {
                     let payload = this.buildPayload();
                     payload.csrfmiddlewaretoken = this.csrf_token;
@@ -502,7 +502,7 @@ export default {
             });
         } catch(err) {
             console.log(err)
-            console.log(typeof(err.body))
+
             await swal({
                 title: 'Submit Error',
               html: helpers.formatErrorHtml(err),

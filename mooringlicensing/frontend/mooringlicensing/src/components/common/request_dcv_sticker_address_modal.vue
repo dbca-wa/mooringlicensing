@@ -117,8 +117,8 @@ export default {
                     sticker.checked = false
                 }
                 vm.stickers = ret.body.stickers
-                console.log('vm.stickers')
-                console.log(vm.stickers)
+
+
 
             } else {
                 vm.stickers = []

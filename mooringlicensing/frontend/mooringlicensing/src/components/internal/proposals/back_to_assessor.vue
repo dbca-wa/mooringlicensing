@@ -91,7 +91,7 @@ export default {
             vm.close();
         },
         sendData: function(){
-            console.log('in sendData')
+
             let vm = this;
             vm.errors = false;
 

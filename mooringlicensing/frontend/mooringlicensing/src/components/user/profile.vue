@@ -382,8 +382,8 @@ export default {
             
             if (this.applicant_system_id != null &&
                 this.applicant_system_id != this.original_applicant_system_id) {
-                console.log(this.applicant_system_id)
-                console.log(this.original_applicant_system_id)
+
+
                 this.changingApplicant = true;
 
                 try {
@@ -437,7 +437,7 @@ export default {
                         }
                     },
                     processResults: function(data){
-                        console.log({data})
+
                         return {
                             'results': data.results,
                             'pagination': {
@@ -463,7 +463,7 @@ export default {
         },
         getApplicantDisplay: function () {           
             let vm = this; 
-            console.log("getApplicantDisplay")
+
             let display = null
             if (vm.profile.legal_first_name) {
                 display = vm.profile.legal_first_name + " " + vm.profile.legal_last_name + " (DOB: "+vm.profile.legal_dob+")";
@@ -488,7 +488,7 @@ export default {
             vm.uploadedFile = _file;
         },       
         fetchProfile: async function(){
-            console.log('in fetchProfile')
+
             let response = null;
             response = await http.get(api_endpoints.profile + '/' + this.proposalId)
             this.profile = Object.assign(response.body)

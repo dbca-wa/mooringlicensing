@@ -818,7 +818,7 @@ export default {
             await this.fetchReadonlyVesselCommon(url);
         },
         fetchDraftData: function () {
-            console.log('fetchDraftData');
+
             this.vessel.rego_no = this.proposal.rego_no;
             this.vessel.id = this.proposal.vessel_id;
             let vessel_details = {};
@@ -925,7 +925,7 @@ export default {
                     try {
                         this.vessel.id = res.body.id;
                         this.vessel.rego_no = res.body.rego_no;
-                        console.log(res.body)
+
                         this.vessel.vessel_ownership.percentage = res.body.vessel_ownership.percentage;
                         this.vessel.vessel_ownership.created = res.body.vessel_ownership.created;
                         this.vessel.vessel_ownership.dot_name = res.body.vessel_ownership.dot_name;

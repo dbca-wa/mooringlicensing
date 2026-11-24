@@ -312,7 +312,7 @@ export default {
     },
     watch: {
         proposal: function(){
-            console.log('%cproposal has been changed.', 'color: #33f;')
+
             if (this.proposal){
                 this.fetchSiteLicenseeMooring()
             }
@@ -431,7 +431,7 @@ export default {
     },
     methods: {
         updateProposal: function(data) {
-            console.log("updateProposal")
+
             this.proposal = data;
         },
         buildPayload: function() {
@@ -516,7 +516,7 @@ export default {
             this.submitText = submitText;
         },
         save: async function(withConfirm=true, url=this.proposal_form_url,updateProposalData=true) {
-            console.log("saving as assessor/approver");
+
             let vm = this;
             vm.savingProposal=true;
 
@@ -637,7 +637,7 @@ export default {
                 });
             } catch(err) {
                 console.log(err)
-                console.log(typeof(err.body))
+
                 await swal({
                     title: 'Submit Error',
                     html: helpers.formatError(err),
@@ -674,33 +674,33 @@ export default {
             this.profile = profile
         },
         fetchSiteLicenseeMooring: async function() {
-            console.log('%cin fetchSiteLicenseeMooring', 'color:#f33;')
+
             if (this.proposal.mooring_id){
                 const res = await this.$http.get(`${api_endpoints.mooring}${this.proposal.mooring_id}`);
                 this.siteLicenseeMooring = Object.assign({}, res.body);
             }
         },
         fetchMooringBays: async function() {
-            console.log('%cin fetchMooringBays', 'color:#f33;')
+
             const res = await this.$http.get(api_endpoints.mooring_bays_lookup);
-            console.log(res.body)
+
             for (let bay of res.body) {
                 this.mooringBays.push(bay)
             }
         },
         locationUpdated: function(){
-            console.log('in locationUpdated()');
+
         },
         commaToNewline(s){
             return s.replace(/[,;]/g, '\n');
         },
         proposedDecline: function(){
-            console.log('in proposedDecline')
+
             this.$refs.proposed_decline.decline = this.proposal.proposaldeclineddetails != null ? helpers.copyObject(this.proposal.proposaldeclineddetails): {};
             this.$refs.proposed_decline.isModalOpen = true;
         },
         proposedApproval: function(){
-            console.log('proposedApproval')
+
             this.uuid++;
             this.$nextTick(() => {
                 this.$refs.proposed_approval.approval = this.proposal.proposed_issuance_approval != null ? helpers.copyObject(this.proposal.proposed_issuance_approval) : {};
@@ -708,7 +708,7 @@ export default {
             });
         },
         issueProposal:function(){
-            console.log('%cin issueProposal', 'color:#f33;')
+
             this.uuid++;
             this.$nextTick(() => {
                 if (this.proposal.proposed_issuance_approval != null){
@@ -721,12 +721,12 @@ export default {
             });
         },
         declineProposal:function(){
-            console.log('in declineProposal')
+
             this.$refs.proposed_decline.decline = this.proposal.proposaldeclineddetails != null ? helpers.copyObject(this.proposal.proposaldeclineddetails): {};
             this.$refs.proposed_decline.isModalOpen = true;
         },
         bypassEndorsement: function(){
-            console.log("bypassEndorsement")
+
             let vm = this;
 
             if(vm.proposal.processing_status == 'Awaiting Endorsement' && 
@@ -736,8 +736,8 @@ export default {
                     emulateJSON:true,
                 })
                 .then((response) => {
-                    console.log('0 response.body: ')
-                    console.log(response.body)
+
+
                     vm.proposal = response.body;
                     vm.original_proposal = helpers.copyObject(response.body);
                     vm.approver_comment='';
@@ -757,7 +757,7 @@ export default {
             }
         },
         requestEndorsement: function(){
-            console.log("requestEndorsement")
+
             let vm = this;
 
             if(vm.proposal.processing_status == 'With Assessor' && 
@@ -768,8 +768,8 @@ export default {
                     emulateJSON:true,
                 })
                 .then((response) => {
-                    console.log('0 response.body: ')
-                    console.log(response.body)
+
+
                     vm.proposal = response.body;
                     vm.original_proposal = helpers.copyObject(response.body);
                     vm.approver_comment='';
@@ -789,7 +789,7 @@ export default {
             }
         },
         backToAssessorRequirements: function(){
-            console.log('Open modal here!')
+
             this.$refs.back_to_assessor.isModalOpen = true
         },
         amendmentRequest: function(){
@@ -826,7 +826,7 @@ export default {
             this.showingRequirements = value
         },
         updateAssignedOfficerSelect:function(){
-            console.log('updateAssignedOfficerSelect')
+
             let vm = this;
             if (vm.proposal.processing_status == 'With Approver'){
                 $(vm.$refs.assigned_officer).val(vm.proposal.assigned_approver);
@@ -855,9 +855,9 @@ export default {
             });
         },
         refreshFromResponse:function(response){
-            console.log('in refreshFromResponse')
-            console.log('response')
-            console.log(response)
+
+
+
             let vm = this;
             vm.original_proposal = helpers.copyObject(response.body);
             vm.proposal = helpers.copyObject(response.body);
@@ -917,9 +917,9 @@ export default {
             }
         },
         switchStatus: function(status){
-            console.log('in switchStatus')
-            console.log(this.proposal.processing_status)
-            console.log(status)
+
+
+
 
             let vm = this;
             if(vm.proposal.processing_status == 'With Assessor' && status == 'with_assessor_requirements'){
@@ -928,8 +928,8 @@ export default {
                     emulateJSON:true,
                 })
                 .then((response) => {
-                    console.log('0 response.body: ')
-                    console.log(response.body)
+
+
                     vm.proposal = response.body;
                     vm.original_proposal = helpers.copyObject(response.body);
                     vm.approver_comment='';
@@ -976,8 +976,8 @@ export default {
                     emulateJSON:true,
                 })
                 .then((response) => {
-                    console.log('2 response.body:')
-                    console.log(response.body)
+
+
 
                     vm.proposal = response.body;
                     vm.original_proposal = helpers.copyObject(response.body);
@@ -997,7 +997,7 @@ export default {
             }
         },
         initialiseAssignedOfficerSelect:function(reinit=false){
-            console.log('initialiseAssignedOfficerSelect')
+
             let vm = this;
             if (reinit){
                 $(vm.$refs.assigned_officer).data('select2') ? $(vm.$refs.assigned_officer).select2('destroy'): '';
@@ -1044,7 +1044,7 @@ export default {
     mounted: function() {
         let vm = this;
         vm.fetchMooringBays()
-        console.log('AAA')
+
     },
     updated: function(){
         let vm = this;
@@ -1057,9 +1057,9 @@ export default {
         });
     },
     created: function() {
-        console.log('%cin created', 'color:#f33;')
+
         http.get(`/api/proposal/${this.$route.params.proposal_id}/internal_proposal.json`).then(res => {
-            console.log('%cproposal has been returned.', 'color: #f11;')
+
             this.proposal = res.body;
             this.original_proposal = helpers.copyObject(res.body);
             this.hasAmendmentRequest=this.proposal.hasAmendmentRequest;
@@ -1069,7 +1069,7 @@ export default {
         });
     },
     beforeRouteUpdate: function(to, from, next) {
-        console.log("beforeRouteUpdate")
+
           http.get(`/api/proposal/${to.params.proposal_id}.json`).then(res => {
               next(vm => {
                 vm.proposal = res.body;
