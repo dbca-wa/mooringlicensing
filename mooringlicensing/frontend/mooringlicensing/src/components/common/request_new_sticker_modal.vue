@@ -1,29 +1,10 @@
 <template>
     <div id="change-contact">
-        <modal
-            v-model:show="isModalOpen"
-            transition="modal fade"
-            @ok="ok()"
-            @cancel="cancel()"
-            :title="title"
-            large
-        >
+        <modal v-model:show="isModalOpen"transition="modal fade" @ok="ok()" @cancel="cancel()" :title="title" large>
             <div class="container-fluid">
-                <alert v-model:show="showError" type="danger"
-                    ><strong>{{ errorString }}</strong></alert
-                >
-                <alert v-model:show="showWarning" type="warning"
-                    ><strong
-                        >One or more stickers have a postal address set that
-                        does not match the postal address on holder's user
-                        profile. Use the Create New Sticker option to change the
-                        postal address that the sticker should be sent
-                        to.</strong
-                    ></alert
-                >
-                <alert v-model:show="showReplaceInfo" type="info"
-                    ><strong>{{ replaceInfo }}</strong></alert
-                >
+                <alert v-model:show="showError" type="danger"><strong>{{ errorString }}</strong></alert>
+                <alert v-model:show="showWarning" type="warning"><strong>One or more stickers have a postal address set that does not match the postal address on holder's user profile. Use the Create New Sticker option to change the postal address that the sticker should be sent to.</strong></alert>
+                <alert v-model:show="showReplaceInfo" type="info"><strong>{{ replaceInfo }}</strong></alert>
                 <div class="row mb-3">
                     <table class="table table-striped table-bordered">
                         <thead>
@@ -37,179 +18,77 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <template
-                                v-for="sticker in stickers"
-                                :key="sticker.id"
-                            >
-                                <tr
-                                    v-if="
-                                        sticker.status &&
-                                        sticker.status.code === 'current'
-                                    "
-                                >
-                                    <td>
-                                        <input
-                                            v-if="
-                                                sticker.status.code == 'current'
-                                            "
-                                            type="checkbox"
-                                            v-model="sticker.checked"
-                                        />
-                                    </td>
-                                    <td v-if="sticker.number">
-                                        {{ sticker.number }}
-                                    </td>
-                                    <td v-else>Not Assigned</td>
-                                    <td>{{ sticker.vessel.rego_no }}</td>
-                                    <td>
-                                        <span
-                                            v-for="mooring in sticker.moorings"
-                                        >
-                                            {{ mooring.name }} ({{
-                                                mooring.mooring_bay_name
-                                            }})
-                                        </span>
-                                    </td>
-                                    <td>{{ sticker.status.display }}</td>
-                                    <td>
-                                        <span>{{
-                                            sticker.postal_address_line1
-                                        }}</span>
-                                        <span>{{
-                                            sticker.postal_address_locality
-                                        }}</span>
-                                        <span>{{
-                                            sticker.postal_address_state
-                                        }}</span>
-                                        <span>{{
-                                            sticker.postal_address_country
-                                        }}</span>
-                                        <span>{{
-                                            sticker.postal_address_postcode
-                                        }}</span>
-                                    </td>
-                                </tr>
+                            <template v-for="sticker in stickers" :key="sticker.id">
+                            <tr v-if="sticker.status && sticker.status.code === 'current'">
+                                <td><input v-if="sticker.status.code == 'current'" type="checkbox" v-model="sticker.checked" /></td>
+                                <td v-if="sticker.number">{{ sticker.number }}</td>
+                                <td v-else>Not Assigned</td>
+                                <td>{{ sticker.vessel.rego_no }}</td>
+                                <td>
+                                    <span v-for="mooring in sticker.moorings">
+                                        {{ mooring.name }} ({{ mooring.mooring_bay_name }})
+                                    </span>
+                                </td>
+                                <td>{{ sticker.status.display }}</td>
+                                <td>
+                                    <span>{{sticker.postal_address_line1}}</span>
+                                    <span>{{sticker.postal_address_locality}}</span>
+                                    <span>{{sticker.postal_address_state}}</span>
+                                    <span>{{sticker.postal_address_country}}</span>
+                                    <span>{{sticker.postal_address_postcode}}</span>
+                                </td>
+                            </tr>
                             </template>
                         </tbody>
                     </table>
                 </div>
-                <div
-                    v-if="showWarning"
-                    class="row mb-3"
-                    style="
-                        border: 2px solid rgba(51, 122, 183, 0.3);
-                        box-shadow: 0 0 6px rgba(51, 122, 183, 0.3);
-                        padding: 5px;
-                        border-radius: 4px;
-                    "
-                    for="change_sticker_address"
-                >
-                    <label class="col-sm-5 col-form-label"
-                        >Change Sticker Address</label
-                    >
+                <div v-if="showWarning" class="row mb-3" style="border: 2px solid rgba(51,122,183,0.3); box-shadow: 0 0 6px rgba(51,122,183,0.3); padding:5px; border-radius:4px;" for="change_sticker_address">
+                    <label class="col-sm-5 col-form-label">Change Sticker Address</label>
                     <div class="col-md-6">
-                        <input
-                            :disabled="!formEnabled"
-                            type="checkbox"
-                            v-model="change_sticker_address"
-                        />
+                        <input :disabled="!formEnabled" type="checkbox" v-model="change_sticker_address" />
                     </div>
                 </div>
                 <div v-else class="row mb-3" for="change_sticker_address">
-                    <label class="col-sm-5 col-form-label"
-                        >Change Sticker Address</label
-                    >
+                    <label class="col-sm-5 col-form-label">Change Sticker Address</label>
                     <div class="col-md-6">
-                        <input
-                            :disabled="!formEnabled"
-                            type="checkbox"
-                            v-model="change_sticker_address"
-                        />
+                        <input :disabled="!formEnabled" type="checkbox" v-model="change_sticker_address" />
                     </div>
                 </div>
                 <div v-if="change_sticker_address" class="row mb-3">
                     <label for="" class="col-sm-3 col-form-label">Street</label>
                     <div class="col-sm-6">
-                        <input
-                            :disabled="!formEnabled"
-                            type="text"
-                            class="form-control"
-                            name="street"
-                            placeholder=""
-                            v-model="new_postal_address_line1"
-                        />
+                        <input :disabled="!formEnabled" type="text" class="form-control" name="street" placeholder="" v-model="new_postal_address_line1">
                     </div>
                 </div>
                 <div v-if="change_sticker_address" class="row mb-3">
-                    <label for="" class="col-sm-3 col-form-label"
-                        >Town/Suburb</label
-                    >
+                    <label for="" class="col-sm-3 col-form-label" >Town/Suburb</label>
                     <div class="col-sm-6">
-                        <input
-                            :disabled="!formEnabled"
-                            type="text"
-                            class="form-control"
-                            name="surburb"
-                            placeholder=""
-                            v-model="new_postal_address_locality"
-                        />
+                        <input :disabled="!formEnabled" type="text" class="form-control" name="surburb" placeholder="" v-model="new_postal_address_locality">
                     </div>
                 </div>
                 <div v-if="change_sticker_address" class="row mb-3">
                     <label for="" class="col-sm-3 col-form-label">State</label>
                     <div class="col-sm-2">
-                        <input
-                            :disabled="!formEnabled"
-                            type="text"
-                            class="form-control"
-                            name="state"
-                            placeholder=""
-                            v-model="new_postal_address_state"
-                        />
+                        <input :disabled="!formEnabled" type="text" class="form-control" name="state" placeholder="" v-model="new_postal_address_state">
                     </div>
-                    <label for="" class="col-sm-2 col-form-label"
-                        >Postcode</label
-                    >
+                    <label for="" class="col-sm-2 col-form-label">Postcode</label>
                     <div class="col-sm-2">
-                        <input
-                            :disabled="!formEnabled"
-                            type="text"
-                            class="form-control"
-                            name="postcode"
-                            placeholder=""
-                            v-model="new_postal_address_postcode"
-                        />
+                        <input :disabled="!formEnabled" type="text" class="form-control" name="postcode" placeholder="" v-model="new_postal_address_postcode">
                     </div>
                 </div>
                 <div v-if="change_sticker_address" class="row mb-3">
-                    <label for="" class="col-sm-3 col-form-label"
-                        >Country</label
-                    >
+                    <label for="" class="col-sm-3 col-form-label" >Country</label>
                     <div class="col-sm-4">
-                        <select
-                            :disabled="!formEnabled"
-                            v-model="new_postal_address_country"
-                            class="form-select"
-                            name="country"
-                        >
+                        <select :disabled="!formEnabled" v-model="new_postal_address_country" class="form-select" name="country">
                             <option selected></option>
-                            <option v-for="c in countries" :value="c.code">
-                                {{ c.name }}
-                            </option>
+                            <option v-for="c in countries" :value="c.code">{{ c.name }}</option>
                         </select>
                     </div>
                 </div>
                 <div class="row mb-3">
-                    <label class="col-sm-2 col-form-label" for="reason"
-                        >Reason</label
-                    >
+                    <label class="col-sm-2 col-form-label" for="reason">Reason</label>
                     <div class="col-sm-9">
-                        <textarea
-                            :disabled="!formEnabled"
-                            class="col-sm-9 form-control"
-                            name="reason"
-                            v-model="details.reason"
-                        ></textarea>
+                        <textarea :disabled="!formEnabled" class="col-sm-9 form-control" name="reason" v-model="details.reason"></textarea>
                     </div>
                 </div>
             </div>
@@ -217,41 +96,13 @@
                 <div class="row w-100">
                     <div class="col-md-6 text-end">
                         <span v-if="is_internal">
-                            <strong
-                                ><input
-                                    type="checkbox"
-                                    v-model="waive_the_fee"
-                                />
-                                Waive the fee</strong
-                            >
+                            <strong><input type="checkbox" v-model="waive_the_fee" /> Waive the fee</strong>
                         </span>
                     </div>
                     <div class="col-md-6 text-end">
-                        <button
-                            type="button"
-                            v-if="processing"
-                            disabled
-                            class="btn btn-primary me-2"
-                            @click="ok"
-                        >
-                            <i class="fa fa-spinner fa-spin"></i> Processing
-                        </button>
-                        <button
-                            type="button"
-                            v-else
-                            class="btn btn-primary me-2"
-                            @click="ok"
-                            :disabled="!okButtonEnabled"
-                        >
-                            Ok
-                        </button>
-                        <button
-                            type="button"
-                            class="btn btn-secondary me-2"
-                            @click="cancel"
-                        >
-                            Cancel
-                        </button>
+                        <button type="button" v-if="processing" disabled class="btn btn-primary me-2" @click="ok"><i class="fa fa-spinner fa-spin"></i> Processing</button>
+                        <button type="button" v-else class="btn btn-primary me-2" @click="ok" :disabled="!okButtonEnabled">Ok</button>
+                        <button type="button" class="btn btn-secondary me-2" @click="cancel">Cancel</button>
                     </div>
                 </div>
             </template>
@@ -260,31 +111,33 @@
 </template>
 
 <script>
-import $ from 'jquery';
-import modal from '@vue-utils/bootstrap-modal.vue';
-import alert from '@vue-utils/alert.vue';
-import { helpers, api_endpoints } from '@/utils/hooks.js';
+import $ from 'jquery'
+import modal from '@vue-utils/bootstrap-modal.vue'
+import alert from '@vue-utils/alert.vue'
+import { helpers, api_endpoints } from "@/utils/hooks.js"
 
 export default {
-    name: 'RequestNewStickerModal',
-    emits: ['sendData'],
-    components: {
+    name:'RequestNewStickerModal',
+    emits: [
+        'sendData',
+    ],
+    components:{
         modal,
         alert,
     },
-    props: {
+    props:{
         is_internal: {
             type: Boolean,
             default: false,
-        },
+        }
     },
-    data: function () {
+    data:function () {
         let vm = this;
         return {
             approval_id: null,
             proposal_id: null,
             stickers: [],
-            isModalOpen: false,
+            isModalOpen:false,
             action: '',
             details: vm.getDefaultDetails(),
             processing: false,
@@ -301,196 +154,191 @@ export default {
             new_postal_address_state: '',
             new_postal_address_country: '',
             new_postal_address_postcode: '',
-            holder: null,
-        };
+            holder: null
+        }
     },
     watch: {
-        approval_id: async function () {
-            let vm = this;
+        approval_id: async function(){
+            let vm = this
             // Whenever approval_id is changed, update this.stickers
-            if (vm.approval_id) {
-                const ret = await vm.$http.get(
-                    helpers.add_endpoint_json(
-                        api_endpoints.approvals,
-                        vm.approval_id + '/stickers'
-                    )
-                );
-                for (let sticker of ret.body.stickers) {
-                    sticker.checked = false;
+            if (vm.approval_id){
+                const ret = await vm.$http.get(helpers.add_endpoint_json(api_endpoints.approvals, vm.approval_id + '/stickers'))
+                for (let sticker of ret.body.stickers){
+                    sticker.checked = false
                 }
-                vm.stickers = ret.body.stickers;
+                vm.stickers = ret.body.stickers
+                console.log('vm.stickers')
+                console.log(vm.stickers)
+
             } else {
-                vm.stickers = [];
+                vm.stickers = []
             }
         },
-        proposal_id: async function () {
-            let vm = this;
-            if (vm.proposal_id) {
+        proposal_id: async function(){
+            let vm = this
+            if (vm.proposal_id){
                 //get the holder address details (via the proposal)
-                const res = await this.$http.get(
-                    '/api/profile/' + vm.proposal_id
-                );
+                const res = await this.$http.get('/api/profile/' + vm.proposal_id)
                 if (res.ok) {
-                    vm.holder = res.body;
+                    vm.holder = res.body
                 }
+                console.log('vm.holder')
+                console.log(vm.holder)
+
             } else {
                 vm.holder = null;
             }
-        },
+        }
     },
     computed: {
-        showWarning: function () {
-            for (let sticker of this.stickers) {
-                if (sticker.checked === true) {
-                    if (
-                        this.holder.postal_address_list !== undefined &&
-                        this.holder.postal_address_list.length > 0
-                    ) {
+        showWarning: function() {
+            for (let sticker of this.stickers){
+                if (sticker.checked === true){
+
+                    if (this.holder.postal_address_list !== undefined && this.holder.postal_address_list.length > 0) {
                         let holder_address = this.holder.postal_address_list[0];
+                        console.log(holder_address.country,sticker.postal_address_country,
+                            holder_address.line1,sticker.postal_address_line1,
+                            holder_address.locality,sticker.postal_address_locality,
+                            holder_address.postcode,sticker.postal_address_postcode,
+                            holder_address.state,sticker.postal_address_state)
                         if (
-                            holder_address.country !=
-                                sticker.postal_address_country ||
-                            holder_address.line1 !=
-                                sticker.postal_address_line1 ||
-                            holder_address.locality !=
-                                sticker.postal_address_locality ||
-                            holder_address.postcode !=
-                                sticker.postal_address_postcode ||
+                            holder_address.country != sticker.postal_address_country ||
+                            holder_address.line1 != sticker.postal_address_line1 ||
+                            holder_address.locality != sticker.postal_address_locality ||
+                            holder_address.postcode != sticker.postal_address_postcode ||
                             holder_address.state != sticker.postal_address_state
                         ) {
-                            return true;
-                        }
+                            return true
+                        }   
                     }
                 }
             }
-            return false;
+            return false
         },
-        replaceInfo: function () {
+        replaceInfo: function(){
+
             if (this.stickers.length == 0) {
-                return 'There are no stickers associated with this Licence to replace.';
+                return "There are no stickers associated with this Licence to replace."
             }
 
             let has_unprinted = false;
             let has_current = false;
-            for (let sticker of this.stickers) {
-                if (
-                    sticker.status.code == 'ready' ||
-                    sticker.status.code == 'not_ready' ||
-                    sticker.status.code == 'awaiting_printing'
-                ) {
+            for (let sticker of this.stickers){
+                if (sticker.status.code == "ready" || sticker.status.code == "not_ready" || sticker.status.code == "awaiting_printing") {
                     has_unprinted = true;
                 }
-                if (sticker.status.code == 'current') {
+                if (sticker.status.code == "current") {
                     has_current = true;
                 }
             }
 
             if (!has_current && has_unprinted) {
-                return 'This licence only has stickers that are awaiting printing, which cannot be replaced.';
+                return "This licence only has stickers that are awaiting printing, which cannot be replaced."
             }
             if (has_current && has_unprinted) {
-                return 'This licence has some stickers that are awaiting printing, which cannot be replaced.';
+                return "This licence has some stickers that are awaiting printing, which cannot be replaced."
             }
             if (!has_current && !has_unprinted) {
-                return 'This licence has no stickers that can be replaced nor does it have any stickers awaiting printing.';
+                return "This licence has no stickers that can be replaced nor does it have any stickers awaiting printing."
             }
 
-            return '';
+            return ""
         },
-        showReplaceInfo: function () {
-            return this.replaceInfo !== '';
+        showReplaceInfo: function(){
+            return this.replaceInfo !== "";
         },
-        formEnabled: function () {
-            for (let sticker of this.stickers) {
-                if (sticker.checked === true) {
-                    return true;
+        formEnabled: function(){
+            for (let sticker of this.stickers){
+                if (sticker.checked === true){
+                    return true
                 }
             }
-            return false;
+            return false
         },
-        okButtonEnabled: function () {
-            if (this.details.reason) {
-                for (let sticker of this.stickers) {
-                    if (sticker.checked === true) {
-                        return true;
+        okButtonEnabled: function(){
+            if (this.details.reason){
+                for (let sticker of this.stickers){
+                    if (sticker.checked === true){
+                        return true
                     }
                 }
             }
-            return false;
+            return false
         },
-        showError: function () {
+        showError: function() {
             var vm = this;
             return vm.errors;
         },
-        title: function () {
-            return 'New Sticker';
+        title: function() {
+            return 'New Sticker'
         },
-        total_fee: function () {
-            let vm = this;
-            let amount = 0;
+        total_fee: function() {
+            let vm = this
+            let amount = 0
 
-            if (!vm.waive_the_fee) {
-                for (let sticker of this.stickers) {
-                    if (sticker.checked) {
-                        amount += vm.fee_item.amount;
+            if (!vm.waive_the_fee){
+                for (let sticker of this.stickers){
+                    if (sticker.checked){
+                        amount += vm.fee_item.amount
                     }
                 }
             }
 
-            return amount;
-        },
+            return amount
+        }
     },
-    methods: {
-        getDefaultDetails: function () {
+    methods:{
+        getDefaultDetails: function(){
             return {
                 reason: '',
                 date_of_lost_sticker: null,
                 date_of_returned_sticker: null,
-            };
+            }
         },
-        ok: function () {
-            let vm = this;
-            vm.errors = false;
-            vm.processing = true;
-            vm.$emit('sendData', {
-                details: vm.details,
-                approval_id: vm.approval_id,
-                stickers: vm.stickers,
-                waive_the_fee: vm.waive_the_fee,
-                change_sticker_address: vm.change_sticker_address,
-                new_postal_address_line1: vm.new_postal_address_line1,
-                new_postal_address_line2: vm.new_postal_address_line2,
-                new_postal_address_line3: vm.new_postal_address_line3,
-                new_postal_address_locality: vm.new_postal_address_locality,
-                new_postal_address_state: vm.new_postal_address_state,
-                new_postal_address_country: vm.new_postal_address_country,
-                new_postal_address_postcode: vm.new_postal_address_postcode,
-            });
+        ok:function () {
+            let vm =this;
+            vm.errors = false
+            vm.processing = true
+            vm.$emit("sendData", {
+                "details": vm.details,
+                "approval_id": vm.approval_id,
+                "stickers": vm.stickers,
+                "waive_the_fee": vm.waive_the_fee,
+                "change_sticker_address": vm.change_sticker_address,
+                "new_postal_address_line1": vm.new_postal_address_line1,
+                "new_postal_address_line2": vm.new_postal_address_line2,
+                "new_postal_address_line3": vm.new_postal_address_line3,
+                "new_postal_address_locality": vm.new_postal_address_locality,
+                "new_postal_address_state": vm.new_postal_address_state,
+                "new_postal_address_country": vm.new_postal_address_country,
+                "new_postal_address_postcode": vm.new_postal_address_postcode,
+            })
         },
-        cancel: function () {
+        cancel:function () {
             this.close();
         },
-        close: function () {
-            this.isModalOpen = false;
-            this.details = this.getDefaultDetails();
-            $('#returned_date_elem').val('');
-            $('#lost_date_elem').val('');
-            this.errors = false;
-            this.processing = false;
-            this.approval_id = null;
-            this.proposal_id = null;
+        close:function () {
+            this.isModalOpen = false
+            this.details = this.getDefaultDetails()
+            $('#returned_date_elem').val('')
+            $('#lost_date_elem').val('')
+            this.errors = false
+            this.processing = false
+            this.approval_id = null
+            this.proposal_id = null
         },
-        fetchData: function () {
-            let vm = this;
+        fetchData: function(){
+            let vm = this
 
             vm.$http.get(api_endpoints.fee_item_sticker_replacement).then(
                 (response) => {
-                    vm.fee_item = response.body;
+                    vm.fee_item = response.body
                 },
                 (error) => {
-                    console.log(error);
+                    console.log(error)
                 }
-            );
+            )
         },
         fetchCountries: function () {
             let vm = this;
@@ -502,10 +350,10 @@ export default {
     mounted: function () {
         this.fetchCountries();
     },
-    created: function () {
+    created:function () {
         this.fetchData();
-    },
-};
+    }
+}
 </script>
 
 <style scoped>

@@ -1,696 +1,419 @@
 <template>
-    <div class="container" id="internalCompliance">
-        <div class="row">
-            <h3>Compliance with Requirements {{ compliance.reference }}</h3>
-            <div class="col-md-3">
-                <CommsLogs
-                    :comms_url="comms_url"
-                    :logs_url="logs_url"
-                    :comms_add_url="comms_add_url"
-                    :disable_add_entry="false"
-                />
-                <div class="card mb-3">
-                    <div class="card-header">Submission</div>
-                    <div class="card-body border-bottom">
-                        <div class="col-sm-12">
-                            <strong>Submitted by</strong><br />
-                            {{ compliance.submitter }}
-                        </div>
-                        <div class="col-sm-12 top-buffer-s">
-                            <strong>Lodged on</strong><br />
-                            {{ formatDate(compliance.lodgement_date) }}
-                        </div>
-                    </div>
+<div class="container" id="internalCompliance">
+    <div class="row">
+        <h3>Compliance with Requirements {{ compliance.reference }}</h3>
+        <div class="col-md-3">
+        <CommsLogs :comms_url="comms_url" :logs_url="logs_url" :comms_add_url="comms_add_url" :disable_add_entry="false"/>
+            <div class="card mb-3">
+                <div class="card-header">
+                    Submission 
                 </div>
-                <div class="card mb-3">
-                    <div class="card-header">Workflow</div>
-                    <div class="card-body border-bottom">
-                        <div class="col-sm-12">
-                            <strong>Status</strong><br />
-                            {{ compliance.processing_status }}
-                        </div>
-                        <div class="col-sm-12 top-buffer-s">
-                            <strong>Currently assigned to</strong><br />
-                            <div class="mb-3">
-                                <select v-show="isLoading" class="form-control">
-                                    <option value="">Loading...</option>
-                                </select>
-                                <select
-                                    @change="assignTo"
-                                    :disabled="canViewonly || !check_assessor()"
-                                    v-if="!isLoading"
-                                    class="form-select"
-                                    v-model="compliance.assigned_to"
-                                >
-                                    <option
-                                        v-for="member in compliance.allowed_assessors"
-                                        :value="member.ledger_id"
-                                    >
-                                        {{ member.legal_first_name }}
-                                        {{ member.legal_last_name }}
-                                    </option>
-                                </select>
-                                <a
-                                    v-if="!canViewonly && check_assessor()"
-                                    @click.prevent="assignMyself()"
-                                    class="actionBtn float-end"
-                                    >Assign to me</a
-                                >
-                            </div>
-                        </div>
-                        <div
-                            class="col-sm-12 top-buffer-s"
-                            v-if="!canViewonly && check_assessor()"
-                        >
-                            <strong>Action</strong><br />
-                            <button
-                                class="btn btn-primary"
-                                @click.prevent="acceptCompliance()"
-                            >
-                                Accept</button
-                            ><br />
-                            <button
-                                class="btn btn-primary top-buffer-s"
-                                @click.prevent="amendmentRequest()"
-                            >
-                                Request Amendment</button
-                            ><br />
-                            <button
-                                class="btn btn-primary top-buffer-s"
-                                @click.prevent="discardCompliance()"
-                            >
-                                Discard
-                            </button>
-                        </div>
+                <div class="card-body border-bottom">
+                    <div class="col-sm-12">
+                        <strong>Submitted by</strong><br/>
+                        {{ compliance.submitter}}
+                    </div>
+                    <div class="col-sm-12 top-buffer-s">
+                        <strong>Lodged on</strong><br/>
+                        {{ formatDate(compliance.lodgement_date) }}
                     </div>
                 </div>
             </div>
-            <div class="col-md-1"></div>
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header">
-                        <h3>Compliance with Requirements</h3>
+            <div class="card mb-3">
+                <div class="card-header">
+                    Workflow 
+                </div>
+                <div class="card-body border-bottom">
+                    <div class="col-sm-12">
+                        <strong>Status</strong><br/>
+                        {{ compliance.processing_status }}
                     </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <form name="complianceForm" method="post">
-                                    <alert
-                                        v-model:show="showError"
-                                        type="danger"
-                                    >
-                                        <strong>{{ errorString }}</strong>
-                                    </alert>
-                                    <div class="row">
-                                        <div class="row mb-3">
-                                            <label
-                                                class="col-sm-3 col-form-label float-start"
-                                                for="Name"
-                                                >Requirement:</label
-                                            >
-                                            <div class="col-sm-6">
-                                                {{ compliance.requirement }}
-                                            </div>
-                                        </div>
+                    <div class="col-sm-12 top-buffer-s">
+                        <strong>Currently assigned to</strong><br/>
+                        <div class="mb-3">
+                            <select v-show="isLoading" class="form-control">
+                                <option value="">Loading...</option>
+                            </select>
+                            <select @change="assignTo" 
+                            :disabled="canViewonly || !check_assessor()" 
+                            v-if="!isLoading" class="form-select" 
+                            v-model="compliance.assigned_to">
+                                <option v-for="member in compliance.allowed_assessors" :value="member.ledger_id">{{member.legal_first_name}} {{member.legal_last_name}}</option>
+                            </select>
+                            <a v-if="!canViewonly && check_assessor()" @click.prevent="assignMyself()" class="actionBtn float-end">Assign to me</a>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 top-buffer-s" v-if="!canViewonly && check_assessor()">
+                        <strong>Action</strong><br/>
+                        <button class="btn btn-primary" @click.prevent="acceptCompliance()">Accept</button><br/>
+                        <button class="btn btn-primary top-buffer-s" @click.prevent="amendmentRequest()">Request Amendment</button><br/>
+                        <button class="btn btn-primary top-buffer-s" @click.prevent="discardCompliance()">Discard</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-1"></div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Compliance with Requirements</h3> 
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12"> 
+                        <form   name="complianceForm" method="post">
+                            <alert v-model:show="showError" type="danger">
+                                <strong>{{errorString}}</strong>
+                            </alert>
+                            <div class="row">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label float-start"  for="Name">Requirement:</label>
+                                    <div class="col-sm-6">
+                                        {{compliance.requirement}}
                                     </div>
-
-                                    <div class="row">
-                                        <div class="row mb-3">
-                                            <label
-                                                class="col-sm-3 col-form-label float-start"
-                                                for="Name"
-                                                >Details:</label
-                                            >
-                                            <div class="col-sm-6">
-                                                <textarea
-                                                    :disabled="isFinalised"
-                                                    class="form-control"
-                                                    name="detail"
-                                                    placeholder=""
-                                                    v-model="compliance.text"
-                                                ></textarea>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div
-                                            v-if="hasDocuments"
-                                            class="row mb-3"
-                                        >
-                                            <div
-                                                class="col-sm-3 col-form-label float-start"
-                                            >
-                                                <label for="Name"
-                                                    >Documents:</label
-                                                >
-                                            </div>
-                                            <div class="col-sm-6">
-                                                <div
-                                                    class="row"
-                                                    v-for="d in compliance.documents"
-                                                >
-                                                    <a
-                                                        :href="d[1]"
-                                                        target="_blank"
-                                                        class="form-label float-start"
-                                                        >{{ d[0] }}</a
-                                                    >
-                                                    <span
-                                                        v-if="
-                                                            !isFinalised &&
-                                                            d.can_delete
-                                                        "
-                                                    >
-                                                        <a
-                                                            @click="
-                                                                delete_document(
-                                                                    d
-                                                                )
-                                                            "
-                                                            class="fa fa-trash-o form-label"
-                                                            title="Remove file"
-                                                            style="
-                                                                cursor: pointer;
-                                                                color: red;
-                                                            "
-                                                        ></a>
-                                                    </span>
-                                                    <span v-else>
-                                                        <i
-                                                            class="fa fa-info-circle"
-                                                            aria-hidden="true"
-                                                            title="Previously submitted documents cannot be deleted"
-                                                            style="
-                                                                cursor: pointer;
-                                                            "
-                                                        ></i>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div
-                                            v-if="!isFinalised"
-                                            class="row mb-3"
-                                        >
-                                            <label
-                                                class="col-sm-3 col-form-label float-start"
-                                                for="Name"
-                                                >Attachments:</label
-                                            >
-                                            <div class="col-sm-6">
-                                                <template
-                                                    v-for="(f, i) in files"
-                                                >
-                                                    <div
-                                                        :class="
-                                                            'row top-buffer file-row-' +
-                                                            i
-                                                        "
-                                                    >
-                                                        <div class="col-sm-4">
-                                                            <span
-                                                                v-if="
-                                                                    f.file ==
-                                                                    null
-                                                                "
-                                                                class="btn btn-info btn-file float-start"
-                                                                style="
-                                                                    margin-bottom: 5px;
-                                                                "
-                                                            >
-                                                                Attach File
-                                                                <input
-                                                                    type="file"
-                                                                    :name="
-                                                                        'file-upload-' +
-                                                                        i
-                                                                    "
-                                                                    :class="
-                                                                        'file-upload-' +
-                                                                        i
-                                                                    "
-                                                                    @change="
-                                                                        uploadFile(
-                                                                            $event,
-                                                                            f
-                                                                        )
-                                                                    "
-                                                                />
-                                                            </span>
-                                                            <span
-                                                                v-else
-                                                                class="btn btn-info btn-file float-start"
-                                                                style="
-                                                                    margin-bottom: 5px;
-                                                                "
-                                                            >
-                                                                Update File
-                                                                <input
-                                                                    type="file"
-                                                                    :name="
-                                                                        'file-upload-' +
-                                                                        i
-                                                                    "
-                                                                    :class="
-                                                                        'file-upload-' +
-                                                                        i
-                                                                    "
-                                                                    @change="
-                                                                        uploadFile(
-                                                                            $event,
-                                                                            f
-                                                                        )
-                                                                    "
-                                                                />
-                                                            </span>
-                                                        </div>
-                                                        <div class="col-sm-4">
-                                                            <span>{{
-                                                                f.name
-                                                            }}</span>
-                                                        </div>
-                                                        <div class="col-sm-4">
-                                                            <button
-                                                                @click="
-                                                                    removeFile(
-                                                                        i
-                                                                    )
-                                                                "
-                                                                class="btn btn-danger"
-                                                            >
-                                                                Remove
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </template>
-                                                <a
-                                                    href=""
-                                                    @click.prevent="
-                                                        attachAnother
-                                                    "
-                                                    ><i
-                                                        class="fa fa-lg fa-plus top-buffer-2x"
-                                                    ></i
-                                                ></a>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="row mb-3">
-                                            <div class="col-lg-2 float-end">
-                                                <button
-                                                    v-if="!isFinalised"
-                                                    @click.prevent="submit()"
-                                                    class="btn btn-primary"
-                                                >
-                                                    Submit
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </form>
+                                </div>
                             </div>
+
+                            <div class="row">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label float-start"  for="Name">Details:</label>
+                                    <div class="col-sm-6">
+                                        <textarea :disabled="isFinalised" class="form-control" name="detail" placeholder="" v-model="compliance.text"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div v-if="hasDocuments" class="row mb-3">
+                                    <div class="col-sm-3 col-form-label float-start" >  
+                                        <label  for="Name">Documents:</label>
+                                    </div> 
+                                    <div class="col-sm-6">
+                                        <div class="row" v-for="d in compliance.documents">
+                                            <a :href="d[1]" target="_blank" class="form-label float-start">{{d[0]   }}</a>
+                                            <span v-if="!isFinalised && d.can_delete">
+                                                <a @click="delete_document(d)" class="fa fa-trash-o form-label" title="Remove file" style="cursor: pointer; color:red;"></a>
+                                            </span>
+                                            <span v-else >
+                                                <i class="fa fa-info-circle" aria-hidden="true" title="Previously submitted documents cannot be deleted" style="cursor: pointer;"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div v-if="!isFinalised" class="row mb-3"> 
+                                    <label class="col-sm-3 col-form-label float-start"  for="Name">Attachments:</label>
+                                <div class="col-sm-6">
+                                    <template v-for="(f,i) in files">
+                                        <div :class="'row top-buffer file-row-'+i">
+                                            <div class="col-sm-4">
+                                                <span v-if="f.file == null" class="btn btn-info btn-file float-start" style="margin-bottom: 5px">
+                                                    Attach File <input type="file" :name="'file-upload-'+i" :class="'file-upload-'+i" @change="uploadFile($event,f)"/>
+                                                </span>
+                                                <span v-else class="btn btn-info btn-file float-start" style="margin-bottom: 5px">
+                                                    Update File <input type="file" :name="'file-upload-'+i" :class="'file-upload-'+i" @change="uploadFile($event,f)"/>
+                                                </span>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <span>{{f.name}}</span>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <button @click="removeFile(i)" class="btn btn-danger">Remove</button>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <a href="" @click.prevent="attachAnother"><i class="fa fa-lg fa-plus top-buffer-2x"></i></a>
+                                </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="row mb-3">
+                                    <div class="col-lg-2 float-end">
+                                        <button v-if="!isFinalised" @click.prevent="submit()" class="btn btn-primary">Submit</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <ComplianceAmendmentRequest
-            ref="amendment_request"
-            :compliance_id="compliance.id"
-        ></ComplianceAmendmentRequest>
     </div>
+    <ComplianceAmendmentRequest ref="amendment_request" :compliance_id="compliance.id"></ComplianceAmendmentRequest>
+</div>
 </template>
 <script>
-import $ from 'jquery';
-import http from '@/utils/vue-resource-shim';
-import datatable from '@vue-utils/datatable.vue';
-import CommsLogs from '@common-utils/comms_logs.vue';
-import ComplianceAmendmentRequest from './compliance_amendment_request.vue';
-import alert from '@vue-utils/alert.vue';
-import { api_endpoints, helpers } from '@/utils/hooks';
+import $ from 'jquery'
+import http from '@/utils/vue-resource-shim'
+import datatable from '@vue-utils/datatable.vue'
+import CommsLogs from '@common-utils/comms_logs.vue'
+import ComplianceAmendmentRequest from './compliance_amendment_request.vue'
+import alert from '@vue-utils/alert.vue'
+import {
+  api_endpoints,
+  helpers
+}
+from '@/utils/hooks'
 export default {
-    name: 'complianceAccess',
-    data() {
-        let vm = this;
-        return {
-            form: null,
-            loading: [],
-            profile: {},
-            compliance: {
-                requester: {},
-            },
-            DATE_TIME_FORMAT: 'DD/MM/YYYY HH:mm:ss',
-            members: [],
-            // Filters
-            logs_url: helpers.add_endpoint_json(
-                api_endpoints.compliances,
-                vm.$route.params.compliance_id + '/action_log'
-            ),
-            comms_url: helpers.add_endpoint_json(
-                api_endpoints.compliances,
-                vm.$route.params.compliance_id + '/comms_log'
-            ),
-            comms_add_url: helpers.add_endpoint_json(
-                api_endpoints.compliances,
-                vm.$route.params.compliance_id + '/add_comms_log'
-            ),
-            errorString: '',
-            errors: false,
-            files: [
-                {
-                    file: null,
-                    name: '',
-                },
-            ],
-        };
-    },
-    beforeRouteEnter: function (to, from, next) {
-        http.get(
-            helpers.add_endpoint_json(
-                api_endpoints.compliances,
-                to.params.compliance_id + '/internal_compliance'
-            )
-        ).then(
-            (response) => {
-                next((vm) => {
-                    vm.compliance = response.body;
-                    vm.members = vm.compliance.allowed_assessors;
-                });
-            },
-            (error) => {
-                console.log(error);
+  name: 'complianceAccess',
+  data() {
+    let vm = this;
+    return {
+        form: null,
+        loading: [],
+        profile:{},
+        compliance: {
+            requester: {}
+        },
+        DATE_TIME_FORMAT: 'DD/MM/YYYY HH:mm:ss',
+        members: [],
+        // Filters
+        logs_url: helpers.add_endpoint_json(api_endpoints.compliances,vm.$route.params.compliance_id+'/action_log'),
+        comms_url: helpers.add_endpoint_json(api_endpoints.compliances,vm.$route.params.compliance_id+'/comms_log'),
+        comms_add_url: helpers.add_endpoint_json(api_endpoints.compliances,vm.$route.params.compliance_id+'/add_comms_log'),
+        errorString: '',
+        errors: false,
+        files: [
+            {
+                'file': null,
+                'name': ''
             }
-        );
+        ]
+    }
+  },
+  beforeRouteEnter: function(to, from, next){
+    http.get(helpers.add_endpoint_json(api_endpoints.compliances,to.params.compliance_id+'/internal_compliance')).then((response) => {
+        next(vm => {
+            vm.compliance = response.body
+            vm.members = vm.compliance.allowed_assessors
+        })
+    },(error) => {
+        console.log(error);
+    })
+  },
+  components: {
+    datatable,
+    CommsLogs,
+    ComplianceAmendmentRequest,
+    alert,
+  },
+  computed: {
+    isLoading: function () {
+      return this.loading.length > 0;
     },
-    components: {
-        datatable,
-        CommsLogs,
-        ComplianceAmendmentRequest,
-        alert,
+    canViewonly: function(){
+        return this.compliance.processing_status == 'Due' || this.compliance.processing_status == 'Future' || this.compliance.processing_status == 'Approved' || this.compliance.processing_status == 'Discarded';
     },
-    computed: {
-        isLoading: function () {
-            return this.loading.length > 0;
-        },
-        canViewonly: function () {
-            return (
-                this.compliance.processing_status == 'Due' ||
-                this.compliance.processing_status == 'Future' ||
-                this.compliance.processing_status == 'Approved' ||
-                this.compliance.processing_status == 'Discarded'
-            );
-        },
-        showError: function () {
-            var vm = this;
-            return vm.errors;
-        },
-        isDiscarded: function () {
-            return (
-                this.compliance &&
-                this.compliance.customer_status == 'Discarded'
-            );
-        },
-        isFinalised: function () {
-            return (
-                this.compliance &&
-                (this.compliance.processing_status == 'With Assessor' ||
-                    this.compliance.processing_status == 'Approved')
-            );
-        },
-        hasDocuments: function () {
-            return this.compliance && this.compliance.documents;
-        },
+    showError: function() {
+        var vm = this;
+        return vm.errors;
     },
-    methods: {
-        formatDate: function (data) {
-            return data ? moment(data).format('DD/MM/YYYY') : '';
-        },
-        delete_document: function (doc) {
-            let vm = this;
-            let data = { document: doc };
-            if (doc) {
-                vm.$http
-                    .post(
-                        helpers.add_endpoint_json(
-                            api_endpoints.compliances,
-                            vm.compliance.id + '/delete_document'
-                        ),
-                        JSON.stringify(data),
-                        {
-                            emulateJSON: true,
-                        }
-                    )
-                    .then(
-                        (response) => {
-                            vm.compliance = response.body;
-                        },
-                        (error) => {
-                            vm.errors = true;
-                            vm.errorString = helpers.apiVueResourceError(error);
-                        }
-                    );
-            }
-        },
-        uploadFile(event, file_obj) {
+    isDiscarded: function(){         
+        return this.compliance && (this.compliance.customer_status == "Discarded");
+    },
+    isFinalised: function(){             
+        return this.compliance && (this.compliance.processing_status == "With Assessor" || this.compliance.processing_status == "Approved");
+    },
+    hasDocuments: function(){             
+        return this.compliance && this.compliance.documents;
+    }
+  },
+  methods: {
+    formatDate: function(data){
+        return data ? moment(data).format('DD/MM/YYYY'): '';    
+    },
+    delete_document: function(doc){
+        let vm= this;
+        let data = {'document': doc}
+        if(doc)
+        {
+          vm.$http.post(helpers.add_endpoint_json(api_endpoints.compliances,vm.compliance.id+'/delete_document'),JSON.stringify(data),{
+                emulateJSON:true
+                }).then((response)=>{               
+                    vm.compliance = response.body;       
+                },(error)=>{
+                    vm.errors = true;
+                    vm.errorString = helpers.apiVueResourceError(error);
+                });              
+        }
+    },
+    uploadFile(event,file_obj){
             let vm = this;
             let _file = null;
             if (event.target.files && event.target.files[0]) {
                 var reader = new FileReader();
-                reader.readAsDataURL(event.target.files[0]);
-                reader.onload = function (e) {
+                reader.readAsDataURL(event.target.files[0]); 
+                reader.onload = function(e) {
                     _file = e.target.result;
                 };
                 _file = event.target.files[0];
             }
             file_obj.file = _file;
             file_obj.name = _file.name;
-        },
-        removeFile(index) {
+    },
+    removeFile(index){
             let length = this.files.length;
-            $('.file-row-' + index).remove();
-            this.files.splice(index, 1);
+            $('.file-row-'+index).remove();
+            this.files.splice(index,1);
             this.$nextTick(() => {
                 length == 1 ? this.attachAnother() : '';
             });
-        },
-        attachAnother() {
+    },
+    attachAnother(){
             this.files.push({
-                file: null,
-                name: '',
-            });
-        },
-        submit: function () {
-            let vm = this;
-            if ($(vm.form).valid()) {
+                'file': null,
+                'name': ''
+            })
+    },
+    submit:function () {
+            let vm =this;
+            if($(vm.form).valid()){
                 vm.sendData();
-            }
-        },
-        sendData: function () {
+            }                
+    },
+    sendData:function(){
             let vm = this;
             vm.errors = false;
             let data = new FormData(vm.form);
-            vm.addingComms = true;
-            vm.$http
-                .post(
-                    helpers.add_endpoint_json(
-                        api_endpoints.compliances,
-                        vm.compliance.id + '/submit'
-                    ),
-                    data,
-                    {
-                        emulateJSON: true,
-                    }
-                )
-                .then(
-                    (response) => {
-                        vm.addingCompliance = false;
-                        vm.compliance = response.body;
-                        swal(
-                            'Submitted',
-                            "Compliance has been submitted on the holder's behalf",
-                            'success'
-                        );
-                        vm.$router.push({ path: '/internal/compliances' });
-                    },
-                    (error) => {
-                        vm.errors = true;
-                        vm.addingCompliance = false;
-                        vm.errorString = helpers.apiVueResourceError(error);
-                    }
-                );
-        },
-
-        commaToNewline(s) {
-            return s.replace(/[,;]/g, '\n');
-        },
-
-        assignMyself: function () {
-            let vm = this;
-            vm.$http
-                .get(
-                    helpers.add_endpoint_json(
-                        api_endpoints.compliances,
-                        vm.compliance.id + '/assign_request_user'
-                    )
-                )
-                .then(
-                    (response) => {
-                        vm.compliance = response.body;
-                    },
-                    (error) => {
-                        console.log(error);
-                    }
-                );
-        },
-        assignTo: function () {
-            let vm = this;
-            if (
-                vm.compliance.assigned_to !== null &&
-                vm.compliance.assigned_to !== undefined
-            ) {
-                let data = { user_id: vm.compliance.assigned_to };
-                vm.$http
-                    .post(
-                        helpers.add_endpoint_json(
-                            api_endpoints.compliances,
-                            vm.compliance.id + '/assign_to'
-                        ),
-                        JSON.stringify(data),
-                        {
-                            emulateJSON: true,
-                        }
-                    )
-                    .then(
-                        (response) => {
-                            vm.compliance = response.body;
-                        },
-                        (error) => {
-                            console.log(error);
-                        }
+            vm.addingComms = true;            
+            vm.$http.post(helpers.add_endpoint_json(api_endpoints.compliances,vm.compliance.id+'/submit'),data,{
+                emulateJSON:true
+                }).then((response)=>{
+                    vm.addingCompliance = false;                
+                    vm.compliance = response.body;
+                    swal(
+                        'Submitted',
+                        'Compliance has been submitted on the holder\'s behalf',
+                        'success'
                     );
-            } else if (vm.compliance.assigned_to !== undefined) {
-                vm.$http
-                    .get(
-                        helpers.add_endpoint_json(
-                            api_endpoints.compliances,
-                            vm.compliance.id + '/unassign'
-                        )
-                    )
-                    .then(
-                        (response) => {
-                            vm.compliance = response.body;
-                        },
-                        (error) => {
-                            console.log(error);
-                        }
-                    );
-            }
-        },
-        acceptCompliance: function () {
-            let vm = this;
-            swal({
-                title: 'Accept Compliance with requirements',
-                text: 'Are you sure you want to accept this compliance with requirements?',
-                type: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Accept',
-            }).then(
-                () => {
-                    vm.$http
-                        .get(
-                            helpers.add_endpoint_json(
-                                api_endpoints.compliances,
-                                vm.compliance.id + '/accept'
-                            )
-                        )
-                        .then(
-                            (response) => {
-                                vm.compliance = response.body;
-                                vm.$router.push({
-                                    name: 'internal-compliances-dash',
-                                }); //Navigate to dashboard
-                            },
-                            (error) => {
-                                console.log(error);
-                            }
-                        );
-                },
-                (error) => {}
-            );
-        },
-        amendmentRequest: function () {
-            this.$refs.amendment_request.amendment.compliance =
-                this.compliance.id;
-            this.$refs.amendment_request.isModalOpen = true;
-        },
-        discardCompliance: function () {
-            let vm = this;
-            swal({
-                title: 'Discard Compliance with',
-                text: 'Are you sure you want to discard this compliance?',
-                type: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Discard',
-            }).then(
-                () => {
-                    vm.$http
-                        .get(
-                            helpers.add_endpoint_json(
-                                api_endpoints.compliances,
-                                vm.compliance.id + '/discard'
-                            )
-                        )
-                        .then(
-                            (response) => {
-                                vm.compliance = response.body;
-                                vm.$router.push({
-                                    name: 'internal-compliances-dash',
-                                }); //Navigate to dashboard
-                            },
-                            (error) => {
-                                console.log(error);
-                            }
-                        );
-                },
-                (error) => {}
-            );
-        },
-
-        fetchProfile: function () {
-            let vm = this;
-            http.get(api_endpoints.profile).then(
-                (response) => {
-                    vm.profile = response.body;
-                },
-                (error) => {
-                    console.log(error);
-                }
-            );
-        },
-
-        check_assessor: function () {
-            let vm = this;
-
-            var assessor = vm.members.filter(function (elem) {
-                return elem.id == vm.profile.id;
-            });
-            if (assessor.length > 0) return true;
-            else return false;
-        },
+                    vm.$router.push({ path: '/internal/compliances' });
+                        
+                },(error)=>{
+                    vm.errors = true;
+                    vm.addingCompliance = false;
+                    vm.errorString = helpers.apiVueResourceError(error);
+                });     
     },
-    mounted: function () {
+
+    commaToNewline(s){
+        return s.replace(/[,;]/g, '\n');
+    },
+  
+    assignMyself: function(){
         let vm = this;
-
-        this.fetchProfile();
-        vm.form = document.forms.complianceForm;
+        vm.$http.get(helpers.add_endpoint_json(api_endpoints.compliances,(vm.compliance.id+'/assign_request_user')))
+        .then((response) => {            
+            vm.compliance = response.body;
+        }, (error) => {
+            console.log(error);
+        });
     },
-};
+    assignTo: function(){
+        let vm = this;
+        if ( vm.compliance.assigned_to !== null && vm.compliance.assigned_to !== undefined){
+            let data = {'user_id': vm.compliance.assigned_to};
+            vm.$http.post(helpers.add_endpoint_json(api_endpoints.compliances,(vm.compliance.id+'/assign_to')),JSON.stringify(data),{
+                emulateJSON:true
+            }).then((response) => {                
+                vm.compliance = response.body;
+            }, (error) => {
+                console.log(error);
+            });
+            
+        }
+        else if (vm.compliance.assigned_to !== undefined) {
+            vm.$http.get(helpers.add_endpoint_json(api_endpoints.compliances,(vm.compliance.id+'/unassign')))
+            .then((response) => {
+                console.log(response);
+                vm.compliance = response.body;
+            }, (error) => {
+                console.log(error);
+            });
+        }
+    },
+    acceptCompliance: function() {
+        let vm = this;
+        swal({
+            title: "Accept Compliance with requirements",
+            text: "Are you sure you want to accept this compliance with requirements?",
+            type: "question",
+            showCancelButton: true,
+            confirmButtonText: 'Accept'
+        }).then(() => {
+            vm.$http.get(helpers.add_endpoint_json(api_endpoints.compliances,(vm.compliance.id+'/accept')))
+            .then((response) => {
+                console.log(response);
+                vm.compliance = response.body;
+                vm.$router.push({ name: 'internal-compliances-dash'}); //Navigate to dashboard
+            }, (error) => {
+                console.log(error);
+            });
+        },(error) => {
+
+        });
+
+    },
+    amendmentRequest: function(){   
+            this.$refs.amendment_request.amendment.compliance = this.compliance.id;                     
+            this.$refs.amendment_request.isModalOpen = true;
+    },
+    discardCompliance: function() {
+        let vm = this;
+        swal({
+            title: "Discard Compliance with",
+            text: "Are you sure you want to discard this compliance?",
+            type: "question",
+            showCancelButton: true,
+            confirmButtonText: 'Discard'
+        }).then(() => {
+            vm.$http.get(helpers.add_endpoint_json(api_endpoints.compliances,(vm.compliance.id+'/discard')))
+            .then((response) => {
+                console.log(response);
+                vm.compliance = response.body;
+                vm.$router.push({ name: 'internal-compliances-dash'}); //Navigate to dashboard
+            }, (error) => {
+                console.log(error);
+            });
+        },(error) => {
+
+        });
+
+    },
+
+    fetchProfile: function(){
+        let vm = this;
+        http.get(api_endpoints.profile).then((response) => {
+            vm.profile = response.body
+                              
+         },(error) => {
+            console.log(error);
+                
+        })
+        },
+
+    check_assessor: function(){
+        let vm = this;
+        
+        var assessor = vm.members.filter(function(elem){
+                    return(elem.id==vm.profile.id);
+                });
+                if (assessor.length > 0)
+                    return true;
+                else
+                    return false;
+     },
+  },
+  mounted: function () {
+    let vm = this;
+    
+    this.fetchProfile();
+    vm.form = document.forms.complianceForm;
+  }
+}
 </script>
 <style scoped>
 .top-buffer-s {

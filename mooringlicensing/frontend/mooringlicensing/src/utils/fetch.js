@@ -1,10 +1,14 @@
 import { helpers, api_endpoints } from '@/utils/hooks.js';
 
 async function request(url, options = {}) {
+
     const headers = new Headers(options.headers ?? {});
 
     if (url !== api_endpoints.countries) {
-        headers.set('X-CSRFToken', helpers.getCookie('csrftoken'));
+        headers.set(
+            'X-CSRFToken',
+            helpers.getCookie('csrftoken')
+        );
     }
 
     let response;
@@ -13,9 +17,10 @@ async function request(url, options = {}) {
         response = await fetch(url, {
             credentials: 'same-origin',
             ...options,
-            headers,
+            headers
         });
-    } catch (error) {
+    }
+    catch (error) {
         console.error(`There was an error fetching ${url}`, error);
         throw error;
     }
@@ -56,10 +61,11 @@ async function request(url, options = {}) {
         bodyText,
         responseText: bodyText,
 
-        data,
+        data
     };
 
     if (!response.ok) {
+        console.log('THROWING', result);
         throw result;
     }
 
@@ -67,9 +73,10 @@ async function request(url, options = {}) {
 }
 
 function buildOptions(method, body, options = {}) {
+
     const config = {
         method,
-        ...options,
+        ...options
     };
 
     if (body === undefined || body === null) {
@@ -89,7 +96,7 @@ function buildOptions(method, body, options = {}) {
 
         config.headers = {
             ...(config.headers || {}),
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
         };
 
         return config;
@@ -103,7 +110,7 @@ function buildOptions(method, body, options = {}) {
 
         config.headers = {
             ...(config.headers || {}),
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
         };
 
         return config;
@@ -115,25 +122,32 @@ function buildOptions(method, body, options = {}) {
 }
 
 export default {
+
     get(url, options = {}) {
         return request(url, {
             method: 'GET',
-            ...options,
+            ...options
         });
     },
 
     post(url, body, options = {}) {
-        return request(url, buildOptions('POST', body, options));
+        return request(
+            url,
+            buildOptions('POST', body, options)
+        );
     },
 
     put(url, body, options = {}) {
-        return request(url, buildOptions('PUT', body, options));
+        return request(
+            url,
+            buildOptions('PUT', body, options)
+        );
     },
 
     delete(url, options = {}) {
         return request(url, {
             method: 'DELETE',
-            ...options,
+            ...options
         });
-    },
+    }
 };

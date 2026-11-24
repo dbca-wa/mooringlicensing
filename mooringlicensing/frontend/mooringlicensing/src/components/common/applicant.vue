@@ -1,466 +1,280 @@
 <template>
     <div>
-        <FormSection
-            :label="customerLabel"
-            :formCollapse="false"
-            :Index="detailsBody"
-        >
-            <form>
-                <div v-if="!proposalApplicant" class="row mb-3">
-                    <label for="" class="col-sm-3 col-form-label"></label>
-                    <div class="col-sm-12">
-                        <div class="alert alert-info">
-                            <b
-                                >The user must log in to the system, navigate to
-                                Options > Manage Account, and click Click Here
-                                to update their account name</b
-                            >
-                        </div>
-                    </div>
-                </div>
 
-                <div class="row mb-3">
-                    <label for="" class="col-sm-3 col-form-label"
-                        >Account Given Name(s)</label
-                    >
-                    <div class="col-sm-6">
-                        <input
-                            disabled
-                            type="text"
-                            class="form-control"
-                            placeholder=""
-                            v-model="user.first_name"
-                        />
-                    </div>
-                </div>
-                <div class="row mb-3">
-                    <label for="" class="col-sm-3 col-form-label"
-                        >Account Surname</label
-                    >
-                    <div class="col-sm-6">
-                        <input
-                            disabled
-                            type="text"
-                            class="form-control"
-                            placeholder=""
-                            v-model="user.last_name"
-                        />
-                    </div>
-                </div>
+                <FormSection
+                    :label="customerLabel"
+                    :formCollapse="false"
+                    :Index="detailsBody"
+                >
+                    <form  >
+                        <div v-if="!proposalApplicant" class="row mb-3">
+                            <label for="" class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-12">
+                                <div class="alert alert-info"><b>The user must log in to the system, navigate to Options > Manage Account, and click Click Here to update their account name</b></div>
+                            </div>
+                        </div>
 
-                <div v-if="!proposalApplicant" class="row mb-3">
-                    <label for="" class="col-sm-3 col-form-label"></label>
-                    <div class="col-sm-12">
-                        <div class="alert alert-info">
-                            <b
-                                >To update the legal name of the permit holder
-                                go to Accounts Management:
-                                <u
-                                    ><a
-                                        :href="
-                                            '/ledger-ui/accounts-management/' +
-                                            user.id +
-                                            '/change'
-                                        "
-                                        >Edit System Account</a
-                                    ></u
-                                ></b
-                            >
+                        <div class="row mb-3">
+                            <label for="" class="col-sm-3 col-form-label">Account Given Name(s)</label>
+                            <div class="col-sm-6">
+                                <input disabled type="text" class="form-control" placeholder=""
+                                    v-model="user.first_name">
+                            </div>
                         </div>
-                    </div>
-                </div>
+                        <div class="row mb-3">
+                            <label for="" class="col-sm-3 col-form-label">Account Surname</label>
+                            <div class="col-sm-6">
+                                <input disabled type="text" class="form-control" placeholder=""
+                                    v-model="user.last_name">
+                            </div>
+                        </div>
 
-                <div class="row mb-3">
-                    <label for="" class="col-sm-3 col-form-label"
-                        >Legal Given Name(s)</label
-                    >
-                    <div class="col-sm-6">
-                        <input
-                            v-if="user.legal_first_name"
-                            disabled
-                            type="text"
-                            class="form-control"
-                            placeholder=""
-                            v-model="user.legal_first_name"
-                        />
-                        <input
-                            v-else
-                            disabled
-                            type="text"
-                            class="form-control"
-                            placeholder=""
-                            v-model="user.first_name"
-                        />
-                    </div>
-                </div>
-                <div class="row mb-3">
-                    <label for="" class="col-sm-3 col-form-label"
-                        >Legal Surname</label
-                    >
-                    <div class="col-sm-6">
-                        <input
-                            v-if="user.legal_last_name"
-                            disabled
-                            type="text"
-                            class="form-control"
-                            placeholder=""
-                            v-model="user.legal_last_name"
-                        />
-                        <input
-                            v-else
-                            disabled
-                            type="text"
-                            class="form-control"
-                            placeholder=""
-                            v-model="user.last_name"
-                        />
-                    </div>
-                </div>
+                        <div v-if="!proposalApplicant" class="row mb-3">
+                            <label for="" class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-12">
+                                <div class="alert alert-info"><b>To update the legal name of the permit holder go to Accounts Management: <u><a :href="'/ledger-ui/accounts-management/'+user.id+'/change'">Edit System Account</a></u></b></div>
+                            </div>
+                        </div>
 
-                <div class="row mb-3">
-                    <label for="" class="col-sm-3 col-form-label"
-                        >Legal Date of Birth</label
-                    >
-                    <div class="col-sm-6">
-                        <input
-                            disabled
-                            type="text"
-                            class="form-control"
-                            placeholder=""
-                            v-model="user.legal_dob"
-                        />
-                    </div>
-                </div>
-            </form>
-        </FormSection>
+                        <div class="row mb-3">
+                            <label for="" class="col-sm-3 col-form-label">Legal Given Name(s)</label>
+                            <div class="col-sm-6">
+                                <input v-if="user.legal_first_name" disabled type="text" class="form-control" placeholder=""
+                                    v-model="user.legal_first_name">
+                                <input v-else disabled type="text" class="form-control" placeholder=""
+                                    v-model="user.first_name">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label for="" class="col-sm-3 col-form-label">Legal Surname</label>
+                            <div class="col-sm-6">
+                                <input v-if="user.legal_last_name" disabled type="text" class="form-control" placeholder=""
+                                    v-model="user.legal_last_name">
+                                <input v-else disabled type="text" class="form-control" placeholder=""
+                                    v-model="user.last_name">
+                            </div>
+                        </div>
 
-        <FormSection
-            label="Address Details"
-            :formCollapse="true"
-            :Index="addressBody"
-            v-if="proposalId && proposalApplicant"
-        >
-            <form>
-                <div class="row mb-3">
-                    <label for="" class="col-sm-3 col-form-label">
-                        <strong> Residential Address </strong>
-                    </label>
-                </div>
-                <div class="row">
-                    <div class="row mb-3">
-                        <label for="" class="col-sm-3 col-form-label"
-                            >Street</label
-                        >
-                        <div class="col-sm-6">
-                            <input
-                                readonly
-                                type="text"
-                                class="form-control"
-                                v-model="
-                                    proposalApplicant.residential_address_line1
-                                "
-                            />
+                        <div class="row mb-3">
+                            <label for="" class="col-sm-3 col-form-label">Legal Date of Birth</label>
+                            <div class="col-sm-6">
+                                <input disabled type="text" class="form-control" placeholder=""
+                                    v-model="user.legal_dob">
+                            </div>
                         </div>
-                    </div>
-                    <div class="row mb-3">
-                        <label for="" class="col-sm-3 col-form-label"
-                            >Town/Suburb</label
-                        >
-                        <div class="col-sm-6">
-                            <input
-                                readonly
-                                type="text"
-                                class="form-control"
-                                v-model="
-                                    proposalApplicant.residential_address_locality
-                                "
-                            />
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <label for="" class="col-sm-3 col-form-label"
-                            >State</label
-                        >
-                        <div class="col-sm-6">
-                            <input
-                                readonly
-                                type="text"
-                                class="form-control"
-                                v-model="
-                                    proposalApplicant.residential_address_state
-                                "
-                            />
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <label for="" class="col-sm-3 col-form-label"
-                            >Postcode</label
-                        >
-                        <div class="col-sm-6">
-                            <input
-                                readonly
-                                type="text"
-                                class="form-control"
-                                v-model="
-                                    proposalApplicant.residential_address_postcode
-                                "
-                            />
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <label for="" class="col-sm-3 col-form-label"
-                            >Country</label
-                        >
-                        <div class="col-sm-6">
-                            <input
-                                readonly
-                                type="text"
-                                class="form-control"
-                                v-model="
-                                    proposalApplicant.residential_address_country
-                                "
-                            />
-                        </div>
-                    </div>
-                </div>
-                <div class="row mb-3">
-                    <label for="" class="col-sm-3 col-form-label">
-                        <strong> Postal Address </strong>
-                    </label>
-                </div>
-                <div class="row">
-                    <div class="row mb-3">
-                        <label for="" class="col-sm-3 col-form-label"
-                            >Street</label
-                        >
-                        <div class="col-sm-6">
-                            <input
-                                readonly
-                                type="text"
-                                class="form-control"
-                                v-model="proposalApplicant.postal_address_line1"
-                            />
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <label for="" class="col-sm-3 col-form-label"
-                            >Town/Suburb</label
-                        >
-                        <div class="col-sm-6">
-                            <input
-                                readonly
-                                type="text"
-                                class="form-control"
-                                v-model="
-                                    proposalApplicant.postal_address_locality
-                                "
-                            />
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <label for="" class="col-sm-3 col-form-label"
-                            >State</label
-                        >
-                        <div class="col-sm-6">
-                            <input
-                                readonly
-                                type="text"
-                                class="form-control"
-                                v-model="proposalApplicant.postal_address_state"
-                            />
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <label for="" class="col-sm-3 col-form-label"
-                            >Postcode</label
-                        >
-                        <div class="col-sm-6">
-                            <input
-                                readonly
-                                type="text"
-                                class="form-control"
-                                v-model="
-                                    proposalApplicant.postal_address_postcode
-                                "
-                            />
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <label for="" class="col-sm-3 col-form-label"
-                            >Country</label
-                        >
-                        <div class="col-sm-6">
-                            <input
-                                readonly
-                                type="text"
-                                class="form-control"
-                                v-model="
-                                    proposalApplicant.postal_address_country
-                                "
-                            />
-                        </div>
-                    </div>
-                </div>
-            </form>
-        </FormSection>
+                    </form>
+                </FormSection>
 
-        <FormSection
-            v-else
-            label="Address Details"
-            :formCollapse="true"
-            :Index="addressBody"
-            @toggle-collapse="adjust_address_tables"
-        >
-            <div class="row">
-                <div class="col-lg-12">
-                    <strong> Residential Address </strong>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-lg-12">
-                    <datatable
-                        ref="residential_address_datatable"
-                        :id="residential_address_datatable_id"
-                        :dtOptions="residential_address_datatable_options"
-                        :dtHeaders="address_datatable_headers"
-                    />
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-lg-12">
-                    <strong> Postal Address </strong>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-lg-12">
-                    <datatable
-                        ref="postal_address_datatable"
-                        :id="postal_address_datatable_id"
-                        :dtOptions="postal_address_datatable_options"
-                        :dtHeaders="address_datatable_headers"
-                    />
-                </div>
-            </div>
-        </FormSection>
 
-        <FormSection
-            label="Contact Details"
-            :formCollapse="true"
-            :Index="contactsBody"
-        >
-            <form>
-                <div class="row mb-3">
-                    <label for="" class="col-sm-3 col-form-label"
-                        >Phone (work)</label
-                    >
-                    <div class="col-sm-6">
-                        <input
-                            disabled
-                            type="text"
-                            class="form-control"
-                            name="phoneNumber"
-                            placeholder=""
-                            v-model="user.phone_number"
-                        />
-                    </div>
-                </div>
-                <div class="row mb-3">
-                    <label for="" class="col-sm-3 col-form-label">Mobile</label>
-                    <div class="col-sm-6">
-                        <input
-                            disabled
-                            type="text"
-                            class="form-control"
-                            name="mobileNumber"
-                            placeholder=""
-                            v-model="user.mobile_number"
-                        />
-                    </div>
-                </div>
-                <div class="row mb-3">
-                    <label for="" class="col-sm-3 col-form-label">Email</label>
-                    <div class="col-sm-6">
-                        <input
-                            disabled
-                            type="text"
-                            class="form-control"
-                            name="email"
-                            placeholder=""
-                            v-model="user.email"
-                        />
-                    </div>
-                </div>
-            </form>
-        </FormSection>
+                <FormSection
+                    label="Address Details"
+                    :formCollapse="true"
+                    :Index="addressBody"
+                    v-if="proposalId && proposalApplicant"
+                > 
+                    <form  >
+                        <div class="row mb-3">
+                            <label for="" class="col-sm-3 col-form-label" >
+                                <strong>
+                                Residential Address
+                                </strong>
+                            </label>
+                        </div>
+                        <div class="row">
+                        <div class="row mb-3">
+                            <label for="" class="col-sm-3 col-form-label" >Street</label>
+                            <div class="col-sm-6">
+                                <input readonly type="text" class="form-control" v-model="proposalApplicant.residential_address_line1">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label for="" class="col-sm-3 col-form-label" >Town/Suburb</label>
+                            <div class="col-sm-6">
+                                <input readonly type="text" class="form-control" v-model="proposalApplicant.residential_address_locality">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label for="" class="col-sm-3 col-form-label" >State</label>
+                            <div class="col-sm-6">
+                                <input readonly type="text" class="form-control" v-model="proposalApplicant.residential_address_state">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label for="" class="col-sm-3 col-form-label" >Postcode</label>
+                            <div class="col-sm-6">
+                                <input readonly type="text" class="form-control" v-model="proposalApplicant.residential_address_postcode">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label for="" class="col-sm-3 col-form-label" >Country</label>
+                            <div class="col-sm-6">
+                                <input readonly type="text" class="form-control" v-model="proposalApplicant.residential_address_country">
+                            </div>
+                        </div> 
+                        </div>
+                        <div class="row mb-3">
+                            <label for="" class="col-sm-3 col-form-label" >
+                                <strong>
+                                Postal Address
+                                </strong>
+                            </label>
+                        </div>
+                        <div class="row">
+                        <div class="row mb-3">
+                            <label for="" class="col-sm-3 col-form-label" >Street</label>
+                            <div class="col-sm-6">
+                                <input readonly type="text" class="form-control" v-model="proposalApplicant.postal_address_line1">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label for="" class="col-sm-3 col-form-label" >Town/Suburb</label>
+                            <div class="col-sm-6">
+                                <input readonly type="text" class="form-control" v-model="proposalApplicant.postal_address_locality">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label for="" class="col-sm-3 col-form-label" >State</label>
+                            <div class="col-sm-6">
+                                <input readonly type="text" class="form-control" v-model="proposalApplicant.postal_address_state">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label for="" class="col-sm-3 col-form-label" >Postcode</label>
+                            <div class="col-sm-6">
+                                <input readonly type="text" class="form-control" v-model="proposalApplicant.postal_address_postcode">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label for="" class="col-sm-3 col-form-label" >Country</label>
+                            <div class="col-sm-6">
+                                <input readonly type="text" class="form-control" v-model="proposalApplicant.postal_address_country">
+                            </div>
+                        </div> 
+                        </div>
+                    </form>
+                </FormSection>
 
-        <FormSection
-            v-if="showElectoralRoll"
-            label="WA State Electoral Roll"
-            :formCollapse="true"
-            :Index="electoralRollBody"
-        >
-            <form>
-                <div class="row mb-3">
-                    <div class="col-sm-8 mb-3">
-                        <strong>
-                            You must be on the WA state electoral roll to make
-                            an application
-                        </strong>
+                <FormSection v-else 
+                    label="Address Details"
+                    :formCollapse="true"
+                    :Index="addressBody"
+                    @toggle-collapse="adjust_address_tables"
+                >
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <strong>
+                            Residential Address
+                            </strong>
+                        </div>
                     </div>
-                    <div class="col-sm-8">
-                        <input
-                            disabled
-                            class="form-check-input"
-                            type="radio"
-                            id="electoral_roll_yes"
-                            :value="false"
-                            v-model="silentElector"
-                        />
-                        <label for="electoral_roll_yes">
-                            Yes, I am on the
-                            <a
-                                href="/"
-                                @click.prevent="uploadProofElectoralRoll"
-                                >WA state electoral roll</a
-                            >
-                        </label>
-                    </div>
-                    <div class="col-sm-8">
-                        <input
-                            disabled
-                            class="form-check-input"
-                            type="radio"
-                            id="electoral_roll_silent"
-                            :value="true"
-                            v-model="silentElector"
-                        />
-                        <label for="electoral_roll_silent">
-                            I am a silent elector
-                        </label>
-                        <div v-if="silentElector === true">
-                            <FileField
-                                readonly
-                                headerCSS="ml-3"
-                                label="Provide evidence"
-                                ref="electoral_roll_documents"
-                                name="electoral-roll-documents"
-                                :isRepeatable="true"
-                                :documentActionUrl="electoralRollDocumentUrl"
-                                :replace_button_by_text="true"
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <datatable
+                                ref="residential_address_datatable"
+                                :id="residential_address_datatable_id"
+                                :dtOptions="residential_address_datatable_options"
+                                :dtHeaders="address_datatable_headers"
                             />
                         </div>
                     </div>
-                </div>
-            </form>
-        </FormSection>
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <strong>
+                            Postal Address
+                            </strong>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <datatable
+                                ref="postal_address_datatable"
+                                :id="postal_address_datatable_id"
+                                :dtOptions="postal_address_datatable_options"
+                                :dtHeaders="address_datatable_headers"
+                            />
+                        </div>
+                    </div>
+                </FormSection>
+
+                <FormSection
+                    label="Contact Details"
+                    :formCollapse="true"
+                    :Index="contactsBody"
+                >
+                    <form  >
+                        <div class="row mb-3">
+                            <label for="" class="col-sm-3 col-form-label">Phone (work)</label>
+                            <div class="col-sm-6">
+                                <input disabled type="text" class="form-control" name="phoneNumber"
+                                    placeholder="" v-model="user.phone_number">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label for="" class="col-sm-3 col-form-label">Mobile</label>
+                            <div class="col-sm-6">
+                                <input disabled type="text" class="form-control" name="mobileNumber"
+                                    placeholder="" v-model="user.mobile_number">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label for="" class="col-sm-3 col-form-label">Email</label>
+                            <div class="col-sm-6">
+                                <input disabled type="text" class="form-control" name="email"
+                                    placeholder="" v-model="user.email">
+                            </div>
+                        </div>
+                    </form>
+                </FormSection>
+
+                <FormSection  v-if="showElectoralRoll"
+                    label="WA State Electoral Roll"
+                    :formCollapse="true"
+                    :Index="electoralRollBody"
+                >
+                    <form  >
+                        <div class="row mb-3">
+                            <div class="col-sm-8 mb-3">
+                                <strong>
+                                    You must be on the WA state electoral roll to make an application
+                                </strong>
+                            </div>
+                            <div class="col-sm-8">
+                                <input disabled class="form-check-input" type="radio" id="electoral_roll_yes" :value="false"
+                                    v-model="silentElector" />
+                                <label for="electoral_roll_yes">
+                                    Yes, I am on the
+                                    <a href="/" @click.prevent="uploadProofElectoralRoll">WA state electoral
+                                        roll</a>
+                                </label>
+                            </div>
+                            <div class="col-sm-8">
+                                <input disabled class="form-check-input" type="radio" id="electoral_roll_silent"
+                                    :value="true" v-model="silentElector" />
+                                <label for="electoral_roll_silent">
+                                    I am a silent elector
+                                </label>
+                                <div v-if="silentElector === true">
+                                    <FileField readonly headerCSS="ml-3" label="Provide evidence"
+                                        ref="electoral_roll_documents" name="electoral-roll-documents"
+                                        :isRepeatable="true" :documentActionUrl="electoralRollDocumentUrl"
+                                        :replace_button_by_text="true" />
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </FormSection>
+
     </div>
 </template>
 
 <script>
-import datatable from '@/utils/vue/datatable.vue';
-import FileField from '@/components/forms/filefield_immediate.vue';
-import FormSection from '@/components/forms/section_toggle.vue';
-import { api_endpoints } from '@/utils/hooks';
+import datatable from '@/utils/vue/datatable.vue'
+import FileField from '@/components/forms/filefield_immediate.vue'
+import FormSection from '@/components/forms/section_toggle.vue'
+import {
+    api_endpoints
+}
+from '@/utils/hooks'
 export default {
     name: 'Applicant',
     props: {
@@ -474,7 +288,7 @@ export default {
         },
         showElectoralRoll: {
             type: Boolean,
-            default: false,
+            default: false
         },
         storedSilentElector: {
             type: Boolean,
@@ -497,17 +311,10 @@ export default {
             addressBody: 'addressBody' + vm.$.uid,
             contactsBody: 'contactsBody' + vm.$.uid,
             electoralRollBody: 'electoralRollBody' + vm.$.uid,
-            residential_address_datatable_id:
-                'residential-address-datatable-' + vm.$.uid,
+            residential_address_datatable_id: 'residential-address-datatable-' + vm.$.uid,
             postal_address_datatable_id: 'postal-address-datatable-' + vm.$.uid,
-            address_datatable_headers: [
-                'Street',
-                'Locality',
-                'State',
-                'Postcode',
-                'Country',
-            ],
-        };
+            address_datatable_headers: ["Street","Locality","State","Postcode","Country"],
+        }
     },
     components: {
         FileField,
@@ -518,10 +325,7 @@ export default {
         electoralRollDocumentUrl: function () {
             let url = '';
             if (this.proposalId) {
-                url =
-                    '/api/proposal/' +
-                    this.proposalId +
-                    '/electoral_roll_document/';
+                url = '/api/proposal/' + this.proposalId + '/electoral_roll_document/'
             }
             return url;
         },
@@ -535,64 +339,60 @@ export default {
             }
             return label;
         },
-        residential_address_datatable_options: function () {
-            return this.datatable_options('residential');
+        residential_address_datatable_options: function() {
+            return this.datatable_options("residential");
         },
-        postal_address_datatable_options: function () {
-            return this.datatable_options('postal');
+        postal_address_datatable_options: function() {
+            return this.datatable_options("postal");
         },
-        column_street: function () {
+        column_street: function(){
             return {
-                data: 'line1',
-            };
+                data: "line1",
+            }
         },
-        column_locality: function () {
+        column_locality: function(){
             return {
-                data: 'locality',
-            };
+                data: "locality",
+            }
         },
-        column_state: function () {
+        column_state: function(){
             return {
-                data: 'state',
-            };
+                data: "state",
+            }
         },
-        column_postcode: function () {
+        column_postcode: function(){
             return {
-                data: 'postcode',
-            };
+                data: "postcode",
+            }
         },
-        column_country: function () {
+        column_country: function(){
             return {
-                data: 'country',
-            };
+                data: "country",
+            }
         },
     },
     methods: {
-        adjust_address_tables: function () {
+        adjust_address_tables: function() {
             let vm = this;
             setTimeout(function () {
                 vm.adjust_table_width();
             }, 200);
         },
-        adjust_table_width: function () {
+        adjust_table_width: function() {
             let vm = this;
             if (vm.$refs.residential_address_datatable !== undefined) {
-                vm.$refs.postal_address_datatable.vmDataTable.columns
-                    .adjust()
-                    .responsive.recalc();
+                vm.$refs.postal_address_datatable.vmDataTable.columns.adjust().responsive.recalc();
             }
             if (vm.$refs.residential_address_datatable !== undefined) {
-                vm.$refs.postal_address_datatable.vmDataTable.columns
-                    .adjust()
-                    .responsive.recalc();
+                vm.$refs.postal_address_datatable.vmDataTable.columns.adjust().responsive.recalc();
             }
         },
-        datatable_options: function (address_type) {
+        datatable_options: function(address_type){
             let vm = this;
             let data = [];
-            if (address_type == 'residential') {
+            if (address_type == "residential") {
                 data = vm.user.residential_address_list;
-            } else if (address_type == 'postal') {
+            } else if (address_type == "postal") {
                 data = vm.user.postal_address_list;
             }
             return {
@@ -610,7 +410,7 @@ export default {
                     vm.column_country,
                 ],
                 processing: true,
-            };
+            }
         },
         fetchCountries: function () {
             let vm = this;
@@ -623,6 +423,6 @@ export default {
         let vm = this;
         this.fetchCountries();
         this.silentElector = this.storedSilentElector;
-    },
-};
+    }
+}
 </script>

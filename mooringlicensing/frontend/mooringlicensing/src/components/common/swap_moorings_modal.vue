@@ -1,24 +1,9 @@
 <template>
     <div id="change-contact">
-        <modal
-            v-model:show="isModalOpen"
-            transition="modal fade"
-            @ok="ok()"
-            @cancel="cancel()"
-            :processing="processing"
-            :okButtonDisabled="!okButtonEnabled"
-            :title="title"
-            large
-        >
-            <p>
-                Please select a Mooring Site License to exchange with the
-                mooring of Mooring Site License:
-                <strong>{{ approval_lodgement_number }}</strong>.
-            </p>
+        <modal v-model:show="isModalOpen"transition="modal fade" @ok="ok()" @cancel="cancel()" :processing="processing" :okButtonDisabled="!okButtonEnabled" :title="title" large>
+            <p>Please select a Mooring Site License to exchange with the mooring of Mooring Site License: <strong>{{ approval_lodgement_number }}</strong>.</p>
             <div class="container-fluid">
-                <alert v-model:show="showError" type="danger"
-                    ><strong>{{ errorString }}</strong></alert
-                >
+                <alert v-model:show="showError" type="danger"><strong>{{ errorString }}</strong></alert>
                 <div class="row mb-3">
                     <datatable
                         ref="swap_moorings_datatable"
@@ -33,20 +18,22 @@
 </template>
 
 <script>
-import modal from '@vue-utils/bootstrap-modal.vue';
-import alert from '@vue-utils/alert.vue';
-import { helpers, api_endpoints } from '@/utils/hooks.js';
-import datatable from '@/utils/vue/datatable.vue';
+import modal from '@vue-utils/bootstrap-modal.vue'
+import alert from '@vue-utils/alert.vue'
+import { helpers, api_endpoints } from "@/utils/hooks.js"
+import datatable from '@/utils/vue/datatable.vue'
 
 export default {
-    name: 'SwapMooringsModal',
-    emits: ['sendData'],
-    components: {
+    name:'SwapMooringsModal',
+    emits: [
+        'sendData',
+    ],
+    components:{
         modal,
         alert,
         datatable,
     },
-    props: {
+    props:{
         is_internal: {
             type: Boolean,
             default: false,
@@ -55,15 +42,15 @@ export default {
             type: Number,
             required: false,
             default: 0,
-        },
+        }
     },
-    data: function () {
+    data:function () {
         let vm = this;
         return {
-            approval_id: null, // ID is assigned when opening this modal.
+            approval_id: null,  // ID is assigned when opening this modal.
             approval_lodgement_number: null,
             stickers: [],
-            isModalOpen: false,
+            isModalOpen:false,
             action: '',
             details: vm.getDefaultDetails(),
             processing: false,
@@ -75,240 +62,217 @@ export default {
             datatable_id: 'swap-moorings-datatable-' + vm.$.uid,
             selectedApprovalId: null,
             selectedApprovalLodgementNumber: null,
-        };
+        }
     },
     computed: {
-        columnId: function () {
+        columnId: function() {
             return {
                 // 1. ID
-                data: 'id',
+                data: "id",
                 orderable: false,
                 searchable: false,
                 visible: false,
-                render: function (row, type, full) {
-                    return full.id;
-                },
-            };
+                'render': function(row, type, full){
+                    return full.id
+                }
+            }
         },
-        columnSelect: function () {
+        columnSelect: function() {
             return {
                 // 1. ID
-                data: 'id',
+                data: "id",
                 orderable: false,
                 searchable: false,
                 visible: true,
-                render: function (row, type, full) {
-                    return (
-                        '<input class="form-check-input" type="radio" name="select" data-selected-approval="' +
-                        full.id +
-                        '" data-selected-approval-lodgement-number="' +
-                        full.lodgement_number +
-                        '">'
-                    );
-                },
-            };
+                'render': function(row, type, full){
+                    return '<input class="form-check-input" type="radio" name="select" data-selected-approval="' + full.id + '" data-selected-approval-lodgement-number="' + full.lodgement_number + '">';
+                }
+            }
         },
-        columnLodgementNumber: function () {
+        columnLodgementNumber: function() {
             return {
                 // 2. Lodgement Number
-                data: 'id',
+                data: "id",
                 orderable: true,
                 searchable: true,
                 visible: true,
-                render: function (row, type, full) {
-                    if (full.migrated) {
-                        return full.lodgement_number + ' (M)';
+                'render': function(row, type, full){
+                    if (full.migrated){
+                        return full.lodgement_number + ' (M)'
                     } else {
-                        return full.lodgement_number;
+                        return full.lodgement_number
                     }
                 },
                 name: 'lodgement_number',
-            };
+            }
         },
-        columnMooring: function () {
-            let vm = this;
+        columnMooring: function(){
+            let vm = this
             return {
-                data: 'id',
+                data: "id",
                 orderable: false,
                 searchable: true,
                 visible: true,
-                render: function (row, type, full) {
-                    let links = '';
-                    for (let mooring of full.moorings) {
-                        if (vm.is_internal) {
-                            links += `<a href='/internal/moorings/${mooring.id}' target='_blank'>${mooring.mooring_name}</a><br/>`;
+                'render': function(row, type, full){
+                    let links = ''
+                    for (let mooring of full.moorings){
+                        if (vm.is_internal){
+                            links += `<a href='/internal/moorings/${mooring.id}' target='_blank'>${mooring.mooring_name}</a><br/>`
                         } else {
-                            links += `${mooring.mooring_name}<br/>`;
+                            links += `${mooring.mooring_name}<br/>`
                         }
                     }
-                    return links;
+                    return links
                 },
-                name: 'moorings__name, mooringlicence__mooring__name',
-            };
+                name: "moorings__name, mooringlicence__mooring__name",
+            }
         },
-        columnVesselRegos: function () {
+        columnVesselRegos: function() {
             return {
-                data: 'id',
+                data: "id",
                 orderable: true,
                 searchable: true,
                 visible: true,
-                render: function (row, type, full) {
-                    let ret = '';
-                    for (let rego of full.vessel_regos) {
-                        ret += rego + '<br/>';
+                'render': function(row, type, full){
+                    let ret = ''
+                    for (let rego of full.vessel_regos){
+                        ret += rego + '<br/>'
                     }
-                    return ret;
+                    return ret
                 },
-                name: 'current_proposal__vessel_details__vessel__rego_no',
-            };
+                name: "current_proposal__vessel_details__vessel__rego_no"
+            }
         },
-        csrf_token: function () {
-            return helpers.getCookie('csrftoken');
+        csrf_token: function() {
+          return helpers.getCookie('csrftoken')
         },
-        datatable_options: function () {
+        datatable_options: function() {
             let vm = this;
             let selectedColumns = [
-                vm.columnId,
-                vm.columnSelect,
-                vm.columnLodgementNumber,
-                vm.columnMooring,
-                vm.columnVesselRegos,
-            ];
+                    vm.columnId,
+                    vm.columnSelect,
+                    vm.columnLodgementNumber,
+                    vm.columnMooring,
+                    vm.columnVesselRegos,
+            ]
 
             return {
                 autoWidth: false,
                 language: {
-                    processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>",
+                    processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>"
                 },
                 responsive: true,
                 serverSide: true,
-                lengthMenu: [
-                    [10, 25, 50, 100],
-                    [10, 25, 50, 100],
-                ],
+                lengthMenu: [ [10, 25, 50, 100], [10, 25, 50, 100] ],
                 searching: true,
                 ajax: {
-                    url:
-                        api_endpoints.approvals_paginated_list +
-                        '/list2/?format=datatables&target_email_user_id=' +
-                        vm.target_email_user_id +
-                        '&for_swap_moorings_modal=True',
-                    dataSrc: 'data',
-                    type: 'POST',
+                    "url": api_endpoints.approvals_paginated_list + '/list2/?format=datatables&target_email_user_id=' + vm.target_email_user_id + '&for_swap_moorings_modal=True',
+                    "dataSrc": 'data',
+                    "type": 'POST',
 
                     // adding extra GET params for Custom filtering
-                    data: function (d) {
-                        d.filter_approval_type2 = 'ml';
-                        d.csrfmiddlewaretoken = vm.csrf_token;
-                    },
+                    "data": function ( d ) {
+                        d.filter_approval_type2 = 'ml'
+                        d.csrfmiddlewaretoken = vm.csrf_token
+                    }
                 },
                 dom: 'lBfrtip',
                 columns: selectedColumns,
                 processing: true,
-                initComplete: function () {},
-                createdRow: function (row, data, dataIndex) {
-                    if (data.status === 'Current') {
-                        if (
-                            data.grace_period_details &&
-                            data.grace_period_details.days_left
-                        ) {
-                            let colour_code = '#ff6961';
-                            if (data.grace_period_details.days_left > 0) {
-                                colour_code = '#ffa07a';
+                initComplete: function() {
+
+                },
+                createdRow: function(row, data, dataIndex){
+                    if (data.status === 'Current'){
+                        if (data.grace_period_details && data.grace_period_details.days_left){
+                            let colour_code = '#ff6961'
+                            if (data.grace_period_details.days_left > 0){
+                                colour_code = '#ffa07a'
                             }
                             $(row).css({
-                                'background-color': colour_code,
-                            });
+                                'background-color': colour_code
+                            })
                         }
                     }
-                },
-            };
-        },
-        datatable_headers: function () {
-            return ['Id', 'Select', 'Number', 'Mooring', 'Vessel Rego'];
-        },
-        okButtonEnabled: function () {
-            let enabled = false;
-            if (
-                this.approval_id &&
-                this.selectedApprovalId &&
-                this.approval_id != this.selectedApprovalId
-            ) {
-                enabled = true;
+                }
             }
-            return enabled;
         },
-        showError: function () {
+        datatable_headers: function() {
+            return [
+                'Id',
+                'Select',
+                'Number',
+                'Mooring',
+                'Vessel Rego',
+            ]
+        },
+        okButtonEnabled: function(){
+            let enabled = false
+            if (this.approval_id && this.selectedApprovalId && this.approval_id != this.selectedApprovalId){
+                enabled = true
+            }
+            return enabled
+        },
+        showError: function() {
             var vm = this;
             return vm.errors;
         },
-        title: function () {
-            return 'Swap Moorings';
+        title: function() {
+            return 'Swap Moorings'
         },
     },
-    methods: {
-        getDefaultDetails: function () {
+    methods:{
+        getDefaultDetails: function(){
             return {
                 reason: '',
                 date_of_lost_sticker: null,
                 date_of_returned_sticker: null,
-            };
+            }
         },
-        ok: function () {
-            let vm = this;
-            vm.errors = false;
-            vm.processing = true;
+        ok:function () {
+            let vm =this;
+            vm.errors = false
+            vm.processing = true
             swal({
-                title: 'Swap Moorings',
-                text:
-                    'Are you sure you want to swap moorings between the licence: ' +
-                    vm.approval_lodgement_number +
-                    ' and the licence: ' +
-                    vm.selectedApprovalLodgementNumber +
-                    '?',
-                type: 'warning',
+                title: "Swap Moorings",
+                text: "Are you sure you want to swap moorings between the licence: " + vm.approval_lodgement_number + " and the licence: " + vm.selectedApprovalLodgementNumber + "?",
+                type: "warning",
                 showCancelButton: true,
                 confirmButtonText: 'Swap Moorings',
-                confirmButtonColor: '#dc3545',
-            }).then(() => {
-                vm.$emit('sendData', {
-                    approval_id: vm.approval_id,
-                    target_approval_id: vm.selectedApprovalId,
-                });
-            });
+                confirmButtonColor:'#dc3545'
+            }).then(()=>{
+                vm.$emit("sendData", {
+                    "approval_id": vm.approval_id,
+                    "target_approval_id": vm.selectedApprovalId,
+                })
+            })
         },
-        cancel: function () {
+        cancel:function () {
             this.close();
         },
-        close: function () {
-            this.isModalOpen = false;
-            this.details = this.getDefaultDetails();
-            $('#returned_date_elem').val('');
-            $('#lost_date_elem').val('');
-            this.errors = false;
-            this.processing = false;
-            this.approval_id = null;
+        close:function () {
+            this.isModalOpen = false
+            this.details = this.getDefaultDetails()
+            $('#returned_date_elem').val('')
+            $('#lost_date_elem').val('')
+            this.errors = false
+            this.processing = false
+            this.approval_id = null
         },
         addEventListeners: function () {
             let vm = this;
-            vm.$refs.swap_moorings_datatable.vmDataTable.on(
-                'click',
-                'input[class="form-check-input"][type="radio"]',
-                function (e) {
-                    var id = $(this).attr('data-selected-approval');
-                    var lodgement_number = $(this).attr(
-                        'data-selected-approval-lodgement-number'
-                    );
-                    vm.selectedApprovalId = id;
-                    vm.selectedApprovalLodgementNumber = lodgement_number;
-                }
-            );
+            vm.$refs.swap_moorings_datatable.vmDataTable.on('click', 'input[class="form-check-input"][type="radio"]', function(e) {
+                var id = $(this).attr('data-selected-approval');
+                var lodgement_number = $(this).attr('data-selected-approval-lodgement-number');
+                vm.selectedApprovalId = id
+                vm.selectedApprovalLodgementNumber = lodgement_number
+            })
         },
     },
-    created: function () {
+    created:function () {
         this.$nextTick(() => {
             this.addEventListeners();
         });
-    },
-};
+    }
+}
 </script>

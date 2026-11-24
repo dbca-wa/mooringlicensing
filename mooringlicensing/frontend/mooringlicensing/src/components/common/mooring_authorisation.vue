@@ -1,90 +1,47 @@
 <template>
-    <div
-        v-if="newAua || changeMooring || (changeMooring && noMoorings)"
-        id="mooring_authorisation"
-    >
+    <div v-if="newAua || changeMooring || (changeMooring && noMoorings)" id="mooring_authorisation">
         <FormSection label="Mooring details" Index="mooring_authorisation">
             <div class="row mb-3">
-                <label for="" class="col-sm-9 form-label"
-                    >Do you want to be authorised
+                <label for="" class="col-sm-9 form-label">Do you want to be authorised
                 </label>
             </div>
             <div class="row mb-3">
                 <div class="row">
                     <div class="col-sm-9">
-                        <input
-                            :disabled="readonly"
-                            class="form-check-input"
-                            type="radio"
-                            id="site_licensee"
-                            value="site_licensee"
-                            v-model="mooringAuthPreference"
-                            required=""
-                        />
-                        <label for="site_licensee" class="form-label"
-                            >By a mooring site licensee for their mooring</label
-                        >
+                        <input :disabled="readonly" class="form-check-input" type="radio" id="site_licensee" value="site_licensee" v-model="mooringAuthPreference" required=""/>
+                        <label for="site_licensee" class="form-label">By a mooring site licensee for their mooring</label>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-sm-9">
-                        <input
-                            :disabled="readonly"
-                            class="form-check-input"
-                            type="radio"
-                            id="ria"
-                            value="ria"
-                            v-model="mooringAuthPreference"
-                            required=""
-                        />
-                        <label for="ria" class="form-label"
-                            >By Rottnest Island Authority for a mooring
-                            allocated by the Authority</label
-                        >
+                        <input :disabled="readonly" class="form-check-input" type="radio" id="ria" value="ria" v-model="mooringAuthPreference" required=""/>
+                        <label for="ria" class="form-label">By Rottnest Island Authority for a mooring allocated by the Authority</label>
                     </div>
                 </div>
             </div>
 
-            <div v-show="mooringAuthPreference === 'site_licensee'">
+            <div v-show="mooringAuthPreference==='site_licensee'">
                 <div class="row mb-3">
-                    <label
-                        for="site_licensee_email"
-                        class="col-sm-3 col-form-label"
-                        >Site licensee email</label
-                    >
+                    <label for="site_licensee_email" class="col-sm-3 col-form-label">Site licensee email</label>
                     <div class="col-sm-9">
-                        <input
-                            :readonly="readonly"
-                            class="form-control"
-                            type="text"
-                            placeholder=""
-                            id="site_licensee_email"
-                            v-model="siteLicenseeEmail"
-                        />
+                        <input :readonly="readonly" class="form-control" type="text" placeholder="" id="site_licensee_email" v-model="siteLicenseeEmail"/>
                     </div>
                 </div>
                 <div class="row mb-3">
-                    <label for="mooring_id" class="col-sm-3 col-form-label"
-                        >Mooring site ID</label
-                    >
+                    <label for="mooring_id" class="col-sm-3 col-form-label">Mooring site ID</label>
                     <div class="col-sm-9">
-                        <select
-                            id="mooring_lookup"
-                            name="mooring_lookup"
-                            ref="mooring_lookup"
-                            class="form-control"
+                        <select 
+                            id="mooring_lookup"  
+                            name="mooring_lookup"  
+                            ref="mooring_lookup" 
+                            class="form-control" 
                             style="width: 40%"
                         />
                     </div>
                 </div>
                 <div class="row mb-3">
                     <div v-if="!readonly">
-                        <button
-                            @click.prevent="addSiteLicensee()"
-                            class="btn btn-primary float-end"
-                        >
-                            Add
-                        </button>
+                        <button @click.prevent="addSiteLicensee()" class="btn btn-primary float-end">Add</button>
                     </div>
                 </div>
                 <div class="mb-3">
@@ -100,33 +57,24 @@
                 </div>
             </div>
 
-            <div v-show="mooringAuthPreference === 'ria'" class="row mb-3">
+            <div v-show="mooringAuthPreference==='ria'" class="row mb-3">
                 <div class="col-sm-9">
-                    <label
-                        for="ria_draggable"
-                        class="draggable-label-class form-label"
-                        >Order the bays in your preferred order with most
-                        preferred bay on top</label
-                    >
-                    <draggable
-                        :disabled="readonly"
-                        :list="mooringBays"
-                        item-key="id"
-                        tag="ul"
-                        class="list-group col-sm-5 draggable-class"
-                        handle=".handle"
-                    >
-                        <template #item="{ element }">
-                            <li
-                                class="list-group-item d-flex align-items-center"
-                            >
-                                <i class="fa fa-align-justify handle"></i>
-                                <span class="ms-2 text">{{
-                                    element.name
-                                }}</span>
-                            </li>
-                        </template>
-                    </draggable>
+                <label for="ria_draggable" class="draggable-label-class form-label">Order the bays in your preferred order with most preferred bay on top</label>
+                <draggable
+                    :disabled="readonly"
+                    :list="mooringBays"
+                    item-key="id"
+                    tag="ul"
+                    class="list-group col-sm-5 draggable-class"
+                    handle=".handle"
+                >
+                    <template #item="{ element }">
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="fa fa-align-justify handle"></i>
+                            <span class="ms-2 text">{{ element.name }}</span>
+                        </li>
+                    </template>
+                </draggable>
                 </div>
             </div>
         </FormSection>
@@ -134,25 +82,28 @@
 </template>
 
 <script>
-import $ from 'jquery';
-import FormSection from '@/components/forms/section_toggle.vue';
-import datatable from '@/utils/vue/datatable.vue';
-import { api_endpoints } from '@/utils/hooks';
+import $ from 'jquery'
+import FormSection from '@/components/forms/section_toggle.vue'
+import datatable from '@/utils/vue/datatable.vue'
+import {
+  api_endpoints
+}
+from '@/utils/hooks'
 import Draggable from 'vuedraggable';
 
 export default {
-    name: 'MooringAuthorisation',
-    components: {
+    name:'MooringAuthorisation',
+    components:{
         FormSection,
         Draggable,
         datatable,
     },
-    props: {
-        proposal: {
+    props:{
+        proposal:{
             type: Object,
-            required: true,
+            required:true
         },
-        readonly: {
+        readonly:{
             type: Boolean,
             default: true,
         },
@@ -166,7 +117,7 @@ export default {
             type: Boolean,
         },
     },
-    data: function () {
+    data:function () {
         let vm = this;
         return {
             mooringBays: [],
@@ -176,65 +127,50 @@ export default {
             mooringSiteName: null,
             dragging: false,
             site_licensee_datatable_id: 'site-licensee-datatable-' + vm.$.uid,
-            site_licensee_datatable_headers: [
-                'Site Licensee Email',
-                'Mooring',
-                'Action',
-            ],
+            site_licensee_datatable_headers: ["Site Licensee Email", "Mooring", "Action"],
             site_licensee_datatable_key: 1,
             actioningRequest: false,
-        };
+        }
     },
     computed: {
-        datatable_options: function () {
-            let vm = this;
+        datatable_options: function(){
+            let vm = this
 
             let columns = [
                 {
-                    data: 'email',
+                    data: "email",
                 },
                 {
-                    data: 'mooring_name',
-                    render: function (row, type, full) {
-                        if (
-                            full.endorsement === undefined ||
-                            full.endorsement == 'Not Actioned'
-                        ) {
-                            return full.mooring_name;
+                    data: "mooring_name",
+                    'render': function(row, type, full){
+                        if (full.endorsement === undefined || full.endorsement == "Not Actioned") {
+                            return full.mooring_name
                         } else {
-                            return full.mooring_name + ' - ' + full.endorsement;
-                        }
-                    },
+                            return full.mooring_name + " - " + full.endorsement
+                        }                            
+                    }
                 },
                 {
-                    data: 'mooring_id',
-                    render: function (row, type, full) {
+                    data: "mooring_id",
+                    'render': function(row, type, full){
                         let links = '';
                         links += `<a href='/internal/moorings/${full.mooring_id}/'  target="_blank" style="cursor: pointer;">View</a><br/>`;
                         if (!vm.readonly) {
                             links += `<a href='#${full.mooring_id}' onclick="window.removeSiteLicenseeMooring('${full.mooring_id}')" style="cursor: pointer;">Remove</a><br/>`;
                         }
 
-                        if (
-                            (vm.proposal.processing_status ==
-                                'Awaiting Endorsement' ||
-                                vm.proposal.processing_status ==
-                                    'With Assessor' ||
-                                vm.proposal.processing_status ==
-                                    'With Assessor (Requirements)') &&
-                            full.endorsement !== undefined
-                        ) {
-                            if (full.endorsement == 'Not Actioned') {
+                        if ((vm.proposal.processing_status == "Awaiting Endorsement" || vm.proposal.processing_status == "With Assessor" || vm.proposal.processing_status == "With Assessor (Requirements)") && full.endorsement !== undefined) {
+                            if (full.endorsement == "Not Actioned") {
                                 links += `<a href='#${full.id}' onclick="window.internalEndorse('${full.id}')" style="cursor: pointer;">Endorse on Licensee Behalf</a><br/>`;
                                 links += `<a href='#${full.id}' onclick="window.internalDecline('${full.id}')" style="cursor: pointer;">Decline on Licensee Behalf</a><br/>`;
-                            } else if (full.endorsement == 'Declined') {
+                            } else if (full.endorsement == "Declined") {
                                 links += `<a href='#${full.id}' onclick="window.internalEndorse('${full.id}')" style="cursor: pointer;">Change to Endorsed</a><br/>`;
-                            } else if (full.endorsement == 'Endorsed') {
+                            } else if (full.endorsement == "Endorsed") {
                                 links += `<a href='#${full.id}' onclick="window.internalDecline('${full.id}')" style="cursor: pointer;">Change to Declined</a><br/>`;
                             }
                         }
 
-                        return links;
+                        return links;    
                     },
                 },
             ];
@@ -249,138 +185,117 @@ export default {
                 buttons: [],
                 columns: columns,
                 processing: true,
-            };
-        },
+            }
+        }
     },
     watch: {
-        proposal: function () {
+        proposal: function() {
             this.$nextTick(async () => {
                 let vm = this;
                 vm.site_licensee_datatable_key++;
-            });
-        },
+            })
+        }
     },
-    emits: ['updateProposal'],
-    methods: {
-        addSiteLicensee: function () {
+    emits: [
+        'updateProposal'
+    ],
+    methods:{
+        addSiteLicensee: function() {
             let vm = this;
             if (vm.siteLicenseeEmail && vm.mooringSiteId) {
                 let newSiteLicensee = {
                     email: vm.siteLicenseeEmail,
                     mooring_id: vm.mooringSiteId,
                     mooring_name: vm.mooringSiteName,
-                };
-                if (
-                    !vm.proposal.site_licensee_moorings.find(
-                        (e) => e.mooring_id === newSiteLicensee.mooring_id
-                    )
-                ) {
+                }
+                if (!vm.proposal.site_licensee_moorings.find(e => e.mooring_id === newSiteLicensee.mooring_id)) {
                     vm.proposal.site_licensee_moorings.push(newSiteLicensee);
                     vm.site_licensee_datatable_key++;
                 }
             }
         },
-        internalEndorse: function (id) {
+        internalEndorse: function(id) {
+            console.log("internalEndorse", id)
             let vm = this;
 
             if (!vm.actioningRequest) {
-                vm.actioningRequest = true;
+                vm.actioningRequest=true;
 
                 let payload = {
                     site_licensee_mooring_request_id: id,
-                };
+                }
 
-                return vm.$http
-                    .post(
-                        '/api/proposal/' +
-                            vm.proposal.id +
-                            '/internal_endorse/',
-                        payload,
-                        {}
-                    )
-                    .then(
-                        (res) => {
-                            swal(
-                                'Saved',
-                                'Site Licensee Mooring Request Endorsed',
-                                'success'
-                            );
-                            vm.$emit('updateProposal', res.body);
-                            this.$nextTick(async () => {
-                                vm.site_licensee_datatable_key++;
-                                vm.actioningRequest = false;
-                            });
-                        },
-                        (err) => {
-                            swal({
-                                title: 'Please fix following errors before saving',
-                                text: err.bodyText,
-                                type: 'error',
-                            });
-                            vm.actioningRequest = false;
-                        }
-                    );
+                return vm.$http.post(
+                    "/api/proposal/"+vm.proposal.id+"/internal_endorse/", 
+                    payload, {}
+                ).then((res)=>{
+                    swal(
+                        'Saved',
+                        'Site Licensee Mooring Request Endorsed',
+                        'success'
+                    );                   
+                    vm.$emit("updateProposal", res.body);
+                    this.$nextTick(async () => {
+                        vm.site_licensee_datatable_key++;
+                        vm.actioningRequest=false;  
+                    })        
+                },(err)=>{
+                    swal({
+                        title: "Please fix following errors before saving",
+                        text: err.bodyText,
+                        type:'error'
+                    });
+                    vm.actioningRequest=false;  
+                })
             }
         },
-        internalDecline: function (id) {
+        internalDecline: function(id) {
+            console.log("internalDecline", id)
             let vm = this;
 
             if (!vm.actioningRequest) {
-                vm.actioningRequest = true;
+                vm.actioningRequest=true;
 
                 let payload = {
                     site_licensee_mooring_request_id: id,
-                };
+                }
 
-                return vm.$http
-                    .post(
-                        '/api/proposal/' +
-                            vm.proposal.id +
-                            '/internal_decline/',
-                        payload,
-                        {}
-                    )
-                    .then(
-                        (res) => {
-                            swal(
-                                'Saved',
-                                'Site Licensee Mooring Request Declined',
-                                'success'
-                            );
-                            vm.$emit('updateProposal', res.body);
-                            vm.site_licensee_datatable_key++;
-                            vm.actioningRequest = false;
-                        },
-                        (err) => {
-                            swal({
-                                title: 'Please fix following errors before saving',
-                                text: err.bodyText,
-                                type: 'error',
-                            });
-                            vm.actioningRequest = false;
-                        }
-                    );
+                return vm.$http.post(
+                    "/api/proposal/"+vm.proposal.id+"/internal_decline/", 
+                    payload, {}
+                ).then((res)=>{
+                    swal(
+                        'Saved',
+                        'Site Licensee Mooring Request Declined',
+                        'success'
+                    );                   
+                    vm.$emit("updateProposal", res.body);
+                    vm.site_licensee_datatable_key++;
+                    vm.actioningRequest=false;          
+                },(err)=>{
+                    swal({
+                        title: "Please fix following errors before saving",
+                        text: err.bodyText,
+                        type:'error'
+                    });
+                    vm.actioningRequest=false;  
+                })
             }
         },
-        removeSiteLicenseeMooring: function (mooring_id) {
+        removeSiteLicenseeMooring: function(mooring_id) {
             let vm = this;
             vm.proposal.site_licensee_moorings.splice(
-                vm.proposal.site_licensee_moorings.findIndex(
-                    (e) => e.mooring_id == mooring_id
-                ),
-                1
-            );
+                vm.proposal.site_licensee_moorings.findIndex(e => e.mooring_id == mooring_id),1
+            )
             vm.site_licensee_datatable_key++;
         },
-        fetchMooringBays: async function () {
+        fetchMooringBays: async function(){
             const response = await this.$http.get(api_endpoints.mooring_bays);
             // reorder array based on proposal.bay_preferences_numbered
             if (this.proposal.bay_preferences_numbered) {
                 let newArray = [];
                 for (let n of this.proposal.bay_preferences_numbered) {
-                    const found = response.body.results.find(
-                        (el) => el.id === n
-                    );
+                    const found = response.body.results.find(el => el.id === n);
                     newArray.push(found);
                 }
                 // read ordered array into Vue array
@@ -395,73 +310,67 @@ export default {
                 }
             }
         },
-        initialiseMooringLookup: function () {
+        initialiseMooringLookup: function(){
             let vm = this;
-            $(vm.$refs.mooring_lookup)
-                .select2({
-                    minimumInputLength: 2,
-                    theme: 'bootstrap-5',
-                    allowClear: true,
-                    placeholder: 'Select Mooring',
-                    pagination: true,
-                    ajax: {
-                        url: api_endpoints.mooring_lookup_by_site_licensee,
-                        dataType: 'json',
-                        data: function (params) {
-                            var query = {
-                                search_term: params.term,
-                                site_licensee_email: vm.siteLicenseeEmail,
-                                type: 'public',
-                                private_moorings: true,
-                                page_number: params.page || 1,
-                            };
-                            return query;
-                        },
-                        processResults: function (data) {
-                            return {
-                                results: data.results,
-                                pagination: {
-                                    more: data.pagination.more,
-                                },
-                            };
-                        },
+            $(vm.$refs.mooring_lookup).select2({
+                minimumInputLength: 2,
+                theme: "bootstrap-5",
+                allowClear: true,
+                placeholder:"Select Mooring",
+                pagination: true,
+                ajax: {
+                    url: api_endpoints.mooring_lookup_by_site_licensee,
+                    dataType: 'json',
+                    data: function(params) {
+                        var query = {
+                            search_term: params.term,
+                            site_licensee_email: vm.siteLicenseeEmail,
+                            type: 'public',
+                            private_moorings: true,
+                            page_number: params.page || 1,
+                        }
+                        return query;
                     },
-                })
-                .on('select2:select', function (e) {
-                    var selected = $(e.currentTarget);
-                    let data = e.params.data.id;
-                    vm.mooringSiteId = data;
-                    vm.mooringSiteName = e.params.data.text;
-                })
-                .on('select2:unselect', function (e) {
-                    var selected = $(e.currentTarget);
-                    vm.mooringSiteId = null;
-                    vm.mooringSiteName = null;
-                })
-                .on('select2:open', function (e) {
-                    const searchField = $('.select2-search__field');
-                    // move focus to select2 field
-                    searchField[0].focus();
-                });
+                    processResults: function(data){
+                        return {
+                            'results': data.results,
+                            'pagination': {
+                                'more': data.pagination.more
+                            }
+                        }
+                    },
+                },
+            }).
+            on("select2:select", function (e) {
+                var selected = $(e.currentTarget);
+                let data = e.params.data.id;
+                vm.mooringSiteId = data;
+                vm.mooringSiteName = e.params.data.text;
+            }).
+            on("select2:unselect",function (e) {
+                var selected = $(e.currentTarget);
+                vm.mooringSiteId = null;
+                vm.mooringSiteName = null;
+            }).
+            on("select2:open",function (e) {
+                const searchField = $(".select2-search__field")
+                // move focus to select2 field
+                searchField[0].focus();
+            });
             vm.readMooringSiteId();
         },
-        readMooringSiteId: async function () {
+        readMooringSiteId: async function() {
             let vm = this;
             if (vm.proposal.mooring_id) {
-                const res = await vm.$http.get(
-                    `${api_endpoints.mooring}${vm.proposal.mooring_id}/fetch_mooring_name`
-                );
-                var option = new Option(
-                    res.body.name,
-                    vm.proposal.mooring_id,
-                    true,
-                    true
-                );
+                const res = await vm.$http.get(`${api_endpoints.mooring}${vm.proposal.mooring_id}/fetch_mooring_name`);
+                var option = new Option(res.body.name, vm.proposal.mooring_id, true, true);
                 $(vm.$refs.mooring_lookup).append(option).trigger('change');
             }
         },
+
+
     },
-    mounted: function () {
+    mounted:function () {
         window.removeSiteLicenseeMooring = (mooring_id) => {
             this.removeSiteLicenseeMooring(mooring_id);
         };
@@ -474,13 +383,13 @@ export default {
         this.$nextTick(async () => {
             await this.fetchMooringBays();
             if (this.proposal.mooring_authorisation_preference) {
-                this.mooringAuthPreference =
-                    this.proposal.mooring_authorisation_preference;
+                this.mooringAuthPreference = this.proposal.mooring_authorisation_preference;
             }
             this.initialiseMooringLookup();
         });
+
     },
-};
+}
 </script>
 
 <style lang="css" scoped>
@@ -498,3 +407,4 @@ export default {
     padding-bottom: 3%;
 }
 </style>
+

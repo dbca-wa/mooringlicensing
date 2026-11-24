@@ -5,19 +5,14 @@
                 <div class="mb-3">
                     <label for="">Organisation</label>
                     <select
-                        id="organisation_lookup1"
-                        name="organisation_lookup1"
-                        ref="organisation_lookup1"
-                        class="form-control"
-                    >
-                        <option
-                            v-for="org in dcv_organisations"
-                            :key="org.id"
-                            :value="org.id"
-                        >
-                            {{ org.name }}
-                        </option>
-                    </select>
+                            id="organisation_lookup1"  
+                            name="organisation_lookup1"  
+                            ref="organisation_lookup1" 
+                            class="form-control">
+                            <option v-for="org in dcv_organisations" :key="org.id" :value="org.id">
+                                {{ org.name }}
+                            </option>
+                        </select>
                 </div>
             </div>
             <div class="col-md-3">
@@ -25,12 +20,7 @@
                     <label for="">Season</label>
                     <select class="form-select" v-model="filterFeeSeason">
                         <option value="All">All</option>
-                        <option
-                            v-for="fee_season in fee_seasons"
-                            :value="fee_season.id"
-                        >
-                            {{ fee_season.name }}
-                        </option>
+                        <option v-for="fee_season in fee_seasons" :value="fee_season.id">{{ fee_season.name }}</option>
                     </select>
                 </div>
             </div>
@@ -38,13 +28,7 @@
 
         <div v-if="is_external || is_internal" class="row">
             <div class="col-md-12">
-                <button
-                    type="button"
-                    class="btn btn-primary float-end"
-                    @click="new_application_button_clicked"
-                >
-                    New Application
-                </button>
+                <button type="button" class="btn btn-primary float-end" @click="new_application_button_clicked">New Application</button>
             </div>
         </div>
 
@@ -74,23 +58,23 @@
 </template>
 
 <script>
-import $ from 'jquery';
-import datatable from '@/utils/vue/datatable.vue';
-import { api_endpoints, helpers } from '@/utils/hooks';
-import CreateNewStickerModal from '@/components/common/create_new_sticker_modal.vue';
-import RequestNewDCVStickerModal from '@/components/common/request_new_dcv_sticker_modal.vue';
-import RequestDCVStickerAddressModal from '@/components/common/request_dcv_sticker_address_modal.vue';
+import $ from 'jquery'
+import datatable from '@/utils/vue/datatable.vue'
+import { api_endpoints, helpers } from '@/utils/hooks'
+import CreateNewStickerModal from "@/components/common/create_new_sticker_modal.vue"
+import RequestNewDCVStickerModal from "@/components/common/request_new_dcv_sticker_modal.vue"
+import RequestDCVStickerAddressModal from "@/components/common/request_dcv_sticker_address_modal.vue"
 
 export default {
     name: 'TableDcvPermits',
     props: {
-        level: {
+        level:{
             type: String,
             required: true,
-            validator: function (val) {
+            validator: function(val) {
                 let options = ['internal', 'referral', 'external'];
-                return options.indexOf(val) != -1 ? true : false;
-            },
+                return options.indexOf(val) != -1 ? true: false;
+            }
         },
     },
     data() {
@@ -105,205 +89,195 @@ export default {
             // filtering options
             dcv_organisations: [],
             fee_seasons: [],
-        };
+        }
     },
-    components: {
+    components:{
         datatable,
         CreateNewStickerModal,
         RequestNewDCVStickerModal,
         RequestDCVStickerAddressModal,
     },
     watch: {
-        filterDcvOrganisation: function () {
+        filterDcvOrganisation: function() {
             let vm = this;
             vm.$refs.dcv_permits_datatable.vmDataTable.draw();
         },
-        filterFeeSeason: function () {
+        filterFeeSeason: function() {
             let vm = this;
             vm.$refs.dcv_permits_datatable.vmDataTable.draw();
         },
     },
     computed: {
-        is_external: function () {
-            return this.level == 'external';
+        is_external: function() {
+            return this.level == 'external'
         },
-        is_internal: function () {
-            return this.level == 'internal';
+        is_internal: function() {
+            return this.level == 'internal'
         },
-        datatable_headers: function () {
-            if (this.is_internal) {
-                return [
-                    'id',
-                    'Number',
-                    'Invoice / Permit',
-                    'Organisation',
-                    'Status',
-                    'Payment Status',
-                    'Season',
-                    'Sticker',
-                    'Vessel Rego',
-                    'Action',
-                ];
+        datatable_headers: function(){
+            if (this.is_internal){
+                return ['id', 'Number', 'Invoice / Permit', 'Organisation', 'Status', 'Payment Status', 'Season', 'Sticker', 'Vessel Rego', 'Action']
             }
         },
-        column_id: function () {
+        column_id: function(){
             return {
                 // 1. ID
-                data: 'id',
+                data: "id",
                 orderable: false,
                 searchable: false,
                 visible: false,
-                render: function (row, type, full) {
-                    return full.id;
-                },
-            };
+                'render': function(row, type, full){
+                    return full.id
+                }
+            }
         },
-        column_lodgement_number: function () {
+        column_lodgement_number: function(){
             return {
                 // 2. Lodgement Number
-                data: 'id',
+                data: "id",
                 orderable: true,
                 searchable: true,
                 visible: true,
-                render: function (row, type, full) {
-                    if (full.migrated) {
-                        return full.lodgement_number + ' (M)';
+                'render': function(row, type, full){
+                    if (full.migrated){
+                        return full.lodgement_number + ' (M)'
                     } else {
-                        return full.lodgement_number;
+                        return full.lodgement_number
                     }
                 },
                 name: 'lodgement_number',
-            };
+            }
         },
-        column_invoice_approval: function () {
-            let vm = this;
+        column_invoice_approval: function(){
+            let vm = this
 
             return {
-                data: 'id',
+                data: "id",
                 orderable: false,
                 searchable: false,
                 visible: true,
-                render: function (row, type, full) {
-                    let links = '';
-                    if (full.invoices) {
-                        for (let invoice of full.invoices) {
-                            links += `<div><a href='${invoice.invoice_url}' target='_blank'><i style='color:red;' class='fa fa-file-pdf-o'></i> #${invoice.reference}</a></div>`;
-                            if (!vm.is_external) {
-                                links += `<div><a href='${invoice.ledger_payment_url}' target='_blank'>Ledger Payment</a></div>`;
+                'render': function(row, type, full){
+                    let links = ''
+                    if (full.invoices){
+                        for (let invoice of full.invoices){
+                            links +=  `<div><a href='${invoice.invoice_url}' target='_blank'><i style='color:red;' class='fa fa-file-pdf-o'></i> #${invoice.reference}</a></div>`;
+                            if (!vm.is_external){
+                                links +=  `<div><a href='${invoice.ledger_payment_url}' target='_blank'>Ledger Payment</a></div>`;
                             }
                         }
                     }
-                    if (full.dcv_permit_documents) {
-                        for (let permit_url of full.dcv_permit_documents) {
-                            links += `<div><a href='${permit_url}' target='_blank'><i style='color:red;' class='fa fa-file-pdf-o'></i> Dcv Permit</a></div>`;
+                    if (full.dcv_permit_documents){
+                        for (let permit_url of full.dcv_permit_documents){
+                            links +=  `<div><a href='${permit_url}' target='_blank'><i style='color:red;' class='fa fa-file-pdf-o'></i> Dcv Permit</a></div>`;
                         }
                     }
-                    return links;
-                },
-            };
+                    return links
+                }
+            }
         },
-        column_organisation: function () {
+        column_organisation: function(){
             return {
-                data: 'id',
+                data: "id",
                 orderable: true,
                 searchable: true,
                 visible: true,
-                render: function (row, type, full) {
+                'render': function(row, type, full){
                     return full.dcv_organisation_name;
                 },
                 name: 'dcv_organisation__name',
-            };
+            }
         },
-        column_status: function () {
+        column_status: function(){
             return {
-                data: 'id',
+                data: "id",
                 orderable: false,
                 searchable: false,
                 visible: true,
-                render: function (row, type, full) {
+                'render': function(row, type, full){
                     return full.status;
                 },
                 name: 'status',
-            };
+            }
         },
-        column_payment_status: function () {
+        column_payment_status: function(){
             return {
-                data: 'id',
+                data: "id",
                 orderable: false,
                 searchable: false,
                 visible: true,
-                render: function (row, type, full) {
+                'render': function(row, type, full){
                     return full.payment_status;
                 },
-            };
+            }
         },
-        column_year: function () {
+        column_year: function(){
             return {
-                data: 'id',
+                data: "id",
                 orderable: true,
                 searchable: false,
                 visible: true,
-                render: function (row, type, full) {
+                'render': function(row, type, full){
                     return full.fee_season;
                 },
                 name: 'fee_season__name',
-            };
+
+            }
         },
-        column_sticker: function () {
+        column_sticker: function(){
             return {
-                data: 'id',
+                data: "id",
                 orderable: false,
                 searchable: true,
                 visible: true,
-                render: function (row, type, full) {
-                    let ret_str = '';
-                    for (let sticker of full.stickers) {
-                        ret_str += sticker.number + '<br />';
+                'render': function(row, type, full){
+                    let ret_str = ''
+                    for(let sticker of full.stickers){
+                        ret_str += sticker.number + '<br />'
                     }
-                    return ret_str;
+                    return ret_str
                 },
                 name: 'stickers__number',
-            };
+            }
         },
-        column_vessel_rego: function () {
+        column_vessel_rego: function(){
             return {
-                data: 'id',
+                data: "id",
                 orderable: false,
                 searchable: true,
                 visible: true,
-                render: function (row, type, full) {
-                    return full.vessel_rego;
+                'render': function(row, type, full){
+                    return full.vessel_rego
                 },
                 name: 'dcv_vessel__rego_no',
-            };
+            }
         },
-        column_action: function () {
-            let vm = this;
+        column_action: function(){
+            let vm = this
             return {
                 // 8. Action
-                data: 'id',
+                data: "id",
                 orderable: false,
                 searchable: false,
                 visible: true,
-                render: function (row, type, full) {
+                'render': function(row, type, full){
                     let links = '';
-                    if (vm.is_internal) {
-                        if (full.display_create_sticker_action) {
-                            links += `<a href='#${full.id}' data-create-new-sticker='${full.id}'>Create New Sticker</a><br/>`;
+                    if (vm.is_internal){
+                        if (full.display_create_sticker_action){
+                            links +=  `<a href='#${full.id}' data-create-new-sticker='${full.id}'>Create New Sticker</a><br/>`;
                         }
-                        if (full.display_request_sticker_action) {
-                            links += `<a href='#${full.id}' data-request-new-sticker='${full.id}'>Request New Sticker</a><br/>`;
+                        if (full.display_request_sticker_action){
+                            links += `<a href='#${full.id}' data-request-new-sticker='${full.id}'>Request New Sticker</a><br/>`
                         }
-                        if (full.display_update_sticker_address_action) {
-                            links += `<a href='#${full.id}' data-request-sticker-address='${full.id}'>Update Sticker Address</a><br/>`;
-                        }
+                        if (full.display_update_sticker_address_action){
+                            links += `<a href='#${full.id}' data-request-sticker-address='${full.id}'>Update Sticker Address</a><br/>`
+                        }                        
                     }
-                    return links;
-                },
-            };
+                    return links
+                }
+            }
         },
-        datatable_options: function () {
-            let vm = this;
+        datatable_options: function(){
+            let vm = this
 
             let columns = [
                 vm.column_id,
@@ -316,340 +290,260 @@ export default {
                 vm.column_sticker,
                 vm.column_vessel_rego,
                 vm.column_action,
-            ];
-            let search = true;
+            ]
+            let search = true
 
             return {
                 autoWidth: false,
                 language: {
-                    processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>",
+                    processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>"
                 },
                 responsive: false,
                 scrollX: true,
                 fixedColumns: {
                     leftColumns: 1,
-                    rightColumns: 1,
+                    rightColumns: 1
                 },
                 serverSide: true,
                 searching: search,
                 ajax: {
-                    url:
-                        api_endpoints.dcvpermits_paginated_list +
-                        '?format=datatables',
-                    dataSrc: 'data',
+                    "url": api_endpoints.dcvpermits_paginated_list + '?format=datatables',
+                    "dataSrc": 'data',
 
                     // adding extra GET params for Custom filtering
-                    data: function (d) {
-                        d.filter_dcv_organisation_id = vm.filterDcvOrganisation;
-                        d.filter_fee_season_id = vm.filterFeeSeason;
+                    "data": function ( d ) {
+                        d.filter_dcv_organisation_id = vm.filterDcvOrganisation
+                        d.filter_fee_season_id = vm.filterFeeSeason
                         //only use columns necessary for filtering and ordering
-                        let keepCols = [];
-                        let originalCols = d.columns;
+                        let keepCols = []
+                        let originalCols = d.columns
                         d.columns.forEach((value, index) => {
                             if (value.searchable || value.orderable) {
-                                keepCols.push(d.columns[index]);
+                                keepCols.push(d.columns[index])
                             }
                         });
                         d.columns = keepCols;
 
                         //adjust order
-                        let nameIndexDict = {};
+                        let nameIndexDict = {}
                         d.columns.forEach((value, index) => {
-                            nameIndexDict[value.name] = index;
-                        });
-                        let originalNameIndexDict = {};
+                                nameIndexDict[value.name] = index;
+                            }
+                        )
+                        let originalNameIndexDict = {}
                         originalCols.forEach((value, index) => {
-                            originalNameIndexDict[value.name] = index;
-                        });
+                                originalNameIndexDict[value.name] = index;
+                            }
+                        )
                         let newOrder = JSON.parse(JSON.stringify(d.order));
                         d.order.forEach((o_value, o_index) => {
-                            Object.entries(originalNameIndexDict).forEach(
-                                ([key, value]) => {
-                                    if (o_value.column == value) {
-                                        let name = key;
-                                        let new_index = nameIndexDict[name];
-                                        newOrder[o_index].column = new_index;
-                                    }
+                            Object.entries(originalNameIndexDict).forEach(([key,value]) => {
+                                if (o_value.column == value) {
+                                    let name = key;
+                                    let new_index = nameIndexDict[name];
+                                    newOrder[o_index].column = new_index;
                                 }
-                            );
-                        });
+                            })    
+                        })
                         d.order = newOrder;
-                    },
+                    }
                 },
                 dom: 'lBfrtip',
                 columns: columns,
                 processing: true,
-                initComplete: function () {},
-            };
-        },
+                initComplete: function() {
+                    console.log('in initComplete')
+                },
+            }
+        }
     },
     methods: {
-        initialiseOrganisationLookup: function () {
+        initialiseOrganisationLookup: function(){
             let vm = this;
-            $(vm.$refs.organisation_lookup1)
-                .select2({
-                    minimumInputLength: 2,
-                    theme: 'bootstrap-5',
-                    allowClear: true,
-                    placeholder: '',
-                    ajax: {
-                        url: api_endpoints.dcv_organisations,
-                        dataType: 'json',
-                        data: function (params) {
-                            return {
-                                search_term: params.term,
-                            };
-                        },
-                        processResults: function (data) {
-                            const results = data.results.map((org) => ({
-                                id: org.id,
-                                text: org.name,
-                            }));
-                            return {
-                                results: results,
-                            };
-                        },
+            $(vm.$refs.organisation_lookup1).select2({
+                minimumInputLength: 2,
+                theme: "bootstrap-5",
+                allowClear: true,
+                placeholder: "",
+                ajax: {
+                    url: api_endpoints.dcv_organisations,
+                    dataType: 'json',
+                    data: function(params) {
+                        return {
+                            search_term: params.term,
+                        }
                     },
-                })
-                .on('select2:select', function (e) {
-                    vm.filterDcvOrganisation = e.params.data.id;
-                })
-                .on('select2:unselect', function (e) {
-                    vm.filterDcvOrganisation = null;
-                })
-                .on('select2:open', function (e) {
-                    const searchField = $(
-                        '[aria-controls="select2-organisation_lookup-results"]'
-                    );
-                    searchField[0].focus();
-                });
-        },
-        sendDataForCreateNewSticker: function (params) {
-            let vm = this;
-            vm.$http
-                .post(
-                    '/api/internal_dcv_permit/' +
-                        params.approval_id +
-                        '/create_new_sticker/',
-                    params
-                )
-                .then(
-                    (res) => {
-                        // Retrieve the element clicked on
-                        let elem_clicked = $(
-                            "a[data-create-new-sticker='" +
-                                params.approval_id +
-                                "']"
-                        );
-
-                        // Retrieve the row index clicked on
-                        let row_index_clicked = elem_clicked
-                            .closest('tr')
-                            .index();
-
-                        // Retrieve whole data in the row
-                        let row_data =
-                            vm.$refs.dcv_permits_datatable.vmDataTable
-                                .row(row_index_clicked)
-                                .data();
-
-                        // Update the row data
-                        row_data.stickers.push({ number: res.body.number });
-                        row_data.display_create_sticker_action = false;
-                        row_data.display_request_sticker_action = true;
-                        row_data.display_update_sticker_address_action = true;
-
-                        // Apply the updated data to the row
-                        vm.$refs.dcv_permits_datatable.vmDataTable
-                            .row(row_index_clicked)
-                            .data(row_data)
-                            .invalidate();
-                        vm.$refs.create_new_sticker_modal.processing = false;
-                        vm.$refs.create_new_sticker_modal.isModalOpen = false;
-                        vm.$refs.create_new_sticker_modal.change_sticker_address = false;
-                        vm.$refs.create_new_sticker_modal.postal_address_line1 =
-                            '';
-                        vm.$refs.create_new_sticker_modal.postal_address_line2 =
-                            '';
-                        vm.$refs.create_new_sticker_modal.postal_address_line3 =
-                            '';
-                        vm.$refs.create_new_sticker_modal.postal_address_locality =
-                            '';
-                        vm.$refs.create_new_sticker_modal.postal_address_state =
-                            '';
-                        vm.$refs.create_new_sticker_modal.postal_address_country =
-                            '';
-                        vm.$refs.create_new_sticker_modal.postal_address_postcode =
-                            '';
+                    processResults: function(data) {
+                        const results = data.results.map(org => ({
+                            id: org.id,   
+                            text: org.name
+                        }));
+                        return {
+                            results: results, 
+                        };
                     },
-                    (err) => {
-                        console.log(err);
-                        vm.$refs.create_new_sticker_modal.errors = true;
-                        vm.$refs.create_new_sticker_modal.errorString =
-                            helpers.apiVueResourceError(err);
-                        vm.$refs.create_new_sticker_modal.processing = false;
-                    }
-                );
+                },
+            })
+            .on("select2:select", function (e) {
+                vm.filterDcvOrganisation = e.params.data.id;
+            })
+            .on("select2:unselect", function (e) {
+                vm.filterDcvOrganisation = null;
+            })
+            .on("select2:open", function (e) {
+                const searchField = $('[aria-controls="select2-organisation_lookup-results"]');
+                searchField[0].focus();
+            });
         },
-        sendDataForRequestNewSticker: function (params) {
-            let vm = this;
-            vm.$http
-                .post(
-                    '/api/internal_dcv_permit/' +
-                        params.dcv_permit_id +
-                        '/request_new_stickers/',
-                    params
-                )
-                .then(
-                    (res) => {
-                        vm.$refs.request_new_dcv_sticker_modal.processing = false;
-                        vm.$refs.request_new_dcv_sticker_modal.isModalOpen = false;
-                        vm.$refs.request_new_dcv_sticker_modal.change_sticker_address = false;
-                        vm.$refs.request_new_dcv_sticker_modal.postal_address_line1 =
-                            '';
-                        vm.$refs.request_new_dcv_sticker_modal.postal_address_line2 =
-                            '';
-                        vm.$refs.request_new_dcv_sticker_modal.postal_address_line3 =
-                            '';
-                        vm.$refs.request_new_dcv_sticker_modal.postal_address_locality =
-                            '';
-                        vm.$refs.request_new_dcv_sticker_modal.postal_address_state =
-                            '';
-                        vm.$refs.request_new_dcv_sticker_modal.postal_address_country =
-                            '';
-                        vm.$refs.request_new_dcv_sticker_modal.postal_address_postcode =
-                            '';
-                    },
-                    (err) => {
-                        console.log(err);
-                        vm.$refs.request_new_dcv_sticker_modal.errors = true;
-                        vm.$refs.request_new_dcv_sticker_modal.errorString =
-                            helpers.apiVueResourceError(err);
-                        vm.$refs.request_new_dcv_sticker_modal.processing = false;
-                    }
-                );
+        sendDataForCreateNewSticker: function(params){
+            let vm = this
+            vm.$http.post('/api/internal_dcv_permit/' + params.approval_id + '/create_new_sticker/', params).then(
+                res => {
+                    // Retrieve the element clicked on
+                    let elem_clicked = $("a[data-create-new-sticker='" + params.approval_id + "']")
+
+                    // Retrieve the row index clicked on
+                    let row_index_clicked = elem_clicked.closest('tr').index()
+
+                    // Retrieve whole data in the row
+                    let row_data = vm.$refs.dcv_permits_datatable.vmDataTable.row(row_index_clicked).data()
+
+                    // Update the row data
+                    row_data.stickers.push({'number': res.body.number})
+                    row_data.display_create_sticker_action = false
+                    row_data.display_request_sticker_action = true
+                    row_data.display_update_sticker_address_action = true
+
+                    // Apply the updated data to the row
+                    vm.$refs.dcv_permits_datatable.vmDataTable.row(row_index_clicked).data(row_data).invalidate()
+                    vm.$refs.create_new_sticker_modal.processing = false
+                    vm.$refs.create_new_sticker_modal.isModalOpen = false
+                    vm.$refs.create_new_sticker_modal.change_sticker_address= false
+                    vm.$refs.create_new_sticker_modal.postal_address_line1 = ''
+                    vm.$refs.create_new_sticker_modal.postal_address_line2 = ''
+                    vm.$refs.create_new_sticker_modal.postal_address_line3 = ''
+                    vm.$refs.create_new_sticker_modal.postal_address_locality = ''
+                    vm.$refs.create_new_sticker_modal.postal_address_state = ''
+                    vm.$refs.create_new_sticker_modal.postal_address_country = ''
+                    vm.$refs.create_new_sticker_modal.postal_address_postcode = ''
+                },
+                err => {
+                    console.log(err)
+                    vm.$refs.create_new_sticker_modal.errors = true
+                    vm.$refs.create_new_sticker_modal.errorString = helpers.apiVueResourceError(err);
+                    vm.$refs.create_new_sticker_modal.processing = false
+                }
+            )
         },
-        sendDataForStickerAddress: function (params) {
-            let vm = this;
-            vm.$http
-                .post(
-                    '/api/internal_dcv_permit/' +
-                        params.dcv_permit_id +
-                        '/change_sticker_addresses/',
-                    params
-                )
-                .then(
-                    (res) => {
-                        vm.$refs.request_dcv_sticker_address_modal.processing = false;
-                        vm.$refs.request_dcv_sticker_address_modal.isModalOpen = false;
-                        vm.$refs.request_dcv_sticker_address_modal.change_sticker_address = false;
-                        vm.$refs.request_dcv_sticker_address_modal.postal_address_line1 =
-                            '';
-                        vm.$refs.request_dcv_sticker_address_modal.postal_address_line2 =
-                            '';
-                        vm.$refs.request_dcv_sticker_address_modal.postal_address_line3 =
-                            '';
-                        vm.$refs.request_dcv_sticker_address_modal.postal_address_locality =
-                            '';
-                        vm.$refs.request_dcv_sticker_address_modal.postal_address_state =
-                            '';
-                        vm.$refs.request_dcv_sticker_address_modal.postal_address_country =
-                            '';
-                        vm.$refs.request_dcv_sticker_address_modal.postal_address_postcode =
-                            '';
-                    },
-                    (err) => {
-                        console.log(err);
-                        vm.$refs.request_dcv_sticker_address_modal.errors = true;
-                        vm.$refs.request_dcv_sticker_address_modal.errorString =
-                            helpers.apiVueResourceError(err);
-                        vm.$refs.request_dcv_sticker_address_modal.processing = false;
-                    }
-                );
+        sendDataForRequestNewSticker: function(params){
+            let vm = this
+            vm.$http.post('/api/internal_dcv_permit/' + params.dcv_permit_id + '/request_new_stickers/', params).then(
+                res => {
+                    vm.$refs.request_new_dcv_sticker_modal.processing = false
+                    vm.$refs.request_new_dcv_sticker_modal.isModalOpen = false
+                    vm.$refs.request_new_dcv_sticker_modal.change_sticker_address= false
+                    vm.$refs.request_new_dcv_sticker_modal.postal_address_line1 = ''
+                    vm.$refs.request_new_dcv_sticker_modal.postal_address_line2 = ''
+                    vm.$refs.request_new_dcv_sticker_modal.postal_address_line3 = ''
+                    vm.$refs.request_new_dcv_sticker_modal.postal_address_locality = ''
+                    vm.$refs.request_new_dcv_sticker_modal.postal_address_state = ''
+                    vm.$refs.request_new_dcv_sticker_modal.postal_address_country = ''
+                    vm.$refs.request_new_dcv_sticker_modal.postal_address_postcode = ''
+                },
+                err => {
+                    console.log(err)
+                    vm.$refs.request_new_dcv_sticker_modal.errors = true
+                    vm.$refs.request_new_dcv_sticker_modal.errorString = helpers.apiVueResourceError(err);
+                    vm.$refs.request_new_dcv_sticker_modal.processing = false
+                }
+            )
         },
-        createNewSticker: function (dcv_permit_id) {
-            this.$refs.create_new_sticker_modal.approval_id = dcv_permit_id;
-            this.$refs.create_new_sticker_modal.isModalOpen = true;
+        sendDataForStickerAddress: function(params){
+            let vm = this
+            vm.$http.post('/api/internal_dcv_permit/' + params.dcv_permit_id + '/change_sticker_addresses/', params).then(
+                res => {
+                    vm.$refs.request_dcv_sticker_address_modal.processing = false
+                    vm.$refs.request_dcv_sticker_address_modal.isModalOpen = false
+                    vm.$refs.request_dcv_sticker_address_modal.change_sticker_address= false
+                    vm.$refs.request_dcv_sticker_address_modal.postal_address_line1 = ''
+                    vm.$refs.request_dcv_sticker_address_modal.postal_address_line2 = ''
+                    vm.$refs.request_dcv_sticker_address_modal.postal_address_line3 = ''
+                    vm.$refs.request_dcv_sticker_address_modal.postal_address_locality = ''
+                    vm.$refs.request_dcv_sticker_address_modal.postal_address_state = ''
+                    vm.$refs.request_dcv_sticker_address_modal.postal_address_country = ''
+                    vm.$refs.request_dcv_sticker_address_modal.postal_address_postcode = ''
+                },
+                err => {
+                    console.log(err)
+                    vm.$refs.request_dcv_sticker_address_modal.errors = true
+                    vm.$refs.request_dcv_sticker_address_modal.errorString = helpers.apiVueResourceError(err);
+                    vm.$refs.request_dcv_sticker_address_modal.processing = false
+                }
+            )
         },
-        requestNewSticker: function (dcv_permit_id) {
-            this.$refs.request_new_dcv_sticker_modal.dcv_permit_id =
-                dcv_permit_id;
-            this.$refs.request_new_dcv_sticker_modal.isModalOpen = true;
+        createNewSticker: function(dcv_permit_id){
+            console.log('dcv_permit_id: ' + dcv_permit_id)
+            this.$refs.create_new_sticker_modal.approval_id = dcv_permit_id
+            this.$refs.create_new_sticker_modal.isModalOpen = true
         },
-        requestStickerAddress: function (dcv_permit_id) {
-            this.$refs.request_dcv_sticker_address_modal.dcv_permit_id =
-                dcv_permit_id;
-            this.$refs.request_dcv_sticker_address_modal.isModalOpen = true;
+        requestNewSticker: function(dcv_permit_id){
+            this.$refs.request_new_dcv_sticker_modal.dcv_permit_id = dcv_permit_id
+            this.$refs.request_new_dcv_sticker_modal.isModalOpen = true
         },
-        new_application_button_clicked: function () {
+        requestStickerAddress: function(dcv_permit_id){
+            this.$refs.request_dcv_sticker_address_modal.dcv_permit_id = dcv_permit_id
+            this.$refs.request_dcv_sticker_address_modal.isModalOpen = true
+        },
+        new_application_button_clicked: function(){
             if (this.is_internal) {
                 this.$router.push({
-                    name: 'internal_dcv_permit',
-                });
+                    name: 'internal_dcv_permit'
+                })
             } else {
                 this.$router.push({
-                    name: 'dcv_permit',
-                });
+                    name: 'dcv_permit'
+                })
             }
         },
-        fetchFilterLists: function () {
+        fetchFilterLists: function(){
             let vm = this;
             // FeeSeason list
-            vm.$http
-                .get(
-                    api_endpoints.fee_seasons_dict +
-                        '?application_type_codes=dcvp'
-                )
-                .then(
-                    (response) => {
-                        vm.fee_seasons = response.body;
-                    },
-                    (error) => {
-                        console.log(error);
-                    }
-                );
+            vm.$http.get(api_endpoints.fee_seasons_dict + '?application_type_codes=dcvp').then((response) => {
+                vm.fee_seasons = response.body
+            },(error) => {
+                console.log(error);
+            })
         },
-        addEventListeners: function () {
-            let vm = this;
+        addEventListeners: function(){
+            let vm = this
 
-            vm.$refs.dcv_permits_datatable.vmDataTable.on(
-                'click',
-                'a[data-create-new-sticker]',
-                function (e) {
-                    e.preventDefault();
-                    var id = $(this).attr('data-create-new-sticker');
-                    vm.createNewSticker(id);
-                }
-            );
-            vm.$refs.dcv_permits_datatable.vmDataTable.on(
-                'click',
-                'a[data-request-new-sticker]',
-                function (e) {
-                    e.preventDefault();
-                    var id = $(this).attr('data-request-new-sticker');
-                    vm.requestNewSticker(id);
-                }
-            );
-            vm.$refs.dcv_permits_datatable.vmDataTable.on(
-                'click',
-                'a[data-request-sticker-address]',
-                function (e) {
-                    e.preventDefault();
-                    var id = $(this).attr('data-request-sticker-address');
-                    vm.requestStickerAddress(id);
-                }
-            );
+            vm.$refs.dcv_permits_datatable.vmDataTable.on('click', 'a[data-create-new-sticker]', function(e) {
+                e.preventDefault();
+                var id = $(this).attr('data-create-new-sticker');
+                vm.createNewSticker(id);
+            });
+            vm.$refs.dcv_permits_datatable.vmDataTable.on('click', 'a[data-request-new-sticker]', function(e) {
+                e.preventDefault();
+                var id = $(this).attr('data-request-new-sticker');
+                vm.requestNewSticker(id);
+            });
+            vm.$refs.dcv_permits_datatable.vmDataTable.on('click', 'a[data-request-sticker-address]', function(e) {
+                e.preventDefault();
+                var id = $(this).attr('data-request-sticker-address');
+                vm.requestStickerAddress(id);
+            });
         },
+        
     },
-    created: function () {
-        this.fetchFilterLists();
+    created: function(){
+        this.fetchFilterLists()
     },
-    mounted: function () {
+    mounted: function(){
         let vm = this;
         this.$nextTick(() => {
             vm.addEventListeners();
-            vm.initialiseOrganisationLookup();
+            vm.initialiseOrganisationLookup()
         });
-    },
-};
+    }
+}
 </script>

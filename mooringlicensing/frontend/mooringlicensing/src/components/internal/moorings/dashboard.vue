@@ -1,19 +1,20 @@
 <template>
     <div class="container" id="MooringsDash">
         <FormSection :formCollapse="false" label="Moorings" Index="moorings">
-            <MooringsTable />
+            <MooringsTable/>
         </FormSection>
     </div>
 </template>
 
 <script>
-import FormSection from '@/components/forms/section_toggle.vue';
-import MooringsTable from '@/components/common/table_moorings.vue';
+import FormSection from "@/components/forms/section_toggle.vue"
+import MooringsTable from "@/components/common/table_moorings.vue"
 export default {
     name: 'InternalMooringsDashboard',
-    components: {
+    components:{
         FormSection,
         MooringsTable,
     },
-};
+}
 </script>
+

@@ -1,23 +1,21 @@
 <template>
     <FormSection label="Search Sticker" Index="search_sticker">
         <div class="row mb-3">
-            <label for="sticker_lookup" class="col-sm-3 col-form-label"
-                >Sticker</label
-            >
+            <label for="sticker_lookup" class="col-sm-3 col-form-label">Sticker</label>
             <div class="col-sm-6">
-                <select
-                    id="sticker_lookup"
-                    name="sticker_lookup"
-                    ref="sticker_lookup"
-                    class="form-control"
+                <select 
+                    id="sticker_lookup"  
+                    name="sticker_lookup"  
+                    ref="sticker_lookup" 
+                    class="form-control" 
                 />
             </div>
             <div class="col-sm-3">
-                <input
-                    type="button"
-                    @click.prevent="openApproval"
-                    class="btn btn-primary"
-                    value="View Details"
+                <input 
+                type="button" 
+                @click.prevent="openApproval" 
+                class="btn btn-primary" 
+                value="View Details"
                 />
             </div>
         </div>
@@ -25,80 +23,82 @@
 </template>
 
 <script>
-import $ from 'jquery';
-import FormSection from '@/components/forms/section_toggle.vue';
+import $ from 'jquery'
+import FormSection from '@/components/forms/section_toggle.vue'
 
-import { api_endpoints } from '@/utils/hooks';
-export default {
-    name: 'SearchSticker',
-    components: {
-        FormSection,
-    },
-    data: function () {
-        return {
-            approval_id: null,
-        };
-    },
-    methods: {
-        openApproval: function () {
-            this.$nextTick(() => {
-                if (this.approval_id) {
-                    this.$router.push({
-                        name: 'internal-approval-detail',
-                        params: { approval_id: this.approval_id },
-                    });
-                }
-            });
+import {
+  api_endpoints,
+}
+from '@/utils/hooks'
+    export default {
+        name:'SearchSticker',
+        components:{
+            FormSection,
         },
-        initialiseStickerLookup: function () {
-            let vm = this;
-            $(vm.$refs.sticker_lookup)
-                .select2({
+         data:function () {
+            return {
+                approval_id: null,
+             }
+        },
+        methods:{
+            openApproval: function() {
+                console.log("open approval: " + this.approval_id);
+                this.$nextTick(() => {
+                    if (this.approval_id) {
+                        this.$router.push({
+                            name: 'internal-approval-detail',
+                            params: {"approval_id": this.approval_id},
+                        });
+                    }
+                });
+
+            },
+            initialiseStickerLookup: function(){
+                let vm = this;
+                $(vm.$refs.sticker_lookup).select2({
                     minimumInputLength: 2,
-                    theme: 'bootstrap-5',
+                    theme: "bootstrap-5",
                     allowClear: true,
-                    placeholder: 'Select Sticker',
+                    placeholder:"Select Sticker",
                     pagination: true,
                     ajax: {
                         url: api_endpoints.sticker_lookup,
                         dataType: 'json',
-                        data: function (params) {
+                        data: function(params) {
                             return {
                                 search_term: params.term,
                                 page_number: params.page || 1,
                                 type: 'public',
-                            };
+                            }
                         },
-                        processResults: function (data) {
+                        processResults: function(data){
                             return {
-                                results: data.results,
-                                pagination: {
-                                    more: data.pagination.more,
-                                },
-                            };
+                                'results': data.results,
+                                'pagination': {
+                                    'more': data.pagination.more
+                                }
+                            }
                         },
                     },
-                })
-                .on('select2:select', function (e) {
+                }).
+                on("select2:select", function (e) {
                     let data = e.params.data.approval_id;
                     vm.approval_id = data;
-                })
-                .on('select2:unselect', function (e) {
+                }).
+                on("select2:unselect",function (e) {
                     vm.approval_id = null;
-                })
-                .on('select2:open', function (e) {
-                    const searchField = $(
-                        '[aria-controls="select2-sticker_lookup-results"]'
-                    );
+                }).
+                on("select2:open",function (e) {
+                    const searchField = $('[aria-controls="select2-sticker_lookup-results"]')
                     // move focus to select2 field
                     searchField[0].focus();
                 });
+            },
         },
-    },
-    mounted: function () {
-        this.$nextTick(async () => {
-            this.initialiseStickerLookup();
-        });
-    },
-};
+        mounted: function () {
+            this.$nextTick(async () => {
+                this.initialiseStickerLookup();
+            });
+        },
+    }
 </script>

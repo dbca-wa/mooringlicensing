@@ -1,39 +1,26 @@
 <template>
     <div id="approvalExtension">
-        <modal
-            v-model:show="isModalOpen"
-            transition="modal fade"
-            @ok="ok()"
-            @cancel="cancel()"
-            :processing="extendingApproval"
-            :title="title"
-            large
-        >
+        <modal v-model:show="isModalOpen"transition="modal fade" @ok="ok()" @cancel="cancel()" :processing="extendingApproval" :title="title" large>
             <div class="container-fluid">
                 <div class="row">
-                    <form name="approvalForm">
-                        <alert v-model:show="showError" type="danger"
-                            ><strong>{{ errorString }}</strong></alert
-                        >
+                    <form   name="approvalForm">
+                        <alert v-model:show="showError" type="danger"><strong>{{errorString}}</strong></alert>
                         <div class="col-sm-12">
+
                             <div class="row mb-3">
                                 <div class="row">
                                     <div class="col-sm-3">
-                                        <label
-                                            class="form-label float-start"
-                                            for="Name"
-                                            >New Expiry Date</label
-                                        >
+                                        <label class="form-label float-start" for="Name">New Expiry Date</label>
                                     </div>
                                     <div class="col-sm-9">
-                                        <div style="width: 70%">
+                                        <div style="width: 70%;">
                                             <input
                                                 type="date"
                                                 class="form-control"
                                                 name="expiry_date"
                                                 v-model="approval.expiry_date"
                                                 :min="today"
-                                            />
+                                            >
                                         </div>
                                     </div>
                                 </div>
@@ -42,22 +29,14 @@
                             <div class="row mb-3">
                                 <div class="row">
                                     <div class="col-sm-3">
-                                        <label
-                                            class="form-label float-start"
-                                            for="Name"
-                                            >Extension Details</label
-                                        >
+                                        <label class="form-label float-start"  for="Name">Extension Details</label>
                                     </div>
                                     <div class="col-sm-9">
-                                        <textarea
-                                            name="extension_details"
-                                            class="form-control"
-                                            style="width: 70%"
-                                            v-model="approval.extension_details"
-                                        ></textarea>
+                                        <textarea name="extension_details" class="form-control" style="width:70%;" v-model="approval.extension_details"></textarea>
                                     </div>
                                 </div>
                             </div>
+
                         </div>
                     </form>
                 </div>
@@ -67,54 +46,57 @@
 </template>
 
 <script>
-import $ from 'jquery';
-import modal from '@vue-utils/bootstrap-modal.vue';
-import alert from '@vue-utils/alert.vue';
-import { helpers, api_endpoints } from '@/utils/hooks.js';
+import $ from 'jquery'
+import modal from '@vue-utils/bootstrap-modal.vue'
+import alert from '@vue-utils/alert.vue'
+import {helpers,api_endpoints} from "@/utils/hooks.js"
 export default {
-    name: 'Extend-Approval',
-    emits: ['refreshFromResponse'],
-    components: {
+    name:'Extend-Approval',
+    emits: [
+        'refreshFromResponse',
+    ],
+    components:{
         modal,
-        alert,
+        alert
     },
-    data: function () {
+    data:function () {
         let vm = this;
         return {
-            isModalOpen: false,
-            form: null,
+            isModalOpen:false,
+            form:null,
             approval: {},
             approval_id: Number,
             extendingApproval: false,
             validation_form: null,
             errors: false,
             errorString: '',
-            success: false,
-        };
+            success:false,
+        }
     },
     computed: {
-        showError: function () {
+        showError: function() {
             var vm = this;
             return vm.errors;
         },
-        title: function () {
+        title: function(){
             return 'Extend Approval Expiry Date';
         },
         today() {
             return new Date().toISOString().split('T')[0];
-        },
+        }
     },
-    methods: {
-        ok: function () {
-            let vm = this;
-            if ($(vm.form).valid()) {
+    methods:{
+        ok:function () {
+            let vm =this;
+            if($(vm.form).valid()){
                 vm.sendData();
+
             }
         },
-        cancel: function () {
-            this.close();
+        cancel:function () {
+            this.close()
         },
-        close: function () {
+        close:function () {
             this.isModalOpen = false;
             this.approval = {};
             this.errors = false;
@@ -122,53 +104,41 @@ export default {
             this.approval.expiry_date = '';
             this.validation_form.resetForm();
         },
-        sendData: function () {
+        sendData:function(){
             let vm = this;
             vm.errors = false;
             let approval = JSON.parse(JSON.stringify(vm.approval));
             vm.extendingApproval = true;
 
-            vm.$http
-                .post(
-                    helpers.add_endpoint_json(
-                        api_endpoints.approvals,
-                        vm.approval_id + '/approval_extension'
-                    ),
-                    JSON.stringify(approval),
-                    {
-                        emulateJSON: true,
-                    }
-                )
-                .then(
-                    (response) => {
+            vm.$http.post(helpers.add_endpoint_json(api_endpoints.approvals,vm.approval_id+'/approval_extension'),JSON.stringify(approval),{
+                        emulateJSON:true,
+                    }).then((response)=>{
                         vm.extendingApproval = false;
-                        vm.approval = {};
+                        vm.approval={};
                         vm.close();
                         swal(
-                            'Extend',
-                            'The expiry date of this Approval will be updated',
-                            'success'
+                             'Extend',
+                             'The expiry date of this Approval will be updated',
+                             'success'
                         );
-                        vm.$emit('refreshFromResponse', response);
-                    },
-                    (error) => {
+                        vm.$emit('refreshFromResponse',response);
+                    },(error)=>{
                         vm.errors = true;
                         vm.extendingApproval = false;
                         vm.errorString = helpers.apiVueResourceError(error);
-                    }
-                );
+                    });
         },
-        addFormValidations: function () {
+        addFormValidations: function() {
             let vm = this;
             vm.validation_form = $(vm.form).validate({
                 rules: {
-                    expiry_date: 'required',
-                    extension_details: 'required',
+                    expiry_date:"required",
+                    extension_details:"required",
                 },
                 messages: {
-                    extension_details: 'Field is required',
+                    extension_details:"Field is required",
                 },
-                showErrors: function (errorMap, errorList) {
+                showErrors: function(errorMap, errorList) {
                     helpers.showValidationErrors.call(
                         this,
                         errorMap,
@@ -176,12 +146,12 @@ export default {
                     );
                 },
             });
-        },
-    },
-    mounted: function () {
-        let vm = this;
+       },
+   },
+   mounted:function () {
+        let vm =this;
         vm.form = document.forms.approvalForm;
         vm.addFormValidations();
-    },
-};
+   }
+}
 </script>
