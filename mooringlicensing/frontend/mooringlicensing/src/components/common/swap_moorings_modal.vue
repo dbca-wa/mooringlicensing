@@ -1,6 +1,6 @@
 <template>
     <div id="change-contact">
-        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :processing="processing" :okButtonDisabled="!okButtonEnabled" :title="title" large>
+        <modal v-model:show="isModalOpen"transition="modal fade" @ok="ok()" @cancel="cancel()" :processing="processing" :okButtonDisabled="!okButtonEnabled" :title="title" large>
             <p>Please select a Mooring Site License to exchange with the mooring of Mooring Site License: <strong>{{ approval_lodgement_number }}</strong>.</p>
             <div class="container-fluid">
                 <alert v-model:show="showError" type="danger"><strong>{{ errorString }}</strong></alert>

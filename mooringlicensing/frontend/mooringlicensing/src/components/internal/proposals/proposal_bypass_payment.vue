@@ -1,6 +1,6 @@
 <template>
     <div id="bypassPayment">
-        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :processing="submitting" :title="title" large>
+        <modal v-model:show="isModalOpen"transition="modal fade" @ok="ok()" @cancel="cancel()" :processing="submitting" :title="title" large>
             <div class="container-fluid">
                 <div class="row">
                     <form   name="bypassForm">

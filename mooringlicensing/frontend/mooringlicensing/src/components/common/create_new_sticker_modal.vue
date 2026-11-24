@@ -1,6 +1,6 @@
 <template>
     <div id="change-contact">
-        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :title="title" large>
+        <modal v-model:show="isModalOpen"transition="modal fade" @ok="ok()" @cancel="cancel()" :title="title" large>
             <div class="container-fluid">
                 <alert v-model:show="showError" type="danger"><strong>{{ errorString }}</strong></alert>
                 <alert v-if="missing_sticker_message" type="warning"><strong>{{ missing_sticker_message }}</strong></alert>   

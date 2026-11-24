@@ -1,6 +1,6 @@
 <template>
     <div id="recordSale">
-        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" title="Record Sale" large>
+        <modal v-model:show="isModalOpen"transition="modal fade" @ok="ok()" @cancel="cancel()" title="Record Sale" large>
             <div class="container-fluid">
                 <div class="row">
                     <form   name="recordSaleForm">

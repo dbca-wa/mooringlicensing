@@ -1,6 +1,6 @@
 <template>
     <div id="offerMooringLicence">
-        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :title="title" large>
+        <modal v-model:show="isModalOpen"transition="modal fade" @ok="ok()" @cancel="cancel()" :title="title" large>
             <div class="container-fluid">
                 <div class="row">
                     <alert v-model:show="showError" type="danger"><strong>{{errorString}}</strong></alert>

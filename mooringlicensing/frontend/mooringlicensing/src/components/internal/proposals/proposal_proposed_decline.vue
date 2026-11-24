@@ -1,6 +1,6 @@
 <template>
     <div id="change-contact">
-        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :processing="decliningProposal" :title="title" large>
+        <modal v-model:show="isModalOpen"transition="modal fade" @ok="ok()" @cancel="cancel()" :processing="decliningProposal" :title="title" large>
             <div class="container-fluid">
                 <div class="row">
                     <form   name="declineForm">

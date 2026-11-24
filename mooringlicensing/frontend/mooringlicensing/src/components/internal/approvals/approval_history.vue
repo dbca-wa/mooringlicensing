@@ -1,6 +1,6 @@
 <template>
     <div id="approvalHistory">
-        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :showOK="false" :showCancel="false" :title="title" large>
+        <modal v-model:show="isModalOpen"transition="modal fade" @ok="ok()" @cancel="cancel()" :showOK="false" :showCancel="false" :title="title" large>
             <div class="container-fluid">
                 <div class="row">
                     <alert v-model:show="showError" type="danger"><strong>{{errorString}}</strong></alert>

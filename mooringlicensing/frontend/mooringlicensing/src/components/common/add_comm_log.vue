@@ -1,6 +1,7 @@
 <template>
   <div id="AddComms">
     <modal
+      v-model:show="isModalOpen"
       transition="modal fade"
       @ok="ok()"
       @cancel="cancel()"
