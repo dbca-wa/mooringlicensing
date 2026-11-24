@@ -183,6 +183,9 @@ export default {
             this.validDate = moment(this.requirement.due_date,'DD/MM/YYYY').isValid();
         },
     },
+    emits: [
+        'updatedRequirements'
+    ],
     methods:{
         initialiseRequirement: function(){
             this.requirement = {
@@ -247,7 +250,7 @@ export default {
                         emulateJSON:true,
                     }).then((response)=>{
                         vm.updatingRequirement = false;
-                        vm.$parent.updatedRequirements();
+                        vm.$emit('updatedRequirements');
                         vm.close();
                     },(error)=>{
                         vm.errors = true;
@@ -261,7 +264,7 @@ export default {
                     }).then((response)=>{
                         vm.addingRequirement = false;
                         vm.close();
-                        vm.$parent.updatedRequirements();
+                        vm.$emit('updatedRequirements');
                     },(error)=>{
                         vm.errors = true;
                         vm.addingRequirement = false;

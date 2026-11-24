@@ -34,6 +34,7 @@
             ref="requirement_detail"
             :proposal_id="proposal.id"
             :requirements="requirements"
+            @updatedRequirements="updatedRequirements"
         />
     </div>
 </template>

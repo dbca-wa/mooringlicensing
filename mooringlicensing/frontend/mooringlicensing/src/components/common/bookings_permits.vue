@@ -54,7 +54,7 @@
                                     </table>
                                 </td>
                                 <td>
-                                    <a v-if="approval.approval_type_dict.code == 'aup'"  v-on:click="removeAUPFromMooring(entity.id,approval.id)">Remove</a>
+                                    <a :href="'#'+approval.id" v-if="approval.approval_type_dict.code == 'aup'"  v-on:click="removeAUPFromMooring(entity.id,approval.id)">Remove</a>
                                 </td>
                             </tr>
 

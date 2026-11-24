@@ -39,10 +39,11 @@
                         />
                     </div>
                 </div>
-                <div class="col-lg-2 float-end" v-if="!readonly">
-                    <button @click.prevent="addSiteLicensee()" class="btn btn-primary">Add</button>
+                <div class="row mb-3">
+                    <div v-if="!readonly">
+                        <button @click.prevent="addSiteLicensee()" class="btn btn-primary float-end">Add</button>
+                    </div>
                 </div>
-                </br>
                 <div class="mb-3">
                     <div class="col-sm-12">
                         <datatable
@@ -155,17 +156,17 @@ export default {
                         let links = '';
                         links += `<a href='/internal/moorings/${full.mooring_id}/'  target="_blank" style="cursor: pointer;">View</a><br/>`;
                         if (!vm.readonly) {
-                            links += `<a onclick="window.removeSiteLicenseeMooring('${full.mooring_id}')" style="cursor: pointer;">Remove</a><br/>`;
+                            links += `<a href='#${full.mooring_id}' onclick="window.removeSiteLicenseeMooring('${full.mooring_id}')" style="cursor: pointer;">Remove</a><br/>`;
                         }
 
                         if ((vm.proposal.processing_status == "Awaiting Endorsement" || vm.proposal.processing_status == "With Assessor" || vm.proposal.processing_status == "With Assessor (Requirements)") && full.endorsement !== undefined) {
                             if (full.endorsement == "Not Actioned") {
-                                links += `<a onclick="window.internalEndorse('${full.id}')" style="cursor: pointer;">Endorse on Licensee Behalf</a><br/>`;
-                                links += `<a onclick="window.internalDecline('${full.id}')" style="cursor: pointer;">Decline on Licensee Behalf</a><br/>`;
+                                links += `<a href='#${full.id}' onclick="window.internalEndorse('${full.id}')" style="cursor: pointer;">Endorse on Licensee Behalf</a><br/>`;
+                                links += `<a href='#${full.id}' onclick="window.internalDecline('${full.id}')" style="cursor: pointer;">Decline on Licensee Behalf</a><br/>`;
                             } else if (full.endorsement == "Declined") {
-                                links += `<a onclick="window.internalEndorse('${full.id}')" style="cursor: pointer;">Change to Endorsed</a><br/>`;
+                                links += `<a href='#${full.id}' onclick="window.internalEndorse('${full.id}')" style="cursor: pointer;">Change to Endorsed</a><br/>`;
                             } else if (full.endorsement == "Endorsed") {
-                                links += `<a onclick="window.internalDecline('${full.id}')" style="cursor: pointer;">Change to Declined</a><br/>`;
+                                links += `<a href='#${full.id}' onclick="window.internalDecline('${full.id}')" style="cursor: pointer;">Change to Declined</a><br/>`;
                             }
                         }
 
@@ -195,6 +196,9 @@ export default {
             })
         }
     },
+    emits: [
+        'updateProposal'
+    ],
     methods:{
         addSiteLicensee: function() {
             let vm = this;
@@ -230,7 +234,7 @@ export default {
                         'Site Licensee Mooring Request Endorsed',
                         'success'
                     );                   
-                    vm.$parent.$emit("updateProposal", res.body);
+                    vm.$emit("updateProposal", res.body);
                     this.$nextTick(async () => {
                         vm.site_licensee_datatable_key++;
                         vm.actioningRequest=false;  
@@ -265,7 +269,7 @@ export default {
                         'Site Licensee Mooring Request Declined',
                         'success'
                     );                   
-                    vm.$parent.$emit("updateProposal", res.body);
+                    vm.$emit("updateProposal", res.body);
                     vm.site_licensee_datatable_key++;
                     vm.actioningRequest=false;          
                 },(err)=>{

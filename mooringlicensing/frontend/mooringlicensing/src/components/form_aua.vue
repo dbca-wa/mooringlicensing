@@ -108,6 +108,7 @@
                   :noMoorings="noMoorings"
                   ref="mooring_authorisation"
                   :readonly="readonly"
+                  @updateProposal="updateProposal"
                   />
               </div>
               <div class="tab-pane fade" id="pills-confirm" role="tabpanel" aria-labelledby="pills-confirm-tab">
@@ -239,7 +240,14 @@
                 return this.proposal.authorised_user_moorings_str == ''
             },
         },
+        emits: [
+            'updateProposal'
+        ],
         methods:{
+            updateProposal(data) {
+                let vm = this;
+                vm.$emit("updateProposal", data);
+            },
             updateVesselOwnershipChanged: async function(changed){
                 await this.$emit("updateVesselOwnershipChanged", changed)
                 this.vesselOwnershipChanged = changed

@@ -104,6 +104,7 @@
                 </div>
             </div>
             <div class="row" v-if="approval && approval.id && authorisedUserPermit">
+                <div>
                 <FormSection 
                     :formCollapse="false" 
                     label="Moorings" 
@@ -118,8 +119,10 @@
                         />
                     </div>
                 </FormSection>
+                </div>
             </div>
             <div class="row" v-if="approval && approval.id && mooringLicence">
+                <div>
                 <FormSection 
                     :formCollapse="false" 
                     label="Authorised Users" 
@@ -140,9 +143,11 @@
                         />
                     </div>
                 </FormSection>
+                </div>
             </div>
 
             <div class="row" v-if="approval && approval.id && mooringLicence">
+                <div>
                 <FormSection 
                     :formCollapse="false" 
                     label="Vessels" 
@@ -157,6 +162,7 @@
                         />
                     </div>
                 </FormSection>
+                </div>
             </div>
 
         </div>
@@ -239,7 +245,7 @@ export default {
                     data: "action",
                    'render': function(row, type, full){
                         let links = '';
-                        links += `<a onclick="window.removeMooringFromAUP('${full.mooring_name}')" style="cursor: pointer;">Remove</a><br/>`;
+                        links += `<a href="#${full.mooring_name}" onclick="window.removeMooringFromAUP('${full.mooring_name}')" style="cursor: pointer;">Remove</a><br/>`;
                         return links;    
                     },
                 },
