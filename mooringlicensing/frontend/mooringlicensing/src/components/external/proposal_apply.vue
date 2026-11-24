@@ -22,8 +22,8 @@
         </div>
         <div v-else class="row">
             <div class="col-sm-12">
-                <form   name="personal_form" method="post">
-                    <FormSection label="Apply for">
+                <form name="personal_form" method="post">
+                    <FormSection label="Apply for" v-show="!this.is_internal || this.applicant_system_id">
                         <div>
                             <div v-if="season_text" class="col-sm-12" style="margin-bottom: 1em;">
                                 <strong>
