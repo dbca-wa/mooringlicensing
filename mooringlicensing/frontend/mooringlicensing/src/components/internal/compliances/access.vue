@@ -15,7 +15,7 @@
                     </div>
                     <div class="col-sm-12 top-buffer-s">
                         <strong>Lodged on</strong><br/>
-                        {{ compliance.lodgement_date | formatDate}}
+                        {{ formatDate(compliance.lodgement_date) }}
                     </div>
                 </div>
             </div>
@@ -62,7 +62,7 @@
                     <div class="row">
                         <div class="col-md-12"> 
                         <form   name="complianceForm" method="post">
-                            <alert :show.sync="showError" type="danger">
+                            <alert v-model:show="showError" type="danger">
                                 <strong>{{errorString}}</strong>
                             </alert>
                             <div class="row">
@@ -148,7 +148,7 @@
 </template>
 <script>
 import $ from 'jquery'
-import Vue from 'vue'
+import http from '@/utils/vue-resource-shim'
 import datatable from '@vue-utils/datatable.vue'
 import CommsLogs from '@common-utils/comms_logs.vue'
 import ComplianceAmendmentRequest from './compliance_amendment_request.vue'
@@ -185,12 +185,8 @@ export default {
         ]
     }
   },
-  filters: {
-    formatDate: function(data){
-        return data ? moment(data).format('DD/MM/YYYY'): '';    }
-  },
   beforeRouteEnter: function(to, from, next){
-    Vue.http.get(helpers.add_endpoint_json(api_endpoints.compliances,to.params.compliance_id+'/internal_compliance')).then((response) => {
+    http.get(helpers.add_endpoint_json(api_endpoints.compliances,to.params.compliance_id+'/internal_compliance')).then((response) => {
         next(vm => {
             vm.compliance = response.body
             vm.members = vm.compliance.allowed_assessors
@@ -227,6 +223,9 @@ export default {
     }
   },
   methods: {
+    formatDate: function(data){
+        return data ? moment(data).format('DD/MM/YYYY'): '';    
+    },
     delete_document: function(doc){
         let vm= this;
         let data = {'document': doc}
@@ -329,7 +328,7 @@ export default {
         else if (vm.compliance.assigned_to !== undefined) {
             vm.$http.get(helpers.add_endpoint_json(api_endpoints.compliances,(vm.compliance.id+'/unassign')))
             .then((response) => {
-                console.log(response);
+
                 vm.compliance = response.body;
             }, (error) => {
                 console.log(error);
@@ -347,7 +346,7 @@ export default {
         }).then(() => {
             vm.$http.get(helpers.add_endpoint_json(api_endpoints.compliances,(vm.compliance.id+'/accept')))
             .then((response) => {
-                console.log(response);
+
                 vm.compliance = response.body;
                 vm.$router.push({ name: 'internal-compliances-dash'}); //Navigate to dashboard
             }, (error) => {
@@ -373,7 +372,7 @@ export default {
         }).then(() => {
             vm.$http.get(helpers.add_endpoint_json(api_endpoints.compliances,(vm.compliance.id+'/discard')))
             .then((response) => {
-                console.log(response);
+
                 vm.compliance = response.body;
                 vm.$router.push({ name: 'internal-compliances-dash'}); //Navigate to dashboard
             }, (error) => {
@@ -387,7 +386,7 @@ export default {
 
     fetchProfile: function(){
         let vm = this;
-        Vue.http.get(api_endpoints.profile).then((response) => {
+        http.get(api_endpoints.profile).then((response) => {
             vm.profile = response.body
                               
          },(error) => {

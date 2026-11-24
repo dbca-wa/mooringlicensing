@@ -72,7 +72,7 @@ export default {
     data() {
         let vm = this;
         return {
-            datatable_id: 'admissions-datatable-' + vm._uid,
+            datatable_id: 'admissions-datatable-' + vm.$.uid,
 
             // selected values for filtering
             filterDcvOrganisation: null,
@@ -287,7 +287,7 @@ export default {
                 columns: columns,
                 processing: true,
                 initComplete: function() {
-                    console.log('in initComplete')
+
                 },
             }
         }

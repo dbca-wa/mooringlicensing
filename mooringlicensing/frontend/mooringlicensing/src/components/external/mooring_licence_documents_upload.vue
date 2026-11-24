@@ -199,10 +199,10 @@ export default {
             }).then(
                 (res)=>{
                     let ret = vm.perform_submit();
-                    console.log(ret);
+
                     ret.then(data=>{
-                        console.log(data);
-                        console.log(data.body);
+
+
                         if (data.body && data.body.internal_submission) {
                             this.$router.push({ name: 'internal-dashboard' })
                         } else {

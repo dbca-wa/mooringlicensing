@@ -7,14 +7,16 @@
                         <strong>Your compliance with requirements has been successfully submitted.</strong>
                         <br/>
                         <table>
-                            <tr>
-                                <td><strong>Compliance:</strong></td>
-                                <td><strong>{{compliance.reference}}</strong></td>
-                            </tr>
-                            <tr>
-                                <td><strong>Date/Time:</strong></td>
-                                <td><strong> {{compliance.lodgement_date|formatDate}}</strong></td>
-                            </tr>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Compliance:</strong></td>
+                                    <td><strong>{{ compliance.reference }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Date/Time:</strong></td>
+                                    <td><strong>{{ formatDate(compliance.lodgement_date) }}</strong></td>
+                                </tr>
+                            </tbody>
                         </table>
                         <div>
                           <p>Thank you for your submission.</p>
@@ -39,7 +41,7 @@ export default {
         "compliance": {},
     }
   },
-  filters:{
+  methods:{
         formatDate: function(data){
             return data ? moment(data).format('DD/MM/YYYY HH:mm:ss'): '';
         }

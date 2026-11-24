@@ -8,6 +8,7 @@
                     :logs_url="logs_url" 
                     :comms_add_url="comms_add_url" 
                     :disable_add_entry="false"
+                    :enable_actions_section="false"
                 />
             </div>
             <div class="col-md-1"></div>
@@ -142,7 +143,7 @@ from '@/utils/hooks'
                 comms_url: helpers.add_endpoint_json(api_endpoints.vessel, this.$route.params.vessel_id + '/comms_log'),
                 comms_add_url: helpers.add_endpoint_json(api_endpoints.vessel, this.$route.params.vessel_id + '/add_comms_log'),
                 logs_url: helpers.add_endpoint_json(api_endpoints.vessel, this.$route.params.vessel_id + '/action_log'),
-                datatable_id: 'owners-datatable-' + this._uid,
+                datatable_id: 'owners-datatable-' + this.$.uid,
                 owners_headers: ['Name', 'Company', 'Percentage', 'Phone', 'Start', 'End', 'Action'],
 
              }
@@ -254,7 +255,7 @@ from '@/utils/hooks'
                         ],
                     processing: true,
                     initComplete: function() {
-                        console.log('in initComplete')
+
                     },
                 }
             },

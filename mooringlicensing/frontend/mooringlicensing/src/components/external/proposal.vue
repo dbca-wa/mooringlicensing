@@ -10,7 +10,7 @@
             <p>We may share this information with other organisations/individuals, to assess your applications and undertake compliance and monitoring of your activity on the island and to advise you of any changes to permissions or conditions as they arise. It may also be used to ensure compliance with other relevant legislation.</p>
             <p>You are required to provide this information/specific personal information to comply with <em>Rottnest Island Regulations 1988 and Rottnest Island Authority Act 1987.</em></p>
             <p>If you choose not to provide the required information we will be unable to issue you with the required permissions and any mooring use will be unlawful.</p>
-            <p>For further details on how RIA manage your personal information, you can read the <a href="https://www.dbca.wa.gov.au/media/6324/download">Privacy Policy</a>. If you have any questions about how your personal information will be handled, or if you would like to access your personal information, please contact RIA on 08 9432 9300 or email <a href="mailto:privacy.rottnest@dbca.wa.gov.au">privacy.rottnest@dbca.wa.gov.au</a>.</p>
+            <p>For further details on how RIA manage your personal information, you can read the <a href="https://www.dbca.wa.gov.au/media/6324/download">Privacy Policy</a>. If you have any questions about how your personal information will be handled, or if you would like to access your personal information, please contact RIA on 08 9432 9300.</p>
             </div>
         </div>
         <br>
@@ -162,7 +162,7 @@ import AnnualAdmissionApplication from '../form_aaa.vue';
 import AuthorisedUserApplication from '../form_aua.vue';
 import MooringLicenceApplication from '../form_mla.vue';
 import FormSection from '@/components/forms/section_toggle.vue'
-import Vue from 'vue'
+import http from '@/utils/vue-resource-shim'
 import {
   api_endpoints,
   helpers
@@ -208,7 +208,7 @@ export default {
   },
   computed: {
       profileHasChanged: function(){
-        console.log(this.profile_original)
+
         let originalHash = JSON.stringify(this.profile_original)
         let currentHash = JSON.stringify(this.profile)
         if (originalHash !== currentHash){
@@ -228,17 +228,17 @@ export default {
                       if (['aaa', 'mla'].includes(this.proposal.application_type_code)){
                           if (!this.vesselChanged && !this.vesselOwnershipChanged && !this.profileHasChanged) {
                               disable = true
-                              console.log('%cSubmit button is disabled 1', 'color: #FF0000')
+
                           }
                       } else if (this.proposal.application_type_code === 'wla'){
                           if (!this.vesselChanged && !this.mooringPreferenceChanged && !this.vesselOwnershipChanged && !this.profileHasChanged) {
                               disable = true
-                              console.log('%cSubmit button is disabled 2', 'color: #FF0000')
+
                           }
                       } else if (this.proposal.application_type_code === 'aua'){
                           if (!this.vesselChanged && !this.mooringOptionsChanged && !this.vesselOwnershipChanged && !this.profileHasChanged) {
                               disable = true
-                              console.log('%cSubmit button is disabled 3', 'color: #FF0000')
+
                           }
                       }
                   }
@@ -399,15 +399,15 @@ export default {
         this.mooringOptionsChanged = changed;
     },
     updateVesselChanged: function(vesselChanged) {
-        console.log('in updateVesselChanged at the proposal.vue')
+
         this.vesselChanged = vesselChanged;
-        console.log('this.vesselChanged: ' + this.vesselChanged)
+
     },
     updateMooringPreference: function(preferenceChanged) {
         this.mooringPreferenceChanged = preferenceChanged;
     },
     updateVesselOwnershipChanged: function(changed) {
-        console.log('updateVesselOwnershipChanged in proposal.vue:' + changed)
+
         this.vesselOwnershipChanged = changed
     },
     proposal_refs:function(){
@@ -481,7 +481,7 @@ export default {
       try {
             await this.save(false, this.proposal_submit_url)
             this.$nextTick(async () => {
-                console.log(this.submitRes)
+
                 if (this.submitRes) {
                     let payload = this.buildPayload();
                     payload.csrfmiddlewaretoken = this.csrf_token;
@@ -502,7 +502,7 @@ export default {
             });
         } catch(err) {
             console.log(err)
-            console.log(typeof(err.body))
+
             await swal({
                 title: 'Submit Error',
               html: helpers.formatErrorHtml(err),
@@ -698,7 +698,7 @@ export default {
   beforeRouteEnter: function(to, from, next) {
     if (to.params.proposal_id) {
       let vm = this;
-      Vue.http.get(`/api/proposal/${to.params.proposal_id}.json`).then(res => {
+      http.get(`/api/proposal/${to.params.proposal_id}.json`).then(res => {
           next(vm => {
             vm.loading.push('fetching proposal')
             vm.proposal = res.body;

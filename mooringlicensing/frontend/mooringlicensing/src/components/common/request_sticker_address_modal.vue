@@ -1,8 +1,8 @@
 <template>
     <div id="change-contact">
-        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :title="title" large>
+        <modal v-model:show="isModalOpen"transition="modal fade" @ok="ok()" @cancel="cancel()" :title="title" large>
             <div class="container-fluid">
-                <alert :show.sync="showError" type="danger"><strong>{{ errorString }}</strong></alert>
+                <alert v-model:show="showError" type="danger"><strong>{{ errorString }}</strong></alert>
                 <div class="row mb-3">
                     <table class="table table-striped table-bordered">
                         <thead>
@@ -16,7 +16,8 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="sticker in stickers" :key="sticker.id"  v-if="sticker.status.code == 'ready' || sticker.status.code == 'not_yet_ready'">
+                            <template v-for="sticker in stickers" :key="sticker.id">
+                            <tr v-if="sticker.status && (sticker.status.code === 'ready' || sticker.status.code === 'not_yet_ready')">
                                 <td><input v-if="sticker.status.code == 'ready' || sticker.status.code == 'not_yet_ready'" type="checkbox" v-model="sticker.checked" /></td>
                                 <td v-if="sticker.number">{{ sticker.number }}</td>
                                 <td v-else>Not Assigned</td>
@@ -35,6 +36,7 @@
                                     <span>{{sticker.postal_address_postcode}}</span>
                                 </td>
                             </tr>
+                            </template>
                         </tbody>
                     </table>
                 </div>
@@ -81,6 +83,9 @@ import { helpers, api_endpoints } from "@/utils/hooks.js"
 
 export default {
     name:'RequestStickerAddressModal',
+    emits: [
+        'sendData',
+    ],
     components:{
         modal,
         alert,

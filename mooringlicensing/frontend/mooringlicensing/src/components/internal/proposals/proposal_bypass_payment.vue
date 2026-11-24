@@ -1,10 +1,10 @@
 <template>
     <div id="bypassPayment">
-        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :processing="submitting" :title="title" large>
+        <modal v-model:show="isModalOpen"transition="modal fade" @ok="ok()" @cancel="cancel()" :processing="submitting" :title="title" large>
             <div class="container-fluid">
                 <div class="row">
                     <form   name="bypassForm">
-                        <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
+                        <alert v-model:show="showError" type="danger"><strong>{{errorString}}</strong></alert>
                         <alert type="warning">
                             <strong>Caution</strong> 
                             This form will cancel the application invoice and forward the application to the approval/printing sticker stage.
@@ -55,6 +55,9 @@ import alert from '@vue-utils/alert.vue'
 import {helpers,api_endpoints} from "@/utils/hooks.js"
 export default {
     name:'Bypass-Payment',
+    emits: [
+        'refreshFromResponse',
+    ],
     components:{
         modal,
         alert

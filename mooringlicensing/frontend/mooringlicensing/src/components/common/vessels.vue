@@ -210,6 +210,14 @@ import {
 
 export default {
     name: 'vessels',
+    emits: [
+        'noVessel',
+        'updateMaxVesselLengthForAAComponent',
+        'updateMaxVesselLengthForMainComponent',
+        'updateVesselLength',
+        'updateVesselOwnershipChanged',
+        'vesselChanged',
+    ],
     data: function () {
         return {
             dotName: '',
@@ -509,19 +517,19 @@ export default {
         },
         setRegisteredOwner: function (isIndividualOwner) {
             if (!this.vessel.vessel_ownership) {
-                this.$set(this.vessel, 'vessel_ownership', {
+                this.vessel.vessel_ownership = {
                     company_ownership: {
                         company: {},
                     },
-                });
+                };
             }
 
-            this.$set(this.vessel.vessel_ownership, 'individual_owner', isIndividualOwner);
+            this.vessel.vessel_ownership.individual_owner = isIndividualOwner;
 
             if (!isIndividualOwner && !this.vessel.vessel_ownership.company_ownership) {
-                this.$set(this.vessel.vessel_ownership, 'company_ownership', {
+                this.vessel.vessel_ownership.company_ownership = {
                     company: {},
-                });
+                };
             }
 
             this.vessel = Object.assign({}, this.vessel);
@@ -800,7 +808,7 @@ export default {
             const res = await this.$http.post(url, payload);
             const companyOwnershipData = res.body;
             if (companyOwnershipData && companyOwnershipData.company) {
-                this.$set(this.vessel.vessel_ownership, 'company_ownership', Object.assign({}, res.body));
+                this.vessel.vessel_ownership.company_ownership = Object.assign({}, res.body);
                 this.vessel = Object.assign({}, this.vessel);
             }
         },
@@ -810,7 +818,7 @@ export default {
             await this.fetchReadonlyVesselCommon(url);
         },
         fetchDraftData: function () {
-            console.log('fetchDraftData');
+
             this.vessel.rego_no = this.proposal.rego_no;
             this.vessel.id = this.proposal.vessel_id;
             let vessel_details = {};
@@ -917,7 +925,7 @@ export default {
                     try {
                         this.vessel.id = res.body.id;
                         this.vessel.rego_no = res.body.rego_no;
-                        console.log(res.body)
+
                         this.vessel.vessel_ownership.percentage = res.body.vessel_ownership.percentage;
                         this.vessel.vessel_ownership.created = res.body.vessel_ownership.created;
                         this.vessel.vessel_ownership.dot_name = res.body.vessel_ownership.dot_name;

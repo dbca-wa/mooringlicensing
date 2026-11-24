@@ -236,7 +236,7 @@ export default {
             .replace(/>/g, '&gt;');
     },
     showValidationErrors: function(errorMap, errorList) {
-        console.log("showValidationErrors")
+
         $.each(this.validElements(), function(index, element) {
             $(element)
                 .parents('.form-group')

@@ -75,7 +75,7 @@ export default {
     data() {
         let vm = this;
         return {
-            datatable_id: 'applications-datatable-' + vm._uid,
+            datatable_id: 'applications-datatable-' + vm.$.uid,
 
             // selected values for filtering
             filterApplicationType: null,
@@ -490,7 +490,7 @@ export default {
             }).then(() => {
                 vm.$http.put('/api/proposal/' + proposal_id + '/reinstate_wl_allocation/')
                 .then((response) => {
-                    console.log({response})
+
                     swal(
                         'Reinstated',
                         'Originated waiting list allocation has been reinstated',

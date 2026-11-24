@@ -40,7 +40,7 @@ from '@/utils/hooks'
         },
         methods:{
             openVessel: function() {
-                console.log("open vessel");
+
                 this.$nextTick(() => {
                     if (this.selectedVessel) {
                         if (this.selectedVessel.entity_type === 'ml') {

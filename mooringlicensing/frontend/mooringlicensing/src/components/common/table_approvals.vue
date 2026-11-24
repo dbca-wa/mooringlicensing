@@ -148,7 +148,7 @@ import CreateNewStickerModal from "@/components/common/create_new_sticker_modal.
 import RequestNewStickerModal from "@/components/common/request_new_sticker_modal.vue"
 import RequestStickerAddressModal from "@/components/common/request_sticker_address_modal.vue"
 import SwapMooringsModal from "@/components/common/swap_moorings_modal.vue"
-import Vue from 'vue'
+import http from '@/utils/vue-resource-shim'
 import { api_endpoints, helpers }from '@/utils/hooks'
 
 export default {
@@ -175,7 +175,7 @@ export default {
     data() {
         let vm = this;
         return {
-            datatable_id: 'waiting_lists-datatable-' + vm._uid,
+            datatable_id: 'waiting_lists-datatable-' + vm.$.uid,
             show_expired_surrendered: false,
             selectedWaitingListAllocationId: null,
             approvalHistoryId: null,
@@ -906,7 +906,7 @@ export default {
     },
     methods: {
         sendDataForSwapMoorings: function(params){
-            console.log('in sendDataForSwapMoorings')
+
             let vm = this
             vm.$http.post(helpers.add_endpoint_json(api_endpoints.approvals, params.approval_id + '/swap_moorings'), params).then(
                 res => {
@@ -977,7 +977,7 @@ export default {
         },
         fetchProfile: function(){
             let vm = this;
-            Vue.http.get(api_endpoints.profile).then((response) => {
+            http.get(api_endpoints.profile).then((response) => {
                 vm.profile = response.body
 
             },(error) => {
@@ -995,7 +995,7 @@ export default {
             this.$refs.approvals_datatable.vmDataTable.ajax.reload();
         },
         refreshFromResponse: async function(lodgementNumber){
-            console.log("refreshFromResponse");
+
             await swal({
                 title: "Saved",
                 text: 'Mooring Site Licence Application ' + lodgementNumber + ' has been created',

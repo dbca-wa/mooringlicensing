@@ -1,9 +1,9 @@
 <template>
     <div id="change-contact">
-        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :processing="processing" :okButtonDisabled="!okButtonEnabled" :title="title" large>
+        <modal v-model:show="isModalOpen"transition="modal fade" @ok="ok()" @cancel="cancel()" :processing="processing" :okButtonDisabled="!okButtonEnabled" :title="title" large>
             <p>Please select a Mooring Site License to exchange with the mooring of Mooring Site License: <strong>{{ approval_lodgement_number }}</strong>.</p>
             <div class="container-fluid">
-                <alert :show.sync="showError" type="danger"><strong>{{ errorString }}</strong></alert>
+                <alert v-model:show="showError" type="danger"><strong>{{ errorString }}</strong></alert>
                 <div class="row mb-3">
                     <datatable
                         ref="swap_moorings_datatable"
@@ -25,6 +25,9 @@ import datatable from '@/utils/vue/datatable.vue'
 
 export default {
     name:'SwapMooringsModal',
+    emits: [
+        'sendData',
+    ],
     components:{
         modal,
         alert,
@@ -56,7 +59,7 @@ export default {
             errors: false,
             errorString: '',
 
-            datatable_id: 'swap-moorings-datatable-' + vm._uid,
+            datatable_id: 'swap-moorings-datatable-' + vm.$.uid,
             selectedApprovalId: null,
             selectedApprovalLodgementNumber: null,
         }
@@ -258,7 +261,7 @@ export default {
         },
         addEventListeners: function () {
             let vm = this;
-            vm.$refs.swap_moorings_datatable.vmDataTable.on('click', 'input[class="form-check-input" type="radio"]', function(e) {
+            vm.$refs.swap_moorings_datatable.vmDataTable.on('click', 'input[class="form-check-input"][type="radio"]', function(e) {
                 var id = $(this).attr('data-selected-approval');
                 var lodgement_number = $(this).attr('data-selected-approval-lodgement-number');
                 vm.selectedApprovalId = id

@@ -22,17 +22,19 @@
         </div>
         <div v-else class="row">
             <div class="col-sm-12">
-                <form   name="personal_form" method="post">
-                    <FormSection label="Apply for">
+                <form name="personal_form" method="post">
+                    <FormSection label="Apply for" v-show="!this.is_internal || this.applicant_system_id">
                         <div>
                             <div v-if="season_text" class="col-sm-12" style="margin-bottom: 1em;">
                                 <strong>
                                     Application for the current season: {{ season_text }}
                                 </strong>
                             </div>
+
                             <div class="col-sm-12" style="margin-left:20px">
                                 <div class="row mb-3">
-                                    <label v-if="aaaChoices.length > 0">Annual Admission</label>
+
+                                    <label>Annual Admission</label>
                                     <div v-if="aaaApprovals.length <= 1">
                                         <div v-for="(application_type, index) in aaaChoices">
                                             <input class="form-check-input" type="radio" name="applicationType"
@@ -42,16 +44,17 @@
                                                 application_type.new_application_text }}</label>
                                         </div>
                                     </div>
+
                                     <div v-else>
                                         <div class="row" v-for="application_type in aaaMultiple">
-                                            <div class="col-sm-5">
+                                            <div class="col-sm-6">
                                                 <input class="form-check-input" type="radio" name="applicationType" :id="application_type.code"
                                                     value="application_type"
                                                     @change="selectApplication(application_type)" />
                                                 <label :for="application_type.code" style="font-weight:normal">{{
                                                     application_type.new_application_text }}</label>
                                             </div>
-                                            <span class="float-start col-sm-2" v-if="application_type.multiple">
+                                            <span class="float-start col-sm-3" v-if="application_type.multiple">
                                                 <select class="form-select" v-model="selectedCurrentProposal">
                                                     <option v-for="approval in aaaApprovals"
                                                         :value="approval.current_proposal_id">
@@ -61,9 +64,10 @@
                                             </span>
                                         </div>
                                     </div>
+
                                 </div>
                                 <div class="row mb-3">
-                                    <label v-if="auaChoices.length > 0">Authorised User</label>
+                                    <label>Authorised User</label>
                                     <div v-if="auaApprovals.length <= 1">
                                         <div v-for="(application_type, index) in auaChoices">
                                             <input class="form-check-input" type="radio" name="applicationType"
@@ -75,14 +79,14 @@
                                     </div>
                                     <div v-else>
                                         <div class="row" v-for="application_type in auaMultiple">
-                                            <div class="col-sm-5">
+                                            <div class="col-sm-6">
                                                 <input class="form-check-input" type="radio" name="applicationType" :id="application_type.code"
                                                     value="application_type"
                                                     @change="selectApplication(application_type)" />
                                                 <label :for="application_type.code" style="font-weight:normal">{{
                                                     application_type.new_application_text }}</label>
                                             </div>
-                                            <span class="float-start col-sm-2" v-if="application_type.multiple">
+                                            <span class="float-start col-sm-3" v-if="application_type.multiple">
                                                 <select class="form-select" v-model="selectedCurrentProposal">
                                                     <option v-for="approval in auaApprovals"
                                                         :value="approval.current_proposal_id">
@@ -106,14 +110,14 @@
                                     </div>
                                     <div v-else>
                                         <div class="row" v-for="application_type in wlaMultiple">
-                                            <div class="col-sm-5">
+                                            <div class="col-sm-6">
                                                 <input class="form-check-input" type="radio" name="applicationType" :id="application_type.code"
                                                     value="application_type"
                                                     @change="selectApplication(application_type)" />
                                                 <label :for="application_type.code" style="font-weight:normal">{{
                                                     application_type.new_application_text }}</label>
                                             </div>
-                                            <span class="float-start col-sm-2" v-if="application_type.multiple">
+                                            <span class="float-start col-sm-3" v-if="application_type.multiple">
                                                 <select class="form-select" v-model="selectedCurrentProposal">
                                                     <option v-for="approval in wlaApprovals"
                                                         :value="approval.current_proposal_id">
@@ -168,7 +172,7 @@
                                     <div v-else>
                                         <!-- Approvals >= 2 -->
                                         <div class="row" v-for="application_type in mlMultiple">
-                                            <div class="col-sm-5">
+                                            <div class="col-sm-6">
                                                 <input
                                                     class="form-check-input" type="radio"
                                                     name="applicationType"
@@ -183,7 +187,7 @@
                                                     {{ application_type.new_application_text }}
                                                 </label>
                                             </div>
-                                            <span class="float-start col-sm-2" v-if="application_type.multiple">
+                                            <span class="float-start col-sm-3" v-if="application_type.multiple">
                                                 <select class="form-select" v-model="selectedCurrentProposal">
                                                     <option v-for="approval in mlApprovals"
                                                         :value="approval.current_proposal_id"
@@ -363,7 +367,7 @@ export default {
                         }
                     },
                     processResults: function(data){
-                        console.log({data})
+
                         return {
                             'results': data.results,
                             'pagination': {
@@ -413,9 +417,9 @@ export default {
             });
         },
         parseWla: function () {
-            console.log('in parseWla')
+
             if (this.wlaApprovals.length > 1) {
-                console.log('wlaApprovals > 1')
+
                 for (let app of this.application_types_and_licences) {
                     if (app.code === 'wla' && !app.approval_id) {
                         // new app
@@ -430,7 +434,7 @@ export default {
                     multiple: true
                 })
             } else {
-                console.log('wlaApprovals = 0 or 1')
+
                 // add wla approval to wlaChoices
                 for (let app of this.application_types_and_licences) {
                     if (app.code === 'wla' && (this.newWlaAllowed || app.approval_id)) {
@@ -662,7 +666,7 @@ export default {
         },
         fetchCurrentSeason: async function () {
             const response = await this.$http.get(api_endpoints.current_season);
-            console.log(response.body)
+
             if (response.body.length) {
                 this.season_text = response.body[0].start_date + ' to ' + response.body[0].end_date
             }
@@ -670,7 +674,7 @@ export default {
     },
     watch: {
         applicant_system_id: async function () {
-            console.log(this.applicant_system_id)
+
             this.applicationsLoading = true;
             this.resetForm();
             if (this.applicant_system_id != null) {

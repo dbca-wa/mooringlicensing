@@ -1,8 +1,8 @@
 <template>
     <div id="change-contact">
-        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :processing="processing" :title="title" large>
+        <modal v-model:show="isModalOpen"transition="modal fade" @ok="ok()" @cancel="cancel()" :processing="processing" :title="title" large>
             <div class="container-fluid">
-                <alert :show.sync="showError" type="danger"><strong>{{ errorString }}</strong></alert>
+                <alert v-model:show="showError" type="danger"><strong>{{ errorString }}</strong></alert>
                 <div class="row mb-3">
                     <table class="table table-striped table-bordered">
                         <thead>
@@ -88,6 +88,9 @@ import { helpers, api_endpoints } from "@/utils/hooks.js"
 
 export default {
     name:'RequestNewDCVStickerModal',
+    emits: [
+        'sendData',
+    ],
     components:{
         modal,
         alert,
@@ -130,8 +133,8 @@ export default {
                     sticker.checked = false
                 }
                 vm.stickers = ret.body.stickers
-                console.log('vm.stickers')
-                console.log(vm.stickers)
+
+
 
             } else {
                 vm.stickers = []

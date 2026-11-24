@@ -1,10 +1,10 @@
 <template>
     <div id="internal-compliance-amend">
-        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" title="Amendment Request" large>
+        <modal v-model:show="isModalOpen"transition="modal fade" @ok="ok()" @cancel="cancel()" title="Amendment Request" large>
             <div class="container-fluid">
                 <div class="row">
                     <form   name="amendForm">
-                        <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
+                        <alert v-model:show="showError" type="danger"><strong>{{errorString}}</strong></alert>
                         <div class="col-sm-12">
                             <div class="row">
                                 <div class="col-sm-offset-2 col-sm-8">
@@ -117,7 +117,7 @@ export default {
                         'success'
                 );
                 vm.amendingcompliance = true;
-                console.log(response)
+
                 vm.close();
                 vm.$router.push({ path: '/internal' });
                 

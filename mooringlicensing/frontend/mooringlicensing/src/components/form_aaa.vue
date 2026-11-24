@@ -98,6 +98,14 @@
     import Insurance from '@/components/common/insurance.vue'
     export default {
         name: 'AnnualAdmissionApplication',
+        emits: [
+            'noVessel',
+            'profile-fetched',
+            'updateAutoApprove',
+            'updateSubmitText',
+            'updateVesselOwnershipChanged',
+            'vesselChanged',
+        ],
         props:{
             proposal:{
                 type: Object,
@@ -189,7 +197,7 @@
                 await this.$emit("vesselChanged", vesselChanged);
             },
             updateVesselLength: function (length) {
-                console.log('%cin updateVesselLength()', 'color: #44aa33')
+
                 if (this.is_external && this.proposal) {
                     if (this.max_vessel_length_with_no_payment !== null &&
                         (this.max_vessel_length_with_no_payment.max_length < length ||
@@ -200,7 +208,7 @@
                         this.higherVesselCategory = false;
                     }
                 }
-                console.log('%cthis.higherVesselCategory: ' + this.higherVesselCategory, 'color: #44aa33')
+
                 this.updateAmendmentRenewalProperties();
             },
             resetCurrentVessel: function(keep) {
@@ -212,16 +220,16 @@
                 this.max_vessel_length_with_no_payment = this.max_vessel_length_for_main_component
             },
             updateMaxVesselLengthForAAComponent: function(length){
-                console.log('updateMaxVesselLengthForAAComponent')
+
                 this.updateMaxVesselLength()
             },
             updateMaxVesselLengthForMainComponent: function(length){
-                console.log('updateMaxVesselLengthForMainComponent')
+
                 this.max_vessel_length_for_main_component = length
                 this.updateMaxVesselLength()
             },
             updateAmendmentRenewalProperties: async function() {
-                console.log('updateAmendmentRenewalProperties in form_aaa.vue')
+
                 if (this.proposal && (this.proposal.proposal_type.code === 'amendment' || this.proposal.pending_amendment_request)) {
                     this.$nextTick(async () => {
                         // insurance

@@ -48,7 +48,7 @@ export default {
     data() {
         let vm = this;
         return {
-            datatable_id: 'compliances-datatable-' + vm._uid,
+            datatable_id: 'compliances-datatable-' + vm.$.uid,
 
             // selected values for filtering
             filterComplianceStatus: null,

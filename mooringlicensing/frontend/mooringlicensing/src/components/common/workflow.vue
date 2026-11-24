@@ -173,6 +173,21 @@ import { constants } from '@/utils/hooks'
 
 export default {
     name: 'Workflow',
+    emits: [
+        'amendmentRequest',
+        'assignRequestUser',
+        'assignTo',
+        'backToAssessorRequirements',
+        'bypassEndorsement',
+        'declineProposal',
+        'issueProposal',
+        'proposedApproval',
+        'proposedDecline',
+        'requestEndorsement',
+        'switchStatus',
+        'toggleProposal',
+        'toggleRequirements',
+    ],
     data: function() {
         let vm = this;
         return {
@@ -285,7 +300,7 @@ export default {
                     display = true
                 }
             } catch(err) {}
-            console.log('display_action_back_to_assessor: ' + display)
+
             return display
         },
         display_action_back_to_assessor_requirements: function(){
@@ -295,7 +310,7 @@ export default {
                     display = true
                 }
             } catch(err) {}
-            console.log('display_action_back_to_assessor_requirements: ' + display)
+
             return display
         },
         display_action_grant: function(){
@@ -327,12 +342,10 @@ export default {
             return display
         },
     },
-    filters: {
+    methods: {
         formatDate: function(data){
             return data ? moment(data).format('DD/MM/YYYY HH:mm:ss'): '';
-        }
-    },
-    methods: {
+        },
         bypassEndorsement: function(){
             this.$emit('bypassEndorsement')
         },

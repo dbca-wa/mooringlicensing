@@ -108,8 +108,8 @@ export default {
     },
     methods: {
         recalc: function(){
-            console.log('test')
-            console.log(this.components['WaitingListTable'])
+
+
         }
     },
     mounted: function () {

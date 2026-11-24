@@ -1,9 +1,9 @@
 <template>
     <div id="offerMooringLicence">
-        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :title="title" large>
+        <modal v-model:show="isModalOpen"transition="modal fade" @ok="ok()" @cancel="cancel()" :title="title" large>
             <div class="container-fluid">
                 <div class="row">
-                    <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
+                    <alert v-model:show="showError" type="danger"><strong>{{errorString}}</strong></alert>
                     <div class="col-sm-12">
                         <div class="row mb-3">
                             <div class="row">
@@ -71,7 +71,7 @@
                 </div>
             </div>
 
-            <div slot="footer">
+            <template v-slot:footer>
                 <p class="float-end" style="margin-top:5px">
                     <input type="checkbox" v-model="noEmails" id="noEmails" />
                     <label for="noEmails">
@@ -81,7 +81,7 @@
                 <button type="button" v-else class="btn btn-primary me-2" @click="ok" :disabled="!ok_button_enabled">Ok</button>
                 <button type="button" class="btn btn-secondary me-2" @click="cancel">Cancel</button>
                 </p>
-            </div>
+            </template>
         </modal>
     </div>
 </template>
@@ -95,6 +95,9 @@ import { helpers, api_endpoints } from "@/utils/hooks.js"
 
 export default {
     name:'OfferMooringLicence',
+    emits: [
+        'refreshFromResponse',
+    ],
     components:{
         modal,
         alert,

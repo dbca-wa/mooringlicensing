@@ -1,8 +1,8 @@
 <template>
     <div id="change-contact">
-        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :title="title" large>
+        <modal v-model:show="isModalOpen"transition="modal fade" @ok="ok()" @cancel="cancel()" :title="title" large>
             <div class="container-fluid">
-                <alert :show.sync="showError" type="danger"><strong>{{ errorString }}</strong></alert>
+                <alert v-model:show="showError" type="danger"><strong>{{ errorString }}</strong></alert>
                 <div class="row mb-3">
                     <label class="col-sm-2 col-form-label" for="reason">Reason</label>
                     <div class="col-sm-10">
@@ -38,7 +38,7 @@
                     </div>
                 </div>
             </div>
-            <div slot="footer">
+            <template v-slot:footer>
                 <div class="row w-100">
                     <div class="col-md-6 text-end">
                         <span v-if="showWaiveFeeCheckbox">
@@ -51,7 +51,7 @@
                         <button type="button" class="btn btn-secondary me-2" @click="cancel">Cancel</button>
                     </div>
                 </div>
-            </div>
+            </template>
         </modal>
     </div>
 </template>
@@ -63,6 +63,9 @@ import alert from '@vue-utils/alert.vue'
 
 export default {
     name:'ModalForSticker',
+    emits: [
+        'sendData',
+    ],
     components:{
         modal,
         alert,

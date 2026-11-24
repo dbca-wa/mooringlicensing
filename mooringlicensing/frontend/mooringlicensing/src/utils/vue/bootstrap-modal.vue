@@ -141,7 +141,12 @@ export default {
         type: Boolean,
         default: false,
     },
+    show: {
+        type: Boolean,
+        default: false,
+    },
   },
+  emits: ['ok', 'cancel', 'update:show'],
   data() {
     return {
       duration: null,
@@ -156,9 +161,6 @@ export default {
         "modal-sm": this.small,
         "modal-full": this.full,
       };
-    },
-    show: function () {
-      return this.$parent.isModalOpen;
     },
   },
   created() {
@@ -188,14 +190,14 @@ export default {
   },
   methods: {
     ok() {
-      this.$emit("ok");
-      if (this.closeWhenOK) {
-        this.show = false;
-      }
+        this.$emit("ok");
+        if (this.closeWhenOK) {
+            this.$emit("update:show", false);
+        }
     },
     cancel() {
-      this.$emit("cancel");
-      this.$parent.close();
+        this.$emit("cancel");
+        this.$emit("update:show", false);
     },
     clickMask() {
       if (!this.force) {

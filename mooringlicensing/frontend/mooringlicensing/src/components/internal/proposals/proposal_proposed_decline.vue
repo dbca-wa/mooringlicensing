@@ -1,10 +1,10 @@
 <template>
     <div id="change-contact">
-        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :processing="decliningProposal" :title="title" large>
+        <modal v-model:show="isModalOpen"transition="modal fade" @ok="ok()" @cancel="cancel()" :processing="decliningProposal" :title="title" large>
             <div class="container-fluid">
                 <div class="row">
                     <form   name="declineForm">
-                        <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
+                        <alert v-model:show="showError" type="danger"><strong>{{errorString}}</strong></alert>
                         <div class="col-sm-12">
                             <div class="row mb-3">
                                 <div class="row">
@@ -37,6 +37,9 @@ import alert from '@vue-utils/alert.vue'
 import { helpers, api_endpoints, constants } from "@/utils/hooks.js"
 export default {
     name:'Decline-Proposal',
+    emits: [
+        'refreshFromResponse',
+    ],
     components:{
         modal,
         alert
@@ -123,7 +126,7 @@ export default {
             this.validation_form.resetForm();
         },
         sendData:function(){
-            console.log('in sendData')
+
             let vm = this;
             vm.errors = false;
             let decline = JSON.parse(JSON.stringify(vm.decline));

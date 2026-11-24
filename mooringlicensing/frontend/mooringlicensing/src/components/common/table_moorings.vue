@@ -33,14 +33,13 @@
 
 <script>
 import datatable from '@/utils/vue/datatable.vue'
-import Vue from 'vue'
 import { api_endpoints, helpers } from '@/utils/hooks'
 export default {
     name: 'TableMoorings',
     data() {
         let vm = this;
         return {
-            datatable_id: 'moorings-datatable-' + vm._uid,
+            datatable_id: 'moorings-datatable-' + vm.$.uid,
 
             // selected values for filtering
             filterMooringStatus: null,
@@ -211,7 +210,7 @@ export default {
                 columnDefs: [{
                     targets: [0],
                     render: function(data, type, full, meta) {
-                        console.log({data})
+
                         return '<div>' + data + '</div>';
                     }
                 }],
@@ -276,7 +275,7 @@ export default {
                 dom: 'lBfrtip',
                 processing: true,
                 initComplete: function () {
-                    console.log('in initComplete')
+
                 },
             }
         },

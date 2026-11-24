@@ -1,6 +1,6 @@
 <template>
     <div id="approvalSurrender">
-        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :processing="issuingApproval" :title="title" large>
+        <modal v-model:show="isModalOpen"transition="modal fade" @ok="ok()" @cancel="cancel()" :processing="issuingApproval" :title="title" large>
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-sm-12 warning">
@@ -10,7 +10,7 @@
                 </div>
                 <form   name="approvalForm">
                     <div class="row">
-                        <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
+                        <alert v-model:show="showError" type="danger"><strong>{{errorString}}</strong></alert>
                         <div class="col-sm-12">
                             <div class="row mb-3">
                                 <div class="col-sm-3">
@@ -36,6 +36,9 @@ import alert from '@vue-utils/alert.vue'
 import {helpers,api_endpoints} from "@/utils/hooks.js"
 export default {
     name:'Surrender-Approval',
+    emits: [
+        'refreshFromResponse',
+    ],
     components:{
         modal,
         alert

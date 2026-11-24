@@ -277,7 +277,7 @@
 </template>
 
 <script>
-import Vue from 'vue'
+import http from '@/utils/vue-resource-shim'
 import $ from 'jquery'
 import { api_endpoints, helpers } from '@/utils/hooks'
 import FormSection from '@/components/forms/section_toggle.vue'
@@ -287,6 +287,9 @@ import datatable from '@/utils/vue/datatable.vue'
 
 export default {
     name: 'Profile',
+    emits: [
+        'profile-fetched',
+    ],
     props:{
         proposalId: {
             type: Number,
@@ -321,15 +324,15 @@ export default {
     data () {
         let vm = this;
         return {
-            electoralRollSectionIndex: 'electoral_roll_' + vm._uid,
+            electoralRollSectionIndex: 'electoral_roll_' + vm.$.uid,
             silentElector: null,
-            appBody: 'appBody'+vm._uid,
-            adBody: 'adBody'+vm._uid,
-            pBody: 'pBody'+vm._uid,
-            cBody: 'cBody'+vm._uid,
+            appBody: 'appBody'+vm.$.uid,
+            adBody: 'adBody'+vm.$.uid,
+            pBody: 'pBody'+vm.$.uid,
+            cBody: 'cBody'+vm.$.uid,
             profile: {},
-            residential_address_datatable_id: 'residential-address-datatable-' + vm._uid,
-            postal_address_datatable_id: 'postal-address-datatable-' + vm._uid,
+            residential_address_datatable_id: 'residential-address-datatable-' + vm.$.uid,
+            postal_address_datatable_id: 'postal-address-datatable-' + vm.$.uid,
             address_datatable_headers: ["Street","Locality","State","Postcode","Country","Action"],
             residential_address_table_key: 0,
             postal_address_table_key: 0,
@@ -379,8 +382,8 @@ export default {
             
             if (this.applicant_system_id != null &&
                 this.applicant_system_id != this.original_applicant_system_id) {
-                console.log(this.applicant_system_id)
-                console.log(this.original_applicant_system_id)
+
+
                 this.changingApplicant = true;
 
                 try {
@@ -434,7 +437,7 @@ export default {
                         }
                     },
                     processResults: function(data){
-                        console.log({data})
+
                         return {
                             'results': data.results,
                             'pagination': {
@@ -460,7 +463,7 @@ export default {
         },
         getApplicantDisplay: function () {           
             let vm = this; 
-            console.log("getApplicantDisplay")
+
             let display = null
             if (vm.profile.legal_first_name) {
                 display = vm.profile.legal_first_name + " " + vm.profile.legal_last_name + " (DOB: "+vm.profile.legal_dob+")";
@@ -485,9 +488,9 @@ export default {
             vm.uploadedFile = _file;
         },       
         fetchProfile: async function(){
-            console.log('in fetchProfile')
+
             let response = null;
-            response = await Vue.http.get(api_endpoints.profile + '/' + this.proposalId)
+            response = await http.get(api_endpoints.profile + '/' + this.proposalId)
             this.profile = Object.assign(response.body)
 
             if (this.profile.residential_address_list !== undefined)
@@ -538,7 +541,7 @@ export default {
         },
     },
     beforeRouteEnter: function(to,from,next){
-        Vue.http.get(api_endpoints.profile).then((response) => {
+        http.get(api_endpoints.profile).then((response) => {
             next(vm => {
                 vm.profile = Object.assign(response.body);
             });           

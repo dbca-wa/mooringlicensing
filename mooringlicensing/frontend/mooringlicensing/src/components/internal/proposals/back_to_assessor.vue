@@ -1,11 +1,11 @@
 
 <template>
     <div id="internal-proposal-amend">
-        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" title="Back To Assessor" large>
+        <modal v-model:show="isModalOpen"transition="modal fade" @ok="ok()" @cancel="cancel()" title="Back To Assessor" large>
             <div class="container-fluid">
                 <div class="row">
                     <form   name="backToAssessorForm">
-                        <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
+                        <alert v-model:show="showError" type="danger"><strong>{{errorString}}</strong></alert>
                         <div class="col-sm-12">
                             <div class="row">
                                 <div class="row mb-3">
@@ -91,7 +91,7 @@ export default {
             vm.close();
         },
         sendData: function(){
-            console.log('in sendData')
+
             let vm = this;
             vm.errors = false;
 

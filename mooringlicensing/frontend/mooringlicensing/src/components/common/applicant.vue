@@ -303,16 +303,16 @@ export default {
     data: function () {
         let vm = this;
         return {
-            electoralRollSectionIndex: 'electoral_roll_' + vm._uid,
+            electoralRollSectionIndex: 'electoral_roll_' + vm.$.uid,
             silentElector: null,
             countries: [],
             showAddressError: false,
-            detailsBody: 'detailsBody' + vm._uid,
-            addressBody: 'addressBody' + vm._uid,
-            contactsBody: 'contactsBody' + vm._uid,
-            electoralRollBody: 'electoralRollBody' + vm._uid,
-            residential_address_datatable_id: 'residential-address-datatable-' + vm._uid,
-            postal_address_datatable_id: 'postal-address-datatable-' + vm._uid,
+            detailsBody: 'detailsBody' + vm.$.uid,
+            addressBody: 'addressBody' + vm.$.uid,
+            contactsBody: 'contactsBody' + vm.$.uid,
+            electoralRollBody: 'electoralRollBody' + vm.$.uid,
+            residential_address_datatable_id: 'residential-address-datatable-' + vm.$.uid,
+            postal_address_datatable_id: 'postal-address-datatable-' + vm.$.uid,
             address_datatable_headers: ["Street","Locality","State","Postcode","Country"],
         }
     },

@@ -1,10 +1,10 @@
 <template>
     <div id="change-contact">
-        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :title="title" large>
+        <modal v-model:show="isModalOpen"transition="modal fade" @ok="ok()" @cancel="cancel()" :title="title" large>
             <div class="container-fluid">
-                <alert :show.sync="showError" type="danger"><strong>{{ errorString }}</strong></alert>
-                <alert :show.sync="showWarning" type="warning"><strong>One or more stickers have a postal address set that does not match the postal address on holder's user profile. Use the Create New Sticker option to change the postal address that the sticker should be sent to.</strong></alert>
-                <alert :show.sync="showReplaceInfo" type="info"><strong>{{ replaceInfo }}</strong></alert>
+                <alert v-model:show="showError" type="danger"><strong>{{ errorString }}</strong></alert>
+                <alert v-model:show="showWarning" type="warning"><strong>One or more stickers have a postal address set that does not match the postal address on holder's user profile. Use the Create New Sticker option to change the postal address that the sticker should be sent to.</strong></alert>
+                <alert v-model:show="showReplaceInfo" type="info"><strong>{{ replaceInfo }}</strong></alert>
                 <div class="row mb-3">
                     <table class="table table-striped table-bordered">
                         <thead>
@@ -18,7 +18,8 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="sticker in stickers" :key="sticker.id" v-if="sticker.status.code == 'current'">
+                            <template v-for="sticker in stickers" :key="sticker.id">
+                            <tr v-if="sticker.status && sticker.status.code === 'current'">
                                 <td><input v-if="sticker.status.code == 'current'" type="checkbox" v-model="sticker.checked" /></td>
                                 <td v-if="sticker.number">{{ sticker.number }}</td>
                                 <td v-else>Not Assigned</td>
@@ -37,6 +38,7 @@
                                     <span>{{sticker.postal_address_postcode}}</span>
                                 </td>
                             </tr>
+                            </template>
                         </tbody>
                     </table>
                 </div>
@@ -90,7 +92,7 @@
                     </div>
                 </div>
             </div>
-            <div slot="footer">
+            <template v-slot:footer>
                 <div class="row w-100">
                     <div class="col-md-6 text-end">
                         <span v-if="is_internal">
@@ -103,7 +105,7 @@
                         <button type="button" class="btn btn-secondary me-2" @click="cancel">Cancel</button>
                     </div>
                 </div>
-            </div>
+            </template>
         </modal>
     </div>
 </template>
@@ -116,6 +118,9 @@ import { helpers, api_endpoints } from "@/utils/hooks.js"
 
 export default {
     name:'RequestNewStickerModal',
+    emits: [
+        'sendData',
+    ],
     components:{
         modal,
         alert,
@@ -162,8 +167,8 @@ export default {
                     sticker.checked = false
                 }
                 vm.stickers = ret.body.stickers
-                console.log('vm.stickers')
-                console.log(vm.stickers)
+
+
 
             } else {
                 vm.stickers = []
@@ -177,8 +182,8 @@ export default {
                 if (res.ok) {
                     vm.holder = res.body
                 }
-                console.log('vm.holder')
-                console.log(vm.holder)
+
+
 
             } else {
                 vm.holder = null;
@@ -192,11 +197,6 @@ export default {
 
                     if (this.holder.postal_address_list !== undefined && this.holder.postal_address_list.length > 0) {
                         let holder_address = this.holder.postal_address_list[0];
-                        console.log(holder_address.country,sticker.postal_address_country,
-                            holder_address.line1,sticker.postal_address_line1,
-                            holder_address.locality,sticker.postal_address_locality,
-                            holder_address.postcode,sticker.postal_address_postcode,
-                            holder_address.state,sticker.postal_address_state)
                         if (
                             holder_address.country != sticker.postal_address_country ||
                             holder_address.line1 != sticker.postal_address_line1 ||

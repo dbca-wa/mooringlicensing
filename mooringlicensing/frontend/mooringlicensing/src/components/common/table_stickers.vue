@@ -45,10 +45,12 @@
 
 <script>
 import datatable from '@/utils/vue/datatable.vue'
-import Vue from 'vue'
 import { api_endpoints, helpers } from '@/utils/hooks'
 export default {
     name: 'TableStickers',
+    emits: [
+        'actionClicked',
+    ],
     props: {
         level:{
             type: String,
@@ -62,7 +64,7 @@ export default {
     data() {
         let vm = this;
         return {
-            datatable_id: 'applications-datatable-' + vm._uid,
+            datatable_id: 'applications-datatable-' + vm.$.uid,
             approvalTypesToDisplay: ['aap', 'aup', 'ml'],
 
             // selected values for filtering
@@ -207,15 +209,12 @@ export default {
                 orderable: false,
                 searchable: false,
                 visible: true,
-                'render': function(row, type, full){
-                    let lines = `
-                                 <table>
-                                     <tr><td style="text-align:right;">Sent:</td><td> ${full.sent_date ? moment(full.sent_date, 'YYYY-MM-DD').format('DD/MM/YYYY') : '---'}</td></tr>
-                                     <tr><td style="text-align:right;">Printed:</td><td> ${full.printing_date ? moment(full.printing_date, 'YYYY-MM-DD').format('DD/MM/YYYY') : '---'}</td></tr>
-                                     <tr><td style="text-align:right;">Mailed:</td><td> ${full.mailing_date ? moment(full.mailing_date, 'YYYY-MM-DD').format('DD/MM/YYYY') : '---'}</td></tr>
-                                 </table>
-                                 `
-                    return lines
+                render: function(row, type, full){
+                    return `
+                        <div><strong>Sent:</strong> ${full.sent_date ? moment(full.sent_date, 'YYYY-MM-DD').format('DD/MM/YYYY') : '---'}</div>
+                        <div><strong>Printed:</strong> ${full.printing_date ? moment(full.printing_date, 'YYYY-MM-DD').format('DD/MM/YYYY') : '---'}</div>
+                        <div><strong>Mailed:</strong> ${full.mailing_date ? moment(full.mailing_date, 'YYYY-MM-DD').format('DD/MM/YYYY') : '---'}</div>
+                    `
                 }
             }
         },
@@ -395,7 +394,7 @@ export default {
                 columns: columns,
                 processing: true,
                 initComplete: function() {
-                    console.log('in initComplete')
+
                 },
             }
         }

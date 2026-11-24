@@ -22,9 +22,9 @@
     "select2-bootstrap-5-theme": "^1.3.0",
     "sweetalert2": "^6.6.5",
     "uuid": "^14.0.3",
-    "vue": "^2.7.16",
-    "vue-router": "^2.3.1",
-    "vuedraggable": "^2.24.3"
+    "vue": "^3.5.0",
+    "vue-router": "^4.5.0",
+    "vuedraggable": "^4.1.0"
   },
   "browserslist": [
     "> 1%",
@@ -37,14 +37,14 @@
     "postcss": "^8.5.26"
   },
   "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.11",
     "autoprefixer": "^10.6.2",
     "eslint": "^9.16.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
     "jquery-validation": "^1.21.0",
     "pretty": "^2.0.0",
-    "vite": "^4.5.14",
-    "vite-plugin-static-copy": "^0.17.1",
-    "vite-plugin-vue2": "^2.0.3"
+    "vite": "^8.3.8",
+    "vite-plugin-static-copy": "^4.1.1"
   }
 }

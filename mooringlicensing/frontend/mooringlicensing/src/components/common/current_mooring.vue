@@ -42,6 +42,9 @@ import FormSection from '@/components/forms/section_toggle.vue'
 
 export default {
     name:'current_mooring',
+    emits: [
+        'resetCurrentMooring',
+    ],
     data:function () {
         return {
             changeMooring: false,

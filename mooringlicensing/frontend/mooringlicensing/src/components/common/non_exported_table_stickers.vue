@@ -39,6 +39,9 @@ import datatable from '@/utils/vue/datatable.vue'
 import { api_endpoints, helpers } from '@/utils/hooks'
 export default {
     name: 'NonExportedTableStickers',
+    emits: [
+        'actionClicked',
+    ],
     props: {
         level:{
             type: String,
@@ -52,7 +55,7 @@ export default {
     data() {
         let vm = this;
         return {
-            datatable_id: 'applications-datatable-' + vm._uid,
+            datatable_id: 'applications-datatable-' + vm.$.uid,
             approvalTypesToDisplay: ['aap', 'aup', 'ml'],
 
             // selected values for filtering
@@ -297,7 +300,7 @@ export default {
                 columns: columns,
                 processing: true,
                 initComplete: function() {
-                    console.log('in initComplete')
+
                 },
             }
         }

@@ -1,6 +1,7 @@
 <template>
   <div id="ShowComms">
     <modal
+      v-model:show="isModalOpen"  
       transition="modal fade"
       :showOK="false"
       :showCancel="false"
@@ -38,6 +39,7 @@ export default {
   },
   data: function () {
     return {
+      dom: 'lBfrtip',
       actionLogId: "action-log-table" + uuid(),
       isModalOpen: false,
       actionsDtHeaders: ["Who", "What", "When"],

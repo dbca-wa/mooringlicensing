@@ -3,7 +3,13 @@
       <table class="hover table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%" :id="id">
             <thead>
                 <tr>
-                    <th :data-class="(i == 0 )? 'expand':null" v-for="(header,i) in dtHeaders"><div class="html-header" v-html="header"></div></th>
+                    <th
+                        v-for="(header,i) in dtHeaders"
+                        :key="i"
+                        :data-class="i === 0 ? 'expand' : null"
+                    >
+                        <div class="html-header" v-html="header"></div>
+                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -29,37 +35,31 @@ export default {
          required:true
      }
    },
-   data : function () {
-      return {
-         table:null,
-         vmDataTable: null,
-      }
-   },
-   computed:{
-
-   },
+   data() {
+        return {
+            table: null,
+            vmDataTable: null,
+            resizeHandler: null,
+        }
+    },
    methods:{
        initEvents: function () {
             let vm =this;
-            var responsiveHelper;
-            var breakpointDefinition = {
-                //bootstrap grid values
-                tablet: 992,
-                phone : 768
-            };
-            var options = Object.assign(vm.dtOptions);
+
+            const options = Object.assign({}, vm.dtOptions);
             vm.vmDataTable = $(vm.table).DataTable(options);
 
-            window.addEventListener('resize', function () {
-                vm.vmDataTable.columns.adjust().responsive.recalc();
-            });
+            vm.resizeHandler = function () {
+                if (vm.vmDataTable) {
+                    vm.vmDataTable.columns.adjust();
 
-            vm.vmDataTable.on('draw', function () {
-                vm.vmDataTable.columns.adjust().responsive.recalc();
-            });
-            $(vm.table).on('page.dt', function () {
-                vm.vmDataTable.columns.adjust().responsive.recalc();
-            } );
+                    if (vm.vmDataTable.responsive) {
+                        vm.vmDataTable.responsive.recalc();
+                    }
+                }
+            }
+
+            window.addEventListener('resize', vm.resizeHandler);
             $(vm.table).on('drawDatatable', function(){
                 vm.vmDataTable.draw();
             });
@@ -70,8 +70,18 @@ export default {
       vm.table =$('#'+vm.id);
       $.fn.dataTable.ext.errMode = 'throw';
       vm.initEvents();
-   }
-};
+   },
+   beforeUnmount() {
+        if (this.resizeHandler) {
+            window.removeEventListener('resize', this.resizeHandler);
+        }
+
+        if (this.vmDataTable) {
+            this.vmDataTable.destroy(true);
+            this.vmDataTable = null;
+        }
+    }
+}
 </script>
 
 <style lang="css">

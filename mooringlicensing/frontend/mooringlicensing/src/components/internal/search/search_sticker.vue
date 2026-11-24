@@ -42,7 +42,7 @@ from '@/utils/hooks'
         },
         methods:{
             openApproval: function() {
-                console.log("open approval: " + this.approval_id);
+
                 this.$nextTick(() => {
                     if (this.approval_id) {
                         this.$router.push({

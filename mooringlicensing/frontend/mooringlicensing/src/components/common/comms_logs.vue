@@ -35,7 +35,7 @@
     </div>
     <AddCommLog ref="add_comm" :url="comms_add_url" @added="onCommAdded" />
     <ShowCommsLogs ref="show_comms" :url="comms_url" />
-    <ShowActionLogs ref="show_actions" :url="logs_url" />
+    <ShowActionLogs v-if="enable_actions_section" ref="show_actions" :url="logs_url" />
   </div>
 </template>
 

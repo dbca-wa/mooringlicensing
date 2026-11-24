@@ -33,7 +33,7 @@
                     <div class="row">
                         <div class="col-md-12"> 
                         <form   name="complianceForm" method="post">
-                            <alert :show.sync="showError" type="danger">
+                            <alert v-model:show="showError" type="danger">
                                 <strong>{{errorString}}</strong>
                             </alert>
                             <div class="row">
@@ -119,7 +119,7 @@
 </template>
 <script>
 import $ from 'jquery'
-import Vue from 'vue'
+import http from '@/utils/vue-resource-shim'
 import datatable from '@vue-utils/datatable.vue'
 import CommsLogs from '@common-utils/comms_logs.vue'
 import alert from '@vue-utils/alert.vue'
@@ -143,9 +143,9 @@ export default {
         isFinalised: false,
         errors: false,
         errorString: '',
-        pdBody: 'pdBody'+vm._uid,
-        oBody: 'oBody'+vm._uid,
-        pdBody: 'pdBody'+vm._uid,
+        pdBody: 'pdBody'+vm.$.uid,
+        oBody: 'oBody'+vm.$.uid,
+        pdBody: 'pdBody'+vm.$.uid,
         hasDocuments: false,
         validation_form: null,
         files: [
@@ -163,13 +163,7 @@ export default {
     hasDocuments: function(){             
         return this.compliance && this.compliance.documents;
     }
-  },
-  filters: {
-    formatDate: function(data){
-        return moment(data).format('DD/MM/YYYY HH:mm:ss');
-    }
-  },
- 
+  }, 
   components: {
     datatable,
     CommsLogs,
@@ -190,6 +184,9 @@ export default {
     
   },
   methods: {
+    formatDate: function(data){
+        return moment(data).format('DD/MM/YYYY HH:mm:ss');
+    },
     uploadFile(target,file_obj){
             let vm = this;
             let _file = null;
@@ -327,13 +324,13 @@ export default {
   },
 
  beforeRouteEnter: function(to, from, next){
-    Vue.http.get(helpers.add_endpoint_json(api_endpoints.compliances,to.params.compliance_id)).then((response) => {
+    http.get(helpers.add_endpoint_json(api_endpoints.compliances,to.params.compliance_id)).then((response) => {
         next(vm => {
             vm.compliance = response.body 
             if ( vm.compliance.customer_status == "Under Review" || vm.compliance.customer_status == "Approved" ) { vm.isFinalised = true }
             if (vm.compliance && vm.compliance.documents){ vm.hasDocuments = true}
 
-            Vue.http.get(helpers.add_endpoint_json(api_endpoints.compliances,to.params.compliance_id+'/amendment_request')).then((res) => {                     
+            http.get(helpers.add_endpoint_json(api_endpoints.compliances,to.params.compliance_id+'/amendment_request')).then((res) => {                     
                 vm.setAmendmentData(res.body);                  
             },
             err => {

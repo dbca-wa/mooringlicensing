@@ -1,10 +1,10 @@
 <template>
     <div id="proposalRequirementDetail">
-        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" title="Requirement" large>
+        <modal v-model:show="isModalOpen"transition="modal fade" @ok="ok()" @cancel="cancel()" title="Requirement" large>
             <div class="container-fluid">
                 <div class="row">
                     <form   name="requirementForm">
-                        <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
+                        <alert v-model:show="showError" type="danger"><strong>{{errorString}}</strong></alert>
                         <div class="col-sm-12">
                             <div class="row mb-3">
                                 <label class="form-check-label form-label"><input class="form-check-input" type="radio" name="requirementType" :value="true" v-model="requirement.standard">Standard Requirement</label>
@@ -90,7 +90,7 @@
                     </form>
                 </div>
             </div>
-            <div slot="footer">
+            <template v-slot:footer>
                 <template v-if="requirement.id">
                     <button type="button" v-if="updatingRequirement" disabled class="btn btn-primary me-2" @click="ok"><i class="fa fa-spinnner fa-spin"></i> Updating</button>
                     <button type="button" v-else class="btn btn-primary me-2" @click="ok">Update</button>
@@ -100,7 +100,7 @@
                     <button type="button" v-else class="btn btn-primary me-2" @click="ok">Add</button>
                 </template>
                 <button type="button" class="btn btn-secondary me-2" @click="cancel">Cancel</button>
-            </div>
+            </template>
         </modal>
     </div>
 </template>
@@ -183,6 +183,9 @@ export default {
             this.validDate = moment(this.requirement.due_date,'DD/MM/YYYY').isValid();
         },
     },
+    emits: [
+        'updatedRequirements'
+    ],
     methods:{
         initialiseRequirement: function(){
             this.requirement = {
@@ -247,7 +250,7 @@ export default {
                         emulateJSON:true,
                     }).then((response)=>{
                         vm.updatingRequirement = false;
-                        vm.$parent.updatedRequirements();
+                        vm.$emit('updatedRequirements');
                         vm.close();
                     },(error)=>{
                         vm.errors = true;
@@ -261,7 +264,7 @@ export default {
                     }).then((response)=>{
                         vm.addingRequirement = false;
                         vm.close();
-                        vm.$parent.updatedRequirements();
+                        vm.$emit('updatedRequirements');
                     },(error)=>{
                         vm.errors = true;
                         vm.addingRequirement = false;

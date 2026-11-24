@@ -99,6 +99,15 @@ import CurrentVessels from '@/components/common/current_vessels.vue'
 import Mooring from '@/components/common/mooring.vue'
 export default {
     name: 'WaitingListApplication',
+    emits: [
+        'mooringPreferenceChanged',
+        'noVessel',
+        'profile-fetched',
+        'updateAutoApprove',
+        'updateSubmitText',
+        'updateVesselOwnershipChanged',
+        'vesselChanged',
+    ],
     props: {
         proposal: {
             type: Object,
@@ -207,7 +216,7 @@ export default {
             await this.$emit("noVessel", noVessel);
         },
         vesselChanged: async function (vesselChanged) {
-            console.log('emit vesselChanged from form_wla.vue')
+
             await this.$emit("vesselChanged", vesselChanged);
         },
         toggleMooringPreference: async function (preferenceChanged) {
@@ -215,7 +224,7 @@ export default {
             await this.$emit("mooringPreferenceChanged", preferenceChanged);
         },
         updateVesselLength: function (length) {
-            console.log('%cin updateVesselLength()', 'color: #44aa33')
+
             if (this.is_external && this.proposal) {
                 if (this.max_vessel_length_with_no_payment !== null &&
                     (this.max_vessel_length_with_no_payment.max_length < length ||
@@ -226,20 +235,20 @@ export default {
                     this.higherVesselCategory = false;
                 }
             }
-            console.log('%cthis.higherVesselCategory:', 'color: #44aa33')
-            console.log(this.higherVesselCategory)
+
+
             this.updateAmendmentRenewalProperties();
         },
         updateVesselOwnershipChanged: function(changed){
-            console.log('in updateVesselOwnershipChanged at the form_wla.vue')
-            console.log({changed})
+
+
 
             this.vesselOwnershipChanged = changed
             this.updateAmendmentRenewalProperties();
             this.$emit("updateVesselOwnershipChanged", changed);
         },
         resetCurrentVessel: function (keep) {
-            console.log({keep})
+
             this.keepCurrentVessel = keep;
             this.uuid++
             this.updateAmendmentRenewalProperties();
@@ -263,12 +272,12 @@ export default {
             }
             this.$nextTick(async () => {
                 // auto approve
-                console.log(!this.proposal.vessel_on_proposal, this.higherVesselCategory, !this.keepCurrentVessel, this.mooringPreferenceChanged, this.vesselOwnershipChanged)
+
                 if (!this.proposal.vessel_on_proposal || this.higherVesselCategory || !this.keepCurrentVessel || this.mooringPreferenceChanged || this.vesselOwnershipChanged) {
-                    console.log("AUTOAPPROVE FALSE")
+
                     await this.$emit("updateAutoApprove", false);
                 } else {
-                    console.log("AUTOAPPROVE TRUE")
+
                     await this.$emit("updateAutoApprove", true);
                 }
             })

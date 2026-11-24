@@ -1,8 +1,8 @@
 <template>
     <div id="change-contact">
-        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :title="title" large>
+        <modal v-model:show="isModalOpen"transition="modal fade" @ok="ok()" @cancel="cancel()" :title="title" large>
             <div class="container-fluid">
-                <alert :show.sync="showError" type="danger"><strong>{{ errorString }}</strong></alert>
+                <alert v-model:show="showError" type="danger"><strong>{{ errorString }}</strong></alert>
                 <alert v-if="missing_sticker_message" type="warning"><strong>{{ missing_sticker_message }}</strong></alert>   
                 <div class="row mb-3">
                     <label class="col-sm-5 col-form-label" for="change_sticker_address">Change Sticker Address</label>
@@ -48,7 +48,7 @@
                     </div>
                 </div>
             </div>
-            <div slot="footer">
+            <template v-slot:footer>
                 <div class="row w-100">
                     <div class="col-md-6 text-end">
                         <span v-if="replacementFee">
@@ -61,7 +61,7 @@
                         <button type="button" class="btn btn-secondary me-2" @click="cancel">Cancel</button>
                     </div>
                 </div>
-            </div>
+            </template>
         </modal>
     </div>
 </template>
@@ -74,6 +74,9 @@ import { api_endpoints } from "@/utils/hooks.js"
 
 export default {
     name:'CreateNewStickerModal',
+    emits: [
+        'sendData',
+    ],
     components:{
         modal,
         alert,

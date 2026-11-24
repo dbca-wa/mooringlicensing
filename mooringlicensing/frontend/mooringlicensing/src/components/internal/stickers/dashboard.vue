@@ -50,7 +50,7 @@ export default {
     },
     methods: {
         actionClicked: function(param){
-            console.log('actionClicked() in dashboard')
+
             this.$refs.modal_details.action = param.action
             this.$refs.modal_details.sticker.id = param.id
             this.$refs.modal_details.close()

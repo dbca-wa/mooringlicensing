@@ -1,9 +1,9 @@
 <template>
     <div id="approvalHistory">
-        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :showOK="false" :showCancel="false" :title="title" large>
+        <modal v-model:show="isModalOpen"transition="modal fade" @ok="ok()" @cancel="cancel()" :showOK="false" :showCancel="false" :title="title" large>
             <div class="container-fluid">
                 <div class="row">
-                    <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
+                    <alert v-model:show="showError" type="danger"><strong>{{errorString}}</strong></alert>
                     <div class="col-sm-12">
                         <div class="row mb-3">
                             <div class="row">
@@ -46,7 +46,7 @@ export default {
     data:function () {
         let vm = this;
         return {
-            datatable_id: 'history-datatable-' + vm._uid,
+            datatable_id: 'history-datatable-' + vm.$.uid,
             approvalDetails: {
                 approvalLodgementNumber: null,
             },

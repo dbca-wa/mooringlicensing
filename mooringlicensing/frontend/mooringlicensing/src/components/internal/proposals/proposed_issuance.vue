@@ -1,10 +1,10 @@
 <template>
     <div id="proposedIssuanceApproval">
-        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" :processing="issuingApproval" :title="title" large>
+        <modal v-model:show="isModalOpen"transition="modal fade" @ok="ok()" @cancel="cancel()" :processing="issuingApproval" :title="title" large>
             <div class="container-fluid">
                 <div class="row">
                     <form   name="approvalForm">
-                        <alert :show.sync="showError" type="danger"><strong>{{ errorString }}</strong></alert>
+                        <alert v-model:show="showError" type="danger"><strong>{{ errorString }}</strong></alert>
                         <div class="col-sm-12">
                             <div class="row mb-3" v-if="displayBayField && siteLicensee">
                                 <div class="row col-sm-12">
@@ -154,6 +154,9 @@ import { helpers, api_endpoints, constants } from "@/utils/hooks.js"
 
 export default {
     name: 'Proposed-Approval',
+    emits: [
+        'refreshFromResponse',
+    ],
     components: {
         modal,
         alert,
@@ -218,9 +221,9 @@ export default {
             successString: '',
             success: false,
             warningString: 'Please attach Level of Approval document before issuing Approval',
-            mooringsTableId: 'moorings_table' + vm._uid,
-            requestedMooringsTableId: 'requested_moorings_table' + vm._uid,
-            vesselsTableId: 'vessels_table' + vm._uid,
+            mooringsTableId: 'moorings_table' + vm.$.uid,
+            requestedMooringsTableId: 'requested_moorings_table' + vm.$.uid,
+            vesselsTableId: 'vessels_table' + vm.$.uid,
             mooringsDtHeaders: [
                 'Id',
                 '',
@@ -659,7 +662,7 @@ export default {
             });
         },
         sendData: function () {
-            console.log('%cin sendData', 'color: #c33;')
+
             let vm = this;
             vm.errors = false;
             this.$nextTick(() => {
@@ -708,7 +711,7 @@ export default {
                     });
                 }
                 else if (vm.state == 'final_approval') {
-                    console.log('final_approval in proposed_issuance.vue')
+
                     vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposal, vm.proposal_id + '/final_approval'), JSON.stringify(approval), {
                         emulateJSON: true,
                     }).then((response) => {
@@ -738,20 +741,20 @@ export default {
             });
         },
         constructMooringsTable: function () {
-            console.log('in constructMooringsTable()')
+
             // update checkboxes
             if (this.authorisedUserMoorings && this.approval.mooring_on_approval && this.approval.mooring_on_approval.length > 0) {
-                console.log('construct 1')
+
                 for (let moa1 of this.approval.mooring_on_approval) {
                     for (let moa2 of this.authorisedUserMoorings) {
                         if (moa1.id === moa2.id) {
-                            console.log('inside if')
+
                             moa2.checked = moa1.checked;
                         }
                     }
                 }
             } else {
-                console.log('construct 2')
+
             }
             // now draw table
             if (this.$refs.mooringsTable) {
@@ -766,20 +769,20 @@ export default {
             }
         },
         constructRequestedMooringsTable: function () {
-            console.log('in constructRequestedMooringsTable()')
+
             // update checkboxes
             if (this.requestedMoorings && this.approval.requested_mooring_on_approval && this.approval.requested_mooring_on_approval.length > 0) {
-                console.log('construct 1')
+
                 for (let moa1 of this.approval.requested_mooring_on_approval) {
                     for (let moa2 of this.requestedMoorings) {
                         if (moa1.id === moa2.id) {
-                            console.log('inside if')
+
                             moa2.checked = moa1.checked;
                         }
                     }
                 }
             } else {
-                console.log('construct 2')
+
             }
             // now draw table
             if (this.$refs.requestedMooringsTable) {
@@ -853,8 +856,8 @@ export default {
                 // Construct table
                 if (this.mooringLicenceVessels.length > 0) {
                     for (let vo of this.mooringLicenceVessels) {
-                        console.log('addVesselToTable')
-                        console.log({vo})
+
+
                         this.addVesselToTable(vo);
                     }
                 }
@@ -874,11 +877,11 @@ export default {
         vesselsCheckboxClicked: function (e) {
             let vm = this;
             let vesselOwnershipId = this.getVesselOwnershipIdFromEvent(e);
-            console.log(vesselOwnershipId);
+
             let checked_status = e.target.checked;
             for (let vo of this.mooringLicenceVessels) {
                 if (vo.id == vesselOwnershipId) {
-                    console.log(e.target.checked)
+
                     vo.checked = checked_status;
                 }
             }
@@ -911,7 +914,7 @@ export default {
                             vessel_weight:vm.proposal.vessel_weight,
                             aup_id: vm.proposal.approval_id,
                         }
-                        console.log('in data()')
+
                         return query;
                     },
                 },

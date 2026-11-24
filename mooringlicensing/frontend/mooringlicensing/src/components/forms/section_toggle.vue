@@ -60,6 +60,10 @@ import { v4 as uuid } from "uuid";
 
 export default {
   name: "FormSection",
+  emits: [
+    'toggle-collapse',
+    'toggleComment',
+  ],
   props: {
     label: {
       type: String,

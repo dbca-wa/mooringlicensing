@@ -107,6 +107,9 @@ import { api_endpoints, helpers } from '@/utils/hooks'
 
 export default {
     name: 'DcvAdmissionArrivalPanel',
+    emits: [
+        'delete_arrival',
+    ],
     props: {
         level: {
             type: String,

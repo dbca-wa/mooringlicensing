@@ -1,6 +1,7 @@
 <template>
   <div id="AddComms">
     <modal
+      v-model:show="isModalOpen"
       transition="modal fade"
       @ok="ok()"
       @cancel="cancel()"
@@ -172,6 +173,9 @@ import alert from "@vue-utils/alert.vue";
 import { helpers } from "@/utils/hooks";
 export default {
   name: "Add-Comms",
+  emits: [
+      'added',
+  ],
   components: {
     modal,
     alert,

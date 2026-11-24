@@ -22,7 +22,7 @@
                     <div class="col-12">
                         <datatable
                             ref="requirements_datatable"
-                            :id="'requirements-datatable-'+_uid"
+                            :id="requirementsDatatableId"
                             :dtOptions="requirement_options"
                             :dtHeaders="requirement_headers"
                         />
@@ -34,6 +34,7 @@
             ref="requirement_detail"
             :proposal_id="proposal.id"
             :requirements="requirements"
+            @updatedRequirements="updatedRequirements"
         />
     </div>
 </template>
@@ -48,13 +49,17 @@ import RequirementDetail from '@/components/internal/proposals/proposal_add_requ
 import FormSection from "@/components/forms/section_toggle.vue"
 export default {
     name: 'InternalProposalRequirements',
+    emits: [
+        'refreshRequirements',
+    ],
     props: {
         proposal: Object
     },
     data: function() {
         let vm = this;
         return {
-            panelBody: "proposal-requirements-"+vm._uid,
+            requirementsDatatableId: `requirements-datatable-${vm.$.uid}`,
+            panelBody: "proposal-requirements-"+vm.$.uid,
             requirements: [],
             requirement_headers:["Requirement","Due Date","Recurrence","Action","Order"],
             requirement_options:{
@@ -223,10 +228,10 @@ export default {
             });
         },
         fetchRequirements(){
-            console.log('fetchRequirements')
+
             let vm = this;
             let url = api_endpoints.proposal_standard_requirements
-            console.log('url: ' + url)
+
             vm.$http.get(url, {params: {'application_type_code': vm.proposal.application_type_code}}).then((response) => {
                 vm.requirements = response.body
             },(error) => {

@@ -42,7 +42,7 @@ export default {
     data() {
         let vm = this;
         return {
-            datatable_id: 'invoices-datatable-' + vm._uid,
+            datatable_id: 'invoices-datatable-' + vm.$.uid,
 
             // selected values for filtering
             filterFeeSourceType: null,
@@ -277,7 +277,7 @@ export default {
                             })    
                         })
                         d.order = newOrder;
-                        console.log(newOrder)
+
                     }
                 },
                 dom: 'lBfrtip',

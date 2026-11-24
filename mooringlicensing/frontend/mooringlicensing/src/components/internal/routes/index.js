@@ -1,3 +1,4 @@
+import { RouterView } from 'vue-router'
 
 import InternalDashboard from '@/components/internal/dashboard.vue'
 import Proposal from '@/components/internal/proposals/proposal.vue'
@@ -19,181 +20,142 @@ import ProposalApply from '@/components/external/proposal_apply.vue'
 import DcvAdmissionForm from '@/components/external/dcv/dcv_admission.vue'
 import DcvPermit from '@/components/external/dcv/dcv_permit.vue'
 
-export default
-{
+export default {
     path: '/internal',
-    component:
-    {
-        render(c)
-        {
-            return c('router-view')
-        }
-    },
+    component: RouterView,
     children: [
         {
-            path: '/',
+            path: '',
             component: InternalDashboard,
             name: 'internal-dashboard'
         },
         {
             path: 'approvals',
             component: ApprovalDash,
-            name:"internal-approvals-dash"
+            name: 'internal-approvals-dash'
         },
         {
             path: 'approval/:approval_id',
             component: Approval,
-            name: 'internal-approval-detail',
+            name: 'internal-approval-detail'
         },
         {
             path: 'compliances',
             component: ComplianceDash,
-            name: "internal-compliances-dash"
+            name: 'internal-compliances-dash'
         },
         {
             path: 'waiting_list',
             component: WaitingListDash,
-            name: "internal-waiting-list-dash"
+            name: 'internal-waiting-list-dash'
         },
         {
             path: 'moorings',
-            component: {
-                render(c)
-                {
-                    return c('router-view')
-                }
-            },
+            component: RouterView,
             children: [
                 {
-                    path: '/',
+                    path: '',
                     component: MooringsDash,
-                    name: "internal-moorings-dash",
+                    name: 'internal-moorings-dash'
                 },
                 {
                     path: ':mooring_id',
                     component: MooringDetail,
-                    name:"internal-mooring-detail"
-                },
+                    name: 'internal-mooring-detail'
+                }
             ]
         },
         {
             path: 'vessel',
-            component: {
-                render(c)
-                {
-                    return c('router-view')
-                }
-            },
+            component: RouterView,
             children: [
                 {
                     path: ':vessel_id',
                     component: VesselDetail,
-                    name:"internal-vessel-detail"
-                },
+                    name: 'internal-vessel-detail'
+                }
             ]
         },
         {
             path: 'vesselownership',
-            component:
-            {
-                render(c)
-                {
-                    return c('router-view')
-                }
-            },
+            component: RouterView,
             children: [
                 {
                     path: ':vessel_id',
                     component: ManageVessel,
-                    name:"internal-manage-vessel"
-                },
+                    name: 'internal-manage-vessel'
+                }
             ]
         },
         {
             path: 'sticker',
             component: StickersDash,
-            name: "internal-stickers-dash"
+            name: 'internal-stickers-dash'
         },
         {
             path: 'invoice',
             component: InvoicesDash,
-            name: "internal-invoices-dash"
+            name: 'internal-invoices-dash'
         },
         {
             path: 'person/:email_user_id',
             component: PersonDetail,
-            name: "internal-person-detail"
+            name: 'internal-person-detail'
         },
         {
             path: 'compliance/:compliance_id',
-            component: Compliance,
-
+            component: Compliance
         },
         {
             path: 'search',
             component: Search,
-            name:"internal-search"
+            name: 'internal-search'
         },
-        {   
+        {
             path: 'dcv_permit',
             component: DcvPermit,
-            name:"internal_dcv_permit",
-            props: {is_internal:true},    
+            name: 'internal_dcv_permit',
+            props: { is_internal: true }
         },
         {
             path: 'dcv',
-            component: {
-                render(c)
-                {
-                    return c('router-view')
-                }
-            },
+            component: RouterView,
             children: [
                 {
-                    path: '/',
+                    path: '',
                     component: DcvDashboard,
-                    name:"internal-dcv-dash"
+                    name: 'internal-dcv-dash'
                 },
                 {
                     path: 'dcv_admission_form',
                     component: DcvAdmissionForm,
-                    name:"internal-dcv-admission-form",
-                    props: {is_internal:true}, 
+                    name: 'internal-dcv-admission-form',
+                    props: { is_internal: true }
                 }
             ]
         },
         {
             path: 'proposal',
-            component: {
-                render(c)
-                {
-                    return c('router-view')
-                }
-            },
+            component: RouterView,
             children: [
                 {
-                    path: '/',
+                    path: '',
                     component: ProposalApply,
-                    name:"internal_apply_proposal",
-                    props: {is_internal:true},
+                    name: 'internal_apply_proposal',
+                    props: { is_internal: true }
                 },
                 {
                     path: ':proposal_id',
-                    component: {
-                        render(c)
-                        {
-                            return c('router-view')
-                        }
-                    },
+                    component: RouterView,
                     children: [
                         {
-                            path: '/',
+                            path: '',
                             component: Proposal,
-                            name:"internal-proposal"
-                        },
+                            name: 'internal-proposal'
+                        }
                     ]
-                },
+                }
             ]
-        },
+        }
     ]
 }

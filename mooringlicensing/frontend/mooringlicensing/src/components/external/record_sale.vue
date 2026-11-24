@@ -1,10 +1,10 @@
 <template>
     <div id="recordSale">
-        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" title="Record Sale" large>
+        <modal v-model:show="isModalOpen"transition="modal fade" @ok="ok()" @cancel="cancel()" title="Record Sale" large>
             <div class="container-fluid">
                 <div class="row">
                     <form   name="recordSaleForm">
-                        <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
+                        <alert v-model:show="showError" type="danger"><strong>{{errorString}}</strong></alert>
                         <div class="col-sm-12">
                             <div class="row mb-3">
                                 <div class="row">
@@ -35,7 +35,7 @@
                     </form>
                 </div>
             </div>
-            <div slot="footer">
+            <template v-slot:footer>
 
                 <input v-if="is_internal" type="checkbox" v-model="noEmail" id="noEmail" />
                 <label v-if="is_internal" for="noEmail">
@@ -45,7 +45,7 @@
                 <button type="button" v-if="saving" disabled class="btn btn-primary me-3" @click="ok"><i class="fa fa-spinner fa-spin"></i> Saving</button>
                 <button type="button" v-else class="btn btn-primary me-2" @click="ok">Save</button>
                 <button type="button" class="btn btn-secondary me-2" @click="cancel">Cancel</button>
-            </div>
+            </template>
         </modal>
     </div>
 </template>
@@ -57,6 +57,10 @@ import alert from '@vue-utils/alert.vue'
 import {helpers,api_endpoints} from "@/utils/hooks.js"
 export default {
     name:'Record-Sale',
+    emits: [
+        'closeModal',
+        'refreshDatatable',
+    ],
     components:{
         modal,
         alert
@@ -142,7 +146,7 @@ export default {
                 const url = `${api_endpoints.vesselownership}${this.recordSaleId}/fetch_sale_date/`;
                 const res = await this.$http.get(url);
                 if (res.ok && res.body.end_date) {
-                    console.log(res.body)
+
                     this.saleDate = res.body.end_date;
                 }
             } catch(error) {

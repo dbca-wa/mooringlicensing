@@ -1,10 +1,10 @@
 <template>
     <div id="internal-proposal-amend">
-        <modal transition="modal fade" @ok="ok()" @cancel="cancel()" title="Amendment Request" large>
+        <modal v-model:show="isModalOpen"transition="modal fade" @ok="ok()" @cancel="cancel()" title="Amendment Request" large>
             <div class="container-fluid">
                 <div class="row">
                     <form   name="amendForm">
-                        <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
+                        <alert v-model:show="showError" type="danger"><strong>{{errorString}}</strong></alert>
                         <div class="col-sm-12">
                             <div class="row">
                                 <div class="row mb-3">
@@ -56,7 +56,7 @@
 
 <script>
 import $ from 'jquery'
-import Vue from 'vue'
+import http from '@/utils/vue-resource-shim'
 import modal from '@vue-utils/bootstrap-modal.vue'
 import alert from '@vue-utils/alert.vue'
 import FileField from '@/components/forms/filefield_immediate.vue'
@@ -64,6 +64,9 @@ import FileField from '@/components/forms/filefield_immediate.vue'
 import {helpers} from "@/utils/hooks.js"
 export default {
     name:'amendment-request',
+    emits: [
+        'refreshFromResponse',
+    ],
     components:{
         modal,
         alert,
@@ -145,7 +148,7 @@ export default {
             } );
         },
         sendData:function(){
-            console.log('in sendData')
+
             let vm = this;
             vm.errors = false;
 
@@ -158,7 +161,7 @@ export default {
                     );
                     vm.amendingProposal = true;
                     vm.close();
-                    Vue.http.get(`/api/proposal/${vm.proposal.id}/internal_proposal.json`).then(
+                    http.get(`/api/proposal/${vm.proposal.id}/internal_proposal.json`).then(
                         response => {
                             vm.$emit('refreshFromResponse', response);
                         }, error => {

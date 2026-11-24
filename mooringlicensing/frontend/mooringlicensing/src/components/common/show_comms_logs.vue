@@ -1,6 +1,7 @@
 <template>
     <div id="ShowComms">
         <modal
+            v-model:show="isModalOpen"
             transition="modal fade"
             :showOK="false"
             :showCancel="false"
@@ -52,6 +53,7 @@ export default {
                 'Created',
             ],
             commsDtOptions: {
+                dom: 'lBfrtip',
                 language: {
                     processing: constants.DATATABLE_PROCESSING_HTML,
                 },

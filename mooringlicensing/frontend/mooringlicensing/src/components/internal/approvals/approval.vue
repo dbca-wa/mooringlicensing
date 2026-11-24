@@ -11,7 +11,7 @@
                 <div class="card-body border-bottom">
                     <div class="col-sm-12 top-buffer-s">
                         <strong>Issued on</strong><br/>
-                        {{ approval.issue_date | formatDate}}
+                        {{ formatDate(approval.issue_date) }}
                     </div>
                 </div>
             </div>
@@ -60,13 +60,13 @@
                           <div class="row mb-3">
                             <label for="" class="col-sm-3 col-form-label">Issue Date</label>
                             <div class="col-sm-6">
-                                <label for="" class="form-label float-start">{{approval.issue_date | formatDate}}</label>
+                                <label for="" class="form-label float-start">{{ formatDate(approval.issue_date) }}</label>
                             </div>
                           </div>
                           <div class="row mb-3">
                             <label for="" class="col-sm-3 col-form-label" >Start Date</label>
                             <div class="col-sm-6">
-                                <label for="" class="form-label float-start">{{approval.start_date | formatDate}}</label>
+                                <label for="" class="form-label float-start">{{ formatDate(approval.start_date) }}</label>
                             </div>
                           </div>
                           <div class="row mb-3">
@@ -104,6 +104,7 @@
                 </div>
             </div>
             <div class="row" v-if="approval && approval.id && authorisedUserPermit">
+                <div>
                 <FormSection 
                     :formCollapse="false" 
                     label="Moorings" 
@@ -118,8 +119,10 @@
                         />
                     </div>
                 </FormSection>
+                </div>
             </div>
             <div class="row" v-if="approval && approval.id && mooringLicence">
+                <div>
                 <FormSection 
                     :formCollapse="false" 
                     label="Authorised Users" 
@@ -140,9 +143,11 @@
                         />
                     </div>
                 </FormSection>
+                </div>
             </div>
 
             <div class="row" v-if="approval && approval.id && mooringLicence">
+                <div>
                 <FormSection 
                     :formCollapse="false" 
                     label="Vessels" 
@@ -157,6 +162,7 @@
                         />
                     </div>
                 </FormSection>
+                </div>
             </div>
 
         </div>
@@ -164,7 +170,7 @@
 </div>
 </template>
 <script>
-import Vue from 'vue'
+import http from '@/utils/vue-resource-shim'
 import datatable from '@vue-utils/datatable.vue'
 import CommsLogs from '@common-utils/comms_logs.vue'
 import Applicant from '@/components/common/applicant.vue'
@@ -177,19 +183,19 @@ export default {
     let vm = this;
     return {
         showExpired: false,
-        moorings_datatable_id: 'moorings-datatable-' + vm._uid,
-        ml_vessels_datatable_id: 'ml-vessels-datatable-' + vm._uid,
-        ml_authorised_users_datatable_id: 'ml-authorised-users-datatable-' + vm._uid,
+        moorings_datatable_id: 'moorings-datatable-' + vm.$.uid,
+        ml_vessels_datatable_id: 'ml-vessels-datatable-' + vm.$.uid,
+        ml_authorised_users_datatable_id: 'ml-authorised-users-datatable-' + vm.$.uid,
         loading: [],
         approval: {
             applicant_id: null
 
         },
         DATE_TIME_FORMAT: 'DD/MM/YYYY HH:mm:ss',
-        adBody: 'adBody'+vm._uid,
-        pBody: 'pBody'+vm._uid,
-        cBody: 'cBody'+vm._uid,
-        oBody: 'oBody'+vm._uid,
+        adBody: 'adBody'+vm.$.uid,
+        pBody: 'pBody'+vm.$.uid,
+        cBody: 'cBody'+vm.$.uid,
+        oBody: 'oBody'+vm.$.uid,
         org: {
             address: {}
         },
@@ -239,7 +245,7 @@ export default {
                     data: "action",
                    'render': function(row, type, full){
                         let links = '';
-                        links += `<a onclick="window.removeMooringFromAUP('${full.mooring_name}')" style="cursor: pointer;">Remove</a><br/>`;
+                        links += `<a href="#${full.mooring_name}" onclick="window.removeMooringFromAUP('${full.mooring_name}')" style="cursor: pointer;">Remove</a><br/>`;
                         return links;    
                     },
                 },
@@ -331,18 +337,13 @@ export default {
           });
       },
   },
-  filters: {
-    formatDate: function(data){
-        return moment(data).format('DD/MM/YYYY');
-    }
-  },
   props: {
       approvalId: {
           type: Number,
       },
   },
   created: async function(){
-      const response = await Vue.http.get(helpers.add_endpoint_json(api_endpoints.approvals,this.$route.params.approval_id));
+      const response = await http.get(helpers.add_endpoint_json(api_endpoints.approvals,this.$route.params.approval_id));
       this.approval = Object.assign({}, response.body);
       this.approval.applicant_id = response.body.applicant_id;
 
@@ -397,6 +398,9 @@ export default {
     },
   },
   methods: {
+    formatDate: function(data){
+        return moment(data).format('DD/MM/YYYY');
+    },
     constructMooringsTable: function() {
         let vm = this;
         this.$refs.moorings_datatable.vmDataTable.clear().draw();
@@ -435,7 +439,7 @@ export default {
         vm.$refs.ml_vessels_datatable.vmDataTable.columns.adjust().responsive.recalc();
     },
     constructMLAuthorisedUsersTable: function() {
-        console.log("construct")
+
         let vm = this;
         this.$refs.ml_authorised_users_datatable.vmDataTable.clear().draw();
 
