@@ -1,33 +1,32 @@
-import { RouterView } from 'vue-router'
+import { RouterView } from 'vue-router';
 
-import ExternalDashboard from '@/components/external/dashboard.vue'
-import Proposal from '@/components/external/proposal.vue'
-import ProposalApply from '@/components/external/proposal_apply.vue'
-import DcvPermit from '@/components/external/dcv/dcv_permit.vue'
-import DcvAdmission from '@/components/external/dcv/dcv_admission.vue'
-import VesselsDashboard from '@/components/external/vessels_dashboard.vue'
-import ManageVessel from '@/components/external/manage_vessel.vue'
-import Compliance from '../compliances/access.vue'
-import ComplianceSubmit from '../compliances/submit.vue'
+import ExternalDashboard from '@/components/external/dashboard.vue';
+import Proposal from '@/components/external/proposal.vue';
+import ProposalApply from '@/components/external/proposal_apply.vue';
+import DcvPermit from '@/components/external/dcv/dcv_permit.vue';
+import DcvAdmission from '@/components/external/dcv/dcv_admission.vue';
+import VesselsDashboard from '@/components/external/vessels_dashboard.vue';
+import ManageVessel from '@/components/external/manage_vessel.vue';
+import Compliance from '../compliances/access.vue';
+import ComplianceSubmit from '../compliances/submit.vue';
 
-export default
-{
+export default {
     path: '/external',
     component: RouterView,
     children: [
         {
             path: '',
             component: ExternalDashboard,
-            name: 'external-dashboard'
+            name: 'external-dashboard',
         },
         {
             path: 'compliance/:compliance_id',
-            component: Compliance
+            component: Compliance,
         },
         {
             path: 'compliance/submit',
             component: ComplianceSubmit,
-            name:"submit_compliance"
+            name: 'submit_compliance',
         },
         {
             path: 'proposal',
@@ -36,14 +35,14 @@ export default
                 {
                     path: '',
                     component: ProposalApply,
-                    name:"apply_proposal"
+                    name: 'apply_proposal',
                 },
                 {
                     path: ':proposal_id',
                     component: Proposal,
-                    name:"draft_proposal"
+                    name: 'draft_proposal',
                 },
-            ]
+            ],
         },
         /*{
             path: 'dcv_permit',
@@ -69,7 +68,7 @@ export default
         {
             path: 'vessels',
             component: VesselsDashboard,
-            name: 'vessels-dashboard'
+            name: 'vessels-dashboard',
         },
         {
             path: 'vesselownership',
@@ -78,14 +77,14 @@ export default
                 {
                     path: '',
                     component: ManageVessel,
-                    name:"new-vessel"
+                    name: 'new-vessel',
                 },
                 {
                     path: ':vessel_id',
                     component: ManageVessel,
-                    name:"manage-vessel"
+                    name: 'manage-vessel',
                 },
-            ]
+            ],
         },
-    ]
-}
+    ],
+};

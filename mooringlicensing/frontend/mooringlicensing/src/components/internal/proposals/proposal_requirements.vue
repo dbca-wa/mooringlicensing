@@ -5,7 +5,7 @@
             :formCollapse="false"
             :Index="panelBody"
         >
-            <form   action="index.html" method="post">
+            <form action="index.html" method="post">
                 <div class="row mb-2">
                     <div class="col-12 text-end">
                         <button
@@ -39,87 +39,94 @@
     </div>
 </template>
 <script>
-import {
-    api_endpoints,
-    helpers
-}
-from '@/utils/hooks'
-import datatable from '@vue-utils/datatable.vue'
-import RequirementDetail from '@/components/internal/proposals/proposal_add_requirement.vue'
-import FormSection from "@/components/forms/section_toggle.vue"
+import { api_endpoints, helpers } from '@/utils/hooks';
+import datatable from '@vue-utils/datatable.vue';
+import RequirementDetail from '@/components/internal/proposals/proposal_add_requirement.vue';
+import FormSection from '@/components/forms/section_toggle.vue';
 export default {
     name: 'InternalProposalRequirements',
-    emits: [
-        'refreshRequirements',
-    ],
+    emits: ['refreshRequirements'],
     props: {
-        proposal: Object
+        proposal: Object,
     },
-    data: function() {
+    data: function () {
         let vm = this;
         return {
             requirementsDatatableId: `requirements-datatable-${vm.$.uid}`,
-            panelBody: "proposal-requirements-"+vm.$.uid,
+            panelBody: 'proposal-requirements-' + vm.$.uid,
             requirements: [],
-            requirement_headers:["Requirement","Due Date","Recurrence","Action","Order"],
-            requirement_options:{
+            requirement_headers: [
+                'Requirement',
+                'Due Date',
+                'Recurrence',
+                'Action',
+                'Order',
+            ],
+            requirement_options: {
                 autoWidth: false,
                 language: {
-                    processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>"
+                    processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>",
                 },
                 responsive: false,
                 scrollX: true,
                 fixedColumns: {
                     leftColumns: 1,
-                    rightColumns: 1
+                    rightColumns: 1,
                 },
                 ajax: {
-                    "url": helpers.add_endpoint_json(api_endpoints.proposal, vm.proposal.id+'/requirements'),
-                    "dataSrc": ''
+                    url: helpers.add_endpoint_json(
+                        api_endpoints.proposal,
+                        vm.proposal.id + '/requirements'
+                    ),
+                    dataSrc: '',
                 },
                 order: [],
                 dom: 'lBfrtip',
                 columns: [
                     {
-                        data: "requirement",
-                        'render': function (value) {
+                        data: 'requirement',
+                        render: function (value) {
                             var ellipsis = '...',
                                 truncated = _.truncate(value, {
                                     length: 25,
                                     omission: ellipsis,
-                                    separator: ' '
+                                    separator: ' ',
                                 }),
                                 result = '<span>' + truncated + '</span>',
-                                popTemplate = _.template('<a href="#" ' +
-                                    'role="button" ' +
-                                    'data-bs-toggle="popover" ' +
-                                    'data-bs-trigger="click" ' +
-                                    'data-bs-placement="top"' +
-                                    'data-bs-html="true" ' +
-                                    'data-bs-content="<%= text %>" ' +
-                                    '>more</a>');
+                                popTemplate = _.template(
+                                    '<a href="#" ' +
+                                        'role="button" ' +
+                                        'data-bs-toggle="popover" ' +
+                                        'data-bs-trigger="click" ' +
+                                        'data-bs-placement="top"' +
+                                        'data-bs-html="true" ' +
+                                        'data-bs-content="<%= text %>" ' +
+                                        '>more</a>'
+                                );
                             if (_.endsWith(truncated, ellipsis)) {
                                 result += popTemplate({
-                                    text: value
+                                    text: value,
                                 });
                             }
 
                             return result;
                         },
-                        'createdCell': helpers.dtPopoverCellFn,
+                        createdCell: helpers.dtPopoverCellFn,
                     },
                     {
-                        data: "due_date",
-                        mRender:function (data,type,full) {
-                            return data != '' && data != null ? moment(data).format('DD/MM/YYYY'): '';
+                        data: 'due_date',
+                        mRender: function (data, type, full) {
+                            return data != '' && data != null
+                                ? moment(data).format('DD/MM/YYYY')
+                                : '';
                         },
-                        orderable: false
+                        orderable: false,
                     },
                     {
-                        data: "recurrence",
-                        mRender:function (data,type,full) {
-                            if (full.recurrence){
-                                switch(full.recurrence_pattern){
+                        data: 'recurrence',
+                        mRender: function (data, type, full) {
+                            if (full.recurrence) {
+                                switch (full.recurrence_pattern) {
                                     case 1:
                                         return `Once per ${full.recurrence_schedule} week(s)`;
                                     case 2:
@@ -132,46 +139,54 @@ export default {
                             }
                             return '';
                         },
-                        orderable: false
+                        orderable: false,
                     },
                     {
-                        data: "id",
-                        mRender:function (data,type,full) {
+                        data: 'id',
+                        mRender: function (data, type, full) {
                             let links = '';
-                            if (vm.proposal.assessor_mode.has_assessor_mode){
-                                if(full.copied_from==null)
-                                {
-                                    links +=  `<a href='#' class="editRequirement" data-id="${full.id}">Edit</a><br/>`;
+                            if (vm.proposal.assessor_mode.has_assessor_mode) {
+                                if (full.copied_from == null) {
+                                    links += `<a href='#' class="editRequirement" data-id="${full.id}">Edit</a><br/>`;
                                 }
-                                links +=  `<a href='#' class="deleteRequirement" data-id="${full.id}">Delete</a><br/>`;
+                                links += `<a href='#' class="deleteRequirement" data-id="${full.id}">Delete</a><br/>`;
                             }
                             return links;
                         },
-                        orderable: false
+                        orderable: false,
                     },
                     {
-                        data: "id",
-                        mRender:function (data,type,full) {
+                        data: 'id',
+                        mRender: function (data, type, full) {
                             let links = '';
-                            if (vm.proposal.assessor_mode.has_assessor_mode){
-                                links +=  `<a class="dtMoveUp" data-id="${full.id}" href='#'><i class="fa fa-angle-up fa-2x"></i></a><br/>`;
-                                links +=  `<a class="dtMoveDown" data-id="${full.id}" href='#'><i class="fa fa-angle-down fa-2x"></i></a><br/>`;
+                            if (vm.proposal.assessor_mode.has_assessor_mode) {
+                                links += `<a class="dtMoveUp" data-id="${full.id}" href='#'><i class="fa fa-angle-up fa-2x"></i></a><br/>`;
+                                links += `<a class="dtMoveDown" data-id="${full.id}" href='#'><i class="fa fa-angle-down fa-2x"></i></a><br/>`;
                             }
                             return links;
                         },
-                        orderable: false
-                    }
+                        orderable: false,
+                    },
                 ],
                 processing: true,
-                rowCallback: function ( row, data, index) {
-                    if (data.copied_for_renewal && data.require_due_date && !data.due_date) {
+                rowCallback: function (row, data, index) {
+                    if (
+                        data.copied_for_renewal &&
+                        data.require_due_date &&
+                        !data.due_date
+                    ) {
                         $('td', row).css('background-color', 'Red');
-                        vm.setApplicationWorkflowState(false)
+                        vm.setApplicationWorkflowState(false);
                     }
                 },
                 drawCallback: function (settings) {
-                    $(vm.$refs.requirements_datatable.table).find('tr:last .dtMoveDown').remove();
-                    $(vm.$refs.requirements_datatable.table).children('tbody').find('tr:first .dtMoveUp').remove();
+                    $(vm.$refs.requirements_datatable.table)
+                        .find('tr:last .dtMoveDown')
+                        .remove();
+                    $(vm.$refs.requirements_datatable.table)
+                        .children('tbody')
+                        .find('tr:first .dtMoveUp')
+                        .remove();
 
                     // Remove previous binding before adding it
                     $('.dtMoveUp').unbind('click');
@@ -181,110 +196,169 @@ export default {
                     $('.dtMoveUp').click(vm.moveUp);
                     $('.dtMoveDown').click(vm.moveDown);
                 },
-                 preDrawCallback: function (settings) {
-                    vm.setApplicationWorkflowState(true)
-                }
-            }
-        }
+                preDrawCallback: function (settings) {
+                    vm.setApplicationWorkflowState(true);
+                },
+            },
+        };
     },
-    watch:{
-        hasAssessorMode(){
+    watch: {
+        hasAssessorMode() {
             // reload the table
             this.updatedRequirements();
-        }
+        },
     },
-    components:{
+    components: {
         datatable,
         RequirementDetail,
         FormSection,
     },
-    computed:{
-        hasAssessorMode(){
+    computed: {
+        hasAssessorMode() {
             return this.proposal.assessor_mode.has_assessor_mode;
-        }
+        },
     },
-    methods:{
-        addRequirement(){
+    methods: {
+        addRequirement() {
             this.$refs.requirement_detail.isModalOpen = true;
         },
-        removeRequirement(_id){
+        removeRequirement(_id) {
             let vm = this;
             swal({
-                title: "Remove Requirement",
-                text: "Are you sure you want to remove this requirement?",
-                type: "warning",
+                title: 'Remove Requirement',
+                text: 'Are you sure you want to remove this requirement?',
+                type: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Remove Requirement',
-                confirmButtonColor:'#d9534f'
-            }).then(() => {
-                vm.$http.get(helpers.add_endpoint_json(api_endpoints.proposal_requirements,_id+'/discard'))
-                .then((response) => {
-                    vm.$refs.requirements_datatable.vmDataTable.ajax.reload();
-                }, (error) => {
-                    console.log(error);
-                });
-
-            },(error) => {
-            });
+                confirmButtonColor: '#d9534f',
+            }).then(
+                () => {
+                    vm.$http
+                        .get(
+                            helpers.add_endpoint_json(
+                                api_endpoints.proposal_requirements,
+                                _id + '/discard'
+                            )
+                        )
+                        .then(
+                            (response) => {
+                                vm.$refs.requirements_datatable.vmDataTable.ajax.reload();
+                            },
+                            (error) => {
+                                console.log(error);
+                            }
+                        );
+                },
+                (error) => {}
+            );
         },
-        fetchRequirements(){
-            console.log('fetchRequirements')
+        fetchRequirements() {
             let vm = this;
-            let url = api_endpoints.proposal_standard_requirements
-            console.log('url: ' + url)
-            vm.$http.get(url, {params: {'application_type_code': vm.proposal.application_type_code}}).then((response) => {
-                vm.requirements = response.body
-            },(error) => {
-                console.log(error);
-            })
+            let url = api_endpoints.proposal_standard_requirements;
+            vm.$http
+                .get(url, {
+                    params: {
+                        application_type_code:
+                            vm.proposal.application_type_code,
+                    },
+                })
+                .then(
+                    (response) => {
+                        vm.requirements = response.body;
+                    },
+                    (error) => {
+                        console.log(error);
+                    }
+                );
         },
-        editRequirement(_id){
+        editRequirement(_id) {
             let vm = this;
-            vm.$http.get(helpers.add_endpoint_json(api_endpoints.proposal_requirements,_id)).then((response) => {
-                this.$refs.requirement_detail.requirement = response.body;
-                this.$refs.requirement_detail.requirement.due_date =  response.body.due_date != null && response.body.due_date != undefined ? moment(response.body.due_date).format('DD/MM/YYYY'): '';
-                response.body.standard ? $(this.$refs.requirement_detail.$refs.standard_req).val(response.body.standard_requirement).trigger('change'): '';
-                this.addRequirement();
-            },(error) => {
-                console.log(error);
-            })
+            vm.$http
+                .get(
+                    helpers.add_endpoint_json(
+                        api_endpoints.proposal_requirements,
+                        _id
+                    )
+                )
+                .then(
+                    (response) => {
+                        this.$refs.requirement_detail.requirement =
+                            response.body;
+                        this.$refs.requirement_detail.requirement.due_date =
+                            response.body.due_date != null &&
+                            response.body.due_date != undefined
+                                ? moment(response.body.due_date).format(
+                                      'DD/MM/YYYY'
+                                  )
+                                : '';
+                        response.body.standard
+                            ? $(
+                                  this.$refs.requirement_detail.$refs
+                                      .standard_req
+                              )
+                                  .val(response.body.standard_requirement)
+                                  .trigger('change')
+                            : '';
+                        this.addRequirement();
+                    },
+                    (error) => {
+                        console.log(error);
+                    }
+                );
         },
-        updatedRequirements(){
+        updatedRequirements() {
             this.$refs.requirements_datatable.vmDataTable.ajax.reload();
         },
-        eventListeners(){
+        eventListeners() {
             let vm = this;
-            vm.$refs.requirements_datatable.vmDataTable.on('click', '.deleteRequirement', function(e) {
-                e.preventDefault();
-                var id = $(this).attr('data-id');
-                vm.removeRequirement(id);
-            });
-            vm.$refs.requirements_datatable.vmDataTable.on('click', '.editRequirement', function(e) {
-                e.preventDefault();
-                var id = $(this).attr('data-id');
-                vm.editRequirement(id);
-            });
+            vm.$refs.requirements_datatable.vmDataTable.on(
+                'click',
+                '.deleteRequirement',
+                function (e) {
+                    e.preventDefault();
+                    var id = $(this).attr('data-id');
+                    vm.removeRequirement(id);
+                }
+            );
+            vm.$refs.requirements_datatable.vmDataTable.on(
+                'click',
+                '.editRequirement',
+                function (e) {
+                    e.preventDefault();
+                    var id = $(this).attr('data-id');
+                    vm.editRequirement(id);
+                }
+            );
         },
-        sendDirection(req,direction){
-            let movement = direction == 'down'? 'move_down': 'move_up';
-            this.$http.get(helpers.add_endpoint_json(api_endpoints.proposal_requirements,req+'/'+movement)).then((response) => {
-                this.$refs.requirements_datatable.vmDataTable.ajax.reload()
-            },(error) => {
-                console.log(error);
-
-            })
+        sendDirection(req, direction) {
+            let movement = direction == 'down' ? 'move_down' : 'move_up';
+            this.$http
+                .get(
+                    helpers.add_endpoint_json(
+                        api_endpoints.proposal_requirements,
+                        req + '/' + movement
+                    )
+                )
+                .then(
+                    (response) => {
+                        this.$refs.requirements_datatable.vmDataTable.ajax.reload();
+                    },
+                    (error) => {
+                        console.log(error);
+                    }
+                );
         },
         moveUp(e) {
             // Move the row up
             let vm = this;
             e.preventDefault();
-            vm.sendDirection($(e.target).parent().data('id'),'up');
+            vm.sendDirection($(e.target).parent().data('id'), 'up');
         },
         moveDown(e) {
             // Move the row down
             e.preventDefault();
             let vm = this;
-            vm.sendDirection($(e.target).parent().data('id'),'down');
+            vm.sendDirection($(e.target).parent().data('id'), 'down');
         },
         moveRow(row, direction) {
             // Move up or down (depending...)
@@ -293,7 +367,7 @@ export default {
 
             var order = -1;
             if (direction === 'down') {
-              order = 1;
+                order = 1;
             }
 
             var data1 = table.row(index).data();
@@ -307,18 +381,17 @@ export default {
 
             table.page(0).draw(false);
         },
-        setApplicationWorkflowState(bool){
-            let vm=this;
-            vm.$emit('refreshRequirements',bool);
-        }
-
+        setApplicationWorkflowState(bool) {
+            let vm = this;
+            vm.$emit('refreshRequirements', bool);
+        },
     },
-    mounted: function(){
+    mounted: function () {
         let vm = this;
         this.fetchRequirements();
         vm.$nextTick(() => {
             this.eventListeners();
         });
-    }
-}
+    },
+};
 </script>

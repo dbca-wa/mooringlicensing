@@ -1,6 +1,10 @@
 <template>
     <div class="container" id="WaitingListDash">
-        <FormSection :formCollapse="false" label="Waiting List" Index="waiting_list">
+        <FormSection
+            :formCollapse="false"
+            label="Waiting List"
+            Index="waiting_list"
+        >
             <WaitingListTable
                 level="internal"
                 :approvalTypeFilter="approvalTypeFilter"
@@ -10,21 +14,20 @@
 </template>
 
 <script>
-import FormSection from "@/components/forms/section_toggle.vue"
-import WaitingListTable from "@/components/common/table_approvals.vue"
+import FormSection from '@/components/forms/section_toggle.vue';
+import WaitingListTable from '@/components/common/table_approvals.vue';
 
 export default {
     name: 'InternalWaitingListDashboard',
     data() {
         let vm = this;
         return {
-            approvalTypeFilter: ['wla',],
-        }
+            approvalTypeFilter: ['wla'],
+        };
     },
-    components:{
+    components: {
         FormSection,
         WaitingListTable,
     },
-}
+};
 </script>
-

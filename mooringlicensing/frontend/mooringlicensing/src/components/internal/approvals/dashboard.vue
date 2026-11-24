@@ -10,8 +10,8 @@
 </template>
 
 <script>
-import FormSection from "@/components/forms/section_toggle.vue"
-import ApprovalsTable from "@/components/common/table_approvals.vue"
+import FormSection from '@/components/forms/section_toggle.vue';
+import ApprovalsTable from '@/components/common/table_approvals.vue';
 
 export default {
     name: 'InternalApprovalsDashboard',
@@ -19,12 +19,11 @@ export default {
         let vm = this;
         return {
             approvalTypeFilter: ['ml', 'aap', 'aup'],
-        }
+        };
     },
-    components:{
+    components: {
         FormSection,
         ApprovalsTable,
     },
-}
+};
 </script>
-

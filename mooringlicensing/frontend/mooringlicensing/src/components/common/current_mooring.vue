@@ -1,77 +1,91 @@
 <template>
     <div id="current_moorings">
-        <FormSection v-if="currentMooringDisplayText" label="Current Moorings" Index="current_mooring">
+        <FormSection
+            v-if="currentMooringDisplayText"
+            label="Current Moorings"
+            Index="current_mooring"
+        >
             <div class="row mb-3">
                 <div class="col-sm-9">
-                    <label for="" class="col-sm-12 form-label">{{ currentMooringDisplayText }}</label>
-                        <div class="col-sm-9">
-                            <input
+                    <label for="" class="col-sm-12 form-label">{{
+                        currentMooringDisplayText
+                    }}</label>
+                    <div class="col-sm-9">
+                        <input
                             @change="resetCurrentMooring"
                             :disabled="readonly"
-                            class="form-check-input" type="radio"
+                            class="form-check-input"
+                            type="radio"
                             id="changeMooringFalse"
                             name="changeMooringFalse"
                             :value="false"
                             v-model="changeMooring"
                             required
-                            />
-                            <label for="changeMooringFalse" class="form-label">No</label>
-                        </div>
-                        <div class="col-sm-9">
-                            <input
+                        />
+                        <label for="changeMooringFalse" class="form-label"
+                            >No</label
+                        >
+                    </div>
+                    <div class="col-sm-9">
+                        <input
                             @change="resetCurrentMooring"
                             :disabled="readonly"
-                            class="form-check-input" type="radio"
+                            class="form-check-input"
+                            type="radio"
                             id="changeMooringTrue"
                             name="changeMooringTrue"
                             :value="true"
                             v-model="changeMooring"
                             required
-                            />
-                            <label for="changeMooringTrue" class="form-label">Yes</label>
-                        </div>
-
+                        />
+                        <label for="changeMooringTrue" class="form-label"
+                            >Yes</label
+                        >
+                    </div>
                 </div>
             </div>
         </FormSection>
     </div>
-
 </template>
 <script>
-import FormSection from '@/components/forms/section_toggle.vue'
+import FormSection from '@/components/forms/section_toggle.vue';
 
 export default {
-    name:'current_mooring',
-    emits: [
-        'resetCurrentMooring',
-    ],
-    data:function () {
+    name: 'current_mooring',
+    emits: ['resetCurrentMooring'],
+    data: function () {
         return {
             changeMooring: false,
-        }
+        };
     },
-    components:{
+    components: {
         FormSection,
     },
-    props:{
-        proposal:{
+    props: {
+        proposal: {
             type: Object,
-            required:true
+            required: true,
         },
-        readonly:{
+        readonly: {
             type: Boolean,
             default: true,
         },
-        is_internal:{
+        is_internal: {
             type: Boolean,
-            default: false
+            default: false,
         },
     },
     computed: {
-        currentMooringDisplayText: function() {
+        currentMooringDisplayText: function () {
             let displayText = '';
-            if (this.proposal.proposal_type != undefined && this.proposal.proposal_type.code != 'new') {
-                if (this.proposal && this.proposal.authorised_user_moorings_str) {
+            if (
+                this.proposal.proposal_type != undefined &&
+                this.proposal.proposal_type.code != 'new'
+            ) {
+                if (
+                    this.proposal &&
+                    this.proposal.authorised_user_moorings_str
+                ) {
                     displayText += `Your ${this.proposal.approval_type_text} ${this.proposal.approval_lodgement_number}
                     lists moorings ${this.proposal.authorised_user_moorings_str}.
                         Do you want to apply to add another mooring to your Authorised User Permit?`;
@@ -83,26 +97,25 @@ export default {
             }
             return displayText;
         },
-
     },
-    methods:{
-        resetCurrentMooring: function() {
+    methods: {
+        resetCurrentMooring: function () {
             this.$nextTick(() => {
-                this.$emit("resetCurrentMooring", this.changeMooring)
+                this.$emit('resetCurrentMooring', this.changeMooring);
             });
         },
     },
-    created: function() {
+    created: function () {
         if (this.proposal && !this.proposal.keep_existing_mooring) {
             this.changeMooring = true;
             this.resetCurrentMooring();
         }
     },
-}
+};
 </script>
 
 <style lang="css" scoped>
-    input[type=text] {
-        padding-left: 1em;
-    }
+input[type='text'] {
+    padding-left: 1em;
+}
 </style>

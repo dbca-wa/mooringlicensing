@@ -1,9 +1,9 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import Profile from '@/components/user/profile.vue'
-import external_routes from '@/components/external/routes'
-import internal_routes from '@/components/internal/routes'
-import MooringLicenceDocumentsUpload from '@/components/external/mooring_licence_documents_upload.vue'
-import DcvAdmissionForm from '@/components/external/dcv/dcv_admission.vue'
+import { createRouter, createWebHistory } from 'vue-router';
+import Profile from '@/components/user/profile.vue';
+import external_routes from '@/components/external/routes';
+import internal_routes from '@/components/internal/routes';
+import MooringLicenceDocumentsUpload from '@/components/external/mooring_licence_documents_upload.vue';
+import DcvAdmissionForm from '@/components/external/dcv/dcv_admission.vue';
 
 export default createRouter({
     history: createWebHistory(),
@@ -11,24 +11,24 @@ export default createRouter({
         {
             path: '/firsttime',
             name: 'first-time',
-            component: Profile
+            component: Profile,
         },
         {
             path: '/account',
             name: 'account',
-            component: Profile
+            component: Profile,
         },
         external_routes,
         internal_routes,
         {
             path: '/mla_documents_upload/:uuid',
             name: 'mla-documents-upload',
-            component: MooringLicenceDocumentsUpload
+            component: MooringLicenceDocumentsUpload,
         },
         {
             path: '/dcv_admission_form',
             name: 'dcv-admission-form',
-            component: DcvAdmissionForm
-        }
-    ]
-})
+            component: DcvAdmissionForm,
+        },
+    ],
+});

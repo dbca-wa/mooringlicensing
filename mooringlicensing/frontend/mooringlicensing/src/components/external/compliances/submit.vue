@@ -1,31 +1,70 @@
 <template>
-    <div class="container" >
+    <div class="container">
         <div class="row">
             <div class="col-sm-12">
                 <div class="row">
-                    <div v-if="compliance && compliance.id" class="col-sm-offset-3 col-sm-6 borderDecoration">
-                        <strong>Your compliance with requirements has been successfully submitted.</strong>
-                        <br/>
+                    <div
+                        v-if="compliance && compliance.id"
+                        class="col-sm-offset-3 col-sm-6 borderDecoration"
+                    >
+                        <strong
+                            >Your compliance with requirements has been
+                            successfully submitted.</strong
+                        >
+                        <br />
                         <table>
                             <tr>
                                 <td><strong>Compliance:</strong></td>
-                                <td><strong>{{compliance.reference}}</strong></td>
+                                <td>
+                                    <strong>{{ compliance.reference }}</strong>
+                                </td>
                             </tr>
                             <tr>
                                 <td><strong>Date/Time:</strong></td>
-                                <td><strong> {{ formatDate(compliance.lodgement_date) }}</strong></td>
+                                <td>
+                                    <strong>
+                                        {{
+                                            formatDate(
+                                                compliance.lodgement_date
+                                            )
+                                        }}</strong
+                                    >
+                                </td>
                             </tr>
                         </table>
                         <div>
-                          <p>Thank you for your submission.</p>
-                          <p>Your Submission will be provided to an officer to gauge compliance of the requirement(s).</p>
-                          <p>You will be notified by email once your submission has been reviewed and / or if further action is required</p>
-                        </div>                     
-                        <router-link :to="{name:'external-dashboard'}" style="margin-top:15px;" class="btn btn-primary">Back to dashboard</router-link>
+                            <p>Thank you for your submission.</p>
+                            <p>
+                                Your Submission will be provided to an officer
+                                to gauge compliance of the requirement(s).
+                            </p>
+                            <p>
+                                You will be notified by email once your
+                                submission has been reviewed and / or if further
+                                action is required
+                            </p>
+                        </div>
+                        <router-link
+                            :to="{ name: 'external-dashboard' }"
+                            style="margin-top: 15px"
+                            class="btn btn-primary"
+                            >Back to dashboard</router-link
+                        >
                     </div>
-                    <div v-else class="col-sm-offset-3 col-sm-6 borderDecoration">
-                        <strong>Sorry it looks like there isn't any compliance currently in your session.</strong>
-                        <br /><router-link :to="{name:'external-dashboard'}" style="margin-top:15px;" class="btn btn-primary">Back to dashboard</router-link>
+                    <div
+                        v-else
+                        class="col-sm-offset-3 col-sm-6 borderDecoration"
+                    >
+                        <strong
+                            >Sorry it looks like there isn't any compliance
+                            currently in your session.</strong
+                        >
+                        <br /><router-link
+                            :to="{ name: 'external-dashboard' }"
+                            style="margin-top: 15px"
+                            class="btn btn-primary"
+                            >Back to dashboard</router-link
+                        >
                     </div>
                 </div>
             </div>
@@ -34,26 +73,26 @@
 </template>
 <script>
 export default {
-  data: function() {
-    return {
-        "compliance": {},
-    }
-  },
-  methods:{
-        formatDate: function(data){
-            return data ? moment(data).format('DD/MM/YYYY HH:mm:ss'): '';
-        }
-  },
-  mounted: function() {
-    let vm = this;
-    vm.form = document.forms.new_compliance;
-  },
-  beforeRouteEnter: function(to, from, next) {
-    next(vm => {
-        vm.compliance = to.params.compliance;
-    })
-  }
-}
+    data: function () {
+        return {
+            compliance: {},
+        };
+    },
+    methods: {
+        formatDate: function (data) {
+            return data ? moment(data).format('DD/MM/YYYY HH:mm:ss') : '';
+        },
+    },
+    mounted: function () {
+        let vm = this;
+        vm.form = document.forms.new_compliance;
+    },
+    beforeRouteEnter: function (to, from, next) {
+        next((vm) => {
+            vm.compliance = to.params.compliance;
+        });
+    },
+};
 </script>
 
 <style lang="css" scoped>

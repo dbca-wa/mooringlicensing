@@ -6,7 +6,12 @@
                     <label for="">Fee Source Type</label>
                     <select class="form-select" v-model="filterFeeSourceType">
                         <option value="All">All</option>
-                        <option v-for="type in fee_source_types" :value="type.code">{{ type.description }}</option>
+                        <option
+                            v-for="type in fee_source_types"
+                            :value="type.code"
+                        >
+                            {{ type.description }}
+                        </option>
                     </select>
                 </div>
             </div>
@@ -15,7 +20,12 @@
                     <label for="">Status</label>
                     <select class="form-select" v-model="filterStatus">
                         <option value="All">All</option>
-                        <option v-for="invoice_status in invoice_statuses" :value="invoice_status.code">{{ invoice_status.description }}</option>
+                        <option
+                            v-for="invoice_status in invoice_statuses"
+                            :value="invoice_status.code"
+                        >
+                            {{ invoice_status.description }}
+                        </option>
                     </select>
                 </div>
             </div>
@@ -35,8 +45,8 @@
 </template>
 
 <script>
-import datatable from '@/utils/vue/datatable.vue'
-import { api_endpoints, helpers } from '@/utils/hooks'
+import datatable from '@/utils/vue/datatable.vue';
+import { api_endpoints, helpers } from '@/utils/hooks';
 export default {
     name: 'TableInvoices',
     data() {
@@ -50,156 +60,166 @@ export default {
 
             // filtering options
             fee_source_types: [
-                {'code':'application','description':'Application'},
-                {'code':'sticker_action','description':'Sticker Action'}
+                { code: 'application', description: 'Application' },
+                { code: 'sticker_action', description: 'Sticker Action' },
             ],
             invoice_statuses: [
-                {'code':'settled','description':'Settled'},
-                {'code':'not_settled','description':'Not Settled'},
-                {'code':'voided','description':'Voided'}
+                { code: 'settled', description: 'Settled' },
+                { code: 'not_settled', description: 'Not Settled' },
+                { code: 'voided', description: 'Voided' },
             ],
-        }
+        };
     },
-    components:{
-        datatable
+    components: {
+        datatable,
     },
     watch: {
-        filterFeeSourceType: function() {
+        filterFeeSourceType: function () {
             this.$refs.invoices_datatable.vmDataTable.draw();
         },
-        filterStatus: function(){
+        filterStatus: function () {
             this.$refs.invoices_datatable.vmDataTable.draw();
         },
     },
     computed: {
-        number_of_columns: function() {
-            return this.datatable_headers.length
+        number_of_columns: function () {
+            return this.datatable_headers.length;
         },
-        datatable_headers: function(){
-            return ['id', 'Invoice Reference','Fee Source', 'Fee Source Type', 'Status','Created At', 'Settled At', 'Amount', 'Description']
+        datatable_headers: function () {
+            return [
+                'id',
+                'Invoice Reference',
+                'Fee Source',
+                'Fee Source Type',
+                'Status',
+                'Created At',
+                'Settled At',
+                'Amount',
+                'Description',
+            ];
         },
-        column_id: function(){
+        column_id: function () {
             return {
-                data: "id",
+                data: 'id',
                 orderable: true,
                 searchable: false,
                 visible: false,
                 name: 'id',
-                'render': function(row, type, full){
-                    return full.id
-                }
-            }
+                render: function (row, type, full) {
+                    return full.id;
+                },
+            };
         },
-        column_reference: function(){
+        column_reference: function () {
             return {
-                data: "reference",
+                data: 'reference',
                 orderable: true,
                 searchable: true,
                 visible: true,
                 name: 'reference',
-                'render': function(row, type, full){
+                render: function (row, type, full) {
                     return `<a target='_blank' href='/ledger-toolkit-api/invoice-pdf/${full.reference}'>${full.reference}</a><br/>
                             <a target='_blank' href='${full.ledger_link}'>Ledger Payment</a>`;
-                }
-            }
+                },
+            };
         },
-        column_fee_source: function(){
+        column_fee_source: function () {
             return {
-                data: "fee_source",
+                data: 'fee_source',
                 orderable: false,
                 searchable: false,
                 visible: true,
                 name: 'fee_source',
-                'render': function(row, type, full){
-                    if (full.fee_source_type == "Application") {
-                        return `<a target='_blank' href='/internal/proposal/${full.fee_source_id}'>${full.fee_source}</a>`
-                    } else if (full.fee_source_type == "Sticker Action") {
-                        return `<a target='_blank' href='/internal/approval/${full.fee_source_id}'>${full.fee_source}</a>`
+                render: function (row, type, full) {
+                    if (full.fee_source_type == 'Application') {
+                        return `<a target='_blank' href='/internal/proposal/${full.fee_source_id}'>${full.fee_source}</a>`;
+                    } else if (full.fee_source_type == 'Sticker Action') {
+                        return `<a target='_blank' href='/internal/approval/${full.fee_source_id}'>${full.fee_source}</a>`;
                     }
-                    return full.fee_source
-                }
-            }
+                    return full.fee_source;
+                },
+            };
         },
-        column_fee_source_type: function(){
+        column_fee_source_type: function () {
             return {
-                data: "fee_source_type",
+                data: 'fee_source_type',
                 orderable: false,
                 searchable: false,
                 visible: true,
                 name: 'fee_source_type',
-                'render': function(row, type, full){
-                    return full.fee_source_type
-                }
-            }
+                render: function (row, type, full) {
+                    return full.fee_source_type;
+                },
+            };
         },
-        column_created: function(){
+        column_created: function () {
             return {
-                data: "created",
+                data: 'created',
                 orderable: true,
                 searchable: true,
                 visible: true,
                 name: 'created',
-                'render': function(row, type, full){
-                    return full.created_str
-                }
-            }
+                render: function (row, type, full) {
+                    return full.created_str;
+                },
+            };
         },
-        column_settled: function(){
+        column_settled: function () {
             return {
-                data: "settlement_date",
+                data: 'settlement_date',
                 orderable: true,
                 searchable: true,
                 visible: true,
                 name: 'settlement_date',
-                'render': function(row, type, full){
-                    return full.settlement_date_str
-                }
-            }
+                render: function (row, type, full) {
+                    return full.settlement_date_str;
+                },
+            };
         },
-        column_amount: function(){
+        column_amount: function () {
             return {
-                data: "amount",
+                data: 'amount',
                 orderable: true,
                 searchable: true,
                 visible: true,
                 name: 'amount',
-                'render': function(row, type, full){
-                    return "$"+full.amount
-                }
-            }
+                render: function (row, type, full) {
+                    return '$' + full.amount;
+                },
+            };
         },
-        column_status: function(){
+        column_status: function () {
             return {
-                data: "id",
+                data: 'id',
                 orderable: false,
                 searchable: false,
                 visible: true,
                 name: 'status',
-                'render': function(row, type, full){
+                render: function (row, type, full) {
                     if (full.settlement_date) {
-                        return "Settled"
+                        return 'Settled';
                     } else if (full.voided) {
-                        return "Voided"
+                        return 'Voided';
                     } else {
-                        return "Not Settled"
+                        return 'Not Settled';
                     }
-                }
-            }
+                },
+            };
         },
-        column_description: function(){
+        column_description: function () {
             return {
-                data: "text",
+                data: 'text',
                 orderable: false,
                 searchable: true,
                 visible: true,
                 name: 'text',
-                'render': function(row, type, full){
-                    return full.text
-                }
-            }
+                render: function (row, type, full) {
+                    return full.text;
+                },
+            };
         },
-        datatable_options: function(){
-            let vm = this
+        datatable_options: function () {
+            let vm = this;
 
             let columns = [
                 vm.column_id,
@@ -211,80 +231,83 @@ export default {
                 vm.column_settled,
                 vm.column_amount,
                 vm.column_description,
-            ]
-            let search = true
+            ];
+            let search = true;
 
             return {
                 language: {
-                    processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>"
+                    processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>",
                 },
-                rowCallback: function (row, invoice){
-                    let row_jq = $(row)
-                    row_jq.attr('id', 'invoice_id_' + invoice.id)
-                    row_jq.children().first().addClass(vm.td_expand_class_name)
-
+                rowCallback: function (row, invoice) {
+                    let row_jq = $(row);
+                    row_jq.attr('id', 'invoice_id_' + invoice.id);
+                    row_jq.children().first().addClass(vm.td_expand_class_name);
                 },
                 autoWidth: true,
                 responsive: false,
                 scrollX: true,
                 fixedColumns: {
                     leftColumns: 1,
-                    rightColumns: 1
+                    rightColumns: 1,
                 },
                 serverSide: true,
                 paging: true,
-                lengthMenu: [ [10, 25, 50, 100], [10, 25, 50, 100] ],
+                lengthMenu: [
+                    [10, 25, 50, 100],
+                    [10, 25, 50, 100],
+                ],
                 searching: search,
                 ordering: true,
-                order: [[0, 'desc']],  // Default order [[column_index, 'asc/desc'], ...]
+                order: [[0, 'desc']], // Default order [[column_index, 'asc/desc'], ...]
                 ajax: {
-                    "url": api_endpoints.invoices_paginated_list + '?format=datatables',
-                    "dataSrc": 'data',
+                    url:
+                        api_endpoints.invoices_paginated_list +
+                        '?format=datatables',
+                    dataSrc: 'data',
 
                     // adding extra GET params for Custom filtering
-                    "data": function ( d ) {
-                        d.filter_fee_source_type = vm.filterFeeSourceType
-                        d.filter_status = vm.filterStatus
+                    data: function (d) {
+                        d.filter_fee_source_type = vm.filterFeeSourceType;
+                        d.filter_status = vm.filterStatus;
 
                         //only use columns necessary for filtering and ordering
-                        let keepCols = []
-                        let originalCols = d.columns
+                        let keepCols = [];
+                        let originalCols = d.columns;
                         d.columns.forEach((value, index) => {
                             if (value.searchable || value.orderable) {
-                                keepCols.push(d.columns[index])
+                                keepCols.push(d.columns[index]);
                             }
                         });
                         d.columns = keepCols;
                         //adjust order
-                        let nameIndexDict = {}
+                        let nameIndexDict = {};
                         d.columns.forEach((value, index) => {
-                                nameIndexDict[value.name] = index;
-                            }
-                        )
-                        let originalNameIndexDict = {}
+                            nameIndexDict[value.name] = index;
+                        });
+                        let originalNameIndexDict = {};
                         originalCols.forEach((value, index) => {
-                                originalNameIndexDict[value.name] = index;
-                            }
-                        )
+                            originalNameIndexDict[value.name] = index;
+                        });
                         let newOrder = JSON.parse(JSON.stringify(d.order));
                         d.order.forEach((o_value, o_index) => {
-                            Object.entries(originalNameIndexDict).forEach(([key,value]) => {
-                                if (o_value.column == value) {
-                                    let name = key;
-                                    let new_index = nameIndexDict[name];
-                                    newOrder[o_index].column = new_index;
+                            Object.entries(originalNameIndexDict).forEach(
+                                ([key, value]) => {
+                                    if (o_value.column == value) {
+                                        let name = key;
+                                        let new_index = nameIndexDict[name];
+                                        newOrder[o_index].column = new_index;
+                                    }
                                 }
-                            })    
-                        })
+                            );
+                        });
                         d.order = newOrder;
-                        console.log(newOrder)
-                    }
+                    },
                 },
                 dom: 'lBfrtip',
                 columns: columns,
                 processing: true,
-            }
-        }
+            };
+        },
     },
-}
+};
 </script>

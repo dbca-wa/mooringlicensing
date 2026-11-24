@@ -4,22 +4,33 @@
             <div class="col-md-3">
                 <div class="mb-3">
                     <label for="organisation_lookup">Organisation</label>
-                        <select
-                            id="organisation_lookup"  
-                            name="organisation_lookup"  
-                            ref="organisation_lookup" 
-                            class="form-control">
-                            <option v-for="org in dcv_organisations" :key="org.id" :value="org.id">
-                                {{ org.name }}
-                            </option>
-                        </select>
+                    <select
+                        id="organisation_lookup"
+                        name="organisation_lookup"
+                        ref="organisation_lookup"
+                        class="form-control"
+                    >
+                        <option
+                            v-for="org in dcv_organisations"
+                            :key="org.id"
+                            :value="org.id"
+                        >
+                            {{ org.name }}
+                        </option>
+                    </select>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="mb-3">
                     <label for="">Date from</label>
                     <div class="input-group date">
-                        <input type="date" class="form-control text-center" placeholder="DD/MM/YYYY" v-model="filterDateFrom" id="dateFromField"/>
+                        <input
+                            type="date"
+                            class="form-control text-center"
+                            placeholder="DD/MM/YYYY"
+                            v-model="filterDateFrom"
+                            id="dateFromField"
+                        />
                     </div>
                 </div>
             </div>
@@ -27,7 +38,13 @@
                 <div class="mb-3">
                     <label for="">Date to</label>
                     <div class="input-group date">
-                        <input type="date" class="form-control text-center" placeholder="DD/MM/YYYY" v-model="filterDateTo" id="dateToField"/>
+                        <input
+                            type="date"
+                            class="form-control text-center"
+                            placeholder="DD/MM/YYYY"
+                            v-model="filterDateTo"
+                            id="dateToField"
+                        />
                     </div>
                 </div>
             </div>
@@ -35,7 +52,13 @@
 
         <div class="row">
             <div class="col-md-12">
-                <button type="button" class="btn btn-primary float-end" @click="new_application_button_clicked">New Application</button>
+                <button
+                    type="button"
+                    class="btn btn-primary float-end"
+                    @click="new_application_button_clicked"
+                >
+                    New Application
+                </button>
             </div>
         </div>
 
@@ -53,20 +76,20 @@
 </template>
 
 <script>
-import $ from 'jquery'
-import datatable from '@/utils/vue/datatable.vue'
-import { api_endpoints } from '@/utils/hooks'
+import $ from 'jquery';
+import datatable from '@/utils/vue/datatable.vue';
+import { api_endpoints } from '@/utils/hooks';
 
 export default {
     name: 'TableDcvAdmissions',
     props: {
-        level:{
+        level: {
             type: String,
             required: true,
-            validator: function(val) {
+            validator: function (val) {
                 let options = ['internal', 'referral', 'external'];
-                return options.indexOf(val) != -1 ? true: false;
-            }
+                return options.indexOf(val) != -1 ? true : false;
+            },
         },
     },
     data() {
@@ -81,141 +104,150 @@ export default {
 
             // filtering options
             dcv_organisations: [],
-        }
+        };
     },
-    components:{
-        datatable
+    components: {
+        datatable,
     },
     watch: {
-        filterDcvOrganisation: function() {
+        filterDcvOrganisation: function () {
             let vm = this;
             vm.$refs.admissions_datatable.vmDataTable.draw();
         },
-        filterDateFrom: function() {
+        filterDateFrom: function () {
             let vm = this;
             vm.$refs.admissions_datatable.vmDataTable.draw();
         },
-        filterDateTo: function() {
+        filterDateTo: function () {
             let vm = this;
             vm.$refs.admissions_datatable.vmDataTable.draw();
         },
     },
     computed: {
-        is_external: function() {
-            return this.level == 'external'
+        is_external: function () {
+            return this.level == 'external';
         },
-        is_internal: function() {
-            return this.level == 'internal'
+        is_internal: function () {
+            return this.level == 'internal';
         },
-        datatable_headers: function(){
-            return ['id', 'Number', 'Invoice / Confirmation', 'Arrival Date', 'Lodgement Date', 'Action']
+        datatable_headers: function () {
+            return [
+                'id',
+                'Number',
+                'Invoice / Confirmation',
+                'Arrival Date',
+                'Lodgement Date',
+                'Action',
+            ];
         },
-        column_id: function(){
+        column_id: function () {
             return {
                 // 1. ID
-                data: "id",
+                data: 'id',
                 orderable: false,
                 searchable: false,
                 visible: false,
-                'render': function(row, type, full){
-                    return full.id
-                }
-            }
+                render: function (row, type, full) {
+                    return full.id;
+                },
+            };
         },
-        column_lodgement_number: function(){
+        column_lodgement_number: function () {
             return {
                 // 2. Lodgement Number
-                data: "id",
+                data: 'id',
                 orderable: true,
                 searchable: true,
                 visible: true,
-                'render': function(row, type, full){
-                    return full.lodgement_number
+                render: function (row, type, full) {
+                    return full.lodgement_number;
                 },
                 name: 'lodgement_number',
-            }
+            };
         },
-        column_invoice_confirmation: function(){
-            let vm = this
+        column_invoice_confirmation: function () {
+            let vm = this;
             return {
-                data: "id",
+                data: 'id',
                 orderable: false,
                 searchable: false,
                 visible: true,
-                'render': function(row, type, full){
-                    let links = ''
-                    if (full.invoices){
-                        for (let invoice of full.invoices){
-                            links +=  `<div><a href='${invoice.invoice_url}' target='_blank'><i style='color:red;' class='fa fa-file-pdf-o'></i> #${invoice.reference}</a></div>`;
-                            if (!vm.is_external){
-                                links +=  `<div><a href='${invoice.ledger_payment_url}' target='_blank'>Ledger Payment</a></div>`;
+                render: function (row, type, full) {
+                    let links = '';
+                    if (full.invoices) {
+                        for (let invoice of full.invoices) {
+                            links += `<div><a href='${invoice.invoice_url}' target='_blank'><i style='color:red;' class='fa fa-file-pdf-o'></i> #${invoice.reference}</a></div>`;
+                            if (!vm.is_external) {
+                                links += `<div><a href='${invoice.ledger_payment_url}' target='_blank'>Ledger Payment</a></div>`;
                             }
                         }
                     }
-                    if (full.admission_urls){
-                        for (let admission_url of full.admission_urls){
-                            links +=  `<div><a href='${admission_url}' target='_blank'><i style='color:red;' class='fa fa-file-pdf-o'></i> Confirmation</a></div>`;
+                    if (full.admission_urls) {
+                        for (let admission_url of full.admission_urls) {
+                            links += `<div><a href='${admission_url}' target='_blank'><i style='color:red;' class='fa fa-file-pdf-o'></i> Confirmation</a></div>`;
                         }
                     }
-                    return links
-                }
-            }
+                    return links;
+                },
+            };
         },
-        column_arrival_date: function(){
+        column_arrival_date: function () {
             return {
-                data: "id",
+                data: 'id',
                 orderable: true,
                 searchable: false,
                 visible: true,
-                'render': function(row, type, full){
-                    let ret = ''
-                    for (let arrival of full.arrivals){
-                        if (arrival){
-                            ret += '<div>' + moment(arrival.arrival_date).format('DD/MM/YYYY') + '</div>'
+                render: function (row, type, full) {
+                    let ret = '';
+                    for (let arrival of full.arrivals) {
+                        if (arrival) {
+                            ret +=
+                                '<div>' +
+                                moment(arrival.arrival_date).format(
+                                    'DD/MM/YYYY'
+                                ) +
+                                '</div>';
+                        } else {
+                            ret += '';
                         }
-                        else {
-                            ret += ''
-                        }
-
                     }
-                    return ret
+                    return ret;
                 },
                 name: 'dcv_admission_arrivals__arrival_date',
-            }
+            };
         },
-        column_lodgement_date: function(){
+        column_lodgement_date: function () {
             return {
-                data: "id",
+                data: 'id',
                 orderable: true,
                 searchable: true,
                 visible: true,
-                'render': function(row, type, full){
+                render: function (row, type, full) {
                     return full.lodgement_date;
                 },
                 name: 'lodgement_datetime',
-            }
+            };
         },
-        column_action: function(){
-            let vm = this
+        column_action: function () {
+            let vm = this;
             return {
                 // 8. Action
-                data: "id",
+                data: 'id',
                 orderable: false,
                 searchable: false,
                 visible: true,
-                'render': function(row, type, full){
+                render: function (row, type, full) {
                     let links = '';
-                    if (full.invoices){
-                        for (let invoice of full.invoices){
-
+                    if (full.invoices) {
+                        for (let invoice of full.invoices) {
                         }
                     }
-                    return links
-                }
-            }
+                    return links;
+                },
+            };
         },
-        datatable_options: function(){
-            let vm = this
+        datatable_options: function () {
+            let vm = this;
 
             let columns = [
                 vm.column_id,
@@ -224,130 +256,133 @@ export default {
                 vm.column_arrival_date,
                 vm.column_lodgement_date,
                 vm.column_action,
-            ]
-            let search = true
+            ];
+            let search = true;
 
             return {
                 autoWidth: false,
                 language: {
-                    processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>"
+                    processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>",
                 },
                 responsive: false,
                 scrollX: true,
                 fixedColumns: {
                     leftColumns: 1,
-                    rightColumns: 1
+                    rightColumns: 1,
                 },
                 serverSide: true,
                 searching: search,
                 ajax: {
-                    "url": api_endpoints.dcvadmissions_paginated_list + '?format=datatables',
-                    "dataSrc": 'data',
+                    url:
+                        api_endpoints.dcvadmissions_paginated_list +
+                        '?format=datatables',
+                    dataSrc: 'data',
 
                     // adding extra GET params for Custom filtering
-                    "data": function ( d ) {
-                        d.filter_dcv_organisation_id = vm.filterDcvOrganisation
-                        d.filter_date_from = vm.filterDateFrom
-                        d.filter_date_to = vm.filterDateTo
+                    data: function (d) {
+                        d.filter_dcv_organisation_id = vm.filterDcvOrganisation;
+                        d.filter_date_from = vm.filterDateFrom;
+                        d.filter_date_to = vm.filterDateTo;
                         //only use columns necessary for filtering and ordering
-                        let keepCols = []
-                        let originalCols = d.columns
+                        let keepCols = [];
+                        let originalCols = d.columns;
                         d.columns.forEach((value, index) => {
                             if (value.searchable || value.orderable) {
-                                keepCols.push(d.columns[index])
+                                keepCols.push(d.columns[index]);
                             }
                         });
                         d.columns = keepCols;
 
                         //adjust order
-                        let nameIndexDict = {}
+                        let nameIndexDict = {};
                         d.columns.forEach((value, index) => {
-                                nameIndexDict[value.name] = index;
-                            }
-                        )
-                        let originalNameIndexDict = {}
+                            nameIndexDict[value.name] = index;
+                        });
+                        let originalNameIndexDict = {};
                         originalCols.forEach((value, index) => {
-                                originalNameIndexDict[value.name] = index;
-                            }
-                        )
+                            originalNameIndexDict[value.name] = index;
+                        });
                         let newOrder = JSON.parse(JSON.stringify(d.order));
                         d.order.forEach((o_value, o_index) => {
-                            Object.entries(originalNameIndexDict).forEach(([key,value]) => {
-                                if (o_value.column == value) {
-                                    let name = key;
-                                    let new_index = nameIndexDict[name];
-                                    newOrder[o_index].column = new_index;
+                            Object.entries(originalNameIndexDict).forEach(
+                                ([key, value]) => {
+                                    if (o_value.column == value) {
+                                        let name = key;
+                                        let new_index = nameIndexDict[name];
+                                        newOrder[o_index].column = new_index;
+                                    }
                                 }
-                            })    
-                        })
+                            );
+                        });
                         d.order = newOrder;
-                    }
+                    },
                 },
                 dom: 'lBfrtip',
                 columns: columns,
                 processing: true,
-                initComplete: function() {
-                    console.log('in initComplete')
-                },
-            }
-        }
+                initComplete: function () {},
+            };
+        },
     },
     methods: {
-        initialiseOrganisationLookup: function(){
+        initialiseOrganisationLookup: function () {
             let vm = this;
-            $(vm.$refs.organisation_lookup).select2({
-                minimumInputLength: 2,
-                theme: "bootstrap-5",
-                allowClear: true,
-                placeholder: "",
-                ajax: {
-                    url: api_endpoints.dcv_organisations,
-                    dataType: 'json',
-                    data: function(params) {
-                        return {
-                            search_term: params.term,
-                        }
+            $(vm.$refs.organisation_lookup)
+                .select2({
+                    minimumInputLength: 2,
+                    theme: 'bootstrap-5',
+                    allowClear: true,
+                    placeholder: '',
+                    ajax: {
+                        url: api_endpoints.dcv_organisations,
+                        dataType: 'json',
+                        data: function (params) {
+                            return {
+                                search_term: params.term,
+                            };
+                        },
+                        processResults: function (data) {
+                            const results = data.results.map((org) => ({
+                                id: org.id,
+                                text: org.name,
+                            }));
+                            return {
+                                results: results,
+                            };
+                        },
                     },
-                    processResults: function(data) {
-                        const results = data.results.map(org => ({
-                            id: org.id,   
-                            text: org.name
-                        }));
-                        return {
-                            results: results, 
-                        };
-                    },
-                },
-            })
-            .on("select2:select", function (e) {
-                vm.filterDcvOrganisation = e.params.data.id;
-            })
-            .on("select2:unselect", function (e) {
-                vm.filterDcvOrganisation = null;
-            })
-            .on("select2:open", function (e) {
-                const searchField = $('[aria-controls="select2-organisation_lookup-results"]');
-                searchField[0].focus();
-            });
+                })
+                .on('select2:select', function (e) {
+                    vm.filterDcvOrganisation = e.params.data.id;
+                })
+                .on('select2:unselect', function (e) {
+                    vm.filterDcvOrganisation = null;
+                })
+                .on('select2:open', function (e) {
+                    const searchField = $(
+                        '[aria-controls="select2-organisation_lookup-results"]'
+                    );
+                    searchField[0].focus();
+                });
         },
-        new_application_button_clicked: function(){
-            if (this.is_internal){
+        new_application_button_clicked: function () {
+            if (this.is_internal) {
                 this.$router.push({
-                name: 'internal-dcv-admission-form'
-            })
+                    name: 'internal-dcv-admission-form',
+                });
             }
-            if (this.is_external){
-            this.$router.push({
-                name: 'apply_proposal'
-            })
-        }
+            if (this.is_external) {
+                this.$router.push({
+                    name: 'apply_proposal',
+                });
+            }
         },
     },
-    mounted: function(){
+    mounted: function () {
         let vm = this;
         this.$nextTick(() => {
             vm.initialiseOrganisationLookup();
         });
-    }
-}
+    },
+};
 </script>

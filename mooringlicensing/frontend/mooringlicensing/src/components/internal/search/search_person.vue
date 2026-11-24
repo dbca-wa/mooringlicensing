@@ -1,21 +1,23 @@
 <template>
     <FormSection label="Search Person" Index="search_person">
         <div class="row mb-3">
-            <label for="person_lookup" class="col-sm-3 col-form-label">Person</label>
+            <label for="person_lookup" class="col-sm-3 col-form-label"
+                >Person</label
+            >
             <div class="col-sm-6">
-                <select 
-                    id="person_lookup"  
-                    name="person_lookup"  
-                    ref="person_lookup" 
-                    class="form-control" 
+                <select
+                    id="person_lookup"
+                    name="person_lookup"
+                    ref="person_lookup"
+                    class="form-control"
                 />
             </div>
             <div class="col-sm-3">
-                <input 
-                type="button" 
-                @click.prevent="openDetailsApprovalsVessels" 
-                class="btn btn-primary" 
-                value="View Details"
+                <input
+                    type="button"
+                    @click.prevent="openDetailsApprovalsVessels"
+                    class="btn btn-primary"
+                    value="View Details"
                 />
             </div>
         </div>
@@ -23,77 +25,79 @@
 </template>
 
 <script>
-import $ from "jquery";
-import FormSection from '@/components/forms/section_toggle.vue'
+import $ from 'jquery';
+import FormSection from '@/components/forms/section_toggle.vue';
 
-import {
-  api_endpoints
-}
-from '@/utils/hooks'
-    export default {
-        name:'SearchPerson',
-        components:{
-            FormSection,
+import { api_endpoints } from '@/utils/hooks';
+export default {
+    name: 'SearchPerson',
+    components: {
+        FormSection,
+    },
+    data: function () {
+        return {
+            email_user: null,
+        };
+    },
+    methods: {
+        openDetailsApprovalsVessels: function () {
+            this.$nextTick(() => {
+                if (this.email_user) {
+                    window.location.replace(
+                        '/internal/person/' + this.email_user.ledger_id
+                    );
+                }
+            });
         },
-        data:function () {
-            return {
-                email_user: null,
-             }
-        },
-        methods:{
-            openDetailsApprovalsVessels: function() {
-                this.$nextTick(() => {
-                    if (this.email_user) {
-                        window.location.replace("/internal/person/" + this.email_user.ledger_id);
-                    }
-                });
-            },
-            initialisePersonLookup: function(){
-                let vm = this;
-                $(vm.$refs.person_lookup).select2({
+        initialisePersonLookup: function () {
+            let vm = this;
+            $(vm.$refs.person_lookup)
+                .select2({
                     minimumInputLength: 2,
-                    theme: "bootstrap-5",
+                    theme: 'bootstrap-5',
                     allowClear: true,
-                    placeholder:"Select Person",
+                    placeholder: 'Select Person',
                     ajax: {
                         url: api_endpoints.person_lookup,
                         dataType: 'json',
-                        data: function(params) {
+                        data: function (params) {
                             return {
                                 search_term: params.term,
                                 page_number: params.page || 1,
                                 type: 'public',
-                            }
+                            };
                         },
-                        processResults: function(data){
+                        processResults: function (data) {
                             return {
-                                'results': data.results,
-                                'pagination': {
-                                    'more': data.pagination.more
-                                }
-                            }
+                                results: data.results,
+                                pagination: {
+                                    more: data.pagination.more,
+                                },
+                            };
                         },
                     },
-                }).
-                on("select2:select", function (e) {
+                })
+                .on('select2:select', function (e) {
                     var selected = $(e.currentTarget);
-                    vm.email_user = e.params.data
-                }).
-                on("select2:unselect",function (e) {
+                    vm.email_user = e.params.data;
+                })
+                .on('select2:unselect', function (e) {
                     var selected = $(e.currentTarget);
                     vm.approval_id = null;
-                }).
-                on("select2:open",function (e) {
-                    const searchField = $('[aria-controls="select2-person_lookup-results"]')
+                })
+                .on('select2:open', function (e) {
+                    const searchField = $(
+                        '[aria-controls="select2-person_lookup-results"]'
+                    );
                     // move focus to select2 field
                     searchField[0].focus();
                 });
-            },
         },
-        mounted: function () {
-            this.$nextTick(async () => {
-                this.initialisePersonLookup();
-            });
-        },
-    }
+    },
+    mounted: function () {
+        this.$nextTick(async () => {
+            this.initialisePersonLookup();
+        });
+    },
+};
 </script>

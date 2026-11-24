@@ -1,50 +1,110 @@
 <template>
     <div id="change-contact">
-        <modal v-model:show="isModalOpen"transition="modal fade" @ok="ok()" @cancel="cancel()" :title="title" large>
+        <modal
+            v-model:show="isModalOpen"
+            transition="modal fade"
+            @ok="ok()"
+            @cancel="cancel()"
+            :title="title"
+            large
+        >
             <div class="container-fluid">
-                <alert v-model:show="showError" type="danger"><strong>{{ errorString }}</strong></alert>
-                <alert v-if="missing_sticker_message" type="warning"><strong>{{ missing_sticker_message }}</strong></alert>   
+                <alert v-model:show="showError" type="danger"
+                    ><strong>{{ errorString }}</strong></alert
+                >
+                <alert v-if="missing_sticker_message" type="warning"
+                    ><strong>{{ missing_sticker_message }}</strong></alert
+                >
                 <div class="row mb-3">
-                    <label class="col-sm-5 col-form-label" for="change_sticker_address">Change Sticker Address</label>
+                    <label
+                        class="col-sm-5 col-form-label"
+                        for="change_sticker_address"
+                        >Change Sticker Address</label
+                    >
                     <div class="col-md-6">
-                        <input type="checkbox" v-model="change_sticker_address" />
+                        <input
+                            type="checkbox"
+                            v-model="change_sticker_address"
+                        />
                     </div>
                 </div>
                 <div v-if="change_sticker_address" class="row mb-3">
                     <label for="" class="col-sm-3 col-form-label">Street</label>
                     <div class="col-sm-6">
-                        <input type="text" class="form-control" name="street" placeholder="" v-model="postal_address_line1">
+                        <input
+                            type="text"
+                            class="form-control"
+                            name="street"
+                            placeholder=""
+                            v-model="postal_address_line1"
+                        />
                     </div>
                 </div>
                 <div v-if="change_sticker_address" class="row mb-3">
-                    <label for="" class="col-sm-3 col-form-label" >Town/Suburb</label>
+                    <label for="" class="col-sm-3 col-form-label"
+                        >Town/Suburb</label
+                    >
                     <div class="col-sm-6">
-                        <input type="text" class="form-control" name="surburb" placeholder="" v-model="postal_address_locality">
+                        <input
+                            type="text"
+                            class="form-control"
+                            name="surburb"
+                            placeholder=""
+                            v-model="postal_address_locality"
+                        />
                     </div>
                 </div>
                 <div v-if="change_sticker_address" class="row mb-3">
                     <label for="" class="col-sm-3 col-form-label">State</label>
                     <div class="col-sm-2">
-                        <input type="text" class="form-control" name="state" placeholder="" v-model="postal_address_state">
+                        <input
+                            type="text"
+                            class="form-control"
+                            name="state"
+                            placeholder=""
+                            v-model="postal_address_state"
+                        />
                     </div>
-                    <label for="" class="col-sm-2 col-form-label">Postcode</label>
+                    <label for="" class="col-sm-2 col-form-label"
+                        >Postcode</label
+                    >
                     <div class="col-sm-2">
-                        <input type="text" class="form-control" name="postcode" placeholder="" v-model="postal_address_postcode">
+                        <input
+                            type="text"
+                            class="form-control"
+                            name="postcode"
+                            placeholder=""
+                            v-model="postal_address_postcode"
+                        />
                     </div>
                 </div>
                 <div v-if="change_sticker_address" class="row mb-3">
-                    <label for="" class="col-sm-3 col-form-label" >Country</label>
+                    <label for="" class="col-sm-3 col-form-label"
+                        >Country</label
+                    >
                     <div class="col-sm-4">
-                        <select v-model="postal_address_country" class="form-select" name="country">
+                        <select
+                            v-model="postal_address_country"
+                            class="form-select"
+                            name="country"
+                        >
                             <option selected></option>
-                            <option v-for="c in countries" :value="c.code">{{ c.name }}</option>
+                            <option v-for="c in countries" :value="c.code">
+                                {{ c.name }}
+                            </option>
                         </select>
                     </div>
                 </div>
                 <div v-if="replacementFee" class="row mb-3">
-                    <label class="col-sm-2 col-form-label" for="reason">Reason</label>
+                    <label class="col-sm-2 col-form-label" for="reason"
+                        >Reason</label
+                    >
                     <div class="col-sm-9">
-                        <textarea class="col-sm-9 form-control" name="reason" v-model="details.reason"></textarea>
+                        <textarea
+                            class="col-sm-9 form-control"
+                            name="reason"
+                            v-model="details.reason"
+                        ></textarea>
                     </div>
                 </div>
             </div>
@@ -52,13 +112,41 @@
                 <div class="row w-100">
                     <div class="col-md-6 text-end">
                         <span v-if="replacementFee">
-                            <strong><input type="checkbox" v-model="waive_the_fee" /> Waive the fee</strong>
+                            <strong
+                                ><input
+                                    type="checkbox"
+                                    v-model="waive_the_fee"
+                                />
+                                Waive the fee</strong
+                            >
                         </span>
                     </div>
                     <div class="col-md-6 text-end">
-                        <button type="button" v-if="processing" disabled class="btn btn-primary me-2" @click="ok"><i class="fa fa-spinner fa-spin"></i> Processing</button>
-                        <button type="button" v-else class="btn btn-primary me-2" @click="ok" :disabled="!okButtonEnabled">Ok</button>
-                        <button type="button" class="btn btn-secondary me-2" @click="cancel">Cancel</button>
+                        <button
+                            type="button"
+                            v-if="processing"
+                            disabled
+                            class="btn btn-primary me-2"
+                            @click="ok"
+                        >
+                            <i class="fa fa-spinner fa-spin"></i> Processing
+                        </button>
+                        <button
+                            type="button"
+                            v-else
+                            class="btn btn-primary me-2"
+                            @click="ok"
+                            :disabled="!okButtonEnabled"
+                        >
+                            Ok
+                        </button>
+                        <button
+                            type="button"
+                            class="btn btn-secondary me-2"
+                            @click="cancel"
+                        >
+                            Cancel
+                        </button>
                     </div>
                 </div>
             </template>
@@ -67,26 +155,24 @@
 </template>
 
 <script>
-import $ from 'jquery'
-import modal from '@vue-utils/bootstrap-modal.vue'
-import alert from '@vue-utils/alert.vue'
-import { api_endpoints } from "@/utils/hooks.js"
+import $ from 'jquery';
+import modal from '@vue-utils/bootstrap-modal.vue';
+import alert from '@vue-utils/alert.vue';
+import { api_endpoints } from '@/utils/hooks.js';
 
 export default {
-    name:'CreateNewStickerModal',
-    emits: [
-        'sendData',
-    ],
-    components:{
+    name: 'CreateNewStickerModal',
+    emits: ['sendData'],
+    components: {
         modal,
         alert,
     },
-    data:function () {
+    data: function () {
         let vm = this;
         return {
             details: vm.getDefaultDetails(),
             approval_id: null,
-            isModalOpen:false,
+            isModalOpen: false,
             processing: false,
             replacementFee: false,
             fee_item: null,
@@ -104,87 +190,87 @@ export default {
             postal_address_country: '',
             postal_address_postcode: '',
             missing_sticker_message: '',
-        }
+        };
     },
-    props:{
+    props: {
         is_internal: {
             type: Boolean,
             default: false,
         },
     },
     computed: {
-        okButtonEnabled: function(){
-            if (this.details.reason){
-                return true
+        okButtonEnabled: function () {
+            if (this.details.reason) {
+                return true;
             }
-            return false
+            return false;
         },
-        showError: function() {
+        showError: function () {
             var vm = this;
             return vm.errors;
         },
-        title: function() {
-            return 'Create New Sticker'
+        title: function () {
+            return 'Create New Sticker';
         },
-        total_fee: function() {
-            let vm = this
-            let amount = 0
+        total_fee: function () {
+            let vm = this;
+            let amount = 0;
 
-            if (!vm.waive_the_fee){
+            if (!vm.waive_the_fee) {
                 amount = vm.fee_item.amount;
             }
 
-            return amount
+            return amount;
         },
     },
-    methods:{
-        getDefaultDetails: function(){
+    methods: {
+        getDefaultDetails: function () {
             return {
                 reason: '',
                 date_of_lost_sticker: null,
                 date_of_returned_sticker: null,
-            }
+            };
         },
-        ok:function () {
-            let vm =this;
-            vm.errors = false
-            vm.processing = true
-            vm.$emit("sendData", {
-                "waive_the_fee": vm.waive_the_fee,
-                "approval_id": vm.approval_id,
-                "mailed_date": vm.mailed_date,
-                "change_sticker_address": vm.change_sticker_address,
-                "postal_address_line1": vm.postal_address_line1,
-                "postal_address_line2": vm.postal_address_line2,
-                "postal_address_line3": vm.postal_address_line3,
-                "postal_address_locality": vm.postal_address_locality,
-                "postal_address_state": vm.postal_address_state,
-                "postal_address_country": vm.postal_address_country,
-                "postal_address_postcode": vm.postal_address_postcode,
-                "details": vm.details,
-            })
+        ok: function () {
+            let vm = this;
+            vm.errors = false;
+            vm.processing = true;
+            vm.$emit('sendData', {
+                waive_the_fee: vm.waive_the_fee,
+                approval_id: vm.approval_id,
+                mailed_date: vm.mailed_date,
+                change_sticker_address: vm.change_sticker_address,
+                postal_address_line1: vm.postal_address_line1,
+                postal_address_line2: vm.postal_address_line2,
+                postal_address_line3: vm.postal_address_line3,
+                postal_address_locality: vm.postal_address_locality,
+                postal_address_state: vm.postal_address_state,
+                postal_address_country: vm.postal_address_country,
+                postal_address_postcode: vm.postal_address_postcode,
+                details: vm.details,
+            });
         },
-        cancel:function () {
+        cancel: function () {
             this.close();
         },
-        close:function () {
-            this.details = this.getDefaultDetails()
-            this.isModalOpen = false
-            this.errors = false
-            this.processing = false
-            this.approval_id = null
+        close: function () {
+            this.details = this.getDefaultDetails();
+            this.isModalOpen = false;
+            this.errors = false;
+            this.processing = false;
+            this.approval_id = null;
         },
-        fetchData: function(){
-            let vm = this
+        fetchData: function () {
+            let vm = this;
 
             vm.$http.get(api_endpoints.fee_item_sticker_replacement).then(
                 (response) => {
-                    vm.fee_item = response.body
+                    vm.fee_item = response.body;
                 },
                 (error) => {
-                    console.log(error)
+                    console.log(error);
                 }
-            )
+            );
         },
         fetchCountries: function () {
             let vm = this;
@@ -196,10 +282,10 @@ export default {
     mounted: function () {
         this.fetchCountries();
     },
-    created:function () {
+    created: function () {
         this.fetchData();
-    }
-}
+    },
+};
 </script>
 
 <style scoped>
