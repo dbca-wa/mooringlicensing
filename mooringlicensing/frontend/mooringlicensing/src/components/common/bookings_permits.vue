@@ -1,19 +1,19 @@
 <template>
     <div id="bookingsPermits">
         <div class="row mb-3">
-            <div class="col-sm-12">
-                <label for="" class="col-sm-2 col-form-label">Date</label>
-                <div class="col-sm-3 input-group date">
-                    <div style="width: 70%;">
-                        <input
-                            type="date"
-                            class="form-control"
-                            name="selectedDate"
-                            v-model="selectedDate"
-                            :max="today"
-                        >
-                    </div>
-                </div>
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <label class="mb-0">
+                    Date
+                </label>
+
+                <input
+                    type="date"
+                    class="form-control"
+                    style="width: 200px;"
+                    name="selectedDate"
+                    v-model="selectedDate"
+                    :max="today"
+                >
             </div>
         </div>
         <div class="row mb-3">
@@ -21,8 +21,8 @@
                 <div id="spinnerLoader" v-if="dataLoading">
                     <i class="fa fa-4x fa-spinner fa-spin"></i>
                 </div>
-                <div v-else>
-                    <table class="table">
+                <div class="booking-permits-wrapper" v-else>
+                    <table class="table booking-permits-table">
                         <thead>
                             <tr>
                                 <th>Entity type</th>
@@ -181,9 +181,42 @@ export default {
 </script>
 
 <style lang="css" scoped>
-  #spinnerLoader {
-    width: 100%;
-    text-align: center;
-    padding: 1em 0;
-  }
+    #spinnerLoader {
+        width: 100%;
+        text-align: center;
+        padding: 1em 0;
+    }
+
+    .booking-permits-wrapper {
+        overflow-x: auto;
+    }
+
+    .booking-permits-table {
+        min-width: 1000px;
+    }
+
+    .booking-permits-table th:first-child,
+    .booking-permits-table td:first-child {
+        position: sticky;
+        left: 0;
+        background: #fff;
+        z-index: 2;
+    }
+
+    .booking-permits-table th:last-child,
+    .booking-permits-table td:last-child {
+        position: sticky;
+        right: 0;
+        background: #fff;
+        z-index: 2;
+    }
+
+    .booking-permits-table thead th {
+        z-index: 3;
+    }
+
+    .booking-permits-table td:nth-child(5),
+    .booking-permits-table th:nth-child(5) {
+        min-width: 300px;
+    }
 </style>

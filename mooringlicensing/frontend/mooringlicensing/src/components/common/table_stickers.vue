@@ -324,7 +324,7 @@ export default {
 
             return {
                 language: {
-                    processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>"
+                    //processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>"
                 },
                 rowCallback: function (row, sticker){
                     let row_jq = $(row)

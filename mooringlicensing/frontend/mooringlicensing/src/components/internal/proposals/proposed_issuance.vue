@@ -244,7 +244,7 @@ export default {
                     [1, 'desc'], [0, 'desc'],
                 ],
                 language: {
-                    processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>"
+                    //processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>"
                 },
                 responsive: false,
                 scrollX: true,
@@ -362,7 +362,7 @@ export default {
                     [1, 'desc'], [0, 'desc'],
                 ],
                 language: {
-                    processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>"
+                    //processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>"
                 },
                 responsive: false,
                 scrollX: true,
@@ -476,7 +476,7 @@ export default {
                     [1, 'desc'], [0, 'desc'],
                 ],
                 language: {
-                    processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>"
+                    //processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>"
                 },
                 responsive: false,
                 scrollX: true,

@@ -72,6 +72,10 @@ def check_db_connection():
         connection.connect()
 
 def get_bookings(booking_date, rego_no=None, mooring_id=None):
+
+    if not (settings.MOORING_BOOKINGS_API_URL and settings.MOORING_BOOKINGS_API_KEY):
+        return []
+
     url = settings.MOORING_BOOKINGS_API_URL + "bookings/" + settings.MOORING_BOOKINGS_API_KEY + '/' 
     myobj = {
             'date': booking_date,
