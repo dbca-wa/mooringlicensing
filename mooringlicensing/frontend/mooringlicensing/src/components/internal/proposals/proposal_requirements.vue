@@ -65,7 +65,7 @@ export default {
             requirement_options:{
                 autoWidth: false,
                 language: {
-                    //processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>"
+                    processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>"
                 },
                 responsive: false,
                 scrollX: true,

@@ -244,7 +244,7 @@ export default {
             contacts_table_id: vm.$.uid+'contacts-table',
             contacts_options:{
                 language: {
-                    //processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>"
+                    processing: "<i class='fa fa-4x fa-spinner fa-spin'></i>"
                 },
                 responsive: true,
                 ajax: {
