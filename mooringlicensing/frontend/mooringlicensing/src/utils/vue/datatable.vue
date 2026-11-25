@@ -129,7 +129,7 @@ export default {
         background: #d9534f !important;
     }
 
-    div.dataTables_processing div {
+    div.dt-processing div {
       display: none;
     }
 
