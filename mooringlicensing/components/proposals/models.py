@@ -6051,22 +6051,25 @@ class AmendmentRequest(ProposalRequest):
                     raise exceptions.ProposalNotAuthorized()
                 if self.status == 'requested':
                     proposal = self.proposal
-
+                    send_notification = False
                     if proposal.proposal_type and proposal.proposal_type.code == "swap_moorings":
                         if proposal.processing_status != Proposal.PROCESSING_STATUS_AWAITING_DOCUMENTS:
                             proposal.processing_status = Proposal.PROCESSING_STATUS_AWAITING_DOCUMENTS
                             proposal.save()
                             logger.info(f'Status: [{Proposal.PROCESSING_STATUS_AWAITING_DOCUMENTS}] has been set to the proposal: [{proposal}]')
+                            send_notification = True
                     else:
                         if proposal.processing_status != Proposal.PROCESSING_STATUS_DRAFT:
                             proposal.processing_status = Proposal.PROCESSING_STATUS_DRAFT
                             proposal.save()
                             logger.info(f'Status: [{Proposal.PROCESSING_STATUS_DRAFT}] has been set to the proposal: [{proposal}]')
-                    # Create a log entry for the proposal
-                    proposal.log_user_action(ProposalUserAction.ACTION_ID_REQUEST_AMENDMENTS, request)
-
-                    # send email
-                    send_amendment_email_notification(self, request, proposal)
+                            send_notification = True
+                    
+                    if send_notification:
+                        # Create a log entry for the proposal
+                        proposal.log_user_action(ProposalUserAction.ACTION_ID_REQUEST_AMENDMENTS, request)
+                        # send email
+                        send_amendment_email_notification(self, request, proposal)
 
                 self.save()
             except:

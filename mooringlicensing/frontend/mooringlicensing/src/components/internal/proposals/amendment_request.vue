@@ -1,6 +1,6 @@
 <template>
     <div id="internal-proposal-amend">
-        <modal v-model:show="isModalOpen"transition="modal fade" @ok="ok()" @cancel="cancel()" title="Amendment Request" large>
+        <modal v-model:show="isModalOpen"transition="modal fade" @ok="ok()" @cancel="cancel()" :processing="processing" title="Amendment Request" large>
             <div class="container-fluid">
                 <div class="row">
                     <form   name="amendForm">
@@ -99,6 +99,7 @@ export default {
             errors: false,
             errorString: '',
             validation_form: null,
+            processing: false,
         }
     },
     computed: {
@@ -151,7 +152,7 @@ export default {
 
             let vm = this;
             vm.errors = false;
-
+            vm.processing = true;
             vm.$http.post('/api/amendment_request.json', vm.amendment).then(
                 response => {
                     swal(
@@ -159,6 +160,7 @@ export default {
                          'An email has been sent to the applicant with the request to amend this application',
                          'success'
                     );
+                    vm.processing = false;
                     vm.amendingProposal = true;
                     vm.close();
                     http.get(`/api/proposal/${vm.proposal.id}/internal_proposal.json`).then(
@@ -174,7 +176,7 @@ export default {
                     vm.errors = true;
                     vm.errorString = helpers.apiVueResourceError(error);
                     vm.amendingProposal = true;
-
+                    vm.processing = false;
                 }
             );
         },
