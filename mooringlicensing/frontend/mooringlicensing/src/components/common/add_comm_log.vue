@@ -8,6 +8,7 @@
       okText="Add"
       title="Communication Log - Add Entry"
       large
+      :processing="addingComms"
     >
       <div class="container-fluid">
         <div class="row">

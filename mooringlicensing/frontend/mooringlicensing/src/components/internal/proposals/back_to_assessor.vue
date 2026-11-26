@@ -1,7 +1,7 @@
 
 <template>
     <div id="internal-proposal-amend">
-        <modal v-model:show="isModalOpen"transition="modal fade" @ok="ok()" @cancel="cancel()" title="Back To Assessor" large>
+        <modal v-model:show="isModalOpen"transition="modal fade" @ok="ok()" @cancel="cancel()" :processing="processing" title="Back To Assessor" large>
             <div class="container-fluid">
                 <div class="row">
                     <form   name="backToAssessorForm">
@@ -55,6 +55,7 @@ export default {
             errors: false,
             errorString: '',
             validation_form: null,
+            processing: false,
         }
     },
     methods: {
@@ -94,7 +95,7 @@ export default {
 
             let vm = this;
             vm.errors = false;
-
+            vm.processing = true;
             let data = {'status': 'with_assessor_requirements', 'approver_comment': vm.back_to_assessor.details}
             vm.$http.post(helpers.add_endpoint_json(api_endpoints.proposal, (vm.proposal.id + '/switch_status')), JSON.stringify(data),{
                 emulateJSON:true,
@@ -103,6 +104,7 @@ export default {
                 (res) => {
                     vm.close()
                     vm.$router.push({ path: '/internal' }); //Navigate to dashboard after creating Amendment request
+                    vm.processing = false;
                 }, 
                 (err) => {
                     swal(
@@ -110,6 +112,7 @@ export default {
                         helpers.apiVueResourceError(err),
                         'error'
                     )
+                    vm.processing = false;
                 }
             );
         },

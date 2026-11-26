@@ -1,6 +1,6 @@
 <template>
     <div id="change-contact">
-        <modal v-model:show="isModalOpen"transition="modal fade" @ok="ok()" @cancel="cancel()" :title="title" large>
+        <modal v-model:show="isModalOpen"transition="modal fade" @ok="ok()" @cancel="cancel()" :okButtonDisabled="!okButtonEnabled" :processing="processing" :title="title" large>
             <div class="container-fluid">
                 <alert v-model:show="showError" type="danger"><strong>{{ errorString }}</strong></alert>
                 <div class="row mb-3">
