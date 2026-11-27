@@ -21,18 +21,18 @@ export default defineConfig({
 
     resolve: {
         alias: {
-            '@': path.resolve(__dirname, 'src'),
-            '@vue-utils': path.resolve(__dirname, 'src/utils/vue'),
+            '@': path.resolve(import.meta.dirname, 'src'),
+            '@vue-utils': path.resolve(import.meta.dirname, 'src/utils/vue'),
             '@common-utils': path.resolve(
-                __dirname,
+                import.meta.dirname,
                 'src/components/common'
             ),
             '@static-root': path.resolve(
-                __dirname,
+                import.meta.dirname,
                 '../../../staticfiles_ml'
             ),
             moment: path.resolve(
-                __dirname,
+                import.meta.dirname,
                 'node_modules/moment/moment.js'
             ),
         },
@@ -59,13 +59,13 @@ export default defineConfig({
         manifest: 'manifest.json',
         commonjsOptions: { transformMixedEsModules: true },
         outDir: path.resolve(
-            __dirname,
+            import.meta.dirname,
             `../../static/mooringlicensing_vue`
         ),
         sourcemap: false,
         rollupOptions: {
             input: {
-                main: path.resolve(__dirname, 'src/main.js'),
+                main: path.resolve(import.meta.dirname, 'src/main.js'),
             },
         },
         emptyOutDir: true,

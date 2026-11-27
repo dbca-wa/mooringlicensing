@@ -1,26 +1,30 @@
 <template>
     <div id="internal-compliance-amend">
-        <modal v-model:show="isModalOpen"transition="modal fade" @ok="ok()" @cancel="cancel()" title="Amendment Request" large>
+        <modal v-model:show="isModalOpen"transition="modal fade" @ok="ok()" @cancel="cancel()" :processing="processing" title="Amendment Request" large>
             <div class="container-fluid">
                 <div class="row">
                     <form   name="amendForm">
                         <alert v-model:show="showError" type="danger"><strong>{{errorString}}</strong></alert>
                         <div class="col-sm-12">
                             <div class="row">
-                                <div class="col-sm-offset-2 col-sm-8">
-                                    <div class="row mb-3">
-                                        <label class="form-label float-start"  for="Name">Reason</label>
-                                        <select class="form-select" name="reason" ref="reason" v-model="amendment.reason">
+                                <div class="row mb-3">
+                                    <div class="col-sm-3">
+                                        <label class="form-label float-end"  for="reason_select">Reason</label>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <select class="form-select" id="reason_select" ref="reason" v-model="amendment.reason">
                                             <option v-for="r in reason_choices" :value="r.key">{{r.value}}</option>
                                         </select>
                                     </div>
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-sm-offset-2 col-sm-8">
-                                    <div class="row mb-3">
-                                        <label class="form-label float-start"  for="Name">Details</label>
-                                        <textarea class="form-control" name="name" v-model="amendment.text"></textarea>
+                                <div class="row mb-3">
+                                    <div class="col-sm-3">
+                                        <label class="form-label float-end" for="amendment_text">Details</label>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <textarea class="form-control" v-model="amendment.text" id="amendment_text"></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -63,6 +67,7 @@ export default {
             errors: false,
             errorString: '',
             validation_form: null,
+            processing: false,
         }
     },
     computed: {
@@ -107,7 +112,8 @@ export default {
         sendData:function(){
             let vm = this;
             vm.errors = false;
-            let amendment = JSON.parse(JSON.stringify(vm.amendment));            
+            let amendment = JSON.parse(JSON.stringify(vm.amendment));         
+            vm.processing = true;   
             vm.$http.post('/api/compliance_amendment_request.json',JSON.stringify(amendment),{
                 emulateJSON:true,
             }).then((response)=>{
@@ -117,13 +123,14 @@ export default {
                         'success'
                 );
                 vm.amendingcompliance = true;
-
+                vm.processing = false;  
                 vm.close();
                 vm.$router.push({ path: '/internal' });
                 
             },(error)=>{
                 console.log(error);
                 vm.errors = true;
+                vm.processing = false;  
                 vm.errorString = helpers.apiVueResourceError(error);
                 vm.amendingcompliance = true;                        
             });                
